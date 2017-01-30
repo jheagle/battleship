@@ -20,7 +20,7 @@ var babel = require('gulp-babel');
 gulp.task('browserSync', function() {
   browserSync({
     server: {
-      baseDir: 'dist'
+      baseDir: 'src'
     }
   })
 })
