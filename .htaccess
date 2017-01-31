@@ -1,6 +1,0 @@
-Options +FollowSymLinks
-RewriteEngine On
-RewriteBase /js/battleship
-
-RewriteCond %{REQUEST_URI} !^/js/battleship/dist
-RewriteRule (.*) dist/$1 [R=302,L]

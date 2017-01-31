@@ -1,52 +1,34 @@
 "use strict";
 ( function () {
+  // Utility Functions
   const curry = ( fn ) => function curried( ...args ) {
     return args.length >= fn.length ? fn( ...args ) : ( ...a ) => curried( ...[ ...args, ...a ] );
   }
 
-  const tile = () => ( {
-    hasShip: false,
-    isHit: false,
-    point: {},
-    styles: {
-      border: '1px solid #333',
-      width: '24px',
-      height: '24px',
-      backgroundColor: 'blue',
-      cursor: 'pointer',
-    },
-    events: {
-      click: {
-        f: 'attackFleet',
-        args: [
-          'shipFleet',
-          'point',
-        ],
-      },
-    },
-    element: {},
-  } );
+  const cloneObject = ( object ) => {
+    return JSON.parse( JSON.stringify( object ) );
+  }
 
-  const shipTile = () => ( {
-    hasShip: true,
-  } );
+  const mergeObjects = ( ...args) => {
+    // if (obj instanceof Object){
+    //   changes = Object.keys(changes).map((prop) => {
+    //     return obj.hasOwnProperty(prop) ? mergeObjects(obj[prop], changes[prop]) : changes[prop];
+    //   });
+    // }
+    return Object.assign(...args);
+  }
 
-  const shipViewTile = () => ( {
-    hasShip: true,
-    styles : {
-      backgroundColor: '#777',
-    }
-  } );
+  const fillArray = ( i, l, a = [] ) => {
+    a = a.slice();
+    a.push( i );
+    return ( --l > 0 ? fillArray( cloneObject( i ), l, a ) : a );
+  }
 
-  const hitTile = () => ( {
-    isHit: true,
-  } );
+  const buildArray = curry( fillArray );
 
-  const ship = () => ( {
-    status: 100,
-    parts: [],
-  } );
+  const nextIndex = ( a, i ) => ( i < a.length - 1 ) ? ++i : a.length - 1;
 
+  // Utility Objects
   const point = ( x, y ) => ( {
     x: x,
     y: y,
@@ -65,40 +47,8 @@
     y: pnt.y + dir.y,
   };
 
-  const playerSet = (name = '') => ({
-    name: name,
-    status: 100,
-    board: {},
-    shipFleet: [],
-  });
-
-  const cloneObject = ( object ) => {
-    return JSON.parse( JSON.stringify( object ) );
-  }
-
-  const mergeObjects = ( obj, changes) => {
-    // if (obj instanceof Object){
-    //   changes = Object.keys(changes).map((prop) => {
-    //     return obj.hasOwnProperty(prop) ? mergeObjects(obj[prop], changes[prop]) : changes[prop];
-    //   });
-    // }
-    return Object.assign(obj, changes);
-  }
-
-  const fillArray = ( i, l, a = [] ) => {
-    a = a.slice();
-    a.push( i );
-    return ( --l > 0 ? fillArray( cloneObject( i ), l, a ) : a );
-  }
-  const buildArray = curry( fillArray );
-  const lineContent = buildArray( tile() );
-  const rectMatrix = ( x, y ) => buildArray( lineContent( x ), y );
-  const rect3d = ( x, y, z ) => buildArray( rectMatrix( x, y ), z );
-  const squareMatrix = ( size ) => rectMatrix( size, size );
-  const cube3d = ( size ) => rect3d( size, size, size );
-
   const locateCells = (matrix, pnt = {}, depth = 0) => {
-    if (!Object.keys(point).length){
+    if (!Object.keys(pnt).length){
       pnt = point(0, 0);
     }
     if (Array.isArray(matrix)){
@@ -116,17 +66,13 @@
         return locateCells(arr, pnt, depth + 1);
       });
     }
-    matrix.point = pnt;
+    matrix.point = cloneObject(pnt);
     return matrix;
   }
 
-  const recurseArray = ( array ) => Array.isArray( array ) ? array.map( recurseArray( arr ) ) : array;
-
-  const nextIndex = ( a, i ) => ( i < a.length - 1 ) ? ++i : a.length - 1;
-
   const configureHtml = ( config ) => {
     if (config.isHit){
-      config.styles.backgroundColor = config.hasShip ? 'red' : '#222';
+      config.styles.backgroundColor = config.hasShip ? 'red' : 'white';
     }
     if ( Object.keys( config.styles ).length ) {
       Object.keys( config.styles ).forEach( ( styleName ) => config.element.style[ styleName ] = config.styles[ styleName ] );
@@ -134,6 +80,7 @@
     // if ( Object.keys( config.events ).length ) {
     //   Object.keys( config.events ).forEach( ( eventName ) => {
     //     let args = Object.keys(config.events[ eventName ].args).map((arg) => arg === 'point'? config.point: config.events[ eventName ].args[ arg ]);
+    //     console.log(args);
     //     return config.element.addEventListener(eventName, config.events[ eventName ].f(...args) );
     //   });
     // }
@@ -179,13 +126,75 @@
   const update3dCell = ( config, matrix, x, y, z ) => configureHtml( mergeObjects( matrix[ y ][ x ][ z ], config ) );
   const alter3dCell = curry( update3dCell );
 
+  const shipViewTile = () => ( {
+    hasShip: true,
+    styles : {
+      backgroundColor: '#777',
+    }
+  } );
+
+  const tile = () => ( {
+    hasShip: false,
+    isHit: false,
+    point: {},
+    styles: {
+      border: '1px solid #333',
+      width: '35px',
+      height: '35px',
+      backgroundColor: 'blue',
+      cursor: 'pointer',
+    },
+    events: {
+      click: {
+        f: attackFleet,
+        args: [
+          'shipFleet',
+          'point',
+        ],
+      },
+    },
+    element: {},
+  } );
+
+  const shipTile = () => ( {
+    hasShip: true,
+  } );
+
+  const ship = () => ( {
+    status: 100,
+    parts: [],
+  } );
+
+  const hitTile = () => ( {
+    isHit: true,
+  } );
+
+  const playerSet = (name = '') => ({
+    name: name,
+    status: 100,
+    board: {},
+    shipFleet: [],
+  });
+
   const setViewShip = alterCell( mergeObjects(shipTile(), { styles : {backgroundColor: '#777',},}));
   const setHiddenShip = alterCell( shipTile() );
   const setShip = (matrix, point, view) => view ? setViewShip( matrix, point.x, point.y) : setHiddenShip(matrix, point.x, point.y );
   const setHit = alterCell( hitTile() );
 
+  const attackFleet = ( matrix, fleet, target ) => {
+    let hitCell = setHit( matrix, target.x, target.y );
+    return hitCell.hasShip ? fleet.map( ( ship ) => {
+      if (ship.hasOwnProperty('parts')){
+        let healthy = ship.parts.filter( ( part ) => !part.isHit );
+        ship.status = healthy.length / ship.parts.length * 100;
+      }
+      return ship;
+    } ) : fleet;
+  }
+
   const checkIfShipCell = (point, matrix) => matrix[point.y][point.x].hasShip;
   const checkIfAnyShip = (arr, matrix) => arr.filter((point) => !checkIfShipCell(point, matrix));
+
   const checkShipBetween = (start, end, matrix) => {
     if (checkIfShipCell(start, matrix) || checkIfShipCell(end, matrix)){
       return true;
@@ -227,9 +236,9 @@
       let dir = point(0, 1);
       let end = point(0, 0);
       do {
-        start = point(Math.floor(Math.random() * (11 - shipStats[size])), Math.floor(Math.random() * (11 - shipStats[size])));
         dirSelect = Math.floor(Math.random() * 2);
         dir = dirSelect === 0 ? point(0, 1): point(1, 0);
+        start = point(Math.floor(Math.random() * (matrix.length - ((shipStats[size]- 1) * dir.x))), Math.floor(Math.random() * (matrix[0].length - ((shipStats[size]- 1) * dir.y))));
         end = point(start.x + dir.x * (shipStats[size] - 1), start.y + dir.y * (shipStats[size] - 1));
       } while (checkShipBetween(start, end, matrix));
       shipFleet.push(buildShip( shipStats[size], start, dir, matrix, view ));
@@ -240,15 +249,22 @@
   const fleetBuilder = curry(buildFleet);
   const defaultFleet = fleetBuilder([5, 4, 3, 3, 2]);
 
-  const attackFleet = ( fleet, target, matrix ) => {
-    let hitCell = setHit( matrix, target.x, target.y );
-    return setHit( matrix, target.x, target.y ).isHit ? fleet.map( ( ship ) => {
-      if (ship.hasOwnProperty('parts')){
-        let healthy = ship.parts.filter( ( part ) => !part.isHit );
-        ship.status = healthy.length / ship.parts.length * 100;
-      }
-      return ship;
-    } ) : fleet;
+  const lineContent = buildArray( tile() );
+  const rectMatrix = ( x, y ) => buildArray( lineContent( x ), y );
+  const rect3d = ( x, y, z ) => buildArray( rectMatrix( x, y ), z );
+  const squareMatrix = ( size ) => rectMatrix( size, size );
+  const cube3d = ( size ) => rect3d( size, size, size );
+
+  const launchAttack = curry(attackFleet);
+
+
+  const bindListeners = ( matrix, func, board, fleet ) => {
+    if (Array.isArray(matrix)){
+      return matrix.map((arr) => {
+        return bindListeners(arr, func, board, fleet);
+      });
+    }
+    return matrix.element.addEventListener('click', () => launchAttack(board, fleet, matrix.point));
   }
 
   const buildPlayers = (num) => {
@@ -256,8 +272,11 @@
     for (let i = 0; i < num; ++i){
       let player = playerSet();
       player.board = squareMatrix( 10 );
-      createTable(player.board, document.body);
+      let boardAttack = launchAttack(player.board);
+      createTable(locateCells(player.board), document.body);
       player.shipFleet = defaultFleet(player.board, true);
+      let focusFleet = (player.shipFleet);
+      bindListeners(player.board, focusFleet, player.board, player.shipFleet );
       players.push(player);
     }
     return players;
@@ -265,8 +284,5 @@
 
   let players = buildPlayers(1);
   console.log(players);
-
-  attackFleet( players[0].shipFleet, point( 2, 5 ), players[0].board );
-  attackFleet( players[0].shipFleet, point( 3, 5 ), players[0].board );
 
 }() );
