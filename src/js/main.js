@@ -11,6 +11,7 @@
             let focusFleet = (player.shipFleet);
             bindListeners(player.board, focusFleet, player.board, player.shipFleet);
             players.push(player);
+
         }
         return players;
     }
