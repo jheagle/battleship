@@ -16,15 +16,11 @@ const shipViewTile = () => ( {
 } );
 
 const tile = () => ( {
-    hasShip: false,
-    isHit: false,
     point: {},
     styles: {
-        border: '1px solid #333',
         width: '35px',
         height: '35px',
-        backgroundColor: 'blue',
-        cursor: 'pointer',
+        backgroundColor: 'transparent',
     },
     // events: {
     //     click: {
@@ -38,11 +34,30 @@ const tile = () => ( {
     element: {},
 } );
 
-const lineContent = buildArray(tile());
-const rectMatrix = (x, y) => buildArray(lineContent(x), y);
-const rect3d = (x, y, z) => buildArray(rectMatrix(x, y), z);
-const squareMatrix = (size) => rectMatrix(size, size);
-const cube3d = (size) => rect3d(size, size, size);
+const gameTile = () => mergeObjects(tile(), {
+    hasShip: false,
+    isHit: false,
+    styles: {
+        border: '1px solid #333',
+        backgroundColor: 'blue',
+        cursor: 'pointer',
+    },
+    // events: {
+    //     click: {
+    //         f: attackFleet,
+    //         args: [
+    //             'shipFleet',
+    //             'point'  dc ,
+    //         ],
+    //     },
+    // },
+});
+
+// const lineContent = buildArray(tile());
+const rectMatrix = (i, x, y) => buildArray(buildArray(i, x), y);
+const rect3d = (i, x, y, z) => buildArray(rectMatrix(i, x, y), z);
+const squareMatrix = (i, size) => rectMatrix(i, size, size);
+const cube3d = (i, size) => rect3d(i, size, size, size);
 
 const shipTile = () => ( {
     hasShip: true,

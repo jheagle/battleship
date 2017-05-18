@@ -49,7 +49,7 @@ const processHtml = (types, matrix, parent = document.body) => parent.appendChil
 const generateHtml = curry(processHtml);
 const createTable = generateHtml([['table', 'tbody'], 'tr', 'td']);
 
-const updateCell = (config, matrix, x, y) => configureHtml(mergeObjects(matrix[y][x], config));
+const updateCell = (config, matrix, x, y) => configureHtml( mergeObjects(matrix[y][x], config));
 const alterCell = curry(updateCell);
 const update3dCell = (config, matrix, x, y, z) => configureHtml(mergeObjects(matrix[y][x][z], config));
 const alter3dCell = curry(update3dCell);

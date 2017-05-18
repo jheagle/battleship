@@ -8,11 +8,12 @@ const cloneObject = (object) => {
 }
 
 const mergeObjects = (...args) => {
-    // if (obj instanceof Object){
-    //   changes = Object.keys(changes).map((prop) => {
-    //     return obj.hasOwnProperty(prop) ? mergeObjects(obj[prop], changes[prop]) : changes[prop];
-    //   });
-    // }
+    // TODO: This needs to recurse through sub-objects and merge
+    if (args[0] instanceof Object && args[1] instanceof Object){
+      Object.keys(args[0]).map((prop, obj) => {
+        return obj.hasOwnProperty(prop) ? mergeObjects(obj[prop], args[1][prop]) : args[1][prop];
+      });
+    }
     return Object.assign(...args);
 }
 
