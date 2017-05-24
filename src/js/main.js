@@ -17,18 +17,14 @@
 
     let players = buildPlayers(1);
     console.log(players);
+    // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
     // let results = mergeObjects({
-    //     a: 1,
+    //     a: { a: 1},
+    // },{
+    //     a: { b: 1},
+    // },{
+    //     a: { b: 2, c: 1},
     //     b: 2,
-    //     c: 3,
-    // },{
-    //     b: 4,
-    //     c: 5,
-    //     d: 6,
-    // },{
-    //     c: 7,
-    //     d: 8,
-    //     e: 9,
     // });
     // console.log(results);
 }() );
