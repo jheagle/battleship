@@ -10,6 +10,10 @@ const cloneObject = (object) => {
 const mergeObjects = (...args) => {
     let obj1 = args[0];
     let obj2 = args[1];
+    while (args.length > 2){
+        let endArgs = args.splice(args.length - 2, 2);
+        obj2 = args[args.length - 2] = mergeObjects(...endArgs);
+    }
     if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
         return typeof obj2 === 'object' ? obj2 : obj1;
     }

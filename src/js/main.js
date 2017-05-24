@@ -17,5 +17,18 @@
 
     let players = buildPlayers(1);
     console.log(players);
-
+    // let results = mergeObjects({
+    //     a: 1,
+    //     b: 2,
+    //     c: 3,
+    // },{
+    //     b: 4,
+    //     c: 5,
+    //     d: 6,
+    // },{
+    //     c: 7,
+    //     d: 8,
+    //     e: 9,
+    // });
+    // console.log(results);
 }() );
