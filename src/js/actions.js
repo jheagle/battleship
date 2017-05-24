@@ -2,7 +2,7 @@ const configureHtml = (config) => {
     if (config.isHit) {
         config.styles.backgroundColor = config.hasShip ? 'red' : 'white';
     }
-    if (Object.keys(config.styles).length) {
+    if (Object.keys(config.styles).length && config.element.style) {
         Object.keys(config.styles).forEach((styleName) => config.element.style[styleName] = config.styles[styleName]);
     }
     // if ( Object.keys( config.events ).length ) {
@@ -78,5 +78,5 @@ const bindListeners = (matrix, func, board, fleet) => {
             return bindListeners(arr, func, board, fleet);
         });
     }
-    return matrix.element.addEventListener('click', () => launchAttack(board, fleet, matrix.point));
+    return matrix.element instanceof HTMLElement ? matrix.element.addEventListener('click', () => launchAttack(board, fleet, matrix.point)) : matrix.element;
 }

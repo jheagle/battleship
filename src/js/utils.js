@@ -8,15 +8,21 @@ const cloneObject = (object) => {
 }
 
 const mergeObjects = (...args) => {
-    // TODO: This needs to recurse through sub-objects and merge
-    if (args[0] instanceof Object && args[1] instanceof Object){
-      Object.keys(args[0]).map((prop, obj) => {
-        return obj.hasOwnProperty(prop) ? mergeObjects(obj[prop], args[1][prop]) : args[1][prop];
-      });
+    let obj1 = args[0];
+    let obj2 = args[1];
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+        return typeof obj2 === 'object' ? obj2 : obj1;
     }
-    return Object.assign(...args);
+    Object.keys(obj2).map((prop) => {
+        if (typeof obj2[prop] === 'object' && obj1.hasOwnProperty(prop) && typeof obj1[prop] === 'object') {
+            obj1[prop] = mergeObjects(obj1[prop], obj2[prop]);
+            if (Object.keys(obj1[prop]).length > Object.keys(obj2[prop]).length) {
+                obj2[prop] = cloneObject(obj1[prop]);
+            }
+        }
+    });
+    return Object.assign(obj1, obj2);
 }
-
 
 const fillArray = (i, l, a = []) => {
     a = a.slice();
