@@ -4,9 +4,9 @@
         let players = [];
         for (let i = 0; i < num; ++i) {
             let player = playerSet();
-            player.board = squareMatrix(gameTile(), 10);
+            player.board = rect3d(waterTile(), 10, 10, 1);
             createTable(locateCells(player.board), document.body);
-            player.shipFleet = defaultFleet(player.board, true);
+            player.shipFleet = defaultFleet(player.board[0], true);
             let focusFleet = (player.shipFleet);
             bindListeners(player.board, focusFleet, player.board, player.shipFleet);
             players.push(player);

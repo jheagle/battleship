@@ -2,9 +2,7 @@ const configureHtml = (config) => {
     if (config.isHit) {
         config.styles.backgroundColor = config.hasShip ? 'red' : 'white';
     }
-    if (Object.keys(config.styles).length && config.element.style) {
-        Object.keys(config.styles).forEach((styleName) => config.element.style[styleName] = config.styles[styleName]);
-    }
+    addElementStyles(config.element, config.styles);
     // if ( Object.keys( config.events ).length ) {
     //   Object.keys( config.events ).forEach( ( eventName ) => {
     //     let args = Object.keys(config.events[ eventName ].args).map((arg) => arg === 'point'? config.point: config.events[ eventName ].args[ arg ]);
@@ -15,15 +13,29 @@ const configureHtml = (config) => {
     return config;
 }
 
-const recurseHtml = (types, matrix, depth = 0) => {
-    var depth = depth || 0;
+const addElementStyles = (elem, styles) => (Object.keys(styles).length && elem.style) ? Object.keys(styles).forEach((styleName) => elem.style[styleName] = styles[styleName]) : elem;
+
+const generateElement = (elemAttr) => {
+    let elem = document.createElement(elemAttr.type);
+    Object.keys(elemAttr).map((attr) => {
+        if (attr !== 'type' && attr !== 'styles') {
+            elem.setAttribute(attr, elemAttr[attr]);
+        }
+    });
+    if (elemAttr.styles){
+        addElementStyles(elem, elemAttr.styles);
+    }
+    return elem;
+}
+
+const recurseHtml = (types, matrix, depth = 0, layer = 0) => {
     let nextDepth = (i) => nextIndex(types, i);
     if (depth === 0) {
         let elems = [];
         if (Array.isArray(types[depth])) {
-            elems = types[depth].map((elem) => document.createElement(elem));
+            elems = types[depth].map(generateElement);
         }
-        matrix.forEach((a) => elems[elems.length - 1].appendChild(recurseHtml(types, a, nextDepth(depth))));
+        matrix.forEach((a) => elems[elems.length - 1].appendChild(recurseHtml(types, a, nextDepth(depth), layer++)));
         let prevElem = false;
         elems.forEach((elem) => {
             if (prevElem) {
@@ -33,12 +45,15 @@ const recurseHtml = (types, matrix, depth = 0) => {
         });
         return elems[0];
     }
+    if (depth === 1 && types.length > 2){
+        types[depth].styles.zIndex = layer;
+    }
     if (Array.isArray(matrix)) {
-        let el = document.createElement(types[depth]);
-        matrix.forEach((a) => el.appendChild(recurseHtml(types, a, nextDepth(depth))));
+        let el = generateElement(types[depth]);
+        matrix.forEach((a) => el.appendChild(recurseHtml(types, a, nextDepth(depth), layer)));
         return el;
     }
-    let el = document.createElement(types[depth]);
+    let el = generateElement(types[depth]);
     if (matrix instanceof Object) {
         matrix = configureHtml(mergeObjects(matrix, {element: el,}));
     }
@@ -47,9 +62,9 @@ const recurseHtml = (types, matrix, depth = 0) => {
 
 const processHtml = (types, matrix, parent = document.body) => parent.appendChild(recurseHtml(types, matrix));
 const generateHtml = curry(processHtml);
-const createTable = generateHtml([['table', 'tbody'], 'tr', 'td']);
+const createTable = generateHtml(boardHTML());
 
-const updateCell = (config, matrix, x, y) => configureHtml( mergeObjects(matrix[y][x], config));
+const updateCell = (config, matrix, x, y) => configureHtml(mergeObjects(matrix[y][x], config));
 const alterCell = curry(updateCell);
 const update3dCell = (config, matrix, x, y, z) => configureHtml(mergeObjects(matrix[y][x][z], config));
 const alter3dCell = curry(update3dCell);

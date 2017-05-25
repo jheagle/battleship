@@ -36,7 +36,7 @@ const fillArray = (i, l, a = []) => {
 
 const buildArray = curry(fillArray);
 
-const nextIndex = (a, i) => ( i < a.length - 1 ) ? ++i : a.length - 1;
+const nextIndex = (a, i = 0) => ( i < a.length - 1 ) ? ++i : a.length - 1;
 
 const nextCell = (pnt, dir) => pnt.z ? {
         x: pnt.x + dir.x,

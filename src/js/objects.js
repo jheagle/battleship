@@ -1,12 +1,9 @@
 // Utility Objects
-const point = (x, y) => ( {
+const point = (x, y, z = 0) => ( {
     x: x,
     y: y,
+    z: z,
 } );
-
-const point3d = (point, z) => Object.assign({}, point, {
-    z: z
-});
 
 const shipViewTile = () => ( {
     hasShip: true,
@@ -22,24 +19,39 @@ const tile = () => ( {
         height: '35px',
         backgroundColor: 'transparent',
     },
-    // events: {
-    //     click: {
-    //         f: attackFleet,
-    //         args: [
-    //             'shipFleet',
-    //             'point'  dc ,
-    //         ],
-    //     },
-    // },
     element: {},
 } );
 
-const gameTile = () => mergeObjects(tile(), {
+// const lineContent = buildArray(tile());
+const rectMatrix = (i, x, y) => buildArray(buildArray(i, x), y);
+const rect3d = (i, x, y, z = 0) => buildArray(rectMatrix(i, x, y), z);
+const squareMatrix = (i, size) => rectMatrix(i, size, size);
+const cube3d = (i, size) => rect3d(i, size, size, size);
+
+const tableHTML = () => ( [
+    [{
+        type: 'table',
+        class: 'matrix'
+    },
+        {
+            type: 'tbody',
+        }],
+    {
+        type: 'tr',
+        class: 'row',
+    },
+    {
+        type: 'td',
+        class: 'column',
+    },
+])
+
+const gameTile = () => ( {
     hasShip: false,
     isHit: false,
     styles: {
         border: '1px solid #333',
-        backgroundColor: 'blue',
+        backgroundColor: 'white',
         cursor: 'pointer',
     },
     // events: {
@@ -53,11 +65,11 @@ const gameTile = () => mergeObjects(tile(), {
     // },
 });
 
-// const lineContent = buildArray(tile());
-const rectMatrix = (i, x, y) => buildArray(buildArray(i, x), y);
-const rect3d = (i, x, y, z) => buildArray(rectMatrix(i, x, y), z);
-const squareMatrix = (i, size) => rectMatrix(i, size, size);
-const cube3d = (i, size) => rect3d(i, size, size, size);
+const waterTile = () => mergeObjects(tile(), gameTile(), {
+    styles: {
+        backgroundColor: 'blue',
+    },
+});
 
 const shipTile = () => ( {
     hasShip: true,
@@ -71,6 +83,39 @@ const ship = () => ( {
 const hitTile = () => ( {
     isHit: true,
 } );
+
+const boardHTML = () => ( [
+    [{
+        type: 'div',
+        class: 'matrix',
+        styles: {
+            display: 'block',
+            position: 'relative'
+        },
+    }],
+    {
+        type: 'div',
+        class: 'layer',
+        styles: {
+            display: 'block',
+            position: 'absolute'
+        },
+    },
+    {
+        type: 'div',
+        class: 'row',
+        styles: {
+            display: 'flex',
+        },
+    },
+    {
+        type: 'div',
+        class: 'column',
+        styles: {
+            display: 'inline-block',
+        },
+    },
+]);
 
 const playerSet = (name = '') => ({
     name: name,
