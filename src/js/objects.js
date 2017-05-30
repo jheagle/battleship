@@ -54,15 +54,6 @@ const gameTile = () => ( {
         backgroundColor: 'white',
         cursor: 'pointer',
     },
-    // events: {
-    //     click: {
-    //         f: attackFleet,
-    //         args: [
-    //             'shipFleet',
-    //             'point'  dc ,
-    //         ],
-    //     },
-    // },
 });
 
 const waterTile = () => mergeObjects(tile(), gameTile(), {
@@ -99,8 +90,9 @@ const boardHTML = () => ( [
         type: 'div',
         class: 'layer',
         styles: {
-            display: 'block',
-            position: 'absolute'
+            display: 'inline-block',
+            position: 'relative',
+            margin: '0 auto',
         },
     },
     {

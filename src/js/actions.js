@@ -1,20 +1,28 @@
+/**
+ *
+ * @param config
+ * @returns {*}
+ */
 const configureHtml = (config) => {
     if (config.isHit) {
         config.styles.backgroundColor = config.hasShip ? 'red' : 'white';
     }
     addElementStyles(config.element, config.styles);
-    // if ( Object.keys( config.events ).length ) {
-    //   Object.keys( config.events ).forEach( ( eventName ) => {
-    //     let args = Object.keys(config.events[ eventName ].args).map((arg) => arg === 'point'? config.point: config.events[ eventName ].args[ arg ]);
-    //     console.log(args);
-    //     return config.element.addEventListener(eventName, config.events[ eventName ].f(...args) );
-    //   });
-    // }
     return config;
 }
 
+/**
+ *
+ * @param elem
+ * @param styles
+ */
 const addElementStyles = (elem, styles) => (Object.keys(styles).length && elem.style) ? Object.keys(styles).forEach((styleName) => elem.style[styleName] = styles[styleName]) : elem;
 
+/**
+ *
+ * @param elemAttr
+ * @returns {Element}
+ */
 const generateElement = (elemAttr) => {
     let elem = document.createElement(elemAttr.type);
     Object.keys(elemAttr).map((attr) => {
@@ -28,6 +36,14 @@ const generateElement = (elemAttr) => {
     return elem;
 }
 
+/**
+ *
+ * @param types
+ * @param matrix
+ * @param depth
+ * @param layer
+ * @returns {*}
+ */
 const recurseHtml = (types, matrix, depth = 0, layer = 0) => {
     let nextDepth = (i) => nextIndex(types, i);
     if (depth === 0) {
@@ -60,22 +76,47 @@ const recurseHtml = (types, matrix, depth = 0, layer = 0) => {
     return el;
 }
 
+/**
+ *
+ * @param types
+ * @param matrix
+ * @param parent
+ */
 const processHtml = (types, matrix, parent = document.body) => parent.appendChild(recurseHtml(types, matrix));
 const generateHtml = curry(processHtml);
 const createTable = generateHtml(boardHTML());
 
-const updateCell = (config, matrix, x, y) => configureHtml(mergeObjects(matrix[y][x], config));
-const alterCell = curry(updateCell);
+/**
+ *
+ * @param config
+ * @param matrix
+ * @param x
+ * @param y
+ * @param z
+ * @returns {*}
+ */
 const update3dCell = (config, matrix, x, y, z) => {
     return configureHtml(mergeObjects(matrix[z][y][x], config));
 }
 const alter3dCell = curry(update3dCell);
-
 const setViewShip = alter3dCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777',},}));
 const setHiddenShip = alter3dCell(shipTile());
+
+/**
+ *
+ * @param matrix
+ * @param point
+ * @param view
+ */
 const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, point.y, point.z) : setHiddenShip(matrix, point.x, point.y, point.z);
 const setHit = alter3dCell(hitTile());
 
+/**
+ *
+ * @param player
+ * @param playAgain
+ * @param sunkShip
+ */
 const updatePlayer = (player, playAgain, sunkShip) => {
     if (player.attacker) {
         if (playAgain) {
@@ -92,10 +133,25 @@ const updatePlayer = (player, playAgain, sunkShip) => {
     }
 }
 
+/**
+ *
+ * @param winner
+ * @returns {[*]}
+ */
 const endGame = (winner) => {
-
+    return [winner];
 }
 
+/**
+ *
+ * @param player
+ * @param players
+ * @param i
+ * @param foundAttacker
+ * @param hitShip
+ * @param sunkShip
+ * @returns {*}
+ */
 const nextAttacker = (player, players, i, foundAttacker, hitShip, sunkShip) => {
     if (foundAttacker && player.status > 0) {
         updatePlayer(player, hitShip, sunkShip);
@@ -112,6 +168,15 @@ const nextAttacker = (player, players, i, foundAttacker, hitShip, sunkShip) => {
     return foundAttacker;
 }
 
+/**
+ *
+ * @param player
+ * @param hitShip
+ * @param sunkShip
+ * @param players
+ * @param playersLost
+ * @returns {*}
+ */
 const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
     if (player.status <= 0) {
         playersLost.push(player);
@@ -119,7 +184,7 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
     players = players.filter((p) => p.status > 0);
     let foundAttacker = false;
     if (players.length < 2) {
-        endGame(players[0]);
+        return endGame(players[0]);
     }
     return players.map((p, i) => {
         foundAttacker = nextAttacker(p, players, i, foundAttacker, hitShip, sunkShip);
@@ -127,15 +192,23 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
     });
 }
 
+/**
+ *
+ * @param matrix
+ * @param target
+ * @param player
+ * @param players
+ * @param playersLost
+ * @returns {*}
+ */
 const attackFleet = (matrix, target, player, players, playersLost) => {
     if (player.status <= 0 || player.attacker) {
         return players;
     }
     let hitCell = setHit(matrix, target.x, target.y, target.z);
+    let hitShip = {};
     if (hitCell.hasShip) {
         let status = 0;
-        let sunkShip = 0;
-        let hitShip = {};
         player.shipFleet.map((ship) => {
             if (ship.hasOwnProperty('parts')) {
                 let healthy = ship.parts.filter((part) => {
@@ -150,12 +223,9 @@ const attackFleet = (matrix, target, player, players, playersLost) => {
             return ship;
         });
         player.status = status / player.shipFleet.length;
-        if (hitShip.status <= 0) {
-            sunkShip = hitShip.parts.length;
-        }
-        return updateScore(player, hitCell.hasShip, sunkShip, players, playersLost);
     }
-    return updateScore(player, hitCell.hasShip, false, players, playersLost);
+    let sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0;
+    return updateScore(player, hitCell.hasShip, sunkShip, players, playersLost);
 }
 
 const launchAttack = curry(attackFleet);
