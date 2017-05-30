@@ -10,7 +10,7 @@ const cloneObject = (object) => {
 const mergeObjects = (...args) => {
     let obj1 = args[0];
     let obj2 = args[1];
-    while (args.length > 2){
+    while (args.length > 2) {
         let endArgs = args.splice(args.length - 2, 2);
         obj2 = args[args.length - 2] = mergeObjects(...endArgs);
     }
@@ -38,30 +38,27 @@ const buildArray = curry(fillArray);
 
 const nextIndex = (a, i = 0) => ( i < a.length - 1 ) ? ++i : a.length - 1;
 
-const nextCell = (pnt, dir) => pnt.z ? {
-        x: pnt.x + dir.x,
-        y: pnt.y + dir.y,
-        z: pnt.z + dir.z,
-    } : {
-        x: pnt.x + dir.x,
-        y: pnt.y + dir.y,
-    };
+const nextCell = (pnt, dir) => ({
+    x: pnt.x + dir.x,
+    y: pnt.y + dir.y,
+    z: pnt.z + dir.z,
+});
 
 const locateCells = (matrix, pnt = {}, depth = 0) => {
     if (!Object.keys(pnt).length) {
-        pnt = point(0, 0);
+        pnt = point(0, 0, 0);
     }
     if (Array.isArray(matrix)) {
         return matrix.map((arr, i) => {
             switch (depth) {
                 case 0:
-                    pnt = mergeObjects(pnt, {y: i});
+                    pnt = mergeObjects(pnt, {z: i});
                     break;
                 case 1:
-                    pnt = mergeObjects(pnt, {x: i});
+                    pnt = mergeObjects(pnt, {y: i});
                     break;
                 default:
-                    pnt = mergeObjects(pnt, {z: i});
+                    pnt = mergeObjects(pnt, {x: i});
             }
             return locateCells(arr, pnt, depth + 1);
         });
@@ -70,25 +67,31 @@ const locateCells = (matrix, pnt = {}, depth = 0) => {
     return matrix;
 }
 
-const checkIfShipCell = (point, matrix) => matrix[point.y][point.x].hasShip;
+const checkIfShipCell = (point, matrix) => matrix[point.z][point.y][point.x].hasShip;
 const checkIfAnyShip = (arr, matrix) => arr.filter((point) => !checkIfShipCell(point, matrix));
 
 const checkShipBetween = (start, end, matrix) => {
     if (checkIfShipCell(start, matrix) || checkIfShipCell(end, matrix)) {
         return true;
     }
-    let testArr = [];
     let xdiff = end.x - start.x;
     let ydiff = end.y - start.y;
+    let zdiff = end.z - start.z;
     if (xdiff > 0) {
         for (let i = start.x; i < end.x; ++i) {
-            if (checkIfShipCell({x: i, y: start.y}, matrix)) {
+            if (checkIfShipCell({x: i, y: start.y, z: start.z}, matrix)) {
                 return true;
             }
         }
     } else if (ydiff > 0) {
         for (let i = start.y; i < end.y; ++i) {
-            if (checkIfShipCell({x: start.x, y: i}, matrix)) {
+            if (checkIfShipCell({x: start.x, y: i, z: start.z}, matrix)) {
+                return true;
+            }
+        }
+    } else if (zdiff > 0) {
+        for (let i = start.z; i < end.z; ++i) {
+            if (checkIfShipCell({x: start.x, y: start.y, z: i}, matrix)) {
                 return true;
             }
         }
@@ -109,15 +112,22 @@ const buildShip = (l, start, dir, matrix, view = false) => {
 const buildFleet = (shipStats, matrix, view = false) => {
     let shipFleet = [];
     for (let size in shipStats) {
-        let start = point(0, 0);
+        let start = point(0, 0, 0);
         let dirSelect = 0;
-        let dir = point(0, 1);
-        let end = point(0, 0);
+        let dir = point(1, 0, 0);
+        let end = point(0, 0, 0);
         do {
-            dirSelect = Math.floor(Math.random() * 2);
-            dir = dirSelect === 0 ? point(0, 1) : point(1, 0);
-            start = point(Math.floor(Math.random() * (matrix.length - ((shipStats[size] - 1) * dir.x))), Math.floor(Math.random() * (matrix[0].length - ((shipStats[size] - 1) * dir.y))));
-            end = point(start.x + dir.x * (shipStats[size] - 1), start.y + dir.y * (shipStats[size] - 1));
+            dirSelect = Math.floor(Math.random() * (matrix.length + 1));
+            switch (dirSelect) {
+                case 1:
+                    dir = point(0, 1, 0);
+                    break;
+                case 2:
+                    dir = point(0, 1, 0);
+                    break;
+            }
+            start = point(Math.floor(Math.random() * (matrix[0][0].length - ((shipStats[size] - 1) * dir.x))), Math.floor(Math.random() * (matrix[0].length - ((shipStats[size] - 1) * dir.y))), Math.floor(Math.random() * (matrix.length - ((shipStats[size] - 1) * dir.z))));
+            end = point(start.x + dir.x * (shipStats[size] - 1), start.y + dir.y * (shipStats[size] - 1), start.z + dir.z * (shipStats[size] - 1));
         } while (checkShipBetween(start, end, matrix));
         shipFleet.push(buildShip(shipStats[size], start, dir, matrix, view));
     }
@@ -125,3 +135,12 @@ const buildFleet = (shipStats, matrix, view = false) => {
 }
 
 const fleetBuilder = curry(buildFleet);
+
+const bindListeners = (matrix, func, board, ...extra) => {
+    if (Array.isArray(matrix)) {
+        return matrix.map((arr) => {
+            return bindListeners(arr, func, board, ...extra);
+        });
+    }
+    return matrix.element instanceof HTMLElement ? matrix.element.addEventListener('click', () => func(board, matrix.point, ...extra)) : matrix.element;
+}

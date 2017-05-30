@@ -22,7 +22,7 @@ const generateElement = (elemAttr) => {
             elem.setAttribute(attr, elemAttr[attr]);
         }
     });
-    if (elemAttr.styles){
+    if (elemAttr.styles) {
         addElementStyles(elem, elemAttr.styles);
     }
     return elem;
@@ -45,7 +45,7 @@ const recurseHtml = (types, matrix, depth = 0, layer = 0) => {
         });
         return elems[0];
     }
-    if (depth === 1 && types.length > 2){
+    if (depth === 1 && types.length > 2) {
         types[depth].styles.zIndex = layer;
     }
     if (Array.isArray(matrix)) {
@@ -66,32 +66,96 @@ const createTable = generateHtml(boardHTML());
 
 const updateCell = (config, matrix, x, y) => configureHtml(mergeObjects(matrix[y][x], config));
 const alterCell = curry(updateCell);
-const update3dCell = (config, matrix, x, y, z) => configureHtml(mergeObjects(matrix[y][x][z], config));
+const update3dCell = (config, matrix, x, y, z) => {
+    return configureHtml(mergeObjects(matrix[z][y][x], config));
+}
 const alter3dCell = curry(update3dCell);
 
-const setViewShip = alterCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777',},}));
-const setHiddenShip = alterCell(shipTile());
-const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, point.y) : setHiddenShip(matrix, point.x, point.y);
-const setHit = alterCell(hitTile());
+const setViewShip = alter3dCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777',},}));
+const setHiddenShip = alter3dCell(shipTile());
+const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, point.y, point.z) : setHiddenShip(matrix, point.x, point.y, point.z);
+const setHit = alter3dCell(hitTile());
 
-const attackFleet = (matrix, fleet, target) => {
-    let hitCell = setHit(matrix, target.x, target.y);
-    return hitCell.hasShip ? fleet.map((ship) => {
+const updatePlayer = (player, playAgain, sunkShip) => {
+    if (player.attacker) {
+        if (playAgain) {
+            ++player.attacks.hit;
+        } else {
+            ++player.attacks.miss;
+        }
+        if (sunkShip) {
+            ++player.attacks.sunk;
+        }
+    }
+    if (!playAgain) {
+        player.attacker = !player.attacker
+    }
+}
+
+const endGame = (winner) => {
+
+}
+
+const nextAttacker = (player, players, i, foundAttacker, hitShip, sunkShip) => {
+    if (foundAttacker && player.status > 0) {
+        updatePlayer(player, hitShip, sunkShip);
+        return !foundAttacker;
+    }
+    if (player.attacker) {
+        updatePlayer(player, hitShip, sunkShip);
+        if (i >= players.length - 1) {
+            updatePlayer(players[0], hitShip, sunkShip);
+            return foundAttacker;
+        }
+        return !foundAttacker;
+    }
+    return foundAttacker;
+}
+
+const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
+    if (player.status <= 0) {
+        playersLost.push(player);
+    }
+    players = players.filter((p) => p.status > 0);
+    let foundAttacker = false;
+    if (players.length < 2) {
+        endGame(players[0]);
+    }
+    return players.map((p, i) => {
+        foundAttacker = nextAttacker(p, players, i, foundAttacker, hitShip, sunkShip);
+        return p;
+    });
+}
+
+const attackFleet = (matrix, target, player, players, playersLost) => {
+    if (player.status <= 0 || player.attacker) {
+        return players;
+    }
+    let hitCell = setHit(matrix, target.x, target.y, target.z);
+    if (hitCell.hasShip) {
+        let status = 0;
+        let sunkShip = 0;
+        let hitShip = {};
+        player.shipFleet.map((ship) => {
             if (ship.hasOwnProperty('parts')) {
-                let healthy = ship.parts.filter((part) => !part.isHit);
+                let healthy = ship.parts.filter((part) => {
+                    if (part.point === target) {
+                        hitShip = ship;
+                    }
+                    return !part.isHit;
+                });
                 ship.status = healthy.length / ship.parts.length * 100;
             }
+            status += ship.status;
             return ship;
-        }) : fleet;
+        });
+        player.status = status / player.shipFleet.length;
+        if (hitShip.status <= 0) {
+            sunkShip = hitShip.parts.length;
+        }
+        return updateScore(player, hitCell.hasShip, sunkShip, players, playersLost);
+    }
+    return updateScore(player, hitCell.hasShip, false, players, playersLost);
 }
 
 const launchAttack = curry(attackFleet);
-
-const bindListeners = (matrix, func, board, fleet) => {
-    if (Array.isArray(matrix)) {
-        return matrix.map((arr) => {
-            return bindListeners(arr, func, board, fleet);
-        });
-    }
-    return matrix.element instanceof HTMLElement ? matrix.element.addEventListener('click', () => launchAttack(board, fleet, matrix.point)) : matrix.element;
-}

@@ -89,8 +89,10 @@ const boardHTML = () => ( [
         type: 'div',
         class: 'matrix',
         styles: {
-            display: 'block',
-            position: 'relative'
+            display: 'inline-block',
+            position: 'relative',
+            width: '50%',
+            margin: '0 auto',
         },
     }],
     {
@@ -120,6 +122,9 @@ const boardHTML = () => ( [
 const playerSet = (name = '') => ({
     name: name,
     status: 100,
+    turnCnt: 0,
+    attacker: false,
+    attacks: {hit: 0, miss: 0, sunk: 0},
     board: {},
     shipFleet: [],
 });
