@@ -1,3 +1,4 @@
+// Functions used for live updating
 /**
  *
  * @param config
@@ -201,7 +202,7 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
  * @param playersLost
  * @returns {*}
  */
-const attackFleet = (matrix, target, player, players, playersLost) => {
+const attackFleet = (target, matrix, player, players, playersLost) => {
     if (player.status <= 0 || player.attacker) {
         return players;
     }

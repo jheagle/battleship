@@ -22,11 +22,12 @@
             let player = playerSet(); // get default player object
             player.attacker = attacker;
             attacker = false; // set attacker status, all subsequent are false
-            player.board = rect3d(waterTile(), 10, 10, 1); // generate matrix for player board
-            createTable(locateCells(player.board), document.body); // translate matrix into visual HTML board
+            let board = rect3d(waterTile(), 10, 10, 1); // generate matrix for player board
+            player.board = locateCells(board); // bind point data to each item in matrix
+            createTable(player.board, document.body); // translate matrix into visual HTML board
             player.shipFleet = defaultFleet(player.board, true); // generate fleet of ships
             // attach event listeners to each board tile
-            bindListeners(player.board, launchAttack, player.board, player, players, playersLost);
+            bindListeners(player.board, 'click', launchAttack, player.board, player, players, playersLost);
             // add new player to array
             players.push(player);
         }
