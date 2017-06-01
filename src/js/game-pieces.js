@@ -75,4 +75,4 @@ const playerSet = (name = '') => ({
     shipFleet: [],
 });
 
-const defaultFleet = fleetBuilder([5, 4, 3, 3, 2]);
+const defaultFleet = randomFleet([5, 4, 3, 3, 2]);

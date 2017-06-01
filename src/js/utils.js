@@ -93,7 +93,7 @@ const nextCell = (pnt, dir) => ({
  * @param depth
  * @returns {*}
  */
-const locateCells = (matrix, pnt = {}, depth = 0) => {
+const bindPointData = (matrix, pnt = {}, depth = 0) => {
     if (!Object.keys(pnt).length) {
         pnt = point(0, 0, 0);
     }
@@ -109,11 +109,54 @@ const locateCells = (matrix, pnt = {}, depth = 0) => {
                 default:
                     pnt = mergeObjects(pnt, {x: i});
             }
-            return locateCells(arr, pnt, depth + 1);
+            return bindPointData(arr, pnt, depth + 1);
         });
     }
     matrix.point = cloneObject(pnt);
     return matrix;
+}
+
+/**
+ * Given two points, check the cells between using specified function.
+ * When inclusive is set to true the provided start and end points will also be tested
+ * @param start
+ * @param end
+ * @param matrix
+ * @param func
+ * @param inclusive
+ * @returns {boolean}
+ */
+const checkInBetween = (start, end, matrix, func, inclusive = true) => {
+    // Return true if either of the two points have a ship
+    if (inclusive && (func(start, matrix) || func(end, matrix))) {
+        return true;
+    }
+    // Find the differences between the two points to get the ship direction
+    let xdiff = end.x - start.x;
+    let ydiff = end.y - start.y;
+    let zdiff = end.z - start.z;
+    // Whichever difference is greater than 0 indicates that axis direction,
+    // we then loop through all cells in that direction
+    if (xdiff > 0) {
+        for (let i = start.x; i < end.x; ++i) {
+            if (func({x: i, y: start.y, z: start.z}, matrix)) {
+                return true;
+            }
+        }
+    } else if (ydiff > 0) {
+        for (let i = start.y; i < end.y; ++i) {
+            if (func({x: start.x, y: i, z: start.z}, matrix)) {
+                return true;
+            }
+        }
+    } else if (zdiff > 0) {
+        for (let i = start.z; i < end.z; ++i) {
+            if (func({x: start.x, y: start.y, z: i}, matrix)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 /**
