@@ -160,6 +160,14 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => {
 }
 
 /**
+ * Create a single random number where range is within length. The number is adjusted by the provided direction (0 or 1)
+ * @param length
+ * @param range
+ * @param dirAdjust
+ */
+const randCoords = (length, range, dirAdjust) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)));
+
+/**
  * Attach an event listener to each cell in the matrix.
  * Accepts an unlimited number of additional arguments to be passed to the action function.
  * WARNING: This is a recursive function.

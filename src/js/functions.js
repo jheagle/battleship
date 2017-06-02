@@ -35,26 +35,25 @@ const buildShip = (length, start, dir, matrix, view = false) => {
  */
 const generateRandomFleet = (shipLengths, matrix, view = false) => {
     let shipFleet = []; // Create array to store generated ships
+    let lengths = {x: matrix[0][0].length, y: matrix[0].length, z: matrix.length}; // store the length of each dimension
     // Loop through all of the provided lengths to create a ship for each
     for (let size in shipLengths) {
-        let start = point(0, 0, 0);
+        let start = point(0, 0, 0); // default initial ship coordinates
         let dirSelect = 0;
         let dir = point(1, 0, 0);
         let end = point(0, 0, 0);
+        console.log(matrix.length);
         do {
-            dirSelect = Math.floor(Math.random() * (matrix.length + 1));
+            dirSelect = Math.floor(Math.random() * 2);
             switch (dirSelect) {
                 case 1:
                     dir = point(0, 1, 0);
                     break;
                 case 2:
-                    dir = point(0, 1, 0);
-                    break;
-                default:
-                    dir = point(1, 0, 0);
+                    dir = point(0, 0, 1);
                     break;
             }
-            start = point(Math.floor(Math.random() * (matrix[0][0].length - ((shipLengths[size] - 1) * dir.x))), Math.floor(Math.random() * (matrix[0].length - ((shipLengths[size] - 1) * dir.y))), Math.floor(Math.random() * (matrix.length - ((shipLengths[size] - 1) * dir.z))));
+            start = point(randCoords(lengths.x, shipLengths[size], dir.x), randCoords(lengths.y, shipLengths[size], dir.y), randCoords(lengths.z, shipLengths[size], dir.z));
             end = point(start.x + dir.x * (shipLengths[size] - 1), start.y + dir.y * (shipLengths[size] - 1), start.z + dir.z * (shipLengths[size] - 1));
         } while (checkInBetween(start, end, matrix, checkIfShipCell));
         shipFleet.push(buildShip(shipLengths[size], start, dir, matrix, view));
