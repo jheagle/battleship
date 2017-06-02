@@ -7,3 +7,10 @@ html, body {
   text-align: center; }
   html td:hover, body td:hover {
     opacity: .7; }
+
+.matrix {
+  display: inline-block;
+  width: 50%;
+  min-width: 370px;
+  margin: 10px auto;
+  position: relative; }

@@ -53,28 +53,29 @@ const mergeObjects = (...args) => {
 }
 
 /**
- * Generate an array of specified item (i) extending to specified length (l)
- * @param i
- * @param l
- * @param a
+ * Generate an array of specified item extending to specified length
+ * WARNING: This is a recursive function.
+ * @param item
+ * @param length
+ * @param arr
  * @returns {Array}
  */
-const fillArray = (i, l, a = []) => {
-    a = a.slice(); // clone array
-    a.push(i); // add the item to the array
-    return ( --l > 0 ? fillArray(cloneObject(i), l, a) : a ); // repeat adding items until length value is 0
+const fillArray = (item, length, arr = []) => {
+    arr = arr.slice(); // clone array
+    arr.push(item); // add the item to the array
+    return ( --length > 0 ? fillArray(cloneObject(item), length, arr) : arr ); // repeat adding items until length value is 0
 }
 const buildArray = curry(fillArray);
 
 /**
- *
- * @param a
+ * Return next index in an ordered array until max index reached. Takes array and current index.
+ * @param arr
  * @param i
  */
-const nextIndex = (a, i = 0) => ( i < a.length - 1 ) ? ++i : a.length - 1;
+const nextIndex = (arr, i = 0) => ( i < arr.length - 1 ) ? ++i : arr.length - 1;
 
 /**
- *
+ * Based on provided point and point direction generate next point.
  * @param pnt
  * @param dir
  */
@@ -85,13 +86,14 @@ const nextCell = (pnt, dir) => ({
 });
 
 /**
- *
+ * Generate point data for each item in the matrix
+ * WARNING: This is a recursive function.
  * @param matrix
  * @param pnt
  * @param depth
  * @returns {*}
  */
-const locateCells = (matrix, pnt = {}, depth = 0) => {
+const bindPointData = (matrix, pnt = {}, depth = 0) => {
     if (!Object.keys(pnt).length) {
         pnt = point(0, 0, 0);
     }
@@ -107,7 +109,7 @@ const locateCells = (matrix, pnt = {}, depth = 0) => {
                 default:
                     pnt = mergeObjects(pnt, {x: i});
             }
-            return locateCells(arr, pnt, depth + 1);
+            return bindPointData(arr, pnt, depth + 1);
         });
     }
     matrix.point = cloneObject(pnt);
@@ -115,48 +117,41 @@ const locateCells = (matrix, pnt = {}, depth = 0) => {
 }
 
 /**
- *
- * @param point
- * @param matrix
- */
-const checkIfShipCell = (point, matrix) => matrix[point.z][point.y][point.x].hasShip;
-
-/**
- *
- * @param arr
- * @param matrix
- */
-const checkIfAnyShip = (arr, matrix) => arr.filter((point) => !checkIfShipCell(point, matrix));
-
-/**
- *
+ * Given two points, check the cells between using specified function.
+ * When inclusive is set to true the provided start and end points will also be tested
  * @param start
  * @param end
  * @param matrix
+ * @param func
+ * @param inclusive
  * @returns {boolean}
  */
-const checkShipBetween = (start, end, matrix) => {
-    if (checkIfShipCell(start, matrix) || checkIfShipCell(end, matrix)) {
+const checkInBetween = (start, end, matrix, func, inclusive = true) => {
+    // Return true if either of the two points have a ship
+    if (inclusive && (func(start, matrix) || func(end, matrix))) {
         return true;
     }
+    // Find the differences between the two points to get the ship direction
     let xdiff = end.x - start.x;
     let ydiff = end.y - start.y;
     let zdiff = end.z - start.z;
+    // Whichever difference is greater than 0 indicates that axis direction,
+    // we then loop through all cells in that direction
     if (xdiff > 0) {
         for (let i = start.x; i < end.x; ++i) {
-            if (checkIfShipCell({x: i, y: start.y, z: start.z}, matrix)) {
+            if (func({x: i, y: start.y, z: start.z}, matrix)) {
                 return true;
             }
         }
     } else if (ydiff > 0) {
         for (let i = start.y; i < end.y; ++i) {
-            if (checkIfShipCell({x: start.x, y: i, z: start.z}, matrix)) {
+            if (func({x: start.x, y: i, z: start.z}, matrix)) {
                 return true;
             }
         }
     } else if (zdiff > 0) {
         for (let i = start.z; i < end.z; ++i) {
-            if (checkIfShipCell({x: start.x, y: start.y, z: i}, matrix)) {
+            if (func({x: start.x, y: start.y, z: i}, matrix)) {
                 return true;
             }
         }
@@ -165,69 +160,28 @@ const checkShipBetween = (start, end, matrix) => {
 }
 
 /**
- *
- * @param l
- * @param start
- * @param dir
- * @param matrix
- * @param view
+ * Create a single random number where range is within length. The number is adjusted by the provided direction (0 or 1)
+ * @param length
+ * @param range
+ * @param dirAdjust
  */
-const buildShip = (l, start, dir, matrix, view = false) => {
-    let unit = ship();
-    let cur = start;
-    for (let i = 0; i < l; ++i) {
-        unit.parts.push(setShip(matrix, cur, view));
-        cur = nextCell(cur, dir);
-    }
-    return unit;
-}
+const randCoords = (length, range, dirAdjust) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)));
 
 /**
- *
- * @param shipStats
+ * Attach an event listener to each cell in the matrix.
+ * Accepts an unlimited number of additional arguments to be passed to the action function.
+ * WARNING: This is a recursive function.
  * @param matrix
- * @param view
- * @returns {Array}
- */
-const buildFleet = (shipStats, matrix, view = false) => {
-    let shipFleet = [];
-    for (let size in shipStats) {
-        let start = point(0, 0, 0);
-        let dirSelect = 0;
-        let dir = point(1, 0, 0);
-        let end = point(0, 0, 0);
-        do {
-            dirSelect = Math.floor(Math.random() * (matrix.length + 1));
-            switch (dirSelect) {
-                case 1:
-                    dir = point(0, 1, 0);
-                    break;
-                case 2:
-                    dir = point(0, 1, 0);
-                    break;
-            }
-            start = point(Math.floor(Math.random() * (matrix[0][0].length - ((shipStats[size] - 1) * dir.x))), Math.floor(Math.random() * (matrix[0].length - ((shipStats[size] - 1) * dir.y))), Math.floor(Math.random() * (matrix.length - ((shipStats[size] - 1) * dir.z))));
-            end = point(start.x + dir.x * (shipStats[size] - 1), start.y + dir.y * (shipStats[size] - 1), start.z + dir.z * (shipStats[size] - 1));
-        } while (checkShipBetween(start, end, matrix));
-        shipFleet.push(buildShip(shipStats[size], start, dir, matrix, view));
-    }
-    return shipFleet;
-}
-const fleetBuilder = curry(buildFleet);
-
-/**
- *
- * @param matrix
+ * @param event
  * @param func
- * @param board
  * @param extra
  * @returns {*}
  */
-const bindListeners = (matrix, func, board, ...extra) => {
+const bindListeners = (matrix, event, func, ...extra) => {
     if (Array.isArray(matrix)) {
         return matrix.map((arr) => {
-            return bindListeners(arr, func, board, ...extra);
+            return bindListeners(arr, event, func, ...extra);
         });
     }
-    return matrix.element instanceof HTMLElement ? matrix.element.addEventListener('click', () => func(board, matrix.point, ...extra)) : matrix.element;
+    return matrix.element instanceof HTMLElement ? matrix.element.addEventListener(event, () => func(matrix.point, ...extra)) : matrix.element;
 }

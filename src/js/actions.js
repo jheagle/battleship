@@ -1,3 +1,4 @@
+// Functions used for live updating
 /**
  *
  * @param config
@@ -159,7 +160,7 @@ const nextAttacker = (player, players, i, foundAttacker, hitShip, sunkShip) => {
     }
     if (player.attacker) {
         updatePlayer(player, hitShip, sunkShip);
-        if (i >= players.length - 1) {
+        if (players.length > 1 && i >= players.length - 1) {
             updatePlayer(players[0], hitShip, sunkShip);
             return foundAttacker;
         }
@@ -183,11 +184,11 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
     }
     players = players.filter((p) => p.status > 0);
     let foundAttacker = false;
-    if (players.length < 2) {
-        return endGame(players[0]);
-    }
     return players.map((p, i) => {
         foundAttacker = nextAttacker(p, players, i, foundAttacker, hitShip, sunkShip);
+        if (players.length < 2) {
+            return endGame(players[0]);
+        }
         return p;
     });
 }
@@ -201,7 +202,7 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
  * @param playersLost
  * @returns {*}
  */
-const attackFleet = (matrix, target, player, players, playersLost) => {
+const attackFleet = (target, matrix, player, players, playersLost) => {
     if (player.status <= 0 || player.attacker) {
         return players;
     }
