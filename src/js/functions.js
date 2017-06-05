@@ -39,19 +39,20 @@ const generateRandomFleet = (shipLengths, matrix, view = false) => {
     // Loop through all of the provided lengths to create a ship for each
     for (let size in shipLengths) {
         let start = point(0, 0, 0); // default initial ship coordinates
-        let dirSelect = 0;
         let dir = point(1, 0, 0);
         let end = point(0, 0, 0);
-        console.log(matrix.length);
+        let useZ = shipLengths[size] <= lengths.z ? 1 : 0;
         do {
-            dirSelect = Math.floor(Math.random() * 2);
+            let dirSelect = Math.floor(Math.random() * (2 + useZ));
             switch (dirSelect) {
+                case 0:
+                    dir = point(1, 0, 0);
+                    break;
                 case 1:
                     dir = point(0, 1, 0);
                     break;
-                case 2:
+                default:
                     dir = point(0, 0, 1);
-                    break;
             }
             start = point(randCoords(lengths.x, shipLengths[size], dir.x), randCoords(lengths.y, shipLengths[size], dir.y), randCoords(lengths.z, shipLengths[size], dir.z));
             end = point(start.x + dir.x * (shipLengths[size] - 1), start.y + dir.y * (shipLengths[size] - 1), start.z + dir.z * (shipLengths[size] - 1));
