@@ -38,13 +38,14 @@ const generateRandomFleet = (shipLengths, matrix, view = false) => {
     let lengths = {x: matrix[0][0].length, y: matrix[0].length, z: matrix.length}; // store the length of each dimension
     // Loop through all of the provided lengths to create a ship for each
     for (let size in shipLengths) {
+        let dir = point(1, 0, 0); // default direction adjuster
         let start = point(0, 0, 0); // default initial ship coordinates
-        let dir = point(1, 0, 0);
-        let end = point(0, 0, 0);
-        let useZ = shipLengths[size] <= lengths.z ? 1 : 0;
+        let end = point(0, 0, 0); // default final ship coordinates
+        let useZ = shipLengths[size] <= lengths.z ? 1 : 0; // check if a ship will fit on the z axis
+        // generate and test ship coordinates, if the test fails re-generate and test again till success
         do {
-            let dirSelect = Math.floor(Math.random() * (2 + useZ));
-            switch (dirSelect) {
+            // randomly select ship direction
+            switch (Math.floor(Math.random() * (2 + useZ))) {
                 case 0:
                     dir = point(1, 0, 0);
                     break;
@@ -54,11 +55,13 @@ const generateRandomFleet = (shipLengths, matrix, view = false) => {
                 default:
                     dir = point(0, 0, 1);
             }
+            // generate start and end coordinates based on direction and ensuring start is far enough from edge of matrix
             start = point(randCoords(lengths.x, shipLengths[size], dir.x), randCoords(lengths.y, shipLengths[size], dir.y), randCoords(lengths.z, shipLengths[size], dir.z));
             end = point(start.x + dir.x * (shipLengths[size] - 1), start.y + dir.y * (shipLengths[size] - 1), start.z + dir.z * (shipLengths[size] - 1));
-        } while (checkInBetween(start, end, matrix, checkIfShipCell));
-        shipFleet.push(buildShip(shipLengths[size], start, dir, matrix, view));
+        } while (checkInBetween(start, end, matrix, checkIfShipCell)); // test if there are any ship between start and end
+        shipFleet.push(buildShip(shipLengths[size], start, dir, matrix, view)); // once coordinates pass test, generate the ship and pass to the Fleet
     }
     return shipFleet;
 }
+// shortcut for generating random fleet with the above function
 const randomFleet = curry(generateRandomFleet);
