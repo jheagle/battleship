@@ -117,6 +117,67 @@ const bindPointData = (matrix, pnt = {}, depth = 0) => {
 }
 
 /**
+ * Append styles to the provided element.
+ * @param elem
+ * @param styles
+ */
+const addElementStyles = (elem, styles) => (Object.keys(styles).length && elem.style) ? Object.keys(styles).forEach((styleName) => elem.style[styleName] = styles[styleName]) : elem;
+
+/**
+ * Create an HTML element based on the provided attributes and return the element as an Object.
+ * @param elemAttr
+ * @returns {Element}
+ */
+const generateElement = (elemAttr) => {
+    if (Array.isArray(elemAttr)){
+        if (elemAttr.length > 1){
+            elemAttr = buildHTML(elemAttr, []);
+        } else {
+            elemAttr = elemAttr[0];
+        }
+    }
+    let elem = document.createElement(elemAttr.type);
+    Object.keys(elemAttr).map((attr) => {
+        if (attr !== 'type' && attr !== 'styles') {
+            elem.setAttribute(attr, elemAttr[attr]);
+        }
+    });
+    if (elemAttr.styles) {
+        addElementStyles(elem, elemAttr.styles);
+    }
+    return elem;
+}
+
+
+const buildHTML = (types, matrix) => {
+    console.log('entry');
+    console.log(types);
+    console.log(matrix);
+    if (types.length && Array.isArray(matrix)) {
+        // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
+        let firstType = types.splice(0, 1);
+        matrix = matrix.map((a) => a.element = generateElement(firstType));
+        // let elems = Array.isArray(firstType) ? firstType.map(generateElement) : generateElement(firstType);
+        // console.log(matrix);
+        // console.log(elems);
+        // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
+        // // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
+        // // let prevElem = false;
+        // // elems.forEach((elem) => {
+        // //     if (prevElem) {
+        // //         prevElem.appendChild(elem);
+        // //     }
+        // //     prevElem = elem;
+        // // });
+        // console.log(elems);
+        console.log('exit (array)');
+        return matrix.map((a) => buildHTML(types, a));
+    }
+    console.log('exit');
+    return matrix;
+}
+
+/**
  * Given two points, check the cells between using specified function.
  * When inclusive is set to true the provided start and end points will also be tested
  * @param start

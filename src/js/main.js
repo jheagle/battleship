@@ -24,6 +24,7 @@
             attacker = false; // set attacker status, all subsequent are false
             let board = square(waterTile(), 10); // generate matrix for player board
             player.board = bindPointData(board); // bind point data to each item in matrix
+            // document.body.appendChild(buildHTML(boardHTML(), board));
             createTable(player.board, document.body); // translate matrix into visual HTML board
             player.shipFleet = defaultFleet(player.board, false); // generate fleet of ships
             // attach event listeners to each board tile

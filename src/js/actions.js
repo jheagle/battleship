@@ -14,31 +14,6 @@ const configureHtml = (config) => {
 
 /**
  *
- * @param elem
- * @param styles
- */
-const addElementStyles = (elem, styles) => (Object.keys(styles).length && elem.style) ? Object.keys(styles).forEach((styleName) => elem.style[styleName] = styles[styleName]) : elem;
-
-/**
- *
- * @param elemAttr
- * @returns {Element}
- */
-const generateElement = (elemAttr) => {
-    let elem = document.createElement(elemAttr.type);
-    Object.keys(elemAttr).map((attr) => {
-        if (attr !== 'type' && attr !== 'styles') {
-            elem.setAttribute(attr, elemAttr[attr]);
-        }
-    });
-    if (elemAttr.styles) {
-        addElementStyles(elem, elemAttr.styles);
-    }
-    return elem;
-}
-
-/**
- *
  * @param types
  * @param matrix
  * @param depth
@@ -48,11 +23,8 @@ const generateElement = (elemAttr) => {
 const recurseHtml = (types, matrix, depth = 0, layer = 0) => {
     let nextDepth = (i) => nextIndex(types, i);
     if (depth === 0) {
-        let elems = [];
-        if (Array.isArray(types[depth])) {
-            elems = types[depth].map(generateElement);
-        }
-        matrix.forEach((a) => elems[elems.length - 1].appendChild(recurseHtml(types, a, nextDepth(depth), layer++)));
+        let elems = Array.isArray(types[0]) ? types[0].map(generateElement) : [];
+        matrix.forEach((a) => elems[elems.length - 1].appendChild(recurseHtml(types, a, nextDepth(0), layer++)));
         let prevElem = false;
         elems.forEach((elem) => {
             if (prevElem) {
@@ -63,14 +35,13 @@ const recurseHtml = (types, matrix, depth = 0, layer = 0) => {
         return elems[0];
     }
     if (depth === 1 && types.length > 2) {
-        types[depth].styles.zIndex = layer;
+        types[1].styles.zIndex = layer;
     }
+    let el = generateElement(types[depth]);
     if (Array.isArray(matrix)) {
-        let el = generateElement(types[depth]);
         matrix.forEach((a) => el.appendChild(recurseHtml(types, a, nextDepth(depth), layer)));
         return el;
     }
-    let el = generateElement(types[depth]);
     if (matrix instanceof Object) {
         matrix = configureHtml(mergeObjects(matrix, {element: el,}));
     }

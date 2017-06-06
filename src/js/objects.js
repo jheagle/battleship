@@ -51,13 +51,15 @@ const cube = (i, size) => matrix(i, size, size, size);
  * Basic HTML configuration for displaying a 2 dimensional matrix as a table
  */
 const tableHTML = () => ( [
-    [{
-        type: 'table',
-        class: 'matrix'
-    },
+    [
+        {
+            type: 'table',
+            class: 'matrix'
+        },
         {
             type: 'tbody',
-        }],
+        }
+    ],
     {
         type: 'tr',
         class: 'row',
