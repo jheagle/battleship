@@ -93,24 +93,18 @@ const nextCell = (pnt, dir) => ({
  * @param depth
  * @returns {*}
  */
-const bindPointData = (matrix, pnt = {}, depth = 0) => {
+const bindPointData = (matrix, pnt = {}, axis = 'z') => {
     if (!Object.keys(pnt).length) {
         pnt = point(0, 0, 0);
     }
     if (Array.isArray(matrix)) {
-        return matrix.map((arr, i) => {
-            switch (depth) {
-                case 0:
-                    pnt = mergeObjects(pnt, {z: i});
-                    break;
-                case 1:
-                    pnt = mergeObjects(pnt, {y: i});
-                    break;
-                default:
-                    pnt = mergeObjects(pnt, {x: i});
-            }
-            return bindPointData(arr, pnt, depth + 1);
+        return matrix.map((el, i) => {
+            pnt = mergeObjects(pnt, {[axis]: i});
+            return bindPointData(el, pnt, axis);
         });
+    }
+    if (typeof matrix === 'object' && !matrix.point){
+        return Object.keys(matrix).map((key) => Array.isArray(matrix[key])? bindPointData(matrix[key], pnt, key): matrix[key]);
     }
     matrix.point = cloneObject(pnt);
     return matrix;
@@ -129,13 +123,6 @@ const addElementStyles = (elem, styles) => (Object.keys(styles).length && elem.s
  * @returns {Element}
  */
 const generateElement = (elemAttr) => {
-    if (Array.isArray(elemAttr)){
-        if (elemAttr.length > 1){
-            elemAttr = buildHTML(elemAttr, []);
-        } else {
-            elemAttr = elemAttr[0];
-        }
-    }
     let elem = document.createElement(elemAttr.type);
     Object.keys(elemAttr).map((attr) => {
         if (attr !== 'type' && attr !== 'styles') {
@@ -148,34 +135,108 @@ const generateElement = (elemAttr) => {
     return elem;
 }
 
-
-const buildHTML = (types, matrix) => {
-    console.log('entry');
-    console.log(types);
-    console.log(matrix);
-    if (types.length && Array.isArray(matrix)) {
-        // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
-        let firstType = types.splice(0, 1);
-        matrix = matrix.map((a) => a.element = generateElement(firstType));
-        // let elems = Array.isArray(firstType) ? firstType.map(generateElement) : generateElement(firstType);
-        // console.log(matrix);
-        // console.log(elems);
-        // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
-        // // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
-        // // let prevElem = false;
-        // // elems.forEach((elem) => {
-        // //     if (prevElem) {
-        // //         prevElem.appendChild(elem);
-        // //     }
-        // //     prevElem = elem;
-        // // });
-        // console.log(elems);
-        console.log('exit (array)');
-        return matrix.map((a) => buildHTML(types, a));
+const appendElement = (types, matrix) => {
+    let tempArray = types.splice(0, 1);
+    let firstType = tempArray[0];
+    let elems = Array.isArray(firstType) ? firstType.map(generateElement) : generateElement(firstType);
+    if (Array.isArray(firstType)){
+        let prevElem = false;
+        elems.forEach((elem) => {
+            if (prevElem) {
+                prevElem.appendChild(elem);
+            }
+            prevElem = elem;
+        });
+        // console.log(elems[0]);
+        if (types.length){
+            let result = buildHTML(types, matrix, layer++);
+            console.log(result);
+            elems[0].appendChild(result);
+        }
+        return elems[0];
     }
-    console.log('exit');
-    return matrix;
+    elems.style.zIndex = layer;
+    // console.log(elems);
+    if (Array.isArray(matrix)) {
+        // console.log(matrix);
+        console.log(types);
+        if (types.length < 2){
+            matrix.map((a) => a.element = elems);
+            console.log(matrix);
+            console.log(elems);
+            return elems;
+        }
+        console.log(types.length);
+        matrix.map((a) => elems.appendChild(buildHTML(types, a, layer++)));
+    }
 }
+
+const buildHTML = (types, matrix, layer = 0) => {
+    // console.log(types);
+    let tempArray = types.splice(0, 1);
+    let firstType = tempArray[0];
+    console.log(types);
+    console.log(firstType);
+    let elems = Array.isArray(firstType) ? firstType.map(generateElement) : generateElement(firstType);
+    if (Array.isArray(firstType)){
+        let prevElem = false;
+        elems.forEach((elem) => {
+            if (prevElem) {
+                prevElem.appendChild(elem);
+            }
+            prevElem = elem;
+        });
+        // console.log(elems[0]);
+        if (types.length){
+            let result = buildHTML(types, matrix, layer++);
+            console.log(result);
+            elems[0].appendChild(result);
+        }
+        return elems[0];
+    }
+    elems.style.zIndex = layer;
+    // console.log(elems);
+    if (Array.isArray(matrix)) {
+        // console.log(matrix);
+        console.log(types);
+        if (types.length < 2){
+            matrix.map((a) => a.element = elems);
+            console.log(matrix);
+            console.log(elems);
+            return elems;
+        }
+        console.log(types.length);
+        matrix.map((a) => elems.appendChild(buildHTML(types, a, layer++)));
+    }
+    return elems;
+}
+// const buildHTML = (types, matrix) => {
+//     console.log('entry');
+//     console.log(types);
+//     console.log(matrix);
+//     if (types.length && Array.isArray(matrix)) {
+//         // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
+//         let firstType = types.splice(0, 1);
+//         matrix = matrix.map((a) => a.element = generateElement(firstType));
+//         // let elems = Array.isArray(firstType) ? firstType.map(generateElement) : generateElement(firstType);
+//         // console.log(matrix);
+//         // console.log(elems);
+//         // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
+//         // // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
+//         // // let prevElem = false;
+//         // // elems.forEach((elem) => {
+//         // //     if (prevElem) {
+//         // //         prevElem.appendChild(elem);
+//         // //     }
+//         // //     prevElem = elem;
+//         // // });
+//         // console.log(elems);
+//         console.log('exit (array)');
+//         return matrix.map((a) => buildHTML(types, a));
+//     }
+//     console.log('exit');
+//     return matrix;
+// }
 
 /**
  * Given two points, check the cells between using specified function.

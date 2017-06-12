@@ -33,19 +33,36 @@ const tile = () => ( {
  */
 const matrix = (i, x, y, z = 1) => buildArray(buildArray(buildArray(i, x), y), z);
 
+const coordinate = (axisName) => ({
+    axis: axisName,
+    element: {}
+});
+
+/**
+ *
+ */
+const newMatrix = (i, x, y, z = 1, i2 = {}) => ({
+    z: buildArray(mergeObjects(coordinate('z'), {
+        y: buildArray(mergeObjects(coordinate('y'), {
+            x: buildArray(mergeObjects(coordinate('x'), i, i2), x)
+        }, i2), y)
+    }, i2), z)
+});
+
+
 /**
  * Return a single layer matrix where x and y are equal
  * @param i
  * @param size
  */
-const square = (i, size) => matrix(i, size, size);
+const square = (i, size) => newMatrix(i, size, size);
 
 /**
  * Return a matrix where x, y, and z are equal
  * @param i
  * @param size
  */
-const cube = (i, size) => matrix(i, size, size, size);
+const cube = (i, size) => newMatrix(i, size, size, size);
 
 /**
  * Basic HTML configuration for displaying a 2 dimensional matrix as a table
