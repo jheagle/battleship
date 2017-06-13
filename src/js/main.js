@@ -27,7 +27,7 @@
             board = bindPointData(board); // bind point data to each item in matrix
             board = bindElements(boardHTML(), board); // bind HTML element data to each item in matrix
             player.board = board;
-            let htmlBoard = compileHTML(player.board); // translate matrix into visual HTML board
+            let htmlBoard = appendHTML(player.board); // translate matrix into visual HTML board
             console.log(player.board);
             console.log(htmlBoard);
             // player.shipFleet = defaultFleet(player.board, false); // generate fleet of ships

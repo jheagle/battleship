@@ -158,6 +158,11 @@ const bindElements = (types, matrix, zIndex = 0) => {
     return matrix;
 }
 
+/**
+ *
+ * @param matrix
+ * @returns {*}
+ */
 const buildHTML = (matrix) => {
     if (Array.isArray(matrix)) {
         return matrix.map((el) => buildHTML(el));
@@ -172,7 +177,12 @@ const buildHTML = (matrix) => {
     return matrix.element;
 }
 
-const compileHTML = (matrix, parent = document.body) => parent.appendChild(buildHTML(matrix));
+/**
+ *
+ * @param matrix
+ * @param parent
+ */
+const appendHTML = (matrix, parent = document.body) => parent.appendChild(buildHTML(matrix));
 
 /**
  * Given two points, check the cells between using specified function.
