@@ -1,6 +1,6 @@
 // Functions used for live updating
 /**
- *
+ * Update view based on actions performed
  * @param config
  * @returns {*}
  */
@@ -13,7 +13,7 @@ const configureHtml = (config) => {
 }
 
 /**
- *
+ * Given a cell and new config data, update the data of the cell
  * @param config
  * @param matrix
  * @param x
@@ -22,14 +22,14 @@ const configureHtml = (config) => {
  * @returns {*}
  */
 const update3dCell = (config, matrix, x, y, z) => {
-    return configureHtml(mergeObjects(matrix[z][y][x], config));
+    return configureHtml(mergeObjects(matrix.z[z].y[y].x[x], config));
 }
 const alter3dCell = curry(update3dCell);
 const setViewShip = alter3dCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777',},}));
 const setHiddenShip = alter3dCell(shipTile());
 
 /**
- *
+ * Set a specified point to be part of a ship
  * @param matrix
  * @param point
  * @param view
@@ -38,7 +38,7 @@ const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, poi
 const setHit = alter3dCell(hitTile());
 
 /**
- *
+ * Track player stats such as attacks and turns
  * @param player
  * @param playAgain
  * @param sunkShip
@@ -60,7 +60,7 @@ const updatePlayer = (player, playAgain, sunkShip) => {
 }
 
 /**
- *
+ * Final stat once a game is one (only one player remains)
  * @param winner
  * @returns {[*]}
  */
@@ -69,7 +69,7 @@ const endGame = (winner) => {
 }
 
 /**
- *
+ * Control function for retrieving the next player to play
  * @param player
  * @param players
  * @param i
@@ -95,7 +95,7 @@ const nextAttacker = (player, players, i, foundAttacker, hitShip, sunkShip) => {
 }
 
 /**
- *
+ * Update all game stats after each player round
  * @param player
  * @param hitShip
  * @param sunkShip
@@ -119,7 +119,7 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
 }
 
 /**
- *
+ * Perform attack on an enemy board / cell
  * @param matrix
  * @param target
  * @param player

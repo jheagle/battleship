@@ -137,7 +137,8 @@ const generateElement = (elemAttr) => {
 }
 
 /**
- *
+ * Generate HTML element data for each object in the matrix
+ * WARNING: This is a recursive function.
  * @param types
  * @param matrix
  * @param zIndex
@@ -159,7 +160,8 @@ const bindElements = (types, matrix, zIndex = 0) => {
 }
 
 /**
- *
+ * Append each HTML element data in a combined HTML element
+ * WARNING: This is a recursive function.
  * @param matrix
  * @returns {*}
  */
@@ -178,7 +180,7 @@ const buildHTML = (matrix) => {
 }
 
 /**
- *
+ * Select the parent HTML element to append matrix to
  * @param matrix
  * @param parent
  */
@@ -251,5 +253,9 @@ const bindListeners = (matrix, event, func, ...extra) => {
             return bindListeners(arr, event, func, ...extra);
         });
     }
-    return matrix.element instanceof HTMLElement ? matrix.element.addEventListener(event, () => func(matrix.point, ...extra)) : matrix.element;
+    if (typeof matrix === 'object' && !matrix.point) {
+        Object.keys(matrix).map((key) => Array.isArray(matrix[key]) ? bindListeners(matrix[key], event, func, ...extra) : matrix[key]);
+        return matrix;
+    }
+    return matrix.element instanceof HTMLElement && matrix.point? matrix.element.addEventListener(event, () => func(matrix.point, ...extra)) : matrix.element;
 }

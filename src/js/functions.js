@@ -4,7 +4,7 @@
  * @param point
  * @param matrix
  */
-const checkIfShipCell = (point, matrix) => matrix[point.z][point.y][point.x].hasShip;
+const checkIfShipCell = (point, matrix) => matrix.z[point.z].y[point.y].x[point.x].hasShip;
 
 /**
  * Generate a ship with the specified length, beginning and direction.
@@ -35,7 +35,7 @@ const buildShip = (length, start, dir, matrix, view = false) => {
  */
 const generateRandomFleet = (shipLengths, matrix, view = false) => {
     let shipFleet = []; // Create array to store generated ships
-    let lengths = {x: matrix[0][0].length, y: matrix[0].length, z: matrix.length}; // store the length of each dimension
+    let lengths = {x: matrix.z[0].y[0].x.length, y: matrix.z[0].y.length, z: matrix.z.length}; // store the length of each dimension
     // Loop through all of the provided lengths to create a ship for each
     for (let size in shipLengths) {
         let dir = point(1, 0, 0); // default direction adjuster

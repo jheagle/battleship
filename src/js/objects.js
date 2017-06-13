@@ -25,29 +25,30 @@ const tile = () => ( {
 } );
 
 /**
- * Create a 3d matrix of i with x by y by z size
- * @param i
- * @param x
- * @param y
- * @param z
+ *
+ * @param axisName
  */
-const matrix = (i, x, y, z = 1) => buildArray(buildArray(buildArray(i, x), y), z);
-
 const coordinate = (axisName) => ({
     axis: axisName,
     element: {}
 });
 
 /**
- *
+ * Create a 3d matrix of i with x by y by z size,
+ * add additional objects for each layer as well
+ * @param i
+ * @param x
+ * @param y
+ * @param z
+ * @param i2
  */
-const newMatrix = (i, x, y, z = 1, i2 = {}) => (mergeObjects(coordinate('base'), {
+const matrix = (i, x, y, z = 1, ...props) => (mergeObjects(coordinate('base'), {
     z: buildArray(mergeObjects(coordinate('z'), {
         y: buildArray(mergeObjects(coordinate('y'), {
-            x: buildArray(mergeObjects(coordinate('x'), i, i2), x)
-        }, i2), y)
-    }, i2), z)
-}, i2));
+            x: buildArray(mergeObjects(coordinate('x'), i, ...props), x)
+        }, ...props), y)
+    }, ...props), z)
+}, ...props));
 
 
 /**
@@ -55,14 +56,14 @@ const newMatrix = (i, x, y, z = 1, i2 = {}) => (mergeObjects(coordinate('base'),
  * @param i
  * @param size
  */
-const square = (i, size) => newMatrix(i, size, size);
+const square = (i, size) => matrix(i, size, size);
 
 /**
  * Return a matrix where x, y, and z are equal
  * @param i
  * @param size
  */
-const cube = (i, size) => newMatrix(i, size, size, size);
+const cube = (i, size) => matrix(i, size, size, size);
 
 /**
  * Basic HTML configuration for displaying a 2 dimensional matrix as a table
