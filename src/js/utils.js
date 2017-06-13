@@ -103,8 +103,9 @@ const bindPointData = (matrix, pnt = {}, axis = 'z') => {
             return bindPointData(el, pnt, axis);
         });
     }
-    if (typeof matrix === 'object' && !matrix.point){
-        return Object.keys(matrix).map((key) => Array.isArray(matrix[key])? bindPointData(matrix[key], pnt, key): matrix[key]);
+    if (typeof matrix === 'object' && !matrix.point) {
+        Object.keys(matrix).map((key) => Array.isArray(matrix[key]) ? bindPointData(matrix[key], pnt, key) : matrix[key]);
+        return matrix;
     }
     matrix.point = cloneObject(pnt);
     return matrix;
@@ -135,108 +136,43 @@ const generateElement = (elemAttr) => {
     return elem;
 }
 
-const appendElement = (types, matrix) => {
-    let tempArray = types.splice(0, 1);
-    let firstType = tempArray[0];
-    let elems = Array.isArray(firstType) ? firstType.map(generateElement) : generateElement(firstType);
-    if (Array.isArray(firstType)){
-        let prevElem = false;
-        elems.forEach((elem) => {
-            if (prevElem) {
-                prevElem.appendChild(elem);
-            }
-            prevElem = elem;
-        });
-        // console.log(elems[0]);
-        if (types.length){
-            let result = buildHTML(types, matrix, layer++);
-            console.log(result);
-            elems[0].appendChild(result);
-        }
-        return elems[0];
-    }
-    elems.style.zIndex = layer;
-    // console.log(elems);
+/**
+ *
+ * @param types
+ * @param matrix
+ * @param zIndex
+ * @returns {*}
+ */
+const bindElements = (types, matrix, zIndex = 0) => {
     if (Array.isArray(matrix)) {
-        // console.log(matrix);
-        console.log(types);
-        if (types.length < 2){
-            matrix.map((a) => a.element = elems);
-            console.log(matrix);
-            console.log(elems);
-            return elems;
-        }
-        console.log(types.length);
-        matrix.map((a) => elems.appendChild(buildHTML(types, a, layer++)));
+        return matrix.map((el, i) => el.axis === 'z' ? bindElements(types, el, i) : bindElements(types, el, 0));
     }
+    if (matrix.element && types[matrix.axis]) {
+        types[matrix.axis].styles = mergeObjects(matrix.styles, Array.isArray(types[matrix.axis]) ? types[matrix.axis][types[matrix.axis].length - 1].styles : types[matrix.axis].styles);
+        Array.isArray(types[matrix.axis]) ? types[matrix.axis][0].styles.zIndex = zIndex : types[matrix.axis].styles.zIndex = zIndex;
+        matrix.element = Array.isArray(types[matrix.axis]) ? (types[matrix.axis].map(type => matrix.element instanceof HTMLElement ? matrix.element.appendChild(generateElement(type)) : matrix.element = generateElement(type)))[0] : generateElement(types[matrix.axis]);
+    }
+    Object.keys(matrix).map((key) => {
+        return Array.isArray(matrix[key]) ? bindElements(types, matrix[key], 0) : matrix[key]
+    });
+    return matrix;
 }
 
-const buildHTML = (types, matrix, layer = 0) => {
-    // console.log(types);
-    let tempArray = types.splice(0, 1);
-    let firstType = tempArray[0];
-    console.log(types);
-    console.log(firstType);
-    let elems = Array.isArray(firstType) ? firstType.map(generateElement) : generateElement(firstType);
-    if (Array.isArray(firstType)){
-        let prevElem = false;
-        elems.forEach((elem) => {
-            if (prevElem) {
-                prevElem.appendChild(elem);
-            }
-            prevElem = elem;
-        });
-        // console.log(elems[0]);
-        if (types.length){
-            let result = buildHTML(types, matrix, layer++);
-            console.log(result);
-            elems[0].appendChild(result);
-        }
-        return elems[0];
-    }
-    elems.style.zIndex = layer;
-    // console.log(elems);
+const buildHTML = (matrix) => {
     if (Array.isArray(matrix)) {
-        // console.log(matrix);
-        console.log(types);
-        if (types.length < 2){
-            matrix.map((a) => a.element = elems);
-            console.log(matrix);
-            console.log(elems);
-            return elems;
-        }
-        console.log(types.length);
-        matrix.map((a) => elems.appendChild(buildHTML(types, a, layer++)));
+        return matrix.map((el) => buildHTML(el));
     }
-    return elems;
+    Object.keys(matrix).map((key) => {
+        if (Array.isArray(matrix[key])) {
+            return buildHTML(matrix[key]).map((elem) => matrix.element instanceof HTMLElement ? matrix.element.appendChild(elem) : elem);
+        } else {
+            return matrix[key]
+        }
+    });
+    return matrix.element;
 }
-// const buildHTML = (types, matrix) => {
-//     console.log('entry');
-//     console.log(types);
-//     console.log(matrix);
-//     if (types.length && Array.isArray(matrix)) {
-//         // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
-//         let firstType = types.splice(0, 1);
-//         matrix = matrix.map((a) => a.element = generateElement(firstType));
-//         // let elems = Array.isArray(firstType) ? firstType.map(generateElement) : generateElement(firstType);
-//         // console.log(matrix);
-//         // console.log(elems);
-//         // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
-//         // // matrix.forEach((a) => elems[elems.length - 1].appendChild(buildHTML(types, a)));
-//         // // let prevElem = false;
-//         // // elems.forEach((elem) => {
-//         // //     if (prevElem) {
-//         // //         prevElem.appendChild(elem);
-//         // //     }
-//         // //     prevElem = elem;
-//         // // });
-//         // console.log(elems);
-//         console.log('exit (array)');
-//         return matrix.map((a) => buildHTML(types, a));
-//     }
-//     console.log('exit');
-//     return matrix;
-// }
+
+const compileHTML = (matrix, parent = document.body) => parent.appendChild(buildHTML(matrix));
 
 /**
  * Given two points, check the cells between using specified function.

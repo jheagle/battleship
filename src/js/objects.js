@@ -41,13 +41,13 @@ const coordinate = (axisName) => ({
 /**
  *
  */
-const newMatrix = (i, x, y, z = 1, i2 = {}) => ({
+const newMatrix = (i, x, y, z = 1, i2 = {}) => (mergeObjects(coordinate('base'), {
     z: buildArray(mergeObjects(coordinate('z'), {
         y: buildArray(mergeObjects(coordinate('y'), {
             x: buildArray(mergeObjects(coordinate('x'), i, i2), x)
         }, i2), y)
     }, i2), z)
-});
+}, i2));
 
 
 /**
@@ -67,22 +67,24 @@ const cube = (i, size) => newMatrix(i, size, size, size);
 /**
  * Basic HTML configuration for displaying a 2 dimensional matrix as a table
  */
-const tableHTML = () => ( [
-    [
+const tableHTML = () => ( {
+    base: [
         {
             type: 'table',
             class: 'matrix'
         },
-        {
-            type: 'tbody',
-        }
     ],
-    {
+    z: {
+        type: 'tbody',
+    },
+    y: {
         type: 'tr',
         class: 'row',
-    },
-    {
+    }
+    ,
+    x: {
         type: 'td',
         class: 'column',
-    },
-])
+    }
+    ,
+})

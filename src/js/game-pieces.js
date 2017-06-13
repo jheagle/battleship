@@ -46,12 +46,13 @@ const hitTile = () => ( {
 /**
  * Create 3D game board styles
  */
-const boardHTML = () => ( [
-    [{
+const boardHTML = () => ( {
+    base: [{
         type: 'div',
         class: 'matrix',
+        styles: {},
     }],
-    {
+    z: {
         type: 'div',
         class: 'layer',
         styles: {
@@ -60,21 +61,21 @@ const boardHTML = () => ( [
             margin: '0 auto',
         },
     },
-    {
+    y: {
         type: 'div',
         class: 'row',
         styles: {
             display: 'flex',
         },
     },
-    {
+    x: {
         type: 'div',
         class: 'column',
         styles: {
             display: 'inline-block',
         },
     },
-]);
+});
 
 /**
  * Store the player attributes.
