@@ -14,52 +14,6 @@ const configureHtml = (config) => {
 
 /**
  *
- * @param types
- * @param matrix
- * @param depth
- * @param layer
- * @returns {*}
- */
-const recurseHtml = (types, matrix, depth = 0, layer = 0) => {
-    let nextDepth = (i) => nextIndex(types, i);
-    if (depth === 0) {
-        let elems = Array.isArray(types[0]) ? types[0].map(generateElement) : [];
-        matrix.forEach((a) => elems[elems.length - 1].appendChild(recurseHtml(types, a, nextDepth(0), layer++)));
-        let prevElem = false;
-        elems.forEach((elem) => {
-            if (prevElem) {
-                prevElem.appendChild(elem);
-            }
-            prevElem = elem;
-        });
-        return elems[0];
-    }
-    if (depth === 1 && types.length > 2) {
-        types[1].styles.zIndex = layer;
-    }
-    let el = generateElement(types[depth]);
-    if (Array.isArray(matrix)) {
-        matrix.forEach((a) => el.appendChild(recurseHtml(types, a, nextDepth(depth), layer)));
-        return el;
-    }
-    if (matrix instanceof Object) {
-        matrix = configureHtml(mergeObjects(matrix, {element: el,}));
-    }
-    return el;
-}
-
-/**
- *
- * @param types
- * @param matrix
- * @param parent
- */
-const processHtml = (types, matrix, parent = document.body) => parent.appendChild(recurseHtml(types, matrix));
-const generateHtml = curry(processHtml);
-const createTable = generateHtml(boardHTML());
-
-/**
- *
  * @param config
  * @param matrix
  * @param x
