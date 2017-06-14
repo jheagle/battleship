@@ -5,9 +5,11 @@
  * @returns {*}
  */
 const configureHtml = (config) => {
+    // Update cell colour once it has been hit
     if (config.isHit) {
         config.styles.backgroundColor = config.hasShip ? 'red' : 'white';
     }
+    // Add any other style changes to the cell
     addElementStyles(config.element, config.styles);
     return config;
 }
@@ -60,38 +62,12 @@ const updatePlayer = (player, playAgain, sunkShip) => {
 }
 
 /**
- * Final stat once a game is one (only one player remains)
+ * Final state once a game is won (only one player remains)
  * @param winner
  * @returns {[*]}
  */
 const endGame = (winner) => {
     return [winner];
-}
-
-/**
- * Control function for retrieving the next player to play
- * @param player
- * @param players
- * @param i
- * @param foundAttacker
- * @param hitShip
- * @param sunkShip
- * @returns {*}
- */
-const nextAttacker = (player, players, i, foundAttacker, hitShip, sunkShip) => {
-    if (foundAttacker && player.status > 0) {
-        updatePlayer(player, hitShip, sunkShip);
-        return !foundAttacker;
-    }
-    if (player.attacker) {
-        updatePlayer(player, hitShip, sunkShip);
-        if (players.length > 1 && i >= players.length - 1) {
-            updatePlayer(players[0], hitShip, sunkShip);
-            return foundAttacker;
-        }
-        return !foundAttacker;
-    }
-    return foundAttacker;
 }
 
 /**
@@ -108,14 +84,19 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
         playersLost.push(player);
     }
     players = players.filter((p) => p.status > 0);
-    let foundAttacker = false;
-    return players.map((p, i) => {
-        foundAttacker = nextAttacker(p, players, i, foundAttacker, hitShip, sunkShip);
-        if (players.length < 2) {
-            return endGame(players[0]);
-        }
-        return p;
-    });
+    let attacker = players.filter((p) => p.attacker)[0];
+    updatePlayer(attacker, hitShip, sunkShip);
+    let attackerIndex = players.indexOf(attacker);
+
+    let nextAttacker = {};
+    do {
+        nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex];
+    } while (nextAttacker.status <= 0);
+    updatePlayer(nextAttacker, hitShip, sunkShip);
+    if (players.length < 2) {
+        return endGame(players[0]);
+    }
+    return players;
 }
 
 /**
