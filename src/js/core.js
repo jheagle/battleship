@@ -1,4 +1,4 @@
-// Utility Functions
+// Core system functions
 /**
  * Return a curried version of the passed function.
  * The returned function expects the same number of arguments minus the ones provided.
@@ -90,7 +90,7 @@ const nextCell = (pnt, dir) => ({
  * WARNING: This is a recursive function.
  * @param matrix
  * @param pnt
- * @param depth
+ * @param axis
  * @returns {*}
  */
 const bindPointData = (matrix, pnt = {}, axis = 'z') => {
