@@ -83,6 +83,7 @@ const boardHTML = () => ( {
  */
 const playerSet = (name = '') => ({
     name: name,
+    isRobot: false,
     status: 100,
     turnCnt: 0,
     attacker: false,

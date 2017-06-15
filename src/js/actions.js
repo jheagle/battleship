@@ -45,7 +45,7 @@ const setHit = alter3dCell(hitTile());
  * @param playAgain
  * @param sunkShip
  */
-const updatePlayer = (player, playAgain, sunkShip) => {
+const updatePlayer = (player, playAgain, sunkShip = 0) => {
     if (player.attacker) {
         if (playAgain) {
             ++player.attacks.hit;
@@ -59,6 +59,7 @@ const updatePlayer = (player, playAgain, sunkShip) => {
     if (!playAgain) {
         player.attacker = !player.attacker
     }
+    return player;
 }
 
 /**
@@ -71,6 +72,22 @@ const endGame = (winner) => {
 }
 
 /**
+ *
+ * @param attacker
+ * @param players
+ * @param playAgain
+ * @returns {*}
+ */
+const getNextAttacker = (attacker, players, playAgain) => {
+    let attackerIndex = players.indexOf(attacker);
+    let nextAttacker = {};
+    do {
+        nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex];
+    } while (nextAttacker.status <= 0);
+    return playAgain ? attacker : updatePlayer(nextAttacker, playAgain);
+}
+
+/**
  * Update all game stats after each player round
  * @param player
  * @param hitShip
@@ -79,22 +96,23 @@ const endGame = (winner) => {
  * @param playersLost
  * @returns {*}
  */
-const updateScore = (player, hitShip, sunkShip, players, playersLost) => {
+const updateScore = (player, hitShip, sunkShip, players, playersLost, target) => {
     if (player.status <= 0) {
         playersLost.push(player);
     }
     players = players.filter((p) => p.status > 0);
-    let attacker = players.filter((p) => p.attacker)[0];
-    updatePlayer(attacker, hitShip, sunkShip);
-    let attackerIndex = players.indexOf(attacker);
-
-    let nextAttacker = {};
-    do {
-        nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex];
-    } while (nextAttacker.status <= 0);
-    updatePlayer(nextAttacker, hitShip, sunkShip);
+    let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2);
+    console.log('Attacker:');
+    console.log(attacker);
+    attacker = updatePlayer(attacker, hitShip, sunkShip);
     if (players.length < 2) {
         return endGame(players[0]);
+    }
+    let nextAttacker = getNextAttacker(attacker, players, hitShip);
+    console.log('Next Attacker:');
+    console.log(nextAttacker);
+    if (nextAttacker.isRobot) {
+        computerAttack(nextAttacker, players, playersLost, hitShip ? target : false);
     }
     return players;
 }
@@ -132,7 +150,7 @@ const attackFleet = (target, matrix, player, players, playersLost) => {
         player.status = status / player.shipFleet.length;
     }
     let sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0;
-    return updateScore(player, hitCell.hasShip, sunkShip, players, playersLost);
+    return updateScore(player, hitCell.hasShip, sunkShip, players, playersLost, target);
 }
 
 const launchAttack = curry(attackFleet);

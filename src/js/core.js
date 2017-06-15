@@ -235,7 +235,7 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => {
  * @param range
  * @param dirAdjust
  */
-const randCoords = (length, range, dirAdjust) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)));
+const randCoords = (length, range = 0, dirAdjust = 0) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)));
 
 /**
  * Attach an event listener to each cell in the matrix.

@@ -7,6 +7,13 @@
 const checkIfShipCell = (point, matrix) => matrix.z[point.z].y[point.y].x[point.x].hasShip;
 
 /**
+ * Return the hasShip tile boolean at the specified point.
+ * @param point
+ * @param matrix
+ */
+const checkIfHitCell = (point, matrix) => matrix.z[point.z].y[point.y].x[point.x].isHit;
+
+/**
  * Generate a ship with the specified length, beginning and direction.
  * The visibility of the ship on the board is determined by the view parameter.
  * @param length
