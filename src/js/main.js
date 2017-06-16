@@ -33,7 +33,7 @@
             board = bindElements(boardHTML(), board); // bind HTML element data to each item in matrix
             player.board = board;
             let htmlBoard = appendHTML(player.board); // translate matrix into visual HTML board
-            player.shipFleet = defaultFleet(player.board, true); // generate fleet of ships
+            player.shipFleet = defaultFleet(player.board, false); // generate fleet of ships
             // attach event listeners to each board tile
             bindListeners(player.board, 'click', launchAttack, player.board, player, players, playersLost);
             // add new player to array
@@ -46,7 +46,7 @@
      *
      * @type {Array}
      */
-    let players = buildPlayers(1);
+    let players = buildPlayers(1, 1);
     console.log(players);
     console.log(playersLost);
     // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer

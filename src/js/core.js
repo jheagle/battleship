@@ -79,11 +79,14 @@ const nextIndex = (arr, i = 0) => ( i < arr.length - 1 ) ? ++i : arr.length - 1;
  * @param pnt
  * @param dir
  */
-const nextCell = (pnt, dir) => ({
-    x: pnt.x + dir.x,
-    y: pnt.y + dir.y,
-    z: pnt.z + dir.z,
-});
+const nextCell = (pnt, dir) => point(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z);
+
+/**
+ * Based on provided point and point direction generate next point.
+ * @param start
+ * @param end
+ */
+const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, end.z - start.z);
 
 /**
  * Generate point data for each item in the matrix
@@ -202,32 +205,36 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => {
         return true;
     }
     // Find the differences between the two points to get the ship direction
-    let xdiff = end.x - start.x;
-    let ydiff = end.y - start.y;
-    let zdiff = end.z - start.z;
+    let pntDiff = pointDifference(start, end);
     // Whichever difference is greater than 0 indicates that axis direction,
     // we then loop through all cells in that direction
-    if (xdiff > 0) {
+    if (pntDiff.x > 1) {
         for (let i = start.x; i < end.x; ++i) {
             if (func({x: i, y: start.y, z: start.z}, matrix)) {
                 return true;
             }
         }
-    } else if (ydiff > 0) {
+    } else if (pntDiff.y > 1) {
         for (let i = start.y; i < end.y; ++i) {
             if (func({x: start.x, y: i, z: start.z}, matrix)) {
                 return true;
             }
         }
-    } else if (zdiff > 0) {
+    } else if (pntDiff.z > 1) {
         for (let i = start.z; i < end.z; ++i) {
             if (func({x: start.x, y: start.y, z: i}, matrix)) {
                 return true;
             }
         }
     }
-    return false;
+    return !inclusive;
 }
+
+/**
+ *
+ * @param matrix
+ */
+const getAxisLengths = (matrix) => ({x: matrix.z[0].y[0].x.length, y: matrix.z[0].y.length, z: matrix.z.length});
 
 /**
  * Create a single random number where range is within length. The number is adjusted by the provided direction (0 or 1)
@@ -236,6 +243,38 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => {
  * @param dirAdjust
  */
 const randCoords = (length, range = 0, dirAdjust = 0) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)));
+
+const checkValidPoint = (pnt, matrix) => !!matrix.z[pnt.z] && !!matrix.z[pnt.z].y[pnt.y] && !!matrix.z[pnt.z].y[pnt.y].x[pnt.x] && !!matrix.z[pnt.z].y[pnt.y].x[pnt.x].point;
+
+const getAllPoints = matrix => {
+    let lengths = getAxisLengths(matrix);
+    let allPoints = [];
+    for (let z = 0; z < lengths.z; ++z) {
+        for (let y = 0; y < lengths.y; ++y) {
+            for (let x = 0; x < lengths.x; ++x) {
+                allPoints.push(matrix.z[z].y[y].x[x].point);
+            }
+        }
+    }
+    return allPoints;
+}
+
+const adjacentPoints = (pnt, matrix) => {
+    let adjPoints = [];
+    for (let z = -1; z < 2; ++z) {
+        for (let y = -1; y < 2; ++y) {
+            for (let x = -1; x < 2; ++x) {
+                let testPoint = point(pnt.x + x, pnt.y + y, pnt.z + z);
+                if (checkValidPoint(testPoint, matrix) && point !== testPoint) {
+                    adjPoints.push(testPoint);
+                }
+            }
+        }
+    }
+    return adjPoints;
+}
+
+const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), point(0, -1, 0), point(0, 1, 0), point(0, 0, -1), point(0, 0, 1)].map(p => point(pnt.x + p.x, pnt.y + p.y, pnt.z + p.z)).filter(p => checkValidPoint(p, matrix));
 
 /**
  * Attach an event listener to each cell in the matrix.
@@ -257,5 +296,5 @@ const bindListeners = (matrix, event, func, ...extra) => {
         Object.keys(matrix).map((key) => Array.isArray(matrix[key]) ? bindListeners(matrix[key], event, func, ...extra) : matrix[key]);
         return matrix;
     }
-    return matrix.element instanceof HTMLElement && matrix.point? matrix.element.addEventListener(event, () => func(matrix.point, ...extra)) : matrix.element;
+    return matrix.element instanceof HTMLElement && matrix.point ? matrix.element.addEventListener(event, () => func(matrix.point, ...extra)) : matrix.element;
 }

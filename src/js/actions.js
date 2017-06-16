@@ -102,15 +102,11 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost, target) =>
     }
     players = players.filter((p) => p.status > 0);
     let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2);
-    console.log('Attacker:');
-    console.log(attacker);
     attacker = updatePlayer(attacker, hitShip, sunkShip);
     if (players.length < 2) {
         return endGame(players[0]);
     }
     let nextAttacker = getNextAttacker(attacker, players, hitShip);
-    console.log('Next Attacker:');
-    console.log(nextAttacker);
     if (nextAttacker.isRobot) {
         computerAttack(nextAttacker, players, playersLost, hitShip ? target : false);
     }

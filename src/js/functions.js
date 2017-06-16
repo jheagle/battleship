@@ -1,17 +1,34 @@
 // Game specific functions
 /**
  * Return the hasShip tile boolean at the specified point.
- * @param point
+ * @param pnt
  * @param matrix
  */
-const checkIfShipCell = (point, matrix) => matrix.z[point.z].y[point.y].x[point.x].hasShip;
+const checkIfShipCell = (pnt, matrix) => matrix.z[pnt.z].y[pnt.y].x[pnt.x].hasShip;
 
 /**
  * Return the hasShip tile boolean at the specified point.
- * @param point
+ * @param pnt
  * @param matrix
  */
-const checkIfHitCell = (point, matrix) => matrix.z[point.z].y[point.y].x[point.x].isHit;
+const checkIfHitCell = (pnt, matrix) => matrix.z[pnt.z].y[pnt.y].x[pnt.x].isHit;
+
+const getAllNonHitCells = (matrix) => getAllPoints(matrix).filter(p => !checkIfHitCell(p, matrix));
+
+const getAdjNonHitCells = (pnt, matrix) => adjacentPoints(pnt, matrix).filter(p => !checkIfHitCell(p, matrix));
+
+const getAdjEdgeNonHitCells = (pnt, matrix) => adjacentEdgePoints(pnt, matrix).filter(p => !checkIfHitCell(p, matrix));
+
+
+const getALowStatusItem = items => items.reduce((a, b) => b.status <= a.status ? b : a);
+
+const getLowStatusItems = items => items.filter(i => i.status <= getALowStatusItem(items).status);
+
+const getBrokenItems = items => items.filter(i => i.status < 100 && i.status > 0);
+
+const getBrokenShipsPlayers = players => players.filter(p => getBrokenItems(p.shipFleet).length);
+
+const numDamangedParts = (total, status) => total - Math.ceil(((status / 100) * total));
 
 /**
  * Generate a ship with the specified length, beginning and direction.
@@ -42,7 +59,7 @@ const buildShip = (length, start, dir, matrix, view = false) => {
  */
 const generateRandomFleet = (shipLengths, matrix, view = false) => {
     let shipFleet = []; // Create array to store generated ships
-    let lengths = {x: matrix.z[0].y[0].x.length, y: matrix.z[0].y.length, z: matrix.z.length}; // store the length of each dimension
+    let lengths = getAxisLengths(matrix); // store the length of each dimension
     // Loop through all of the provided lengths to create a ship for each
     for (let size in shipLengths) {
         let dir = point(1, 0, 0); // default direction adjuster
