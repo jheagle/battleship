@@ -27,7 +27,7 @@ const update3dCell = (config, matrix, x, y, z) => {
     return configureHtml(mergeObjects(matrix.z[z].y[y].x[x], config));
 }
 const alter3dCell = curry(update3dCell);
-const setViewShip = alter3dCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777',},}));
+const setViewShip = alter3dCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777', }, }));
 const setHiddenShip = alter3dCell(shipTile());
 
 /**
@@ -107,6 +107,9 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost, target) =>
         return endGame(players[0]);
     }
     let nextAttacker = getNextAttacker(attacker, players, hitShip);
+    if (attacker !== nextAttacker) {
+        ++nextAttacker.turnCnt;
+    }
     if (nextAttacker.isRobot) {
         computerAttack(nextAttacker, players, playersLost, hitShip ? target : false);
     }
