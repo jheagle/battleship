@@ -7,27 +7,61 @@
 const checkIfShipCell = (pnt, matrix) => matrix.z[pnt.z].y[pnt.y].x[pnt.x].hasShip;
 
 /**
- * Return the hasShip tile boolean at the specified point.
+ * Return the isHit tile boolean at the specified point.
  * @param pnt
  * @param matrix
  */
 const checkIfHitCell = (pnt, matrix) => matrix.z[pnt.z].y[pnt.y].x[pnt.x].isHit;
 
+/**
+ * Get all points which were not yet hit in the matrix.
+ * @param matrix
+ */
 const getAllNonHitCells = (matrix) => getAllPoints(matrix).filter(p => !checkIfHitCell(p, matrix));
 
+/**
+ * Get the points surrounding a provided point which were not hit.
+ * @param pnt
+ * @param matrix
+ */
 const getAdjNonHitCells = (pnt, matrix) => adjacentPoints(pnt, matrix).filter(p => !checkIfHitCell(p, matrix));
 
+/**
+ * Get the points which have same edges with the provided point and are not hit.
+ * @param pnt
+ * @param matrix
+ */
 const getAdjEdgeNonHitCells = (pnt, matrix) => adjacentEdgePoints(pnt, matrix).filter(p => !checkIfHitCell(p, matrix));
 
-
+/**
+ * Given an array of items, return the item with the lowest status property (at the end of the array)
+ * @param items
+ */
 const getALowStatusItem = items => items.reduce((a, b) => b.status <= a.status ? b : a);
 
+/**
+ * Given an array of items, return all items which have the lowest status property
+ * @param items
+ */
 const getLowStatusItems = items => items.filter(i => i.status <= getALowStatusItem(items).status);
 
+/**
+ * Given an array of items, return all of the items which have a status less than 100, but more than 0
+ * @param items
+ */
 const getBrokenItems = items => items.filter(i => i.status < 100 && i.status > 0);
 
+/**
+ * Return all of the players which have broken ships.
+ * @param players
+ */
 const getBrokenShipsPlayers = players => players.filter(p => getBrokenItems(p.shipFleet).length);
 
+/**
+ * Return the number of damaged ship parts. Performs math on the number of parts vs the damaged status.
+ * @param total
+ * @param status
+ */
 const numDamangedParts = (total, status) => total - Math.ceil(((status / 100) * total));
 
 /**

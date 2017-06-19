@@ -75,7 +75,7 @@ const endGame = (winner) => {
 }
 
 /**
- *
+ * Based on the current attacker and list of players, return the next attacker.
  * @param attacker
  * @param players
  * @param playAgain
@@ -84,10 +84,11 @@ const endGame = (winner) => {
 const getNextAttacker = (attacker, players, playAgain) => {
     let attackerIndex = players.indexOf(attacker);
     let nextAttacker = {};
+    // Get next player index, overflow to 0 if the current attacker is the last player.
     do {
         nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex];
-    } while (nextAttacker.status <= 0);
-    return playAgain ? attacker : updatePlayer(nextAttacker, playAgain);
+    } while (nextAttacker.status <= 0); // Only use players with a positive status
+    return playAgain ? attacker : updatePlayer(nextAttacker, playAgain); // If attacker has playAgain, then just return current attacker
 }
 
 /**
@@ -97,6 +98,7 @@ const getNextAttacker = (attacker, players, playAgain) => {
  * @param sunkShip
  * @param players
  * @param playersLost
+ * @param target
  * @returns {*}
  */
 const updateScore = (player, hitShip, sunkShip, players, playersLost, target) => {
@@ -126,28 +128,36 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost, target) =>
  * @returns {*}
  */
 const attackFleet = (target, matrix, player, players, playersLost) => {
+    // Player cannot attack themselves (current attacker) or if they have bad status
     if (player.status <= 0 || player.attacker) {
         return players;
     }
+    // Update cell to hit
     let hitCell = setHit(matrix, target.x, target.y, target.z);
     let hitShip = {};
     if (hitCell.hasShip) {
         let status = 0;
+        // Update all ship status and player status by checking all ships / parts
         player.shipFleet.map((ship) => {
             if (ship.hasOwnProperty('parts')) {
+                // Get all healthy ships
                 let healthy = ship.parts.filter((part) => {
                     if (part.point === target) {
                         hitShip = ship;
                     }
                     return !part.isHit;
                 });
+                // Create percentage health status
                 ship.status = healthy.length / ship.parts.length * 100;
             }
+            // Create sum of ship status
             status += ship.status;
             return ship;
         });
+        // Divide sum of ship statuses by number of ships to get player status
         player.status = status / player.shipFleet.length;
     }
+    // Check if the hit ship was sunk
     let sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0;
     return updateScore(player, hitCell.hasShip, sunkShip, players, playersLost, target);
 }

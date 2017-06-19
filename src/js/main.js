@@ -39,6 +39,13 @@
         return players;
     }
 
+    /**
+     * Logic for setting up and starting a new round
+     * (selects random start player and calls computer attack if it is AI starting)
+     * @param players
+     * @param playersLost
+     * @param firstGoesFirst
+     */
     const beginRound = (players, playersLost, firstGoesFirst = false) => {
         let firstAttacker = firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)];
         ++firstAttacker.turnCnt;

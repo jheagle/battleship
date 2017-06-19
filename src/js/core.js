@@ -190,14 +190,15 @@ const buildHTML = (matrix) => {
 const appendHTML = (matrix, parent = document.body) => parent.appendChild(buildHTML(matrix));
 
 /**
- *
+ * Given a start and end point, test the points between with the provided function.
+ * Return the points as part of true or/and false properties based on the test.
  * @param start
  * @param end
  * @param matrix
  * @param func
  * @returns {{true: Array, false: Array}}
  */
-const testForAxis = (start, end, matrix, func) => {
+const testPointsBetween = (start, end, matrix, func) => {
     let points = {
         true: [],
         false: []
@@ -238,13 +239,14 @@ const testForAxis = (start, end, matrix, func) => {
 }
 
 /**
- *
+ * Retrieve all points between start and end as either true or
+ * false properties based on the function used.
  * @param start
  * @param end
  * @param matrix
  * @param func
  * @param inclusive
- * @returns {*}
+ * @returns {{true: Array, false: Array}}
  */
 const getInBetween = (start, end, matrix, func, inclusive = true) => {
     let points = {
@@ -266,7 +268,7 @@ const getInBetween = (start, end, matrix, func, inclusive = true) => {
         }
     }
 
-    return mergeObjects(points, testForAxis(start, end, matrix, func));
+    return mergeObjects(points, testPointsBetween(start, end, matrix, func));
 }
 
 /**
@@ -284,11 +286,11 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => {
     if (inclusive && (func(start, matrix) || func(end, matrix))) {
         return true;
     }
-    return !!testForAxis(start, end, matrix, func).true.length;
+    return !!testPointsBetween(start, end, matrix, func).true.length;
 }
 
 /**
- *
+ * Return point-like object with all of the axis lengths.
  * @param matrix
  */
 const getAxisLengths = (matrix) => ({x: matrix.z[0].y[0].x.length, y: matrix.z[0].y.length, z: matrix.z.length});
@@ -301,8 +303,18 @@ const getAxisLengths = (matrix) => ({x: matrix.z[0].y[0].x.length, y: matrix.z[0
  */
 const randCoords = (length, range = 0, dirAdjust = 0) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)));
 
+/**
+ * Test if the provided point exists in the matrix.
+ * @param pnt
+ * @param matrix
+ */
 const checkValidPoint = (pnt, matrix) => !!matrix.z[pnt.z] && !!matrix.z[pnt.z].y[pnt.y] && !!matrix.z[pnt.z].y[pnt.y].x[pnt.x] && !!matrix.z[pnt.z].y[pnt.y].x[pnt.x].point;
 
+/**
+ * Return an array of all the points in the matrix
+ * @param matrix
+ * @returns {Array}
+ */
 const getAllPoints = matrix => {
     let lengths = getAxisLengths(matrix);
     let allPoints = [];
@@ -316,6 +328,12 @@ const getAllPoints = matrix => {
     return allPoints;
 }
 
+/**
+ * Return all valid points surrounding a provided point
+ * @param pnt
+ * @param matrix
+ * @returns {Array}
+ */
 const adjacentPoints = (pnt, matrix) => {
     let adjPoints = [];
     for (let z = -1; z < 2; ++z) {
@@ -331,6 +349,11 @@ const adjacentPoints = (pnt, matrix) => {
     return adjPoints;
 }
 
+/**
+ * Return all points which touch on edges (not diagonal)
+ * @param pnt
+ * @param matrix
+ */
 const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), point(0, -1, 0), point(0, 1, 0), point(0, 0, -1), point(0, 0, 1)].map(p => point(pnt.x + p.x, pnt.y + p.y, pnt.z + p.z)).filter(p => checkValidPoint(p, matrix));
 
 /**
