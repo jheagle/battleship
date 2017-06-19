@@ -45,7 +45,7 @@
         firstAttacker.attacker = true;
         if (firstAttacker.isRobot) {
             computerAttack(firstAttacker, players, playersLost, false);
-    }
+        }
     }
 
     /**

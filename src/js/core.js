@@ -190,6 +190,86 @@ const buildHTML = (matrix) => {
 const appendHTML = (matrix, parent = document.body) => parent.appendChild(buildHTML(matrix));
 
 /**
+ *
+ * @param start
+ * @param end
+ * @param matrix
+ * @param func
+ * @returns {{true: Array, false: Array}}
+ */
+const testForAxis = (start, end, matrix, func) => {
+    let points = {
+        true: [],
+        false: []
+    };
+    // Find the differences between the two points to get the ship direction
+    let pntDiff = pointDifference(start, end);
+    // Whichever difference is greater than 0 indicates that axis direction,
+    // we then loop through all cells in that direction
+    if (pntDiff.x > 1) {
+        for (let i = start.x; i < end.x; ++i) {
+            let test = point(i, start.y, start.z);
+            if (func(test, matrix)) {
+                points.true.push(test);
+            } else {
+                points.false.push(test);
+            }
+        }
+    } else if (pntDiff.y > 1) {
+        for (let i = start.y; i < end.y; ++i) {
+            let test = point(start.x, i, start.z);
+            if (func(test, matrix)) {
+                points.true.push(test);
+            } else {
+                points.false.push(test);
+            }
+        }
+    } else if (pntDiff.z > 1) {
+        for (let i = start.z; i < end.z; ++i) {
+            let test = point(start.x, start.y, i);
+            if (func(test, matrix)) {
+                points.true.push(test);
+            } else {
+                points.false.push(test);
+            }
+        }
+    }
+    return points;
+}
+
+/**
+ *
+ * @param start
+ * @param end
+ * @param matrix
+ * @param func
+ * @param inclusive
+ * @returns {*}
+ */
+const getInBetween = (start, end, matrix, func, inclusive = true) => {
+    let points = {
+        true: [],
+        false: []
+    };
+
+    // Return true if either of the two points have a ship
+    if (inclusive) {
+        if (func(start, matrix)) {
+            points.true.push(start);
+        } else {
+            points.false.push(start);
+        }
+        if (func(end, matrix)) {
+            points.true.push(end);
+        } else {
+            points.false.push(end);
+        }
+    }
+
+    return mergeObjects(points, testForAxis(start, end, matrix, func));
+}
+
+/**
  * Given two points, check the cells between using specified function.
  * When inclusive is set to true the provided start and end points will also be tested
  * @param start
@@ -204,30 +284,7 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => {
     if (inclusive && (func(start, matrix) || func(end, matrix))) {
         return true;
     }
-    // Find the differences between the two points to get the ship direction
-    let pntDiff = pointDifference(start, end);
-    // Whichever difference is greater than 0 indicates that axis direction,
-    // we then loop through all cells in that direction
-    if (pntDiff.x > 1) {
-        for (let i = start.x; i < end.x; ++i) {
-            if (func({x: i, y: start.y, z: start.z}, matrix)) {
-                return true;
-            }
-        }
-    } else if (pntDiff.y > 1) {
-        for (let i = start.y; i < end.y; ++i) {
-            if (func({x: start.x, y: i, z: start.z}, matrix)) {
-                return true;
-            }
-        }
-    } else if (pntDiff.z > 1) {
-        for (let i = start.z; i < end.z; ++i) {
-            if (func({x: start.x, y: start.y, z: i}, matrix)) {
-                return true;
-            }
-        }
-    }
-    return !inclusive;
+    return !!testForAxis(start, end, matrix, func).true.length;
 }
 
 /**

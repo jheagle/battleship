@@ -12,8 +12,9 @@ const selectTargetCoord = (victim, lastTarget) => {
         let hitParts = targetShip.parts.filter(part => checkIfHitCell(part.point, victim.board));
         if (moreBrokenShips.length) {
             for (let i = 0; i < hitParts.length; ++i) {
-                if (!checkInBetween(hitParts[0].point, hitParts[i].point, victim.board, checkIfHitCell, false)) {
-                    return hitParts[--i].point;
+                let targetPoints = getInBetween(hitParts[0].point, hitParts[i].point, victim.board, checkIfHitCell, false);
+                if (targetPoints.false.length) {
+                    return targetPoints.false[0];
                 }
             }
             let pntDiff = pointDifference(hitParts[0].point, hitParts[1].point);
