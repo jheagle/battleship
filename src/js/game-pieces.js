@@ -5,20 +5,14 @@
 const gameTile = () => ( {
     hasShip: false,
     isHit: false,
-    styles: {
-        border: '1px solid #333',
-        backgroundColor: 'white',
-        cursor: 'pointer',
-    },
+    styles: {},
 });
 
 /**
  * Set the style for tiles representing water.
  */
 const waterTile = () => mergeObjects(tile(), gameTile(), {
-    styles: {
-        backgroundColor: 'blue',
-    },
+    styles: {},
 });
 
 /**
@@ -55,25 +49,17 @@ const boardHTML = () => ( {
     z: {
         type: 'div',
         class: 'layer',
-        styles: {
-            display: 'inline-block',
-            position: 'relative',
-            margin: '0 auto',
-        },
+        styles: {},
     },
     y: {
         type: 'div',
         class: 'row',
-        styles: {
-            display: 'flex',
-        },
+        styles: {},
     },
     x: {
         type: 'div',
         class: 'column',
-        styles: {
-            display: 'inline-block',
-        },
+        styles: {},
     },
 });
 

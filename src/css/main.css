@@ -1,3 +1,6 @@
+html {
+  font-size: 62.5%; }
+
 html, body {
   background-color: #333;
   height: 100%;
@@ -9,8 +12,29 @@ html, body {
     opacity: .7; }
 
 .matrix {
+  font-size: 1rem;
   display: inline-block;
   width: 50%;
   min-width: 370px;
+  min-width: 37em;
   margin: 10px auto;
-  position: relative; }
+  margin: 1em auto;
+  position: relative;
+  transition: all 800ms; }
+  .matrix .layer {
+    display: inline-block;
+    position: relative;
+    margin: 0 auto; }
+    .matrix .layer .row {
+      display: flex; }
+      .matrix .layer .row .column {
+        height: 35px;
+        height: 3.5em;
+        width: 35px;
+        width: 3.5em;
+        border: 1px solid #333;
+        border: 0.1em solid #333;
+        background-color: blue;
+        cursor: pointer;
+        display: inline-block;
+        transition: all 800ms; }

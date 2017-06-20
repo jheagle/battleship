@@ -47,9 +47,7 @@
      * @param firstGoesFirst
      */
     const beginRound = (players, playersLost, firstGoesFirst = false) => {
-        let firstAttacker = firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)];
-        ++firstAttacker.turnCnt;
-        firstAttacker.attacker = true;
+        let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)]);
         if (firstAttacker.isRobot) {
             computerAttack(firstAttacker, players, playersLost, false);
         }
@@ -64,7 +62,7 @@
     console.log(players);
     console.log(playersLost);
 
-    beginRound(players, playersLost, true);
+    beginRound(players, playersLost, false);
     // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
     // let results = mergeObjects({
     //     a: { a: 1},

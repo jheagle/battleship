@@ -16,11 +16,7 @@ const point = (x, y, z = 0) => ( {
  */
 const tile = () => ( {
     point: {},
-    styles: {
-        width: '35px',
-        height: '35px',
-        backgroundColor: 'transparent',
-    },
+    styles: {},
     element: {},
 } );
 

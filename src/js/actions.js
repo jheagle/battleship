@@ -59,7 +59,10 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
     if (!playAgain) {
         player.attacker = !player.attacker
         if (player.attacker) {
+            player.board.element.style.fontSize = '0.5rem';
             ++player.turnCnt;
+        } else {
+            player.board.element.style.fontSize = '1rem';
         }
     }
     return player;
