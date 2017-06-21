@@ -11,9 +11,6 @@ html, body
   padding: 0
   text-align: center
 
-  td:hover
-    opacity: .7
-
 .matrix
   font-size: 1rem
   display: inline-block
@@ -23,7 +20,7 @@ html, body
   margin: 10px auto
   margin: 1em auto
   position: relative
-  transition: all 800ms
+  transition: all 600ms 1500ms
 
   .layer
     display: inline-block
@@ -43,4 +40,7 @@ html, body
         background-color: blue
         cursor: pointer
         display: inline-block
-        transition: all 800ms
+        transition: background-color 400ms 150ms
+
+        &:hover
+          opacity: 0.7

@@ -119,7 +119,12 @@ const bindPointData = (matrix, pnt = {}, axis = 'z') => {
  * @param elem
  * @param styles
  */
-const addElementStyles = (elem, styles) => (Object.keys(styles).length && elem.style) ? Object.keys(styles).forEach((styleName) => elem.style[styleName] = styles[styleName]) : elem;
+const addElementStyles = (elem, styles) => {
+    if (Object.keys(styles).length && elem.style) {
+        Object.keys(styles).forEach((styleName) => elem.style[styleName] = styles[styleName]);
+    }
+    return elem;
+}
 
 /**
  * Create an HTML element based on the provided attributes and return the element as an Object.
