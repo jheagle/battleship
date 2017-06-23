@@ -27,12 +27,12 @@
             player.isRobot = --humans < 0;
             let board = square(waterTile(), 10); // generate matrix for player board
             board = bindPointData(board); // bind point data to each item in matrix
-            board = bindElements(boardHTML(), board); // bind HTML element data to each item in matrix
+            board = bindElements(board); // bind HTML element data to each item in matrix
             player.board = board;
             let htmlBoard = appendHTML(player.board); // translate matrix into visual HTML board
             player.shipFleet = defaultFleet(player.board, false); // generate fleet of ships
             // attach event listeners to each board tile
-            bindListeners(player.board, 'click', launchAttack, player.board, player, players, playersLost);
+            let events = bindListeners(player.board, 'click', launchAttack, player.board, player, players, playersLost);
             // add new player to array
             players.push(player);
         }
@@ -52,6 +52,13 @@
             computerAttack(firstAttacker, players, playersLost, false);
         }
     }
+
+    const main = () => {
+        let menu = bindElements(mainMenu());
+        appendHTML(menu);
+    }
+
+    main();
 
     /**
      *

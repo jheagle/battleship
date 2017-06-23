@@ -16,8 +16,6 @@ const point = (x, y, z = 0) => ( {
  */
 const tile = () => ( {
     point: {},
-    styles: {},
-    element: {},
 } );
 
 /**
@@ -25,8 +23,7 @@ const tile = () => ( {
  * @param axisName
  */
 const coordinate = (axisName) => ({
-    axis: axisName,
-    element: {}
+    axis: axisName
 });
 
 /**
@@ -36,15 +33,28 @@ const coordinate = (axisName) => ({
  * @param x
  * @param y
  * @param z
- * @param i2
+ * @param props
  */
-const matrix = (i, x, y, z = 1, ...props) => (mergeObjects(coordinate('base'), {
-    z: buildArray(mergeObjects(coordinate('z'), {
-        y: buildArray(mergeObjects(coordinate('y'), {
-            x: buildArray(mergeObjects(coordinate('x'), i, ...props), x)
+const matrix = (i, x, y, z = 1, ...props) => DOMItem({
+    attributes: {
+        class: 'matrix'
+    },
+    children: buildArray(DOMItem(coordinate('z'), {
+        attributes: {
+            class: 'layer'
+        },
+        children: buildArray(DOMItem(coordinate('y'), {
+            attributes: {
+                class: 'row'
+            },
+            children: buildArray(DOMItem(mergeObjects(coordinate('x'), {
+                attributes: {
+                    class: 'column'
+                }
+            }, i), ...props), x)
         }, ...props), y)
     }, ...props), z)
-}, ...props));
+});
 
 
 /**
@@ -67,21 +77,19 @@ const cube = (i, size) => matrix(i, size, size, size);
 const tableHTML = () => ( {
     base: [
         {
-            type: 'table',
+            element: 'table',
             class: 'matrix'
         },
     ],
     z: {
-        type: 'tbody',
+        element: 'tbody',
     },
     y: {
-        type: 'tr',
+        element: 'tr',
         class: 'row',
-    }
-    ,
+    },
     x: {
-        type: 'td',
+        element: 'td',
         class: 'column',
-    }
-    ,
-})
+    },
+});

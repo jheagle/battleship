@@ -2,15 +2,16 @@
 /**
  * Update view based on actions performed
  * @param config
+ * @param isRobot
  * @returns {*}
  */
 const configureHtml = (config, isRobot) => {
     // Update cell colour once it has been hit
     if (config.isHit) {
-        config.styles.backgroundColor = config.hasShip ? 'red' : 'white';
+        config.attributes.styles.backgroundColor = config.hasShip ? 'red' : 'white';
     }
     // Add any other style changes to the cell
-    config.element = addElementStyles(config.element, config.styles);
+    config.element = addElementStyles(config.element, config.attributes.styles);
     return config;
 }
 
@@ -24,7 +25,7 @@ const configureHtml = (config, isRobot) => {
  * @returns {*}
  */
 const update3dCell = (config, matrix, x, y, z, isRobot = false) => {
-    return configureHtml(mergeObjects(matrix.z[z].y[y].x[x], config, isRobot));
+    return configureHtml(mergeObjects(matrix.children[z].children[y].children[x], config, isRobot));
 }
 const alter3dCell = curry(update3dCell);
 const setViewShip = alter3dCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777',},}));

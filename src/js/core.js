@@ -96,22 +96,19 @@ const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, 
  * @param axis
  * @returns {*}
  */
-const bindPointData = (matrix, pnt = {}, axis = 'z') => {
+const bindPointData = (item, pnt = {}) => {
     if (!Object.keys(pnt).length) {
         pnt = point(0, 0, 0);
     }
-    if (Array.isArray(matrix)) {
-        return matrix.map((el, i) => {
-            pnt = mergeObjects(pnt, {[axis]: i});
-            return bindPointData(el, pnt, axis);
+    if (item.point) {
+        item.point = cloneObject(pnt);
+    } else {
+        item.children.map((el, i) => {
+            pnt = mergeObjects(pnt, {[el.axis]: i});
+            return bindPointData(el, pnt);
         });
     }
-    if (typeof matrix === 'object' && !matrix.point) {
-        Object.keys(matrix).map((key) => Array.isArray(matrix[key]) ? bindPointData(matrix[key], pnt, key) : matrix[key]);
-        return matrix;
-    }
-    matrix.point = cloneObject(pnt);
-    return matrix;
+    return item;
 }
 
 /**
@@ -132,9 +129,9 @@ const addElementStyles = (elem, styles) => {
  * @returns {Element}
  */
 const generateElement = (elemAttr) => {
-    let elem = document.createElement(elemAttr.type);
+    let elem = document.createElement(elemAttr.element);
     Object.keys(elemAttr).map((attr) => {
-        if (attr !== 'type' && attr !== 'styles') {
+        if (attr !== 'element' && attr !== 'styles') {
             elem.setAttribute(attr, elemAttr[attr]);
         }
     });
@@ -152,19 +149,12 @@ const generateElement = (elemAttr) => {
  * @param zIndex
  * @returns {*}
  */
-const bindElements = (types, matrix, zIndex = 0) => {
-    if (Array.isArray(matrix)) {
-        return matrix.map((el, i) => el.axis === 'z' ? bindElements(types, el, i) : bindElements(types, el, 0));
-    }
-    if (matrix.element && types[matrix.axis]) {
-        types[matrix.axis].styles = mergeObjects(matrix.styles, Array.isArray(types[matrix.axis]) ? types[matrix.axis][types[matrix.axis].length - 1].styles : types[matrix.axis].styles);
-        Array.isArray(types[matrix.axis]) ? types[matrix.axis][0].styles.zIndex = zIndex : types[matrix.axis].styles.zIndex = zIndex;
-        matrix.element = Array.isArray(types[matrix.axis]) ? (types[matrix.axis].map(type => matrix.element instanceof HTMLElement ? matrix.element.appendChild(generateElement(type)) : matrix.element = generateElement(type)))[0] : generateElement(types[matrix.axis]);
-    }
-    Object.keys(matrix).map((key) => {
-        return Array.isArray(matrix[key]) ? bindElements(types, matrix[key], 0) : matrix[key]
+const bindElements = (item) => {
+    return DOMItem(item, {
+        attributes: item.attributes,
+        element: generateElement(item.attributes),
+        children: item.children.map(bindElements)
     });
-    return matrix;
 }
 
 /**
@@ -173,18 +163,9 @@ const bindElements = (types, matrix, zIndex = 0) => {
  * @param matrix
  * @returns {*}
  */
-const buildHTML = (matrix) => {
-    if (Array.isArray(matrix)) {
-        return matrix.map((el) => buildHTML(el));
-    }
-    Object.keys(matrix).map((key) => {
-        if (Array.isArray(matrix[key])) {
-            return buildHTML(matrix[key]).map((elem) => matrix.element instanceof HTMLElement ? matrix.element.appendChild(elem) : elem);
-        } else {
-            return matrix[key]
-        }
-    });
-    return matrix.element;
+const buildHTML = (item) => {
+    item.children.map(i => item.element.appendChild(buildHTML(i)));
+    return item.element;
 }
 
 /**
@@ -192,7 +173,7 @@ const buildHTML = (matrix) => {
  * @param matrix
  * @param parent
  */
-const appendHTML = (matrix, parent = document.body) => parent.appendChild(buildHTML(matrix));
+const appendHTML = (item, parent = document.body) => parent.appendChild(buildHTML(item));
 
 /**
  * Given a start and end point, test the points between with the provided function.
@@ -298,7 +279,11 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => {
  * Return point-like object with all of the axis lengths.
  * @param matrix
  */
-const getAxisLengths = (matrix) => ({x: matrix.z[0].y[0].x.length, y: matrix.z[0].y.length, z: matrix.z.length});
+const getAxisLengths = (matrix) => ({
+    x: matrix.children[0].children[0].children.length,
+    y: matrix.children[0].children.length,
+    z: matrix.children.length
+});
 
 /**
  * Create a single random number where range is within length. The number is adjusted by the provided direction (0 or 1)
@@ -313,7 +298,7 @@ const randCoords = (length, range = 0, dirAdjust = 0) => Math.floor(Math.random(
  * @param pnt
  * @param matrix
  */
-const checkValidPoint = (pnt, matrix) => !!matrix.z[pnt.z] && !!matrix.z[pnt.z].y[pnt.y] && !!matrix.z[pnt.z].y[pnt.y].x[pnt.x] && !!matrix.z[pnt.z].y[pnt.y].x[pnt.x].point;
+const checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point;
 
 /**
  * Return an array of all the points in the matrix
@@ -326,7 +311,7 @@ const getAllPoints = matrix => {
     for (let z = 0; z < lengths.z; ++z) {
         for (let y = 0; y < lengths.y; ++y) {
             for (let x = 0; x < lengths.x; ++x) {
-                allPoints.push(matrix.z[z].y[y].x[x].point);
+                allPoints.push(matrix.children[z].children[y].children[x].point);
             }
         }
     }
@@ -365,21 +350,17 @@ const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), po
  * Attach an event listener to each cell in the matrix.
  * Accepts an unlimited number of additional arguments to be passed to the action function.
  * WARNING: This is a recursive function.
- * @param matrix
+ * @param item
  * @param event
  * @param func
  * @param extra
  * @returns {*}
  */
-const bindListeners = (matrix, event, func, ...extra) => {
-    if (Array.isArray(matrix)) {
-        return matrix.map((arr) => {
-            return bindListeners(arr, event, func, ...extra);
-        });
+const bindListeners = (item, event, func, ...extra) => {
+    if (item.point) {
+        item.element instanceof HTMLElement && item.point ? item.element.addEventListener(event, () => func(item.point, ...extra)) : item.element;
+    } else {
+        item.children.map(i => bindListeners(i, event, func, ...extra));
     }
-    if (typeof matrix === 'object' && !matrix.point) {
-        Object.keys(matrix).map((key) => Array.isArray(matrix[key]) ? bindListeners(matrix[key], event, func, ...extra) : matrix[key]);
-        return matrix;
-    }
-    return matrix.element instanceof HTMLElement && matrix.point ? matrix.element.addEventListener(event, () => func(matrix.point, ...extra)) : matrix.element;
+    return item;
 }

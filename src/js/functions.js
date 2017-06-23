@@ -4,14 +4,14 @@
  * @param pnt
  * @param matrix
  */
-const checkIfShipCell = (pnt, matrix) => matrix.z[pnt.z].y[pnt.y].x[pnt.x].hasShip;
+const checkIfShipCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].hasShip;
 
 /**
  * Return the isHit tile boolean at the specified point.
  * @param pnt
  * @param matrix
  */
-const checkIfHitCell = (pnt, matrix) => matrix.z[pnt.z].y[pnt.y].x[pnt.x].isHit;
+const checkIfHitCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].isHit;
 
 /**
  * Get all points which were not yet hit in the matrix.

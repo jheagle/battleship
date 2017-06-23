@@ -5,15 +5,12 @@
 const gameTile = () => ( {
     hasShip: false,
     isHit: false,
-    styles: {},
 });
 
 /**
  * Set the style for tiles representing water.
  */
-const waterTile = () => mergeObjects(tile(), gameTile(), {
-    styles: {},
-});
+const waterTile = () => mergeObjects(gameTile(), tile());
 
 /**
  * Set status and custom properties for tiles that have a ship
@@ -36,32 +33,6 @@ const ship = () => ( {
 const hitTile = () => ( {
     isHit: true,
 } );
-
-/**
- * Create 3D game board styles
- */
-const boardHTML = () => ( {
-    base: [{
-        type: 'div',
-        class: 'matrix',
-        styles: {},
-    }],
-    z: {
-        type: 'div',
-        class: 'layer',
-        styles: {},
-    },
-    y: {
-        type: 'div',
-        class: 'row',
-        styles: {},
-    },
-    x: {
-        type: 'div',
-        class: 'column',
-        styles: {},
-    },
-});
 
 /**
  * Store the player attributes.
