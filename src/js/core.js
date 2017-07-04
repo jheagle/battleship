@@ -13,8 +13,18 @@ const curry = (fn) => function curried(...args) {
  * Clone objects for manipulation without data corruption
  * @param object
  */
-const cloneObject = (object) => {
-    return JSON.parse(JSON.stringify(object));
+const cloneObject = (object) => cloneExclusions(JSON.parse(JSON.stringify(object)), object);
+
+const cloneExclusions = (cloned, object) => {
+    if (typeof object === 'object' && Object.keys(object).length) {
+        Object.keys(object).map(key => cloned[key] = cloned[key] && !(object[key] instanceof HTMLElement) ? cloneExclusions(cloned[key], object[key]) : object[key]);
+        return cloned;
+    }
+    if (Array.isArray(object) && object.length) {
+        object.map((prop, i) => cloned[i] = cloned[i].length && !(prop instanceof HTMLElement) ? cloneExclusions(cloned[i], prop) : prop);
+        return cloned;
+    }
+    return cloned;
 }
 
 /**
@@ -26,30 +36,23 @@ const cloneObject = (object) => {
  * @returns {*}
  */
 const mergeObjects = (...args) => {
+    if (args.length === 1) {
+        return args[0];
+    }
+    if (args.length > 2) {
+        return args.reduce((obj1, obj2) => mergeObjects(obj1, obj2), {});
+    }
     let obj1 = args[0]; // original object
     let obj2 = args[1]; // overwriting object
-    // When there are more than two objects start from end of list and perform merge
-    // Loop ends when object list has no more than two objects.
-    while (args.length > 2) {
-        let endArgs = args.splice(args.length - 2, 2); // remove last two objects from list and perform merge
-        obj2 = args[args.length - 2] = mergeObjects(...endArgs);
+    if (typeof obj2 === 'object' && Object.keys(obj2).length) {
+        Object.keys(obj2).map(key => obj1[key] = obj1[key] && !(obj2[key] instanceof HTMLElement) ? mergeObjects(obj1[key], obj2[key]) : obj2[key]);
+        return obj1;
     }
-    // Discontinue deep merge if the inputs are not objects
-    if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
-        return typeof obj2 === 'object' ? obj2 : obj1; // Simply return the passed argument
+    if (Array.isArray(obj2) && obj2.length) {
+        obj2.map((prop, i) => obj1[i] = obj1[i].length && !(prop instanceof HTMLElement) ? mergeObjects(obj1[i], prop) : prop);
+        return obj1;
     }
-    // Loop through object properties to find sub-objects
-    Object.keys(obj2).map((prop) => {
-        if (typeof obj2[prop] === 'object' && obj1.hasOwnProperty(prop) && typeof obj1[prop] === 'object') {
-            // If a sub-object is found perform merge on that object.
-            obj1[prop] = mergeObjects(obj1[prop], obj2[prop]);
-            // Add preference for the object with more properties to do the overwriting
-            if (Object.keys(obj1[prop]).length > Object.keys(obj2[prop]).length) {
-                obj2[prop] = cloneObject(obj1[prop]);
-            }
-        }
-    });
-    return Object.assign(obj1, obj2); // assign() will perform a merge of the objects at the top level
+    return typeof obj2 !== 'object' && !Array.isArray(obj2) ? obj2 : Object.assign(obj1, obj2);
 }
 
 /**
@@ -294,6 +297,23 @@ const getAxisLengths = (matrix) => ({
 const randCoords = (length, range = 0, dirAdjust = 0) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)));
 
 /**
+ * Get random direction point
+ * @param useZ
+ */
+const randDirection = (useZ = 0) => {
+    switch (Math.floor(Math.random() * (2 + useZ))) {
+        case 0:
+            return point(1, 0, 0);
+            break;
+        case 1:
+            return point(0, 1, 0);
+            break;
+        default:
+            return point(0, 0, 1);
+    }
+}
+
+/**
  * Test if the provided point exists in the matrix.
  * @param pnt
  * @param matrix
@@ -351,16 +371,14 @@ const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), po
  * Accepts an unlimited number of additional arguments to be passed to the action function.
  * WARNING: This is a recursive function.
  * @param item
- * @param event
- * @param func
  * @param extra
  * @returns {*}
  */
-const bindListeners = (item, event, func, ...extra) => {
-    if (item.point) {
-        item.element instanceof HTMLElement && item.point ? item.element.addEventListener(event, () => func(item.point, ...extra)) : item.element;
+const bindListeners = (item, ...extra) => {
+    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
+        Object.keys(item.eventListeners).map(event => item.element.addEventListener(event, () => item.eventListeners[event](item, ...extra)));
     } else {
-        item.children.map(i => bindListeners(i, event, func, ...extra));
+        item.children.map(i => bindListeners(i, ...extra));
     }
     return item;
 }

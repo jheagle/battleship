@@ -26,14 +26,14 @@ const mainMenu = () => DOMItem({
                             attributes: {
                                 element: 'input',
                                 type: 'button',
-                                value: 'Start'
+                                value: 'Vs Computer'
                             }
                         }),
                         DOMItem({
                             attributes: {
                                 element: 'input',
                                 type: 'button',
-                                value: 'Quit'
+                                value: 'Vs Human'
                             }
                         })
                     ]

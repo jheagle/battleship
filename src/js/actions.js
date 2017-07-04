@@ -24,9 +24,7 @@ const configureHtml = (config, isRobot) => {
  * @param z
  * @returns {*}
  */
-const update3dCell = (config, matrix, x, y, z, isRobot = false) => {
-    return configureHtml(mergeObjects(matrix.children[z].children[y].children[x], config, isRobot));
-}
+const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(mergeObjects(matrix.children[z].children[y].children[x], config), isRobot);
 const alter3dCell = curry(update3dCell);
 const setViewShip = alter3dCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777',},}));
 const setHiddenShip = alter3dCell(shipTile());
@@ -58,7 +56,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
         }
     }
     if (!playAgain) {
-        player.attacker = !player.attacker
+        player.attacker = !player.attacker;
         if (player.attacker) {
             player.board.element.style.fontSize = '0.5rem';
             ++player.turnCnt;
@@ -167,3 +165,4 @@ const attackFleet = (target, matrix, player, players, playersLost) => {
 }
 
 const launchAttack = curry(attackFleet);
+const attackListener = (target, ...extra) => attackFleet(target.point, ...extra);

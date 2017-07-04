@@ -5,6 +5,9 @@
 const gameTile = () => ( {
     hasShip: false,
     isHit: false,
+    eventListeners: {
+        click: attackListener
+    },
 });
 
 /**

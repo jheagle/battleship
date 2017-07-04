@@ -32,7 +32,7 @@
             let htmlBoard = appendHTML(player.board); // translate matrix into visual HTML board
             player.shipFleet = defaultFleet(player.board, false); // generate fleet of ships
             // attach event listeners to each board tile
-            let events = bindListeners(player.board, 'click', launchAttack, player.board, player, players, playersLost);
+            let events = bindListeners(player.board, player.board, player, players, playersLost);
             // add new player to array
             players.push(player);
         }

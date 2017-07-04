@@ -47,11 +47,11 @@ const matrix = (i, x, y, z = 1, ...props) => DOMItem({
             attributes: {
                 class: 'row'
             },
-            children: buildArray(DOMItem(mergeObjects(coordinate('x'), {
+            children: buildArray(DOMItem(coordinate('x'), {
                 attributes: {
                     class: 'column'
                 }
-            }, i), ...props), x)
+            }, ...props, i), x)
         }, ...props), y)
     }, ...props), z)
 });
