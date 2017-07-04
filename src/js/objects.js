@@ -1,5 +1,19 @@
 // Utility Objects
 /**
+ * This is the basic Object for representing the DOM in a virtual perspective
+ * @param attributes
+ * @constructor
+ */
+const DOMItem = (...attributes) => mergeObjects({
+    attributes: {
+        element: 'div',
+        styles: {}
+    },
+    element: {},
+    children: []
+}, ...attributes)
+
+/**
  * Store the point data for an x, y, z matrix.
  * @param x
  * @param y
@@ -9,14 +23,14 @@ const point = (x, y, z = 0) => ( {
     x: x,
     y: y,
     z: z,
-} );
+} )
 
 /**
  * A default tile in the matrix
  */
 const tile = () => ( {
     point: {},
-} );
+} )
 
 /**
  *
@@ -24,7 +38,7 @@ const tile = () => ( {
  */
 const coordinate = (axisName) => ({
     axis: axisName
-});
+})
 
 /**
  * Create a 3d matrix of i with x by y by z size,
@@ -54,7 +68,7 @@ const matrix = (i, x, y, z = 1, ...props) => DOMItem({
             }, ...props, i), x)
         }, ...props), y)
     }, ...props), z)
-});
+})
 
 
 /**
@@ -62,14 +76,14 @@ const matrix = (i, x, y, z = 1, ...props) => DOMItem({
  * @param i
  * @param size
  */
-const square = (i, size) => matrix(i, size, size);
+const square = (i, size) => matrix(i, size, size)
 
 /**
  * Return a matrix where x, y, and z are equal
  * @param i
  * @param size
  */
-const cube = (i, size) => matrix(i, size, size, size);
+const cube = (i, size) => matrix(i, size, size, size)
 
 /**
  * Basic HTML configuration for displaying a 2 dimensional matrix as a table
@@ -92,4 +106,4 @@ const tableHTML = () => ( {
         element: 'td',
         class: 'column',
     },
-});
+})

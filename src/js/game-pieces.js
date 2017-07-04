@@ -8,19 +8,19 @@ const gameTile = () => ( {
     eventListeners: {
         click: attackListener
     },
-});
+})
 
 /**
  * Set the style for tiles representing water.
  */
-const waterTile = () => mergeObjects(gameTile(), tile());
+const waterTile = () => mergeObjects(gameTile(), tile())
 
 /**
  * Set status and custom properties for tiles that have a ship
  */
 const shipTile = () => ( {
     hasShip: true,
-} );
+} )
 
 /**
  * Store properties of a ship which includes an array of all associated ship tiles.
@@ -28,14 +28,14 @@ const shipTile = () => ( {
 const ship = () => ( {
     status: 100,
     parts: [],
-} );
+} )
 
 /**
  * Set the status of the tile to hit.
  */
 const hitTile = () => ( {
     isHit: true,
-} );
+} )
 
 /**
  * Store the player attributes.
@@ -50,9 +50,9 @@ const playerSet = (name = '') => ({
     attacks: {hit: 0, miss: 0, sunk: 0},
     board: {},
     shipFleet: [],
-});
+})
 
 /**
  * Create a default fleet using the standard battleship lengths.
  */
-const defaultFleet = randomFleet([5, 4, 3, 3, 2]);
+const defaultFleet = randomFleet([5, 4, 3, 3, 2])

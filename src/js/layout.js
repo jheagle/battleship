@@ -1,12 +1,7 @@
-const DOMItem = (...attributes) => mergeObjects({
-    attributes: {
-        element: 'div',
-        styles: {}
-    },
-    element: {},
-    children: []
-}, ...attributes);
-
+// Custom layout objects leveraging the DOMItem object
+/**
+ * This will be the main menu for the game.
+ */
 const mainMenu = () => DOMItem({
     attributes: {
         class: 'main-menu'
@@ -41,4 +36,4 @@ const mainMenu = () => DOMItem({
             ]
         })
     ]
-});
+})
