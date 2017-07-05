@@ -183,7 +183,7 @@ const buildHTML = (item) => {
  * @param parent
  * @returns {*|HTMLElement}
  */
-const appendHTML = (item, parent = documentDOMItem().body) => {
+const appendHTML = (item, parent = documentItem.body) => {
     parent.children.push(item)
     buildHTML(parent)
     return parent
