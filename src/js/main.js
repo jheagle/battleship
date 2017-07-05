@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 (function () {
     /**
      * Store the players which have status = 0
