@@ -75,7 +75,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
 const endGame = (winner) => [winner]
 
 const findNextAttacker = (attacker, players, attackerIndex) => {
-    nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex]
+    let nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex]
     return nextAttacker.status > 0 ? nextAttacker : findNextAttacker(attacker, players, attackerIndex) // Only use players with a positive status
 }
 
