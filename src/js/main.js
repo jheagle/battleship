@@ -7,6 +7,11 @@
     let playersLost = []
 
     /**
+     * Create new private reference to the document
+     */
+    let documentItem = documentDOMItem()
+
+    /**
      * Create players and associated properties.
      * Takes an integer for the number of players to generate.
      * Returns an array of players.
@@ -25,22 +30,14 @@
         for (let i = 0; i < playerCnt; ++i) {
             let player = playerSet() // get default player object
             player.isRobot = --humans < 0
-            let board = square(waterTile(), 10) // generate matrix for player board
-            board = bindPointData(board) // bind point data to each item in matrix
-            board = bindElements(board) // bind HTML element data to each item in matrix
-            player.board = board
-            // let htmltest = documentItem()
-            console.log(documentItem)
-            // console.log(document);
-            // let bodytest = bodyItem()
-            console.log(bodyItem)
-            // console.log(document.body);
-            // let htmlBoard = buildHTML(htmltest)
-            // console.log(htmlBoard)
-            let htmlBoard = appendHTML(player.board) // translate matrix into visual HTML board
+            // 1. generate matrix for player board
+            // 2. bind point data to each item in matrix
+            // 3. bind HTML element data to each item in matrix
+            player.board = bindElements(bindPointData(square(waterTile(), 10)))
+            appendHTML(player.board, documentItem.body) // translate matrix into visual HTML board
             player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
             // attach event listeners to each board tile
-            let events = bindListeners(player.board, player.board, player, players, playersLost)
+            bindListeners(player.board, player.board, player, players, playersLost)
             // add new player to array
             players.push(player)
         }
@@ -63,7 +60,7 @@
 
     const main = () => {
         let menu = bindElements(mainMenu())
-        appendHTML(menu)
+        appendHTML(menu, documentItem.body)
     }
 
     main()
@@ -78,6 +75,8 @@
     console.log(playersLost)
 
     beginRound(players, playersLost, false)
+
+    console.log(documentItem);
     // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
     // let results = mergeObjects({
     //     a: { a: 1},

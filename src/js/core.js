@@ -178,11 +178,16 @@ const buildHTML = (item) => {
 }
 
 /**
- * Select the parent HTML element to append matrix to
- * @param matrix
+ * Select the parent HTML element for appending new elements
+ * @param item
  * @param parent
+ * @returns {*|HTMLElement}
  */
-const appendHTML = (item, parent = document.body) => parent.appendChild(buildHTML(item))
+const appendHTML = (item, parent = documentDOMItem().body) => {
+    parent.children.push(item)
+    buildHTML(parent)
+    return parent
+}
 
 /**
  * Given a start and end point, test the points between with the provided function.

@@ -14,24 +14,34 @@ const DOMItem = (...attributes) => mergeObjects({
     children: []
 }, ...attributes)
 
-const documentDOMItem = (children = []) => DOMItem({
+/**
+ * Return a DOMItem style reference to the document
+ */
+const documentDOMItem = () => DOMItem({
     attributes: {
         element: 'html'
     },
-    children: children
+    element: document,
+    head: DOMItem({
+        attributes: {
+            element: 'head'
+        },
+        element: document.head,
+        children: []
+    }),
+    body: DOMItem({
+        attributes: {
+            element: 'body'
+        },
+        element: document.body,
+        children: []
+    }),
 })
 
-const bodyDOMItem = (children = []) => documentDOMItem(DOMItem({
-    attributes: {
-        element: 'body'
-    },
-    children: children
-})
-)
-
+/**
+ * Create reference for storing document changes
+ */
 let documentItem = documentDOMItem()
-
-let bodyItem = bodyDOMItem()
 
 /**
  * Store the point data for an x, y, z matrix.
