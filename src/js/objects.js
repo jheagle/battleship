@@ -10,8 +10,28 @@ const DOMItem = (...attributes) => mergeObjects({
         styles: {}
     },
     element: {},
+    eventListeners: {},
     children: []
 }, ...attributes)
+
+const documentDOMItem = (children = []) => DOMItem({
+    attributes: {
+        element: 'html'
+    },
+    children: children
+})
+
+const bodyDOMItem = (children = []) => documentDOMItem(DOMItem({
+    attributes: {
+        element: 'body'
+    },
+    children: children
+})
+)
+
+let documentItem = documentDOMItem()
+
+let bodyItem = bodyDOMItem()
 
 /**
  * Store the point data for an x, y, z matrix.
