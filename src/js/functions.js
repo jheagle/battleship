@@ -65,6 +65,12 @@ const getBrokenShipsPlayers = players => players.filter(p => getBrokenItems(p.sh
 const numDamangedParts = (total, status) => total - Math.ceil(((status / 100) * total))
 
 /**
+ *
+ * @param pnt
+ */
+const filterAdjacentPoints = pnt => ((pnt.z % 2 === 0 && ((pnt.x % 2 === 0 && pnt.y % 2 === 0) || (pnt.x % 2 !== 0 && pnt.y % 2 !== 0))) || (pnt.z % 2 !== 0 && ((pnt.x % 2 !== 0 && pnt.y % 2 === 0) || (pnt.x % 2 === 0 && pnt.y % 2 !== 0))))
+
+/**
  * Generate a ship with the specified length, beginning and direction.
  * The visibility of the ship on the board is determined by the view parameter.
  * @param length

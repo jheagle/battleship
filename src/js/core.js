@@ -326,6 +326,13 @@ const randDirection = (useZ = 0) => {
 const checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
 
 /**
+ * Test if the provided point exists in the matrix.
+ * @param pnt
+ * @param matrix
+ */
+const getDOMItemFromPoint = (pnt, matrix) => checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false;
+
+/**
  * Return an array of all the points in the matrix
  * @param matrix
  * @returns {Array}
@@ -386,4 +393,30 @@ const bindListeners = (item, ...extra) => {
         item.children.map(i => bindListeners(i, ...extra))
     }
     return item
+}
+
+/**
+ * 
+ * @param fn
+ * @param time
+ * @param args
+ * @returns {*}
+ */
+const queueTimeout = (fn = {}, time = 0, ...args) => {
+    queueTimeout.queue = queueTimeout.queue || []
+    queueTimeout.isRunning = queueTimeout.isRunning || false
+    if (fn) {
+        queueTimeout.queue.push({func: fn, timeout: time, args: args});
+    }
+    if (queueTimeout.queue.length && !queueTimeout.isRunning) {
+        queueTimeout.isRunning = true
+        let toRun = queueTimeout.queue.shift()
+        toRun.args = toRun.args || []
+        return setTimeout(() => {
+            toRun.func(...toRun.args)
+            queueTimeout.isRunning = false
+            return queueTimeout(false)
+        }, toRun.timeout)
+    }
+    return queueTimeout.isRunning
 }

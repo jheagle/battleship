@@ -11,7 +11,16 @@ const configureHtml = (config, isRobot) => {
         config.attributes.styles.backgroundColor = config.hasShip ? 'red' : 'white'
     }
     // Add any other style changes to the cell
-    config.element = addElementStyles(config.element, config.attributes.styles)
+    if (isRobot) {
+        attackFleet.isLocked = true
+        queueTimeout(() => {
+            config.element = addElementStyles(config.element, config.attributes.styles)
+            attackFleet.isLocked = false
+            return config
+        }, 0)
+    } else {
+        config.element = addElementStyles(config.element, config.attributes.styles)
+    }
     return config
 }
 
@@ -22,11 +31,11 @@ const configureHtml = (config, isRobot) => {
  * @param x
  * @param y
  * @param z
- * @returns {*}
+ * @param isRobot
  */
 const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(mergeObjects(matrix.children[z].children[y].children[x], config), isRobot)
 const alter3dCell = curry(update3dCell)
-const setViewShip = alter3dCell(mergeObjects(shipTile(), {styles: {backgroundColor: '#777',},}))
+const setViewShip = alter3dCell(mergeObjects(shipTile(), {attributes: {styles: {backgroundColor: '#777',},},}))
 const setHiddenShip = alter3dCell(shipTile())
 
 /**
@@ -115,7 +124,7 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost, target) =>
     }
     let nextAttacker = getNextAttacker(attacker, players, hitShip)
     if (nextAttacker.isRobot) {
-        computerAttack(nextAttacker, players, playersLost, hitShip ? target : false)
+        queueTimeout(computerAttack, 0, nextAttacker, players, playersLost, hitShip ? target : false)
     }
     return players
 }
@@ -130,8 +139,9 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost, target) =>
  * @returns {*}
  */
 const attackFleet = (target, matrix, player, players, playersLost) => {
+    attackFleet.isLocked = attackFleet.isLocked || false
     // Player cannot attack themselves (current attacker) or if they have bad status
-    if (player.status <= 0 || player.attacker) {
+    if (player.status <= 0 || player.attacker || attackFleet.isLocked) {
         return players
     }
     // Update cell to hit
