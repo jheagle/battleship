@@ -66,11 +66,18 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
     }
     if (!playAgain) {
         player.attacker = !player.attacker
-        if (player.attacker) {
-            player.board.element.style.fontSize = '0.5rem'
+        attackFleet.isLocked = true
+        if (player.attacker) {       
+            queueTimeout(() => {
+                player.board.element = addElementStyles(player.board.element, {fontSize: '0.5rem'})
+                attackFleet.isLocked = false
+            }, 400)
             ++player.turnCnt
-        } else {
-            player.board.element.style.fontSize = '1rem'
+        } else {       
+            queueTimeout(() => {
+                player.board.element = addElementStyles(player.board.element, {fontSize: '1rem'})
+                attackFleet.isLocked = false
+            }, 0)
         }
     }
     return player
@@ -83,6 +90,13 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
  */
 const endGame = (winner) => [winner]
 
+/**
+ * 
+ * @param {type} attacker
+ * @param {type} players
+ * @param {type} attackerIndex
+ * @returns {findNextAttacker.players|findNextAttacker.nextAttacker}
+ */
 const findNextAttacker = (attacker, players, attackerIndex) => {
     let nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex]
     return nextAttacker.status > 0 ? nextAttacker : findNextAttacker(attacker, players, attackerIndex) // Only use players with a positive status
