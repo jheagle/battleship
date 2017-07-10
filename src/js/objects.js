@@ -17,26 +17,33 @@ const DOMItem = (...attributes) => mergeObjects({
 /**
  * Return a DOMItem style reference to the document
  */
-const documentDOMItem = () => DOMItem({
-    attributes: {
-        element: 'html'
-    },
-    element: document,
-    head: DOMItem({
+const documentDOMItem = () => {
+    let children = [
+        DOMItem({
+            attributes: {
+                element: 'head'
+            },
+            element: document.head,
+            children: []
+        }),
+        DOMItem({
+            attributes: {
+                element: 'body'
+            },
+            element: document.body,
+            children: []
+        }),
+    ]
+    return DOMItem({
         attributes: {
-            element: 'head'
+            element: 'html'
         },
-        element: document.head,
-        children: []
-    }),
-    body: DOMItem({
-        attributes: {
-            element: 'body'
-        },
-        element: document.body,
-        children: []
-    }),
-})
+        element: document,
+        children: children,
+        head: children[0],
+        body: children[1],
+    })
+}
 
 /**
  * Create reference for storing document changes

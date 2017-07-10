@@ -67,16 +67,23 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
     if (!playAgain) {
         player.attacker = !player.attacker
         attackFleet.isLocked = true
-        if (player.attacker) {       
+        if (player.attacker) {
             queueTimeout(() => {
                 player.board.element = addElementStyles(player.board.element, {fontSize: '0.5rem'})
-                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {width: '17.5px', height: '17.5px'}))))
+                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
+                    width: '17.5px',
+                    height: '17.5px'
+                }))))
                 attackFleet.isLocked = false
             }, 400)
             ++player.turnCnt
         } else {
             player.board.element = addElementStyles(player.board.element, {fontSize: '1rem'})
-            queueTimeout(() => {player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {width: '35px', height: '35px'}))))
+            queueTimeout(() => {
+                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
+                    width: '35px',
+                    height: '35px'
+                }))))
                 attackFleet.isLocked = false
             }, 0)
         }
@@ -92,7 +99,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
 const endGame = (winner) => [winner]
 
 /**
- * 
+ *
  * @param {type} attacker
  * @param {type} players
  * @param {type} attackerIndex
@@ -161,22 +168,21 @@ const attackFleet = (target, matrix, player, players, playersLost) => {
     }
     // Update cell to hit
     let hitCell = setHit(matrix, target.x, target.y, target.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
-    let hitShip = {}
+    let hitShip = false
+    let sunkShip = 0
     if (hitCell.hasShip) {
         let status = 0
         // Update all ship status and player status by checking all ships / parts
         player.shipFleet.map((ship) => {
-            if (ship.hasOwnProperty('parts')) {
-                // Get all healthy ships
-                let healthy = ship.parts.filter((part) => {
-                    if (part.point === target) {
-                        hitShip = ship
-                    }
-                    return !part.isHit
-                })
-                // Create percentage health status
-                ship.status = healthy.length / ship.parts.length * 100
-            }
+            // Get all healthy ships
+            let healthy = ship.parts.filter((part) => {
+                if (checkEqualPoints(part.point, target)) {
+                    hitShip = ship
+                }
+                return !part.isHit
+            })
+            // Create percentage health status
+            ship.status = healthy.length / ship.parts.length * 100
             // Create sum of ship status
             status += ship.status
             return ship
@@ -184,8 +190,10 @@ const attackFleet = (target, matrix, player, players, playersLost) => {
         // Divide sum of ship statuses by number of ships to get player status
         player.status = status / player.shipFleet.length
     }
-    // Check if the hit ship was sunk
-    let sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
+    if (hitShip) {
+        // Check if the hit ship was sunk
+        sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
+    }
     return updateScore(player, hitCell.hasShip, sunkShip, players, playersLost, target)
 }
 

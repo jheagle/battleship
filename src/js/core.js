@@ -98,6 +98,13 @@ const nextCell = (pnt, dir) => point(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z
 const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, end.z - start.z)
 
 /**
+ * Given two points, compare the x, y, and z of each to see if they are the same
+ * @param p1
+ * @param p2
+ */
+const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
+
+/**
  * Generate point data for each item in the matrix
  * WARNING: This is a recursive function.
  * @param matrix

@@ -22,7 +22,10 @@ html, body {
   .matrix .layer {
     display: inline-block;
     position: relative;
-    margin: 0 auto; }
+    margin: 0 auto;
+    border: 2px solid #333;
+    border: 0.2em solid #333;
+    transition: all 600ms; }
     .matrix .layer .row {
       display: flex; }
       .matrix .layer .row .column {
