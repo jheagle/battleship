@@ -70,12 +70,13 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
         if (player.attacker) {       
             queueTimeout(() => {
                 player.board.element = addElementStyles(player.board.element, {fontSize: '0.5rem'})
+                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {width: '17.5px', height: '17.5px'}))))
                 attackFleet.isLocked = false
             }, 400)
             ++player.turnCnt
-        } else {       
-            queueTimeout(() => {
-                player.board.element = addElementStyles(player.board.element, {fontSize: '1rem'})
+        } else {
+            player.board.element = addElementStyles(player.board.element, {fontSize: '1rem'})
+            queueTimeout(() => {player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {width: '35px', height: '35px'}))))
                 attackFleet.isLocked = false
             }, 0)
         }
