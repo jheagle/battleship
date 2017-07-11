@@ -69,8 +69,8 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
         attackFleet.isLocked = true
         if (player.attacker) {
             queueTimeout(() => {
-                player.board.element = addElementStyles(player.board.element, {fontSize: '0.5rem'})
-                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
+                player.element = addElementStyles(player.element, {fontSize: '0.5rem'})
+                player.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
                     width: '17.5px',
                     height: '17.5px'
                 }))))
@@ -78,9 +78,9 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
             }, 400)
             ++player.turnCnt
         } else {
-            player.board.element = addElementStyles(player.board.element, {fontSize: '1rem'})
+            player.element = addElementStyles(player.element, {fontSize: '1rem'})
             queueTimeout(() => {
-                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
+                player.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
                     width: '35px',
                     height: '35px'
                 }))))
@@ -130,14 +130,10 @@ const getNextAttacker = (attacker, players, playAgain) => {
  * @param hitShip
  * @param sunkShip
  * @param players
- * @param playersLost
  * @param target
  * @returns {*}
  */
-const updateScore = (player, hitShip, sunkShip, players, playersLost, target) => {
-    if (player.status <= 0) {
-        playersLost.push(player)
-    }
+const updateScore = (player, hitShip, sunkShip, players, target) => {
     players = players.filter((p) => p.status > 0)
     let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
     attacker = updatePlayer(attacker, hitShip, sunkShip)
@@ -146,28 +142,26 @@ const updateScore = (player, hitShip, sunkShip, players, playersLost, target) =>
     }
     let nextAttacker = getNextAttacker(attacker, players, hitShip)
     if (nextAttacker.isRobot) {
-        queueTimeout(computerAttack, 0, nextAttacker, players, playersLost, hitShip ? target : false)
+        queueTimeout(computerAttack, 0, nextAttacker, players, hitShip ? target : false)
     }
     return players
 }
 
 /**
  * Perform attack on an enemy board / cell
- * @param matrix
  * @param target
  * @param player
  * @param players
- * @param playersLost
  * @returns {*}
  */
-const attackFleet = (target, matrix, player, players, playersLost) => {
+const attackFleet = (target, player, players) => {
     attackFleet.isLocked = attackFleet.isLocked || false
     // Player cannot attack themselves (current attacker) or if they have bad status
     if (player.status <= 0 || player.attacker || attackFleet.isLocked) {
         return players
     }
     // Update cell to hit
-    let hitCell = setHit(matrix, target.x, target.y, target.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
+    let hitCell = setHit(player, target.x, target.y, target.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
     let hitShip = false
     let sunkShip = 0
     if (hitCell.hasShip) {
@@ -194,7 +188,7 @@ const attackFleet = (target, matrix, player, players, playersLost) => {
         // Check if the hit ship was sunk
         sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
     }
-    return updateScore(player, hitCell.hasShip, sunkShip, players, playersLost, target)
+    return updateScore(player, hitCell.hasShip, sunkShip, players, target)
 }
 
 const launchAttack = curry(attackFleet)

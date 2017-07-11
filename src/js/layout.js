@@ -37,3 +37,12 @@ const mainMenu = () => DOMItem({
         })
     ]
 })
+
+/**
+ * Wrapper div for player data / boards
+ */
+const boards = () => DOMItem({
+    attributes: {
+        class: 'boards'
+    },
+})

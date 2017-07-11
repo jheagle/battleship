@@ -48,7 +48,6 @@ const playerSet = (name = '') => ({
     turnCnt: 0,
     attacker: false,
     attacks: {hit: 0, miss: 0, sunk: 0},
-    board: {},
     shipFleet: [],
 })
 

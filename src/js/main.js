@@ -1,10 +1,5 @@
 'use strict';
 (function () {
-    /**
-     * Store the players which have status = 0
-     * @type {Array}
-     */
-    let playersLost = []
 
     /**
      * Create new private reference to the document
@@ -20,26 +15,25 @@
      * @returns {Array}
      */
     const buildPlayers = (humans, robots = 0) => {
-        let players = [] // temporary players array
+        let playerBoards = bindElements(boards())
+        appendHTML(playerBoards, documentItem.body) // create div for storing players
         let playerCnt = humans + robots
         if (playerCnt < 2) {
             playerCnt = 2
         }
+        let players = playerBoards.children
 
         // build the player list up the the number provided
         for (let i = 0; i < playerCnt; ++i) {
-            let player = playerSet() // get default player object
-            player.isRobot = --humans < 0
             // 1. generate matrix for player board
             // 2. bind point data to each item in matrix
             // 3. bind HTML element data to each item in matrix
-            player.board = bindElements(bindPointData(square(waterTile(), 10)))
-            appendHTML(player.board, documentItem.body) // translate matrix into visual HTML board
-            player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
+            let player = bindElements(bindPointData(mergeObjects(playerSet(), square(waterTile(), 10))))
+            player.isRobot = --humans < 0
+            appendHTML(player, playerBoards) // translate matrix into visual HTML board
+            player.shipFleet = defaultFleet(player, false) // generate fleet of ships
             // attach event listeners to each board tile
-            bindListeners(player.board, player.board, player, players, playersLost)
-            // add new player to array
-            players.push(player)
+            bindListeners(player, player, players)
         }
         return players
     }
@@ -48,13 +42,12 @@
      * Logic for setting up and starting a new round
      * (selects random start player and calls computer attack if it is AI starting)
      * @param players
-     * @param playersLost
      * @param firstGoesFirst
      */
-    const beginRound = (players, playersLost, firstGoesFirst = false) => {
+    const beginRound = (players, firstGoesFirst = false) => {
         let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
         if (firstAttacker.isRobot) {
-            computerAttack(firstAttacker, players, playersLost, false)
+            computerAttack(firstAttacker, players, false)
         }
     }
 
@@ -65,16 +58,7 @@
 
     main()
 
-    /**
-     *
-     * @type {Array}
-     */
-    let players = buildPlayers(1)
-
-    console.log(players)
-    console.log(playersLost)
-
-    beginRound(players, playersLost, false)
+    beginRound(buildPlayers(1), false)
 
     console.log(documentItem);
     // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
