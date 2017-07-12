@@ -10,6 +10,46 @@ html, body
   margin: 0
   padding: 0
   text-align: center
+  font-family: Verdana, Geneva, sans-serif
+
+.main-menu-form
+  margin: 3rem auto
+  max-width: 400px
+
+  label
+    color: white
+    font-size: 1.6rem
+
+  input
+    margin: 1rem 2rem
+    font-size: 1.6rem
+    border-radius: .6rem
+    border: none
+    background-color: white
+
+    &:not([type='checkbox'])
+      display: block
+      margin: 1rem auto
+      padding: .4rem .6rem
+      width: 18rem
+
+  input[type='submit']
+    font-weight: 700
+    color: #777
+    width: 12rem
+    border-bottom: .4rem solid #777
+
+    &:hover
+      color: green
+      border-bottom: .4rem solid green
+
+  .form-group
+    width: 50%
+    display: inline-block
+    margin: 1rem auto
+
+    label
+      display: block
 
 .matrix
   font-size: 1rem

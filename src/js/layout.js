@@ -14,21 +14,86 @@ const mainMenu = () => DOMItem({
             children: [
                 DOMItem({
                     attributes: {
-                        class: 'form-group'
+                        element: 'form',
+                        class: 'main-menu-form',
                     },
                     children: [
                         DOMItem({
                             attributes: {
-                                element: 'input',
-                                type: 'button',
-                                value: 'Vs Computer'
+                                class: 'form-group'
+                            },
+                            children: [
+                                DOMItem({
+                                    attributes: {
+                                        element: 'label',
+                                        for: 'human-players'
+                                    },
+                                    elementProperties: {
+                                        innerText: 'Humans'
+                                    }
+                                }),
+                                DOMItem({
+                                    attributes: {
+                                        element: 'input',
+                                        id: 'human-players',
+                                        name: 'human-players',
+                                        type: 'number',
+                                        value: 0,
+                                        min: 0,
+                                        max: 100
+                                    }
+                                })
+                            ]
+                        }),
+                        DOMItem({
+                            attributes: {
+                                class: 'form-group'
+                            },
+                            children: [
+                                DOMItem({
+                                    attributes: {
+                                        element: 'label',
+                                        for: 'robot-players'
+                                    },
+                                    elementProperties: {
+                                        innerText: 'Robots'
+                                    }
+                                }),
+                                DOMItem({
+                                    attributes: {
+                                        element: 'input',
+                                        id: 'robot-players',
+                                        name: 'robot-players',
+                                        type: 'number',
+                                        value: 0,
+                                        min: 0,
+                                        max: 100
+                                    }
+                                })
+                            ]
+                        }),
+                        DOMItem({
+                            attributes: {
+                                element: 'label',
+                                for: 'first-go-first'
+                            },
+                            elementProperties: {
+                                innerText: 'First Player Starts'
                             }
                         }),
                         DOMItem({
                             attributes: {
                                 element: 'input',
-                                type: 'button',
-                                value: 'Vs Human'
+                                id: 'first-go-first',
+                                name: 'first-go-first',
+                                type: 'checkbox',
+                            }
+                        }),
+                        DOMItem({
+                            attributes: {
+                                element: 'input',
+                                type: 'submit',
+                                value: 'Start'
                             }
                         })
                     ]

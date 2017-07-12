@@ -100,10 +100,10 @@ const endGame = (winner) => [winner]
 
 /**
  *
- * @param {type} attacker
- * @param {type} players
- * @param {type} attackerIndex
- * @returns {findNextAttacker.players|findNextAttacker.nextAttacker}
+ * @param attacker
+ * @param players
+ * @param attackerIndex
+ * @returns {*}
  */
 const findNextAttacker = (attacker, players, attackerIndex) => {
     let nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex]
@@ -120,7 +120,7 @@ const findNextAttacker = (attacker, players, attackerIndex) => {
 const getNextAttacker = (attacker, players, playAgain) => {
     let attackerIndex = players.indexOf(attacker)
     // Get next player index, overflow to 0 if the current attacker is the last player.
-    let nextAttacker = findNextAttacker(attacker, players, attackerIndex)
+    let nextAttacker = findNextAttacker(attacker, players.filter(p => p.status > 0), attackerIndex)
     return playAgain ? attacker : updatePlayer(nextAttacker, playAgain) // If attacker has playAgain, then just return current attacker
 }
 
@@ -192,4 +192,4 @@ const attackFleet = (target, player, players) => {
 }
 
 const launchAttack = curry(attackFleet)
-const attackListener = (target, ...extra) => attackFleet(target.point, ...extra)
+const attackListener = (e, target, ...extra) => attackFleet(target.point, ...extra)

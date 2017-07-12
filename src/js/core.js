@@ -107,9 +107,8 @@ const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === 
 /**
  * Generate point data for each item in the matrix
  * WARNING: This is a recursive function.
- * @param matrix
+ * @param item
  * @param pnt
- * @param axis
  * @returns {*}
  */
 const bindPointData = (item, pnt = {}) => {
@@ -128,6 +127,22 @@ const bindPointData = (item, pnt = {}) => {
 }
 
 /**
+ *
+ * @param item
+ * @param attr
+ * @param value
+ * @param children
+ * @returns {Array}
+ */
+const getChildrenFromAttribute = (item, attr, value, children = []) => {
+    if (item.attributes[attr] && item.attributes[attr] === value) {
+        children.push(item)
+    }
+    item.children.map(child => getChildrenFromAttribute(child, attr, value, children))
+    return children
+}
+
+/**
  * Append styles to the provided element.
  * @param elem
  * @param styles
@@ -142,14 +157,18 @@ const addElementStyles = (elem, styles) => {
 /**
  * Create an HTML element based on the provided attributes and return the element as an Object.
  * @param elemAttr
+ * @param elemProps
  * @returns {Element}
  */
-const generateElement = (elemAttr) => {
+const generateElement = (elemAttr, elemProps = {}) => {
     let elem = document.createElement(elemAttr.element)
     Object.keys(elemAttr).map((attr) => {
         if (attr !== 'element' && attr !== 'styles') {
             elem.setAttribute(attr, elemAttr[attr])
         }
+    })
+    Object.keys(elemProps).map((prop) => {
+        elem[prop] = elemProps[prop]
     })
     if (elemAttr.styles) {
         addElementStyles(elem, elemAttr.styles)
@@ -160,23 +179,19 @@ const generateElement = (elemAttr) => {
 /**
  * Generate HTML element data for each object in the matrix
  * WARNING: This is a recursive function.
- * @param types
- * @param matrix
- * @param zIndex
- * @returns {*}
+ * @param item
  */
-const bindElements = (item) => {
-    return DOMItem(item, {
-        attributes: item.attributes,
-        element: generateElement(item.attributes),
-        children: item.children.map(bindElements)
-    })
-}
+const bindElements = (item) => DOMItem(item, {
+    attributes: item.attributes,
+    elementProperties: item.elementProperties,
+    element: generateElement(item.attributes, item.elementProperties),
+    children: item.children.map(bindElements)
+})
 
 /**
  * Append each HTML element data in a combined HTML element
  * WARNING: This is a recursive function.
- * @param matrix
+ * @param item
  * @returns {*}
  */
 const buildHTML = (item) => {
@@ -191,9 +206,24 @@ const buildHTML = (item) => {
  * @returns {*|HTMLElement}
  */
 const appendHTML = (item, parent = documentItem.body) => {
-    parent.children.push(item)
+    if (Array.isArray(item)) {
+        item.map(i => parent.children.push(i))
+    } else {
+        parent.children.push(item)
+    }
     buildHTML(parent)
-    return parent
+    return item
+}
+
+/**
+ * Reverse of appendHTML, remove an element
+ * @param item
+ * @param parent
+ * @returns {Array.<HTMLElement>}
+ */
+const removeChild = (item, parent = documentItem.body) => {
+    parent.element.removeChild(item.element)
+    return parent.children.splice(parent.children.indexOf(item), 1)
 }
 
 /**
@@ -395,7 +425,7 @@ const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), po
  */
 const bindListeners = (item, ...extra) => {
     if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
-        Object.keys(item.eventListeners).map(event => item.element.addEventListener(event, () => item.eventListeners[event](item, ...extra)))
+        Object.keys(item.eventListeners).map(event => item.element.addEventListener(event, (e) => item.eventListeners[event](e, item, ...extra)))
     } else {
         item.children.map(i => bindListeners(i, ...extra))
     }
@@ -403,7 +433,7 @@ const bindListeners = (item, ...extra) => {
 }
 
 /**
- * 
+ *
  * @param fn
  * @param time
  * @param args

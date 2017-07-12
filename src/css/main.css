@@ -7,7 +7,40 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
-  text-align: center; }
+  text-align: center;
+  font-family: Verdana, Geneva, sans-serif; }
+
+.main-menu-form {
+  margin: 3rem auto;
+  max-width: 400px; }
+  .main-menu-form label {
+    color: white;
+    font-size: 1.6rem; }
+  .main-menu-form input {
+    margin: 1rem 2rem;
+    font-size: 1.6rem;
+    border-radius: .6rem;
+    border: none;
+    background-color: white; }
+    .main-menu-form input:not([type='checkbox']) {
+      display: block;
+      margin: 1rem auto;
+      padding: .4rem .6rem;
+      width: 18rem; }
+  .main-menu-form input[type='submit'] {
+    font-weight: 700;
+    color: #777;
+    width: 12rem;
+    border-bottom: .4rem solid #777; }
+    .main-menu-form input[type='submit']:hover {
+      color: green;
+      border-bottom: .4rem solid green; }
+  .main-menu-form .form-group {
+    width: 50%;
+    display: inline-block;
+    margin: 1rem auto; }
+    .main-menu-form .form-group label {
+      display: block; }
 
 .matrix {
   font-size: 1rem;

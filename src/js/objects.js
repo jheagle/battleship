@@ -9,6 +9,7 @@ const DOMItem = (...attributes) => mergeObjects({
         element: 'div',
         styles: {}
     },
+    elementProperties: {},
     element: {},
     eventListeners: {},
     children: []
