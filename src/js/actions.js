@@ -96,7 +96,10 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
  * @param winner
  * @returns {[*]}
  */
-const endGame = (winner) => [winner]
+const endGame = (winner) => {
+    main(getTopParentItem(winner))
+    return [winner]
+}
 
 /**
  *

@@ -13,7 +13,20 @@ const curry = (fn) => function curried(...args) {
  * Clone objects for manipulation without data corruption
  * @param object
  */
-const cloneObject = (object) => cloneExclusions(JSON.parse(JSON.stringify(object)), object)
+const cloneObject = (object) => {
+    let parents = []
+    return cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object)
+}
+
+const removeCircularReference = (key, val, parents = []) => {
+    if (typeof val === 'object' || key === 'parentItem') {
+        if (parents.indexOf(val) >= 0) {
+            return undefined;
+        }
+        parents.push(val);
+    }
+    return val;
+}
 
 /**
  * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
@@ -23,11 +36,11 @@ const cloneObject = (object) => cloneExclusions(JSON.parse(JSON.stringify(object
  */
 const cloneExclusions = (cloned, object) => {
     if (typeof object === 'object' && Object.keys(object).length) {
-        Object.keys(object).map(key => cloned[key] = cloned[key] && !(object[key] instanceof HTMLElement) ? cloneExclusions(cloned[key], object[key]) : object[key])
+        Object.keys(object).map(key => cloned[key] = (cloned[key] && !(object[key] instanceof HTMLElement) && key !== 'parentItem') ? cloneExclusions(cloned[key], object[key]) : object[key])
         return cloned
     }
     if (Array.isArray(object) && object.length) {
-        object.map((prop, i) => cloned[i] = cloned[i].length && !(prop instanceof HTMLElement) ? cloneExclusions(cloned[i], prop) : prop)
+        object.map((prop, i) => cloned[i] = (cloned[i].length && !(prop instanceof HTMLElement)) ? cloneExclusions(cloned[i], prop) : prop)
         return cloned
     }
     return cloned
@@ -51,7 +64,7 @@ const mergeObjects = (...args) => {
     let obj1 = args[0] // original object
     let obj2 = args[1] // overwriting object
     if (typeof obj2 === 'object' && Object.keys(obj2).length) {
-        Object.keys(obj2).map(key => obj1[key] = obj1[key] && !(obj2[key] instanceof HTMLElement) ? mergeObjects(obj1[key], obj2[key]) : obj2[key])
+        Object.keys(obj2).map(key => obj1[key] = (obj1[key] && !(obj2[key] instanceof HTMLElement) && key !== 'parentItem') ? mergeObjects(obj1[key], obj2[key]) : obj2[key])
         return obj1
     }
     if (Array.isArray(obj2) && obj2.length) {
@@ -128,19 +141,25 @@ const bindPointData = (item, pnt = {}) => {
 
 /**
  *
- * @param item
  * @param attr
  * @param value
+ * @param item
  * @param children
  * @returns {Array}
  */
-const getChildrenFromAttribute = (item, attr, value, children = []) => {
+const getChildrenFromAttribute = (attr, value, item = documentItem.body, children = []) => {
     if (item.attributes[attr] && item.attributes[attr] === value) {
         children.push(item)
     }
-    item.children.map(child => getChildrenFromAttribute(child, attr, value, children))
+    item.children.map(child => getChildrenFromAttribute(attr, value, child, children))
     return children
 }
+
+/**
+ *
+ * @param item
+ */
+const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
 
 /**
  * Append styles to the provided element.
@@ -180,12 +199,14 @@ const generateElement = (elemAttr, elemProps = {}) => {
  * Generate HTML element data for each object in the matrix
  * WARNING: This is a recursive function.
  * @param item
+ * @param parent
  */
-const bindElements = (item) => DOMItem(item, {
+const bindElements = (item, parent = documentItem) => DOMItem(item, {
     attributes: item.attributes,
     elementProperties: item.elementProperties,
     element: generateElement(item.attributes, item.elementProperties),
-    children: item.children.map(bindElements)
+    parentItem: parent,
+    children: item.children.map(child => bindElements(child, item))
 })
 
 /**

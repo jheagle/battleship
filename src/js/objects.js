@@ -12,6 +12,7 @@ const DOMItem = (...attributes) => mergeObjects({
     elementProperties: {},
     element: {},
     eventListeners: {},
+    parentItem: {},
     children: []
 }, ...attributes)
 
