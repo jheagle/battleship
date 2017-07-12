@@ -40,7 +40,8 @@ const mainMenu = () => DOMItem({
                                         type: 'number',
                                         value: 0,
                                         min: 0,
-                                        max: 100
+                                        max: 100,
+                                        required: ''
                                     }
                                 })
                             ]
@@ -67,7 +68,8 @@ const mainMenu = () => DOMItem({
                                         type: 'number',
                                         value: 0,
                                         min: 0,
-                                        max: 100
+                                        max: 100,
+                                        required: ''
                                     }
                                 })
                             ]
