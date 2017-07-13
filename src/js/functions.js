@@ -195,7 +195,9 @@ const beginRound = (e, mainForm, parent = documentItem) => {
  * @param parent
  */
 const main = (parent = documentItem) => {
-    parent.body.children.map(child => removeChild(child, parent.body))
+    for (let i = parent.body.children.length - 1; i >= 0; --i) {
+        removeChild(parent.body.children[i], parent.body)
+    }
     bindListeners(mergeObjects(getChildrenFromAttribute('class', 'main-menu-form', appendHTML(bindElements(mainMenu(), parent.body), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
     return parent
 }
