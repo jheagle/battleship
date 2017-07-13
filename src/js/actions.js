@@ -123,7 +123,7 @@ const findNextAttacker = (attacker, players, attackerIndex) => {
 const getNextAttacker = (attacker, players, playAgain) => {
     let attackerIndex = players.indexOf(attacker)
     // Get next player index, overflow to 0 if the current attacker is the last player.
-    let nextAttacker = findNextAttacker(attacker, players.filter(p => p.status > 0), attackerIndex)
+    let nextAttacker = findNextAttacker(attacker, players, attackerIndex)
     return playAgain ? attacker : updatePlayer(nextAttacker, playAgain) // If attacker has playAgain, then just return current attacker
 }
 
