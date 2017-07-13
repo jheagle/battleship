@@ -113,3 +113,34 @@ const boards = () => DOMItem({
         class: 'boards'
     },
 })
+
+const finalScore = (players) => DOMItem({
+    attributes: {
+        class: 'final-scores'
+    },
+    children: [
+        DOMItem({
+            attributes: {
+                class: 'score-cards'
+            },
+            children: players.map(player => DOMItem({
+                attributes: {
+                    class: 'score-card'
+                },
+                elementProperties: {
+                    innerHTML: `<strong>Status:</strong> ${player.status}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
+                }
+            }))
+        }),
+        DOMItem({
+            attributes: {
+                element: 'input',
+                type: 'button',
+                value: 'Restart'
+            },
+            eventListeners: {
+                click: restart
+            }
+        })
+    ]
+})

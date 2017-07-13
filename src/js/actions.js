@@ -97,7 +97,8 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
  * @returns {[*]}
  */
 const endGame = (winner) => {
-    main(getTopParentItem(winner))
+    let parent = getTopParentItem(winner)
+    bindListeners(appendHTML(bindElements(finalScore(getChildrenFromAttribute('class', 'boards', parent)[0].children), parent.body), parent.body), parent)
     return [winner]
 }
 

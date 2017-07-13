@@ -199,3 +199,5 @@ const main = (parent = documentItem) => {
     bindListeners(mergeObjects(getChildrenFromAttribute('class', 'main-menu-form', appendHTML(bindElements(mainMenu(), parent.body), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
     return parent
 }
+
+const restart = (e, button, parent) => main(parent)
