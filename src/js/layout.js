@@ -128,7 +128,7 @@ const finalScore = (players) => DOMItem({
                     class: 'score-card'
                 },
                 elementProperties: {
-                    innerHTML: `<strong>Status:</strong> ${player.status}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
+                    innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${player.status}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
                 }
             }))
         }),

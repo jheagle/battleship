@@ -154,8 +154,9 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     // 3. bind HTML element data to each item in matrix
     // 4. bind event listeners to each board tile
     // 5. append the elements as HTML
-    let player = bindListeners(...buildArray(bindElements(bindPointData(mergeObjects(playerSet(), {isRobot: humans <= 0}, square(waterTile(), 10))), parent), 2), players)
-    player.shipFleet = defaultFleet(player) // generate fleet of ships
+    let player = bindElements(bindPointData(mergeObjects(playerSet(`Player ${players.length + 1}`), {isRobot: humans <= 0}, square(waterTile(), 10))), parent)
+    player.shipFleet = defaultFleet(player, false) // generate fleet of ships
+    player = bindListeners(player, player, players)
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, parent, players)
 }
@@ -172,6 +173,9 @@ const beginRound = (e, mainForm, parent = documentItem) => {
     e.preventDefault()
     let humans = parseInt(getChildrenFromAttribute('name', 'human-players', mainForm)[0].element.value)
     let robots = parseInt(getChildrenFromAttribute('name', 'robot-players', mainForm)[0].element.value)
+    if (humans < 0 || humans > 100 || robots < 0 || robots > 100) {
+        return false
+    }
     let firstGoesFirst = getChildrenFromAttribute('name', 'first-go-first', mainForm)[0].element.checked
     humans = humans < 0 ? 0 : humans
     if (humans === 0) {
