@@ -15,11 +15,11 @@ const curry = (fn) => function curried(...args) {
  */
 const cloneObject = (object) => {
     let parents = []
-    return cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object)
+    return cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
 }
 
 const removeCircularReference = (key, val, parents = []) => {
-    if (typeof val === 'object' || key === 'parentItem') {
+    if (typeof val === 'object') {
         if (parents.indexOf(val) >= 0) {
             return undefined;
         }
@@ -32,15 +32,17 @@ const removeCircularReference = (key, val, parents = []) => {
  * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
  * @param cloned
  * @param object
+ * @param parents
  * @returns {*}
  */
-const cloneExclusions = (cloned, object) => {
+const cloneExclusions = (cloned, object, parents = []) => {
     if (typeof object === 'object' && Object.keys(object).length) {
-        Object.keys(object).map(key => cloned[key] = (cloned[key] && !(object[key] instanceof HTMLElement) && key !== 'parentItem') ? cloneExclusions(cloned[key], object[key]) : object[key])
+        parents.push(object);
+        Object.keys(object).map(key => cloned[key] = (!cloned[key] || object[key] instanceof HTMLElement || parents.indexOf(object[key]) >= 0) ? object[key] : cloneExclusions(cloned[key], object[key], parents))
         return cloned
     }
     if (Array.isArray(object) && object.length) {
-        object.map((prop, i) => cloned[i] = (cloned[i].length && !(prop instanceof HTMLElement)) ? cloneExclusions(cloned[i], prop) : prop)
+        object.map((prop, i) => cloned[i] = (!cloned[i] || prop instanceof HTMLElement) ? prop : cloneExclusions(cloned[i], prop, parents))
         return cloned
     }
     return cloned
