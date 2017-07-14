@@ -208,7 +208,7 @@ const bindElements = (item, parent = documentItem) => DOMItem(item, {
     elementProperties: item.elementProperties,
     element: generateElement(item.attributes, item.elementProperties),
     parentItem: parent,
-    children: item.children.map(child => bindElements(child, item))
+    children: item.children ? item.children.map(child => bindElements(child, item)) : []
 })
 
 /**

@@ -2,28 +2,28 @@
 /**
  * This will be the main menu for the game.
  */
-const mainMenu = () => DOMItem({
+const mainMenu = () => ({
     attributes: {
         class: 'main-menu'
     },
     children: [
-        DOMItem({
+        {
             attributes: {
                 class: 'content'
             },
             children: [
-                DOMItem({
+                {
                     attributes: {
                         element: 'form',
                         class: 'main-menu-form',
                     },
                     children: [
-                        DOMItem({
+                        {
                             attributes: {
                                 class: 'form-group'
                             },
                             children: [
-                                DOMItem({
+                                {
                                     attributes: {
                                         element: 'label',
                                         for: 'human-players'
@@ -31,8 +31,8 @@ const mainMenu = () => DOMItem({
                                     elementProperties: {
                                         innerText: 'Humans'
                                     }
-                                }),
-                                DOMItem({
+                                },
+                                {
                                     attributes: {
                                         element: 'input',
                                         id: 'human-players',
@@ -43,15 +43,15 @@ const mainMenu = () => DOMItem({
                                         max: 100,
                                         required: ''
                                     }
-                                })
+                                }
                             ]
-                        }),
-                        DOMItem({
+                        },
+                        {
                             attributes: {
                                 class: 'form-group'
                             },
                             children: [
-                                DOMItem({
+                                {
                                     attributes: {
                                         element: 'label',
                                         for: 'robot-players'
@@ -59,8 +59,8 @@ const mainMenu = () => DOMItem({
                                     elementProperties: {
                                         innerText: 'Robots'
                                     }
-                                }),
-                                DOMItem({
+                                },
+                                {
                                     attributes: {
                                         element: 'input',
                                         id: 'robot-players',
@@ -71,10 +71,10 @@ const mainMenu = () => DOMItem({
                                         max: 100,
                                         required: ''
                                     }
-                                })
+                                }
                             ]
-                        }),
-                        DOMItem({
+                        },
+                        {
                             attributes: {
                                 element: 'label',
                                 for: 'first-go-first'
@@ -82,48 +82,48 @@ const mainMenu = () => DOMItem({
                             elementProperties: {
                                 innerText: 'First Player Starts'
                             }
-                        }),
-                        DOMItem({
+                        },
+                        {
                             attributes: {
                                 element: 'input',
                                 id: 'first-go-first',
                                 name: 'first-go-first',
                                 type: 'checkbox',
                             }
-                        }),
-                        DOMItem({
+                        },
+                        {
                             attributes: {
                                 element: 'input',
                                 type: 'submit',
                                 value: 'Start'
                             }
-                        })
+                        }
                     ]
-                })
+                }
             ]
-        })
+        }
     ]
 })
 
 /**
  * Wrapper div for player data / boards
  */
-const boards = () => DOMItem({
+const boards = () => ({
     attributes: {
         class: 'boards'
     },
 })
 
-const finalScore = (players) => DOMItem({
+const finalScore = (players) => ({
     attributes: {
         class: 'final-scores'
     },
     children: [
-        DOMItem({
+        {
             attributes: {
                 class: 'score-cards'
             },
-            children: players.map(player => DOMItem({
+            children: players.map(player => ({
                 attributes: {
                     class: 'score-card'
                 },
@@ -131,8 +131,8 @@ const finalScore = (players) => DOMItem({
                     innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${player.status}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
                 }
             }))
-        }),
-        DOMItem({
+        },
+        {
             attributes: {
                 element: 'input',
                 type: 'button',
@@ -141,6 +141,6 @@ const finalScore = (players) => DOMItem({
             eventListeners: {
                 click: restart
             }
-        })
+        }
     ]
 })

@@ -154,7 +154,7 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     // 3. bind HTML element data to each item in matrix
     // 4. bind event listeners to each board tile
     // 5. append the elements as HTML
-    let player = bindElements(bindPointData(mergeObjects(playerSet(`Player ${players.length + 1}`), {isRobot: humans <= 0}, square(waterTile(), 10))), parent)
+    let player = bindElements(bindPointData(mergeObjects(square(waterTile(), 10), playerSet(`Player ${players.length + 1}`), {isRobot: humans <= 0})), parent)
     player.shipFleet = defaultFleet(player, false) // generate fleet of ships
     player = bindListeners(player, player, players)
     players.push(player)
