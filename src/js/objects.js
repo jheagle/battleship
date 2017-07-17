@@ -90,18 +90,22 @@ const coordinate = (axisName) => ({
  */
 const matrix = (i, x, y, z = 1, ...props) => DOMItem({
     attributes: {
+        element: 'div',
         class: 'matrix'
     },
     children: buildArray(DOMItem(coordinate('z'), {
         attributes: {
+            element: 'div',
             class: 'layer'
         },
         children: buildArray(DOMItem(coordinate('y'), {
             attributes: {
+                element: 'div',
                 class: 'row'
             },
             children: buildArray(DOMItem(coordinate('x'), {
                 attributes: {
+                    element: 'div',
                     class: 'column'
                 }
             }, ...props, i), x)

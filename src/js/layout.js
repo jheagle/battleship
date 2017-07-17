@@ -4,11 +4,13 @@
  */
 const mainMenu = () => ({
     attributes: {
+        element: 'div',
         class: 'main-menu'
     },
     children: [
         {
             attributes: {
+                element: 'div',
                 class: 'content'
             },
             children: [
@@ -48,6 +50,7 @@ const mainMenu = () => ({
                         },
                         {
                             attributes: {
+                                element: 'div',
                                 class: 'form-group'
                             },
                             children: [
@@ -110,25 +113,29 @@ const mainMenu = () => ({
  */
 const boards = () => ({
     attributes: {
+        element: 'div',
         class: 'boards'
     },
 })
 
 const finalScore = (players) => ({
     attributes: {
+        element: 'div',
         class: 'final-scores'
     },
     children: [
         {
             attributes: {
+                element: 'div',
                 class: 'score-cards'
             },
             children: players.map(player => ({
                 attributes: {
+                    element: 'div',
                     class: 'score-card'
                 },
                 elementProperties: {
-                    innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${player.status}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
+                    innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${Math.round(player.status * 100) / 100}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
                 }
             }))
         },

@@ -25,7 +25,8 @@ const shipTile = () => ( {
 /**
  * Store properties of a ship which includes an array of all associated ship tiles.
  */
-const ship = () => ( {
+const ship = (name = '') => ( {
+    name: name,
     status: 100,
     parts: [],
 } )
@@ -41,17 +42,51 @@ const hitTile = () => ( {
  * Store the player attributes.
  * @param name
  */
-const playerSet = (name = '') => ({
+const playerSet = (board = {}, name = '') => ({
     name: name,
     isRobot: false,
     status: 100,
     turnCnt: 0,
     attacker: false,
     attacks: {hit: 0, miss: 0, sunk: 0},
+    board: board,
     shipFleet: [],
+    playerStats: {},
+    attributes: {
+      element: 'div',
+      class: 'player'
+    },
+    children: [
+      board
+    ]
+})
+
+/**
+ *
+ * @param player
+ */
+const playerStats = (player = {}) => ({
+  attributes: {
+    element: 'div'
+  },
+  children: [
+    {
+      attributes: {
+        element: 'ul'
+      },
+      children: player.shipFleet.map(ship => ({
+        attributes: {
+          element: 'li',
+        },
+        elementProperties: {
+          innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
+        }
+      }))
+    }
+  ]
 })
 
 /**
  * Create a default fleet using the standard battleship lengths.
  */
-const defaultFleet = randomFleet([5, 4, 3, 3, 2])
+const defaultFleet = randomFleet([{name: 'Aircraft Carrier', size: 5}, {name: 'Battleship', size: 4}, {name: 'Submarine', size: 3}, {name: 'Cruiser', size: 3}, {name: 'Destroyer', size: 2}])

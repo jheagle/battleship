@@ -176,25 +176,46 @@ const addElementStyles = (elem, styles) => {
 }
 
 /**
- * Create an HTML element based on the provided attributes and return the element as an Object.
- * @param elemAttr
- * @param elemProps
- * @returns {Element}
+ *
+ * @param config
  */
-const generateElement = (elemAttr, elemProps = {}) => {
-    let elem = document.createElement(elemAttr.element)
-    Object.keys(elemAttr).map((attr) => {
-        if (attr !== 'element' && attr !== 'styles') {
-            elem.setAttribute(attr, elemAttr[attr])
-        }
-    })
-    Object.keys(elemProps).map((prop) => {
-        elem[prop] = elemProps[prop]
-    })
-    if (elemAttr.styles) {
-        addElementStyles(elem, elemAttr.styles)
+const updateElement = (config) => {
+    if (!(config.element instanceof HTMLElement)){
+      return config
     }
-    return elem
+    if (config.attributes){
+      Object.keys(config.attributes).map((attr) => {
+        if (attr === 'styles') {
+          addElementStyles(config.element, config.attributes[attr])
+        } else if (attr !== 'element') {
+          config.element.setAttribute(attr, config.attributes[attr])
+        }
+      })
+    }
+    if (config.elementProperties){
+      Object.keys(config.elementProperties).map((prop) => config.element[prop] = config.elementProperties[prop])
+    }
+    return config
+}
+
+/**
+ * Generate HTML element data for each object in the matrix
+ * WARNING: This is a recursive function.
+ * @param item
+ * @param parent
+ */
+const updateElements = (config) => {
+  config = updateElement(config)
+  config.children.map(child => updateElements(child))
+}
+
+/**
+ * Create an HTML element based on the provided attributes and return the element as an Object.
+ * @param config
+ */
+const generateElement = (config) => {
+    config.element = document.createElement(config.attributes.element)
+    return updateElement(config).element
 }
 
 /**
@@ -204,9 +225,9 @@ const generateElement = (elemAttr, elemProps = {}) => {
  * @param parent
  */
 const bindElements = (item, parent = documentItem) => DOMItem(item, {
-    attributes: item.attributes,
-    elementProperties: item.elementProperties,
-    element: generateElement(item.attributes, item.elementProperties),
+    attributes: item.attributes || {element: 'div', styles: {}},
+    elementProperties: item.elementProperties || {},
+    element: generateElement(item) || HTMLElement,
     parentItem: parent,
     children: item.children ? item.children.map(child => bindElements(child, item)) : []
 })

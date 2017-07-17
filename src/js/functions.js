@@ -79,10 +79,10 @@ const filterAdjacentPoints = pnt => ((pnt.z % 2 === 0 && ((pnt.x % 2 === 0 && pn
  * @param matrix
  * @param view
  */
-const buildShip = (length, start, dir, matrix, view = false) => {
-    let unit = ship()
+const buildShip = (shipInfo, start, dir, matrix, view = false) => {
+    let unit = ship(shipInfo.name)
     let cur = start
-    for (let i = 0; i < length; ++i) {
+    for (let i = 0; i < shipInfo.size; ++i) {
         unit.parts.push(setShip(matrix, cur, view))
         cur = nextCell(cur, dir)
     }
@@ -118,17 +118,17 @@ const generateStartDir = (matrix, shipLength, lengths, useZ) => {
  * @param view
  * @returns {Array}
  */
-const generateRandomFleet = (shipLengths, matrix, view = false) => {
+const generateRandomFleet = (ships, matrix, view = false) => {
     let shipFleet = [] // Create array to store generated ships
     let lengths = getAxisLengths(matrix) // store the length of each dimension
     // Loop through all of the provided lengths to create a ship for each
-    for (let size in shipLengths) {
+    for (let ship in ships) {
         let start = point(0, 0, 0) // default initial ship coordinates
         let end = point(0, 0, 0) // default final ship coordinates
-        let useZ = shipLengths[size] <= lengths.z ? 1 : 0 // check if a ship will fit on the z axis
+        let useZ = ships[ship].size <= lengths.z ? 1 : 0 // check if a ship will fit on the z axis
         // generate and test ship coordinates, if the test fails re-generate and test again till success
-        let startDir = generateStartDir(matrix, shipLengths[size], lengths, useZ)
-        shipFleet.push(buildShip(shipLengths[size], startDir.start, startDir.dir, matrix, view)) // once coordinates pass test, generate the ship and pass to the Fleet
+        let startDir = generateStartDir(matrix, ships[ship].size, lengths, useZ)
+        shipFleet.push(buildShip(ships[ship], startDir.start, startDir.dir, matrix, view)) // once coordinates pass test, generate the ship and pass to the Fleet
     }
     return shipFleet
 }
@@ -154,8 +154,13 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     // 3. bind HTML element data to each item in matrix
     // 4. bind event listeners to each board tile
     // 5. append the elements as HTML
-    let player = bindElements(bindPointData(mergeObjects(square(waterTile(), 10), playerSet(`Player ${players.length + 1}`), {isRobot: humans <= 0})), parent)
-    player.shipFleet = defaultFleet(player, false) // generate fleet of ships
+    let board = bindElements(bindPointData(square(waterTile(), 10)), parent)
+    let player = bindElements(playerSet(board, `Player ${players.length + 1}`), parent)
+    player.isRobot = humans <= 0
+    player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
+    let playetStats = bindElements(playerStats(player), player)
+    player.playerStats = playetStats
+    player.children.push(playetStats)
     player = bindListeners(player, player, players)
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, parent, players)

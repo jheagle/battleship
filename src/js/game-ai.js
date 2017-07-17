@@ -26,11 +26,11 @@ const selectTargetCoord = (victim) => {
         // Of the broken ships, attack the lowest status ship
         let targetShip = getALowStatusItem(moreBrokenShips.length ? moreBrokenShips : brokenShips)
         // Get all of the parts which have been hit
-        let hitParts = targetShip.parts.filter(part => checkIfHitCell(part.point, victim))
+        let hitParts = targetShip.parts.filter(part => checkIfHitCell(part.point, victim.board))
         if (moreBrokenShips.length) {
             // If there are more broken ships, attack the parts between hit points first.
             for (let i = 0; i < hitParts.length; ++i) {
-                let targetPoints = getInBetween(hitParts[0].point, hitParts[i].point, victim, checkIfHitCell, false)
+                let targetPoints = getInBetween(hitParts[0].point, hitParts[i].point, victim.board, checkIfHitCell, false)
                 if (targetPoints.false.length) {
                     displayTargets(targetPoints.false, targetPoints.false[0], victim)
                     return targetPoints.false[0]
@@ -38,18 +38,18 @@ const selectTargetCoord = (victim) => {
             }
             // If there are not points between, attack the outer points first.
             let pntDiff = pointDifference(hitParts[0].point, hitParts[1].point)
-            let dirPnts = (pntDiff.x > 0 ? [point(-1, 0, 0), point(1, 0, 0)] : [point(0, -1, 0), point(0, 1, 0)]).map((p, i) => nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => checkValidPoint(p, victim)).filter(a => !checkIfHitCell(a, victim))
+            let dirPnts = (pntDiff.x > 0 ? [point(-1, 0, 0), point(1, 0, 0)] : [point(0, -1, 0), point(0, 1, 0)]).map((p, i) => nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => checkValidPoint(p, victim.board)).filter(a => !checkIfHitCell(a, victim.board))
             // Check outer points which are valid and not hit.
-            let target = dirPnts.reduce((a, b) => checkIfHitCell(a, victim) ? b : a)
+            let target = dirPnts.reduce((a, b) => checkIfHitCell(a, victim.board) ? b : a)
             if (target) {
                 displayTargets(dirPnts, target, victim)
                 return target
             }
         }
         // If there is only one hit part, then set that as the lastTarget for detecting adjacent parts.
-        availTargets = getAdjEdgeNonHitCells(hitParts[0].point, victim)
+        availTargets = getAdjEdgeNonHitCells(hitParts[0].point, victim.board)
     }
-    let finalTargets = availTargets.length ? availTargets : getAllNonHitCells(victim).filter(t => filterAdjacentPoints(t))
+    let finalTargets = availTargets.length ? availTargets : getAllNonHitCells(victim.board).filter(t => filterAdjacentPoints(t))
     let target = finalTargets[Math.floor(Math.random() * finalTargets.length)]
     displayTargets(finalTargets, target, victim)
 
@@ -77,13 +77,13 @@ const displayTargets = (targets, target, victim) => {
  * @returns {void|Array|Object|*}
  */
 const resetTargets = data => {
-    data.victim.children.map(l => addElementStyles(l.element, {borderColor: '#333'}))
-    data.targets.forEach(t => addElementStyles(getDOMItemFromPoint(t, data.victim).element, {borderColor: '#333'}))
+    data.victim.board.children.map(l => addElementStyles(l.element, {borderColor: '#333'}))
+    data.targets.forEach(t => addElementStyles(getDOMItemFromPoint(t, data.victim.board).element, {borderColor: '#333'}))
     if (data.target) {
-        return setHit(data.victim, data.target.x, data.target.y, data.target.z, data.victim.isRobot)
+        return setHit(data.victim.board, data.target.x, data.target.y, data.target.z, data.victim.isRobot)
     } else {
-        data.victim.children.map(l => addElementStyles(l.element, {borderColor: 'yellow'}))
-        return data.targets.forEach(t => addElementStyles(getDOMItemFromPoint(t, data.victim).element, {borderColor: 'yellow'}))
+        data.victim.board.children.map(l => addElementStyles(l.element, {borderColor: 'yellow'}))
+        return data.targets.forEach(t => addElementStyles(getDOMItemFromPoint(t, data.victim.board).element, {borderColor: 'yellow'}))
     }
 }
 

@@ -69,8 +69,8 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
         attackFleet.isLocked = true
         if (player.attacker) {
             queueTimeout(() => {
-                player.element = addElementStyles(player.element, {fontSize: '0.5rem'})
-                player.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
+                player.board.element = addElementStyles(player.board.element, {fontSize: '0.5rem'})
+                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
                     width: '17.5px',
                     height: '17.5px'
                 }))))
@@ -78,9 +78,9 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
             }, 400)
             ++player.turnCnt
         } else {
-            player.element = addElementStyles(player.element, {fontSize: '1rem'})
+            player.board.element = addElementStyles(player.board.element, {fontSize: '1rem'})
             queueTimeout(() => {
-                player.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
+                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
                     width: '35px',
                     height: '35px'
                 }))))
@@ -165,7 +165,7 @@ const attackFleet = (target, player, players) => {
         return players
     }
     // Update cell to hit
-    let hitCell = setHit(player, target.x, target.y, target.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
+    let hitCell = setHit(player.board, target.x, target.y, target.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
     let hitShip = false
     let sunkShip = 0
     if (hitCell.hasShip) {
@@ -189,6 +189,8 @@ const attackFleet = (target, player, players) => {
         player.status = status / player.shipFleet.length
     }
     if (hitShip) {
+        player.playerStats = mergeObjects(player.playerStats, playerStats(player))
+        updateElements(player.playerStats)
         // Check if the hit ship was sunk
         sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
     }
