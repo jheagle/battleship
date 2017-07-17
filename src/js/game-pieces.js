@@ -24,6 +24,7 @@ const shipTile = () => ( {
 
 /**
  * Store properties of a ship which includes an array of all associated ship tiles.
+ * @param name
  */
 const ship = (name = '') => ( {
     name: name,
@@ -40,6 +41,7 @@ const hitTile = () => ( {
 
 /**
  * Store the player attributes.
+ * @param board
  * @param name
  */
 const playerSet = (board = {}, name = '') => ({
@@ -53,11 +55,11 @@ const playerSet = (board = {}, name = '') => ({
     shipFleet: [],
     playerStats: {},
     attributes: {
-      element: 'div',
-      class: 'player'
+        element: 'div',
+        class: 'player'
     },
     children: [
-      board
+        board
     ]
 })
 
@@ -66,27 +68,30 @@ const playerSet = (board = {}, name = '') => ({
  * @param player
  */
 const playerStats = (player = {}) => ({
-  attributes: {
-    element: 'div'
-  },
-  children: [
-    {
-      attributes: {
-        element: 'ul'
-      },
-      children: player.shipFleet.map(ship => ({
-        attributes: {
-          element: 'li',
-        },
-        elementProperties: {
-          innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
+    attributes: {
+        element: 'div'
+    },
+    children: [
+        {
+            attributes: {
+                element: 'ul'
+            },
+            children: player.shipFleet.map(ship => ({
+                attributes: {
+                    element: 'li',
+                },
+                elementProperties: {
+                    innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
+                }
+            }))
         }
-      }))
-    }
-  ]
+    ]
 })
 
 /**
  * Create a default fleet using the standard battleship lengths.
  */
-const defaultFleet = randomFleet([{name: 'Aircraft Carrier', size: 5}, {name: 'Battleship', size: 4}, {name: 'Submarine', size: 3}, {name: 'Cruiser', size: 3}, {name: 'Destroyer', size: 2}])
+const defaultFleet = randomFleet([{name: 'Aircraft Carrier', size: 5}, {
+    name: 'Battleship',
+    size: 4
+}, {name: 'Submarine', size: 3}, {name: 'Cruiser', size: 3}, {name: 'Destroyer', size: 2}])

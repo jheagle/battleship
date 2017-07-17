@@ -118,6 +118,10 @@ const boards = () => ({
     },
 })
 
+/**
+ * 
+ * @param players
+ */
 const finalScore = (players) => ({
     attributes: {
         element: 'div',

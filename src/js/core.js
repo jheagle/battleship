@@ -164,9 +164,10 @@ const getChildrenFromAttribute = (attr, value, item = documentItem.body, childre
 const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
 
 /**
- * Append styles to the provided element.
+ *
  * @param elem
  * @param styles
+ * @returns {*}
  */
 const addElementStyles = (elem, styles) => {
     if (Object.keys(styles).length && elem.style) {
@@ -180,20 +181,20 @@ const addElementStyles = (elem, styles) => {
  * @param config
  */
 const updateElement = (config) => {
-    if (!(config.element instanceof HTMLElement)){
-      return config
+    if (!(config.element instanceof HTMLElement)) {
+        return config
     }
-    if (config.attributes){
-      Object.keys(config.attributes).map((attr) => {
-        if (attr === 'styles') {
-          addElementStyles(config.element, config.attributes[attr])
-        } else if (attr !== 'element') {
-          config.element.setAttribute(attr, config.attributes[attr])
-        }
-      })
+    if (config.attributes) {
+        Object.keys(config.attributes).map((attr) => {
+            if (attr === 'styles') {
+                addElementStyles(config.element, config.attributes[attr])
+            } else if (attr !== 'element') {
+                config.element.setAttribute(attr, config.attributes[attr])
+            }
+        })
     }
-    if (config.elementProperties){
-      Object.keys(config.elementProperties).map((prop) => config.element[prop] = config.elementProperties[prop])
+    if (config.elementProperties) {
+        Object.keys(config.elementProperties).map((prop) => config.element[prop] = config.elementProperties[prop])
     }
     return config
 }
@@ -201,12 +202,11 @@ const updateElement = (config) => {
 /**
  * Generate HTML element data for each object in the matrix
  * WARNING: This is a recursive function.
- * @param item
- * @param parent
+ * @param config
  */
 const updateElements = (config) => {
-  config = updateElement(config)
-  config.children.map(child => updateElements(child))
+    config = updateElement(config)
+    config.children.map(child => updateElements(child))
 }
 
 /**
@@ -247,7 +247,7 @@ const buildHTML = (item) => {
  * Select the parent HTML element for appending new elements
  * @param item
  * @param parent
- * @returns {*|HTMLElement}
+ * @returns {*}
  */
 const appendHTML = (item, parent = documentItem.body) => {
     if (Array.isArray(item)) {
@@ -368,11 +368,7 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => (inclusiv
  * Return point-like object with all of the axis lengths.
  * @param matrix
  */
-const getAxisLengths = (matrix) => ({
-    x: matrix.children[0].children[0].children.length,
-    y: matrix.children[0].children.length,
-    z: matrix.children.length
-})
+const getAxisLengths = (matrix) => point(matrix.children[0].children[0].children.length, matrix.children[0].children.length, matrix.children.length)
 
 /**
  * Create a single random number where range is within length. The number is adjusted by the provided direction (0 or 1)
@@ -477,7 +473,8 @@ const bindListeners = (item, ...extra) => {
 }
 
 /**
- *
+ * Run Timeout functions one after the other in queue
+ * WARNING: This is a recursive function.
  * @param fn
  * @param time
  * @param args
