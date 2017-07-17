@@ -43,6 +43,8 @@ html, body {
       display: block; }
 
 .player {
+  color: white;
+  font-size: 1.6rem;
   display: inline-block;
   min-width: 370px;
   min-width: 37em;
@@ -50,9 +52,8 @@ html, body {
   margin: 10px auto;
   margin: 1em auto; }
   .player ul {
-    color: white;
-    font-size: 1.6rem;
-    list-style: none; }
+    list-style: none;
+    padding: 0; }
 
 .matrix {
   font-size: 1rem;

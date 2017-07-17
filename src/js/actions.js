@@ -48,6 +48,18 @@ const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, poi
 const setHit = alter3dCell(hitTile())
 
 /**
+ *
+ * @param player
+ * @param status
+ * @returns {*}
+ */
+const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
+    player.playerStats = mergeObjects(player.playerStats, playerStats(player, status))
+    updateElements(player.playerStats)
+    return player
+}
+
+/**
  * Track player stats such as attacks and turns
  * @param player
  * @param playAgain
@@ -74,6 +86,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                     width: '17.5px',
                     height: '17.5px'
                 }))))
+                updatePlayerStats(player, 'ATTACKER')
                 attackFleet.isLocked = false
             }, 400)
             ++player.turnCnt
@@ -84,6 +97,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                     width: '35px',
                     height: '35px'
                 }))))
+                updatePlayerStats(player, `${Math.round(player.status * 100) / 100}%`)
                 attackFleet.isLocked = false
             }, 0)
         }
@@ -97,8 +111,12 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
  * @returns {[*]}
  */
 const endGame = (winner) => {
+    updatePlayerStats(winner, 'WINNER')
     let parent = getTopParentItem(winner)
-    bindListeners(appendHTML(bindElements(finalScore(getChildrenFromAttribute('class', 'boards', parent)[0].children), parent.body), parent.body), parent)
+    let players = getChildrenFromAttribute('class', 'boards', parent)[0].children
+    players.map(player => updatePlayerStats(player))
+    updatePlayerStats(winner, 'WINNER')
+    bindListeners(appendHTML(bindElements(finalScore(players), parent.body), parent.body), parent)
     return [winner]
 }
 
@@ -189,8 +207,6 @@ const attackFleet = (target, player, players) => {
         player.status = status / player.shipFleet.length
     }
     if (hitShip) {
-        player.playerStats = mergeObjects(player.playerStats, playerStats(player))
-        updateElements(player.playerStats)
         // Check if the hit ship was sunk
         sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
     }

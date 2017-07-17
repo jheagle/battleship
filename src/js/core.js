@@ -380,20 +380,9 @@ const randCoords = (length, range = 0, dirAdjust = 0) => Math.floor(Math.random(
 
 /**
  * Get random direction point
- * @param useZ
+ * @param useCoords
  */
-const randDirection = (useZ = 0) => {
-    switch (Math.floor(Math.random() * (2 + useZ))) {
-        case 0:
-            return point(1, 0, 0)
-            break
-        case 1:
-            return point(0, 1, 0)
-            break
-        default:
-            return point(0, 0, 1)
-    }
-}
+const randDirection = (useCoords = []) => useCoords.length ? useCoords[Math.floor(Math.random() * useCoords.length)] : point(0, 0, 0)
 
 /**
  * Test if the provided point exists in the matrix.

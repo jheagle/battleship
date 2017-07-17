@@ -66,12 +66,21 @@ const playerSet = (board = {}, name = '') => ({
 /**
  *
  * @param player
+ * @param status
  */
-const playerStats = (player = {}) => ({
+const playerStats = (player = {}, status = '') => ({
     attributes: {
         element: 'div'
     },
     children: [
+        {
+            attributes: {
+                element: 'span'
+            },
+            elementProperties: {
+                innerHTML: `<strong>${player.name}</strong>: ${status}`
+            },
+        },
         {
             attributes: {
                 element: 'ul'
@@ -91,7 +100,10 @@ const playerStats = (player = {}) => ({
 /**
  * Create a default fleet using the standard battleship lengths.
  */
-const defaultFleet = randomFleet([{name: 'Aircraft Carrier', size: 5}, {
-    name: 'Battleship',
-    size: 4
-}, {name: 'Submarine', size: 3}, {name: 'Cruiser', size: 3}, {name: 'Destroyer', size: 2}])
+const defaultFleet = randomFleet([
+    {name: 'Aircraft Carrier', size: 5},
+    {name: 'Battleship', size: 4},
+    {name: 'Submarine', size: 3},
+    {name: 'Cruiser', size: 3},
+    {name: 'Destroyer', size: 2}
+])

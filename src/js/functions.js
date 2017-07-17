@@ -94,16 +94,16 @@ const buildShip = (shipInfo, start, dir, matrix, view = false) => {
  * @param matrix
  * @param shipLength
  * @param lengths
- * @param useZ
+ * @param useCoords
  * @returns {{start: *, dir}}
  */
-const generateStartDir = (matrix, shipLength, lengths, useZ) => {
+const generateStartDir = (matrix, shipLength, lengths, useCoords) => {
     // randomly select ship direction
-    let dir = randDirection(useZ)
+    let dir = randDirection(useCoords)
     // generate start and end coordinates based on direction and ensuring start is far enough from edge of matrix
     let start = point(randCoords(lengths.x, shipLength, dir.x), randCoords(lengths.y, shipLength, dir.y), randCoords(lengths.z, shipLength, dir.z))
     let end = point(start.x + dir.x * (shipLength - 1), start.y + dir.y * (shipLength - 1), start.z + dir.z * (shipLength - 1))
-    return checkInBetween(start, end, matrix, checkIfShipCell) ? generateStartDir(matrix, shipLength, lengths, useZ) :
+    return checkInBetween(start, end, matrix, checkIfShipCell) ? generateStartDir(matrix, shipLength, lengths, useCoords) :
         {
             start: start,
             dir: dir
@@ -113,7 +113,7 @@ const generateStartDir = (matrix, shipLength, lengths, useZ) => {
 /**
  * Create a series of randomly placed ships based on the provided shipLengths.
  * The optional parameter view will set the visibility of the ships.
- * @param shipLengths
+ * @param ships
  * @param matrix
  * @param view
  * @returns {Array}
@@ -125,10 +125,21 @@ const generateRandomFleet = (ships, matrix, view = false) => {
     for (let ship in ships) {
         let start = point(0, 0, 0) // default initial ship coordinates
         let end = point(0, 0, 0) // default final ship coordinates
-        let useZ = ships[ship].size <= lengths.z ? 1 : 0 // check if a ship will fit on the z axis
-        // generate and test ship coordinates, if the test fails re-generate and test again till success
-        let startDir = generateStartDir(matrix, ships[ship].size, lengths, useZ)
-        shipFleet.push(buildShip(ships[ship], startDir.start, startDir.dir, matrix, view)) // once coordinates pass test, generate the ship and pass to the Fleet
+        let useCoords = []
+        if (ships[ship].size <= lengths.x) {
+            useCoords.push(point(1, 0, 0))
+        }
+        if (ships[ship].size <= lengths.y) {
+            useCoords.push(point(0, 1, 0))
+        }
+        if (ships[ship].size <= lengths.z) {
+            useCoords.push(point(0, 0, 1))
+        }
+        if (useCoords.length) {
+            // generate and test ship coordinates, if the test fails re-generate and test again till success
+            let startDir = generateStartDir(matrix, ships[ship].size, lengths, useCoords)
+            shipFleet.push(buildShip(ships[ship], startDir.start, startDir.dir, matrix, view)) // once coordinates pass test, generate the ship and pass to the Fleet
+        }
     }
     return shipFleet
 }
@@ -158,7 +169,7 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     let player = bindElements(playerSet(board, `Player ${players.length + 1}`), parent)
     player.isRobot = humans <= 0
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
-    let playetStats = bindElements(playerStats(player), player)
+    let playetStats = bindElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
     player.playerStats = playetStats
     player.children.push(playetStats)
     player = bindListeners(player, player, players)
