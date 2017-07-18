@@ -10,22 +10,44 @@ const curry = (fn) => function curried(...args) {
 }
 
 /**
+ * This function is intended to replicate behaviour of the Array.map() function but for Objects.
+ * If an array is passed in instead then it will perform standard map(). It is recommended to
+ * always use the standard map() function when it is known that the object is actually an array.
+ * @param obj
+ * @param fn
+ * @param args
+ */
+const mapObject = (obj, fn, ...args) => Array.isArray(obj) ? obj.map((prop, i) => fn(prop, i, ...args)) : Object.keys(obj).reduce((newObj, curr) => {
+        newObj[curr] = fn(obj[curr], curr, ...args)
+        return newObj
+    }, {})
+
+/**
  * Clone objects for manipulation without data corruption
  * @param object
+ * @param parents
  */
-const cloneObject = (object) => {
-    let parents = []
-    return cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
-}
+const cloneObjectRules = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
 
+/**
+ * Call cloneObjectRules with the required object
+ */
+const cloneObject = curry(cloneObjectRules)
+
+/**
+ * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
+ * @param key
+ * @param val
+ * @param parents
+ * @returns {*}
+ */
 const removeCircularReference = (key, val, parents = []) => {
     if (typeof val === 'object') {
-        if (parents.indexOf(val) >= 0) {
-            return undefined;
-        }
-        parents.push(val);
+        if (parents.indexOf(val) >= 0)
+            return undefined
+        parents.push(val)
     }
-    return val;
+    return val
 }
 
 /**
@@ -36,14 +58,9 @@ const removeCircularReference = (key, val, parents = []) => {
  * @returns {*}
  */
 const cloneExclusions = (cloned, object, parents = []) => {
-    if (typeof object === 'object' && Object.keys(object).length) {
+    if ((typeof object === 'object' && Object.keys(object).length) || (Array.isArray(object) && object.length)) {
         parents.push(object);
-        Object.keys(object).map(key => cloned[key] = (!cloned[key] || object[key] instanceof HTMLElement || parents.indexOf(object[key]) >= 0) ? object[key] : cloneExclusions(cloned[key], object[key], parents))
-        return cloned
-    }
-    if (Array.isArray(object) && object.length) {
-        object.map((prop, i) => cloned[i] = (!cloned[i] || prop instanceof HTMLElement) ? prop : cloneExclusions(cloned[i], prop, parents))
-        return cloned
+        return mapObject(object, (prop, key) => (!cloned[key] || prop instanceof HTMLElement || parents.indexOf(prop) >= 0) ? prop : cloneExclusions(cloned[key], prop, parents))
     }
     return cloned
 }
@@ -66,12 +83,11 @@ const mergeObjects = (...args) => {
     let obj1 = args[0] // original object
     let obj2 = args[1] // overwriting object
     if (typeof obj2 === 'object' && Object.keys(obj2).length) {
-        Object.keys(obj2).map(key => obj1[key] = (obj1[key] && !(obj2[key] instanceof HTMLElement) && key !== 'parentItem') ? mergeObjects(obj1[key], obj2[key]) : obj2[key])
+        Object.keys(obj2).map(key => obj1[key] = (!obj1[key] || obj2[key] instanceof HTMLElement || key === 'parentItem') ? obj2[key] : mergeObjects(obj1[key], obj2[key]))
         return obj1
     }
     if (Array.isArray(obj2) && obj2.length) {
-        obj2.map((prop, i) => obj1[i] = obj1[i].length && !(prop instanceof HTMLElement) ? mergeObjects(obj1[i], prop) : prop)
-        return obj1
+        return mapObject(obj2, (prop, key) => (!obj1[key].length || prop instanceof HTMLElement || key === 'parentItem') ? prop : mergeObjects(obj1[key], prop))
     }
     return typeof obj2 !== 'object' && !Array.isArray(obj2) ? obj2 : Object.assign(obj1, obj2)
 }

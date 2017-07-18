@@ -86,7 +86,6 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                     width: '17.5px',
                     height: '17.5px'
                 }))))
-                updatePlayerStats(player, 'ATTACKER')
                 attackFleet.isLocked = false
             }, 400)
             ++player.turnCnt
@@ -97,11 +96,11 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                     width: '35px',
                     height: '35px'
                 }))))
-                updatePlayerStats(player, `${Math.round(player.status * 100) / 100}%`)
                 attackFleet.isLocked = false
             }, 0)
         }
     }
+    queueTimeout(() => player = updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
     return player
 }
 
@@ -111,11 +110,10 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
  * @returns {[*]}
  */
 const endGame = (winner) => {
-    updatePlayerStats(winner, 'WINNER')
     let parent = getTopParentItem(winner)
     let players = getChildrenFromAttribute('class', 'boards', parent)[0].children
-    players.map(player => updatePlayerStats(player))
-    updatePlayerStats(winner, 'WINNER')
+    players.map(player => player = updatePlayerStats(player))
+    winner = updatePlayerStats(winner, 'WINNER')
     bindListeners(appendHTML(bindElements(finalScore(players), parent.body), parent.body), parent)
     return [winner]
 }
@@ -139,12 +137,7 @@ const findNextAttacker = (attacker, players, attackerIndex) => {
  * @param playAgain
  * @returns {*}
  */
-const getNextAttacker = (attacker, players, playAgain) => {
-    let attackerIndex = players.indexOf(attacker)
-    // Get next player index, overflow to 0 if the current attacker is the last player.
-    let nextAttacker = findNextAttacker(attacker, players, attackerIndex)
-    return playAgain ? attacker : updatePlayer(nextAttacker, playAgain) // If attacker has playAgain, then just return current attacker
-}
+const getNextAttacker = (attacker, players, playAgain) => updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), playAgain)
 
 /**
  * Update all game stats after each player round
@@ -207,11 +200,11 @@ const attackFleet = (target, player, players) => {
         player.status = status / player.shipFleet.length
     }
     if (hitShip) {
+        player = updatePlayerStats(player, `${Math.round(player.status * 100) / 100}%`)
         // Check if the hit ship was sunk
         sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
     }
     return updateScore(player, hitCell.hasShip, sunkShip, players, target)
 }
 
-const launchAttack = curry(attackFleet)
 const attackListener = (e, target, ...extra) => attackFleet(target.point, ...extra)
