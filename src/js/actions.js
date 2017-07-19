@@ -121,6 +121,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
  * @returns {[*]}
  */
 const endGame = (winner) => {
+    let parent = getTopParentItem(winner)
     let players = winner.parentItem.children
     players.map(player => updatePlayerStats(player))
     winner = updatePlayerStats(winner, 'WINNER')
@@ -147,7 +148,7 @@ const findNextAttacker = (attacker, players, attackerIndex) => {
  * @param playAgain
  * @returns {*}
  */
-const getNextAttacker = (attacker, players, playAgain) => updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), playAgain)
+const getNextAttacker = (attacker, players, playAgain) => playAgain ? updatePlayerStats(attacker, 'ATTACKER') : updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), playAgain)
 
 /**
  * Update all game stats after each player round

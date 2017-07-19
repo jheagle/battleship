@@ -36,7 +36,7 @@ const documentDOMItem = () => {
             children: []
         }),
     ]
-    return DOMItem({
+    let rootItem = DOMItem({
         attributes: {
             element: 'html'
         },
@@ -44,6 +44,9 @@ const documentDOMItem = () => {
         children: children,
         head: children[0],
         body: children[1],
+    })
+    return DOMItem(rootItem, {
+        children: rootItem.children.map(child => DOMItem(child, {parentItem: rootItem}))
     })
 }
 
