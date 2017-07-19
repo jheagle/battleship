@@ -103,7 +103,7 @@ const mergeObjects = (...args) => {
 const buildArray = (item, length, useReference = false, arr = []) => {
     arr = arr.slice() // clone array
     arr.push(item) // add the item to the array
-    return ( --length > 0 ? fillArray((useReference ? item : cloneObject(item)), length, useReference, arr) : arr ) // repeat adding items until length value is 0
+    return ( --length > 0 ? buildArray((useReference ? item : cloneObject(item)), length, useReference, arr) : arr ) // repeat adding items until length value is 0
 }
 
 /**
