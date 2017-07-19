@@ -15,12 +15,13 @@ const curry = (fn) => function curried(...args) {
  * always use the standard map() function when it is known that the object is actually an array.
  * @param obj
  * @param fn
+ * @param initObj
  * @param args
  */
-const mapObject = (obj, fn, ...args) => Array.isArray(obj) ? obj.map((prop, i) => fn(prop, i, ...args)) : Object.keys(obj).reduce((newObj, curr) => {
+const mapObject = (obj, fn, initObj = {}, ...args) => Array.isArray(obj) ? obj.map((prop, i) => fn(prop, i, ...args)) : Object.keys(obj).reduce((newObj, curr) => {
         newObj[curr] = fn(obj[curr], curr, ...args)
         return newObj
-    }, {})
+    }, initObj)
 
 /**
  * Clone objects for manipulation without data corruption
@@ -82,14 +83,10 @@ const mergeObjects = (...args) => {
     }
     let obj1 = args[0] // original object
     let obj2 = args[1] // overwriting object
-    if (typeof obj2 === 'object' && Object.keys(obj2).length) {
-        Object.keys(obj2).map(key => obj1[key] = (!obj1[key] || obj2[key] instanceof HTMLElement || key === 'parentItem') ? obj2[key] : mergeObjects(obj1[key], obj2[key]))
-        return obj1
+    if ((typeof obj2 === 'object' && Object.keys(obj2).length) || (Array.isArray(obj2) && obj2.length)) {
+        return mapObject(obj2, (prop, key) => (!obj1[key] || prop instanceof HTMLElement || key === 'parentItem') ? prop : mergeObjects(obj1[key], prop), obj1)
     }
-    if (Array.isArray(obj2) && obj2.length) {
-        return mapObject(obj2, (prop, key) => (!obj1[key].length || prop instanceof HTMLElement || key === 'parentItem') ? prop : mergeObjects(obj1[key], prop))
-    }
-    return typeof obj2 !== 'object' && !Array.isArray(obj2) ? obj2 : Object.assign(obj1, obj2)
+    return (typeof obj2 !== 'object' && !Array.isArray(obj2)) ? obj2 : Object.assign(obj1, obj2)
 }
 
 /**
@@ -97,13 +94,14 @@ const mergeObjects = (...args) => {
  * WARNING: This is a recursive function.
  * @param item
  * @param length
+ * @param useReference
  * @param arr
  * @returns {Array}
  */
-const fillArray = (item, length, arr = []) => {
+const fillArray = (item, length, useReference = false, arr = []) => {
     arr = arr.slice() // clone array
     arr.push(item) // add the item to the array
-    return ( --length > 0 ? fillArray(cloneObject(item), length, arr) : arr ) // repeat adding items until length value is 0
+    return ( --length > 0 ? fillArray((useReference ? item : cloneObject(item)), length, useReference, arr) : arr ) // repeat adding items until length value is 0
 }
 const buildArray = curry(fillArray)
 

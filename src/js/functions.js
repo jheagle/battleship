@@ -169,10 +169,10 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     let player = bindElements(playerSet(board, `Player ${players.length + 1}`), parent)
     player.isRobot = humans <= 0
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
-    let playetStats = bindElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
-    player.playerStats = playetStats
-    player.children.push(playetStats)
-    player = bindListeners(player, player, players)
+    let stats = bindElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
+    player.playerStats = stats
+    player.children.push(stats)
+    player = bindListeners(...buildArray(player, 2, true), players)
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, parent, players)
 }
