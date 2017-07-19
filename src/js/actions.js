@@ -34,9 +34,21 @@ const configureHtml = (config, isRobot) => {
  * @param isRobot
  */
 const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(mergeObjects(matrix.children[z].children[y].children[x], config), isRobot)
-const alter3dCell = curry(update3dCell)
-const setViewShip = alter3dCell(mergeObjects(shipTile(), {attributes: {styles: {backgroundColor: '#777',},},}))
-const setHiddenShip = alter3dCell(shipTile())
+
+/**
+ *
+ */
+const setViewShip = curry(update3dCell)(mergeObjects(shipTile(), {attributes: {styles: {backgroundColor: '#777',},},}))
+
+/**
+ *
+ */
+const setHiddenShip = curry(update3dCell)(shipTile())
+
+/**
+ *
+ */
+const setHit = curry(update3dCell)(hitTile())
 
 /**
  * Set a specified point to be part of a ship
@@ -45,7 +57,6 @@ const setHiddenShip = alter3dCell(shipTile())
  * @param view
  */
 const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, point.y, point.z) : setHiddenShip(matrix, point.x, point.y, point.z)
-const setHit = alter3dCell(hitTile())
 
 /**
  *
@@ -110,9 +121,8 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
  * @returns {[*]}
  */
 const endGame = (winner) => {
-    let parent = getTopParentItem(winner)
-    let players = getChildrenFromAttribute('class', 'boards', parent)[0].children
-    players.map(player => player = updatePlayerStats(player))
+    let players = winner.parentItem.children
+    players.map(player => updatePlayerStats(player))
     winner = updatePlayerStats(winner, 'WINNER')
     bindListeners(appendHTML(bindElements(finalScore(players), parent.body), parent.body), parent)
     return [winner]

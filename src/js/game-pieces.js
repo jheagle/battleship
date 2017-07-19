@@ -100,7 +100,7 @@ const playerStats = (player = {}, status = '') => ({
 /**
  * Create a default fleet using the standard battleship lengths.
  */
-const defaultFleet = randomFleet([
+const defaultFleet = curry(generateRandomFleet)([
     {name: 'Aircraft Carrier', size: 5},
     {name: 'Battleship', size: 4},
     {name: 'Submarine', size: 3},

@@ -24,16 +24,17 @@ const mapObject = (obj, fn, initObj = {}, ...args) => Array.isArray(obj) ? obj.m
     }, initObj)
 
 /**
+ * Helper function for testing if the item is an Object or Array that contains properties or elements
+ * @param item
+ */
+const notEmptyObjectOrArray = item => (typeof item === 'object' && Object.keys(item).length) || (Array.isArray(item) && item.length)
+
+/**
  * Clone objects for manipulation without data corruption
  * @param object
  * @param parents
  */
-const cloneObjectRules = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
-
-/**
- * Call cloneObjectRules with the required object
- */
-const cloneObject = curry(cloneObjectRules)
+const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
 
 /**
  * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
@@ -53,13 +54,14 @@ const removeCircularReference = (key, val, parents = []) => {
 
 /**
  * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
+ * WARNING: This is a recursive function.
  * @param cloned
  * @param object
  * @param parents
  * @returns {*}
  */
 const cloneExclusions = (cloned, object, parents = []) => {
-    if ((typeof object === 'object' && Object.keys(object).length) || (Array.isArray(object) && object.length)) {
+    if (notEmptyObjectOrArray(object)) {
         parents.push(object);
         return mapObject(object, (prop, key) => (!cloned[key] || prop instanceof HTMLElement || parents.indexOf(prop) >= 0) ? prop : cloneExclusions(cloned[key], prop, parents))
     }
@@ -83,10 +85,10 @@ const mergeObjects = (...args) => {
     }
     let obj1 = args[0] // original object
     let obj2 = args[1] // overwriting object
-    if ((typeof obj2 === 'object' && Object.keys(obj2).length) || (Array.isArray(obj2) && obj2.length)) {
+    if (notEmptyObjectOrArray(obj2)) {
         return mapObject(obj2, (prop, key) => (!obj1[key] || prop instanceof HTMLElement || key === 'parentItem') ? prop : mergeObjects(obj1[key], prop), obj1)
     }
-    return (typeof obj2 !== 'object' && !Array.isArray(obj2)) ? obj2 : Object.assign(obj1, obj2)
+    return !notEmptyObjectOrArray(obj2) ? obj2 : Object.assign(obj1, obj2)
 }
 
 /**
@@ -98,12 +100,11 @@ const mergeObjects = (...args) => {
  * @param arr
  * @returns {Array}
  */
-const fillArray = (item, length, useReference = false, arr = []) => {
+const buildArray = (item, length, useReference = false, arr = []) => {
     arr = arr.slice() // clone array
     arr.push(item) // add the item to the array
     return ( --length > 0 ? fillArray((useReference ? item : cloneObject(item)), length, useReference, arr) : arr ) // repeat adding items until length value is 0
 }
-const buildArray = curry(fillArray)
 
 /**
  * Return next index in an ordered array until max index reached. Takes array and current index.
@@ -156,7 +157,10 @@ const bindPointData = (item, pnt = {}) => {
 }
 
 /**
- *
+ * A selector function for retrieving existing child DOMItems from the given parent item.
+ * This function will check all the children starting from item, and scan the attributes
+ * property for matches. The return array contains children matching from all levels.
+ * WARNING: This is a recursive function.
  * @param attr
  * @param value
  * @param item
@@ -172,27 +176,39 @@ const getChildrenFromAttribute = (attr, value, item = documentItem.body, childre
 }
 
 /**
- *
+ * Helper for getting all DOMItems starting at parent and having specified class attribute
+ */
+const getChildrenByClass = curry(getChildrenFromAttribute)('class')
+
+/**
+ * Helper for getting all DOMItems starting at parent and having specified name attribute
+ */
+const getChildrenByName = curry(getChildrenFromAttribute)('name')
+
+/**
+ * Get the upper parentItem for the provided child. (usually this is a documentItem reference)
+ * WARNING: This is a recursive function.
  * @param item
  */
 const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
 
 /**
- *
+ * Apply the provided styles to the provided element.
  * @param elem
  * @param styles
  * @returns {*}
  */
 const addElementStyles = (elem, styles) => {
     if (Object.keys(styles).length && elem.style) {
-        Object.keys(styles).forEach((styleName) => elem.style[styleName] = styles[styleName])
+        mergeObjects(elem.style, styles)
     }
     return elem
 }
 
 /**
- *
+ * Update a single DOMItem element with the provided attributes / styles / elementProperties
  * @param config
+ * @returns {*}
  */
 const updateElement = (config) => {
     if (!(config.element instanceof HTMLElement)) {

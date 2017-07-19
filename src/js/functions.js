@@ -143,8 +143,6 @@ const generateRandomFleet = (ships, matrix, view = false) => {
     }
     return shipFleet
 }
-// shortcut for generating random fleet with the above function
-const randomFleet = curry(generateRandomFleet)
 
 /**
  * Create players and associated properties.
@@ -187,12 +185,12 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
  */
 const beginRound = (e, mainForm, parent = documentItem) => {
     e.preventDefault()
-    let humans = parseInt(getChildrenFromAttribute('name', 'human-players', mainForm)[0].element.value)
-    let robots = parseInt(getChildrenFromAttribute('name', 'robot-players', mainForm)[0].element.value)
+    let humans = parseInt(getChildrenByName('human-players', mainForm)[0].element.value)
+    let robots = parseInt(getChildrenByName('robot-players', mainForm)[0].element.value)
     if (humans < 0 || humans > 100 || robots < 0 || robots > 100) {
         return false
     }
-    let firstGoesFirst = getChildrenFromAttribute('name', 'first-go-first', mainForm)[0].element.checked
+    let firstGoesFirst = getChildrenByName('first-go-first', mainForm)[0].element.checked
     humans = humans < 0 ? 0 : humans
     if (humans === 0) {
         robots = robots < 2 ? 2 : robots
@@ -200,9 +198,10 @@ const beginRound = (e, mainForm, parent = documentItem) => {
     if (humans === 1) {
         robots = robots < 1 ? 1 : robots
     }
-    removeChild(getChildrenFromAttribute('class', 'main-menu', parent.body)[0], parent.body)
-    let players = buildPlayers(humans, robots, parent)
-    appendHTML(players, appendHTML(bindElements(boards()), parent.body)) // create div for storing players
+    removeChild(getChildrenByClass('main-menu', parent.body)[0], parent.body)
+    let playerBoards = appendHTML(bindElements(boards(), parent.body), parent.body)
+    let players = buildPlayers(humans, robots, playerBoards)
+    appendHTML(players, playerBoards) // create div for storing players
     let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
     if (firstAttacker.isRobot) {
         computerAttack(firstAttacker, players, false)
@@ -218,7 +217,7 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    bindListeners(mergeObjects(getChildrenFromAttribute('class', 'main-menu-form', appendHTML(bindElements(mainMenu(), parent.body), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
+    bindListeners(mergeObjects(getChildrenByClass('main-menu-form', appendHTML(bindElements(mainMenu(), parent.body), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
     return parent
 }
 
