@@ -4,9 +4,11 @@
  * The returned function expects the same number of arguments minus the ones provided.
  * fn is the name of the function being curried.
  * @param fn
+ * @returns {function(...[*]): function(...[*])}
  */
-const curry = (fn) => function curried(...args) {
-    return args.length >= fn.length ? fn(...args) : (...a) => curried(...[...args, ...a])
+const curry = (fn) => {
+    let curried = (...args) => args.length >= fn.length ? fn(...args) : (...a) => curried(...[...args, ...a])
+    return curried
 }
 
 /**
@@ -17,6 +19,7 @@ const curry = (fn) => function curried(...args) {
  * @param fn
  * @param initObj
  * @param args
+ * @returns {Array|*|{annotation}}
  */
 const mapObject = (obj, fn, initObj = {}, ...args) => Array.isArray(obj) ? obj.map((prop, i) => fn(prop, i, ...args)) : Object.keys(obj).reduce((newObj, curr) => {
         newObj[curr] = fn(obj[curr], curr, ...args)
@@ -26,15 +29,25 @@ const mapObject = (obj, fn, initObj = {}, ...args) => Array.isArray(obj) ? obj.m
 /**
  * Helper function for testing if the item is an Object or Array that contains properties or elements
  * @param item
+ * @returns {boolean}
  */
-const notEmptyObjectOrArray = item => (typeof item === 'object' && Object.keys(item).length) || (Array.isArray(item) && item.length)
+const notEmptyObjectOrArray = item => !!((typeof item === 'object' && Object.keys(item).length) || (Array.isArray(item) && item.length))
 
 /**
  * Clone objects for manipulation without data corruption
  * @param object
  * @param parents
+ * @returns {*}
  */
 const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
+
+/**
+ * A simple function to check if an item is in an array
+ * @param arr
+ * @param prop
+ * @returns {boolean}
+ */
+const inArray = (arr, prop) => arr.indexOf(prop) >= 0
 
 /**
  * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
@@ -45,12 +58,45 @@ const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.st
  */
 const removeCircularReference = (key, val, parents = []) => {
     if (typeof val === 'object') {
-        if (parents.indexOf(val) >= 0)
+        if (inArray(parents, val))
             return undefined
         parents.push(val)
     }
     return val
 }
+
+/**
+ * Tests exceptions to what must be returned as reference vs cloned.
+ * @param obj
+ * @param extraTest
+ * @returns {function(*=, *=)}
+ */
+const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || key === 'parentItem' || (extraTest ? extraTest(prop, key) : false)
+
+/**
+ * A function to use with mapObject or just map which will either return the result
+ * of re-running a function or return the original item.
+ * Pass in the object to be used with map.
+ * Pass in the conditions as a test function.
+ * Pass in the recursive function.
+ * Add any other args to that function.
+ * @param obj
+ * @param test
+ * @param fn
+ * @param args
+ * @returns {function(*=, *)}
+ */
+const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(prop, key) ? prop : fn(obj[key], prop, ...args)
+
+/**
+ * A helper for cloneExclusions to simplify that function
+ * @param cloned
+ * @param object
+ * @param parents
+ * @param fn
+ * @returns {Array|*|{annotation}}
+ */
+const cloneExMap = (cloned, object, parents, fn) => mapObject(object, recursiveMap(cloned, cloneRules(cloned, curry(inArray)(parents.concat([object]))), fn, parents.concat([object])))
 
 /**
  * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
@@ -60,13 +106,7 @@ const removeCircularReference = (key, val, parents = []) => {
  * @param parents
  * @returns {*}
  */
-const cloneExclusions = (cloned, object, parents = []) => {
-    if (notEmptyObjectOrArray(object)) {
-        parents.push(object);
-        return mapObject(object, (prop, key) => (!cloned[key] || prop instanceof HTMLElement || parents.indexOf(prop) >= 0) ? prop : cloneExclusions(cloned[key], prop, parents))
-    }
-    return cloned
-}
+const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object) ? cloneExMap(cloned, object, parents, cloneExclusions) : cloned
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -86,7 +126,7 @@ const mergeObjects = (...args) => {
     let obj1 = args[0] // original object
     let obj2 = args[1] // overwriting object
     if (notEmptyObjectOrArray(obj2)) {
-        return mapObject(obj2, (prop, key) => (!obj1[key] || prop instanceof HTMLElement || key === 'parentItem') ? prop : mergeObjects(obj1[key], prop), obj1)
+        return mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), mergeObjects), obj1)
     }
     return !notEmptyObjectOrArray(obj2) ? obj2 : Object.assign(obj1, obj2)
 }
@@ -98,20 +138,9 @@ const mergeObjects = (...args) => {
  * @param length
  * @param useReference
  * @param arr
- * @returns {Array}
+ * @returns {Array.<*>}
  */
-const buildArray = (item, length, useReference = false, arr = []) => {
-    arr = arr.slice() // clone array
-    arr.push(item) // add the item to the array
-    return ( --length > 0 ? buildArray((useReference ? item : cloneObject(item)), length, useReference, arr) : arr ) // repeat adding items until length value is 0
-}
-
-/**
- * Return next index in an ordered array until max index reached. Takes array and current index.
- * @param arr
- * @param i
- */
-const nextIndex = (arr, i = 0) => ( i < arr.length - 1 ) ? ++i : arr.length - 1
+const buildArray = (item, length, useReference = false, arr = []) => --length > 0 ? buildArray((useReference ? item : cloneObject(item)), length, useReference, arr.concat([item])) : arr.concat([item])
 
 /**
  * Based on provided point and point direction generate next point.
@@ -141,20 +170,7 @@ const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === 
  * @param pnt
  * @returns {*}
  */
-const bindPointData = (item, pnt = {}) => {
-    if (!Object.keys(pnt).length) {
-        pnt = point(0, 0, 0)
-    }
-    if (item.point) {
-        item.point = cloneObject(pnt)
-    } else {
-        item.children.map((el, i) => {
-            pnt = mergeObjects(pnt, {[el.axis]: i})
-            return bindPointData(el, pnt)
-        })
-    }
-    return item
-}
+const bindPointData = (item, pnt = point(0, 0, 0)) => mergeObjects(item, (item.point ? {point: cloneObject(pnt)} : {children: item.children.map((el, i) => bindPointData(el, mergeObjects(pnt, {[el.axis]: i})))}))
 
 /**
  * A selector function for retrieving existing child DOMItems from the given parent item.

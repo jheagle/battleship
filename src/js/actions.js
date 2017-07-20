@@ -148,7 +148,7 @@ const findNextAttacker = (attacker, players, attackerIndex) => {
  * @param playAgain
  * @returns {*}
  */
-const getNextAttacker = (attacker, players, playAgain) => playAgain ? updatePlayerStats(attacker, 'ATTACKER') : updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), playAgain)
+const getNextAttacker = (attacker, players, playAgain) => playAgain ? attacker : updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), playAgain)
 
 /**
  * Update all game stats after each player round
