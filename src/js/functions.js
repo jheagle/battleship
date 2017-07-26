@@ -217,7 +217,7 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    bindListeners(mergeObjects(getChildrenByClass('main-menu-form', appendHTML(bindElements(mainMenu(), parent), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
+    bindListeners(mergeObjectsMutable(getChildrenByClass('main-menu-form', appendHTML(bindElements(mainMenu(), parent), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
     return parent
 }
 

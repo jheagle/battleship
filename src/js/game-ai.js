@@ -77,13 +77,13 @@ const displayTargets = (targets, target, victim) => {
  * @returns {void|Array|Object|*}
  */
 const resetTargets = data => {
-    data.victim.board.children.map(l => addElementStyles(l.element, {borderColor: '#333'}))
-    data.targets.forEach(t => addElementStyles(getDOMItemFromPoint(t, data.victim.board).element, {borderColor: '#333'}))
+    data.victim.board.children.map(l => updateElement(mergeObjects(l, {attributes: {styles: {borderColor: '#333'}}})))
+    data.targets.forEach(t => updateElement(mergeObjects(getDOMItemFromPoint(t, data.victim.board), {attributes: {styles: {borderColor: '#333'}}})))
     if (data.target) {
         return setHit(data.victim.board, data.target.x, data.target.y, data.target.z, data.victim.isRobot)
     } else {
-        data.victim.board.children.map(l => addElementStyles(l.element, {borderColor: 'yellow'}))
-        return data.targets.forEach(t => addElementStyles(getDOMItemFromPoint(t, data.victim.board).element, {borderColor: 'yellow'}))
+        data.victim.board.children.map(l => updateElement(mergeObjects(l, {attributes: {styles: {borderColor: 'yellow'}}})))
+        data.targets.forEach(t => updateElement(mergeObjects(getDOMItemFromPoint(t, data.victim.board), {attributes: {styles: {borderColor: 'yellow'}}})))
     }
 }
 

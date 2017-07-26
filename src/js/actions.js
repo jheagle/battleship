@@ -14,12 +14,12 @@ const configureHtml = (config, isRobot) => {
     if (isRobot) {
         attackFleet.isLocked = true
         queueTimeout(() => {
-            config.element = addElementStyles(config.element, config.attributes.styles)
+            config = updateElement(config)
             attackFleet.isLocked = false
             return config
         }, 0)
     } else {
-        config.element = addElementStyles(config.element, config.attributes.styles)
+        config = updateElement(config)
     }
     return config
 }
@@ -33,7 +33,7 @@ const configureHtml = (config, isRobot) => {
  * @param z
  * @param isRobot
  */
-const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(mergeObjects(matrix.children[z].children[y].children[x], config), isRobot)
+const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(mergeObjectsMutable(matrix.children[z].children[y].children[x], config), isRobot)
 
 /**
  *
@@ -92,21 +92,27 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
         attackFleet.isLocked = true
         if (player.attacker) {
             queueTimeout(() => {
-                player.board.element = addElementStyles(player.board.element, {fontSize: '0.5rem'})
-                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
-                    width: '17.5px',
-                    height: '17.5px'
-                }))))
+                player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
+                    attributes: {
+                        styles: {
+                            width: '17px',
+                            height: '17px'
+                        }
+                    }
+                })))))
                 attackFleet.isLocked = false
             }, 400)
             ++player.turnCnt
         } else {
-            player.board.element = addElementStyles(player.board.element, {fontSize: '1rem'})
             queueTimeout(() => {
-                player.board.children.map(l => l.children.map(r => r.children.map(c => addElementStyles(c.element, {
-                    width: '35px',
-                    height: '35px'
-                }))))
+                player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
+                    attributes: {
+                        styles: {
+                            width: '35px',
+                            height: '35px'
+                        }
+                    }
+                })))))
                 attackFleet.isLocked = false
             }, 0)
         }

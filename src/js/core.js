@@ -66,14 +66,6 @@ const removeCircularReference = (key, val, parents = []) => {
 }
 
 /**
- * Tests exceptions to what must be returned as reference vs cloned.
- * @param obj
- * @param extraTest
- * @returns {function(*=, *=)}
- */
-const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || key === 'parentItem' || (extraTest ? extraTest(prop, key) : false)
-
-/**
  * A function to use with mapObject or just map which will either return the result
  * of re-running a function or return the original item.
  * Pass in the object to be used with map.
@@ -87,6 +79,14 @@ const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop 
  * @returns {function(*=, *)}
  */
 const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(prop, key) ? prop : fn(obj[key], prop, ...args)
+
+/**
+ * Tests exceptions to what must be returned as reference vs cloned.
+ * @param obj
+ * @param extraTest
+ * @returns {function(*=, *=)}
+ */
+const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || key === 'parentItem' || (extraTest ? extraTest(prop, key) : false)
 
 /**
  * A helper for cloneExclusions to simplify that function
@@ -117,19 +117,26 @@ const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(
  * @returns {*}
  */
 const mergeObjects = (...args) => {
-    if (args.length === 1) {
-        return args[0]
-    }
-    if (args.length > 2) {
-        return args.reduce((obj1, obj2) => mergeObjects(obj1, obj2), {})
-    }
-    let obj1 = args[0] // original object
-    let obj2 = args[1] // overwriting object
-    if (notEmptyObjectOrArray(obj2)) {
-        return mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), mergeObjects), obj1)
-    }
-    return !notEmptyObjectOrArray(obj2) ? obj2 : Object.assign(obj1, obj2)
+    if (args.length === 2)
+        return (notEmptyObjectOrArray(args[1])) ? mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjects), cloneObject(args[0])) : args[1]
+    return args.length === 1 ? args[0] : args.reduce((obj1, obj2) => mergeObjects(obj1, obj2), {})
 }
+
+/**
+ * Perform a deep merge of objects. This will combine all objects and sub-objects,
+ * objects having the same attributes will overwrite starting from the end of the argument
+ * list and bubbling up to overwrite the first object. The merged object is then returned.
+ * WARNING: This is a recursive function.
+ * WARNING: This will mutate the first object passed in as input
+ * @param args
+ * @returns {*}
+ */
+const mergeObjectsMutable = (...args) => {
+    if (args.length === 2)
+        return (notEmptyObjectOrArray(args[1])) ? mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjectsMutable), args[0]) : args[1]
+    return args.length === 1 ? args[0] : args.reduce((obj1, obj2) => mergeObjectsMutable(obj1, obj2), {})
+}
+
 
 /**
  * Generate an array of specified item extending to specified length
@@ -141,371 +148,6 @@ const mergeObjects = (...args) => {
  * @returns {Array.<*>}
  */
 const buildArray = (item, length, useReference = false, arr = []) => --length > 0 ? buildArray((useReference ? item : cloneObject(item)), length, useReference, arr.concat([item])) : arr.concat([item])
-
-/**
- * Based on provided point and point direction generate next point.
- * @param pnt
- * @param dir
- */
-const nextCell = (pnt, dir) => point(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z)
-
-/**
- * Based on provided point and point direction generate next point.
- * @param start
- * @param end
- */
-const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, end.z - start.z)
-
-/**
- * Given two points, compare the x, y, and z of each to see if they are the same
- * @param p1
- * @param p2
- */
-const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
-
-/**
- * Generate point data for each item in the matrix
- * WARNING: This is a recursive function.
- * @param item
- * @param pnt
- * @returns {*}
- */
-const bindPointData = (item, pnt = point(0, 0, 0)) => mergeObjects(item, (item.point ? {point: cloneObject(pnt)} : {children: item.children.map((el, i) => bindPointData(el, mergeObjects(pnt, {[el.axis]: i})))}))
-
-/**
- * A selector function for retrieving existing child DOMItems from the given parent item.
- * This function will check all the children starting from item, and scan the attributes
- * property for matches. The return array contains children matching from all levels.
- * WARNING: This is a recursive function.
- * @param attr
- * @param value
- * @param item
- * @param children
- * @returns {Array}
- */
-const getChildrenFromAttribute = (attr, value, item = documentItem.body, children = []) => {
-    if (item.attributes[attr] && item.attributes[attr] === value) {
-        children.push(item)
-    }
-    item.children.map(child => getChildrenFromAttribute(attr, value, child, children))
-    return children
-}
-
-/**
- * Helper for getting all DOMItems starting at parent and having specified class attribute
- */
-const getChildrenByClass = curry(getChildrenFromAttribute)('class')
-
-/**
- * Helper for getting all DOMItems starting at parent and having specified name attribute
- */
-const getChildrenByName = curry(getChildrenFromAttribute)('name')
-
-/**
- * Get the upper parentItem for the provided child. (usually this is a documentItem reference)
- * WARNING: This is a recursive function.
- * @param item
- */
-const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
-
-/**
- * Apply the provided styles to the provided element.
- * @param elem
- * @param styles
- * @returns {*}
- */
-const addElementStyles = (elem, styles) => {
-    if (Object.keys(styles).length && elem.style) {
-        mergeObjects(elem.style, styles)
-    }
-    return elem
-}
-
-/**
- * Update a single DOMItem element with the provided attributes / styles / elementProperties
- * @param config
- * @returns {*}
- */
-const updateElement = (config) => {
-    if (!(config.element instanceof HTMLElement)) {
-        return config
-    }
-    if (config.attributes) {
-        Object.keys(config.attributes).map((attr) => {
-            if (attr === 'styles') {
-                addElementStyles(config.element, config.attributes[attr])
-            } else if (attr !== 'element') {
-                config.element.setAttribute(attr, config.attributes[attr])
-            }
-        })
-    }
-    if (config.elementProperties) {
-        Object.keys(config.elementProperties).map((prop) => config.element[prop] = config.elementProperties[prop])
-    }
-    return config
-}
-
-/**
- * Generate HTML element data for each object in the matrix
- * WARNING: This is a recursive function.
- * @param config
- */
-const updateElements = (config) => {
-    config = updateElement(config)
-    config.children.map(child => updateElements(child))
-}
-
-/**
- * Create an HTML element based on the provided attributes and return the element as an Object.
- * @param config
- */
-const generateElement = (config) => {
-    config.element = document.createElement(config.attributes.element)
-    return updateElement(config).element
-}
-
-/**
- * Generate HTML element data for each object in the matrix
- * WARNING: This is a recursive function.
- * @param item
- * @param parent
- */
-const bindElements = (item, parent = documentItem) => DOMItem(item, {
-    attributes: item.attributes || {element: 'div', styles: {}},
-    elementProperties: item.elementProperties || {},
-    element: generateElement(item) || HTMLElement,
-    parentItem: parent,
-    children: item.children ? item.children.map(child => bindElements(child, item)) : []
-})
-
-/**
- * Append each HTML element data in a combined HTML element
- * WARNING: This is a recursive function.
- * @param item
- * @returns {*}
- */
-const buildHTML = (item) => {
-    item.children.map(i => item.element.appendChild(buildHTML(i)))
-    return item.element
-}
-
-/**
- * Select the parent HTML element for appending new elements
- * @param item
- * @param parent
- * @returns {*}
- */
-const appendHTML = (item, parent = documentItem.body) => {
-    if (Array.isArray(item)) {
-        item.map(i => parent.children.push(i))
-    } else {
-        parent.children.push(item)
-    }
-    buildHTML(parent)
-    return item
-}
-
-/**
- * Reverse of appendHTML, remove an element
- * @param item
- * @param parent
- * @returns {Array.<HTMLElement>}
- */
-const removeChild = (item, parent = documentItem.body) => {
-    parent.element.removeChild(item.element)
-    return parent.children.splice(parent.children.indexOf(item), 1)
-}
-
-/**
- * Given a start and end point, test the points between with the provided function.
- * Return the points as part of true or/and false properties based on the test.
- * @param start
- * @param end
- * @param matrix
- * @param func
- * @returns {{true: Array, false: Array}}
- */
-const testPointsBetween = (start, end, matrix, func) => {
-    let points = {
-        true: [],
-        false: []
-    }
-    // Find the differences between the two points to get the ship direction
-    let pntDiff = pointDifference(start, end)
-    // Whichever difference is greater than 0 indicates that axis direction,
-    // we then loop through all cells in that direction
-    if (pntDiff.x > 1) {
-        for (let i = start.x; i < end.x; ++i) {
-            let test = point(i, start.y, start.z)
-            if (func(test, matrix)) {
-                points.true.push(test)
-            } else {
-                points.false.push(test)
-            }
-        }
-    } else if (pntDiff.y > 1) {
-        for (let i = start.y; i < end.y; ++i) {
-            let test = point(start.x, i, start.z)
-            if (func(test, matrix)) {
-                points.true.push(test)
-            } else {
-                points.false.push(test)
-            }
-        }
-    } else if (pntDiff.z > 1) {
-        for (let i = start.z; i < end.z; ++i) {
-            let test = point(start.x, start.y, i)
-            if (func(test, matrix)) {
-                points.true.push(test)
-            } else {
-                points.false.push(test)
-            }
-        }
-    }
-    return points
-}
-
-/**
- * Retrieve all points between start and end as either true or
- * false properties based on the function used.
- * @param start
- * @param end
- * @param matrix
- * @param func
- * @param inclusive
- * @returns {{true: Array, false: Array}}
- */
-const getInBetween = (start, end, matrix, func, inclusive = true) => {
-    let points = {
-        true: [],
-        false: []
-    }
-
-    // Return true if either of the two points have a ship
-    if (inclusive) {
-        if (func(start, matrix)) {
-            points.true.push(start)
-        } else {
-            points.false.push(start)
-        }
-        if (func(end, matrix)) {
-            points.true.push(end)
-        } else {
-            points.false.push(end)
-        }
-    }
-
-    return mergeObjects(points, testPointsBetween(start, end, matrix, func))
-}
-
-/**
- * Given two points, check the cells between using specified function.
- * When inclusive is set to true the provided start and end points will also be tested
- * @param start
- * @param end
- * @param matrix
- * @param func
- * @param inclusive
- * @returns {boolean}
- */
-const checkInBetween = (start, end, matrix, func, inclusive = true) => (inclusive && (func(start, matrix) || func(end, matrix))) ? true : !!testPointsBetween(start, end, matrix, func).true.length
-
-/**
- * Return point-like object with all of the axis lengths.
- * @param matrix
- */
-const getAxisLengths = (matrix) => point(matrix.children[0].children[0].children.length, matrix.children[0].children.length, matrix.children.length)
-
-/**
- * Create a single random number where range is within length. The number is adjusted by the provided direction (0 or 1)
- * @param length
- * @param range
- * @param dirAdjust
- */
-const randCoords = (length, range = 0, dirAdjust = 0) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)))
-
-/**
- * Get random direction point
- * @param useCoords
- */
-const randDirection = (useCoords = []) => useCoords.length ? useCoords[Math.floor(Math.random() * useCoords.length)] : point(0, 0, 0)
-
-/**
- * Test if the provided point exists in the matrix.
- * @param pnt
- * @param matrix
- */
-const checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
-
-/**
- * Test if the provided point exists in the matrix.
- * @param pnt
- * @param matrix
- */
-const getDOMItemFromPoint = (pnt, matrix) => checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false;
-
-/**
- * Return an array of all the points in the matrix
- * @param matrix
- * @returns {Array}
- */
-const getAllPoints = matrix => {
-    let lengths = getAxisLengths(matrix)
-    let allPoints = []
-    for (let z = 0; z < lengths.z; ++z) {
-        for (let y = 0; y < lengths.y; ++y) {
-            for (let x = 0; x < lengths.x; ++x) {
-                allPoints.push(matrix.children[z].children[y].children[x].point)
-            }
-        }
-    }
-    return allPoints
-}
-
-/**
- * Return all valid points surrounding a provided point
- * @param pnt
- * @param matrix
- * @returns {Array}
- */
-const adjacentPoints = (pnt, matrix) => {
-    let adjPoints = []
-    for (let z = -1; z < 2; ++z) {
-        for (let y = -1; y < 2; ++y) {
-            for (let x = -1; x < 2; ++x) {
-                let testPoint = point(pnt.x + x, pnt.y + y, pnt.z + z)
-                if (checkValidPoint(testPoint, matrix) && point !== testPoint) {
-                    adjPoints.push(testPoint)
-                }
-            }
-        }
-    }
-    return adjPoints
-}
-
-/**
- * Return all points which touch on edges (not diagonal)
- * @param pnt
- * @param matrix
- */
-const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), point(0, -1, 0), point(0, 1, 0), point(0, 0, -1), point(0, 0, 1)].map(p => point(pnt.x + p.x, pnt.y + p.y, pnt.z + p.z)).filter(p => checkValidPoint(p, matrix))
-
-/**
- * Attach an event listener to each cell in the matrix.
- * Accepts an unlimited number of additional arguments to be passed to the action function.
- * WARNING: This is a recursive function.
- * @param item
- * @param extra
- * @returns {*}
- */
-const bindListeners = (item, ...extra) => {
-    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
-        Object.keys(item.eventListeners).map(event => item.element.addEventListener(event, (e) => item.eventListeners[event](e, item, ...extra)))
-    } else {
-        item.children.map(i => bindListeners(i, ...extra))
-    }
-    return item
-}
 
 /**
  * Run Timeout functions one after the other in queue
