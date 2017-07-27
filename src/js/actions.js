@@ -87,12 +87,14 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
             ++player.attacks.sunk
         }
     }
+    let result = {}
     if (!playAgain) {
         player.attacker = !player.attacker
         attackFleet.isLocked = true
         if (player.attacker) {
-            queueTimeout(() => {
-                player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
+            result = queueTimeout(() => {
+                attackFleet.isLocked = false
+                return player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
                     attributes: {
                         styles: {
                             width: '17px',
@@ -100,12 +102,12 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                         }
                     }
                 })))))
-                attackFleet.isLocked = false
             }, 400)
             ++player.turnCnt
         } else {
-            queueTimeout(() => {
-                player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
+            result = queueTimeout(() => {
+                attackFleet.isLocked = false
+                return player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
                     attributes: {
                         styles: {
                             width: '35px',
@@ -113,12 +115,11 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                         }
                     }
                 })))))
-                attackFleet.isLocked = false
             }, 0)
         }
     }
-    queueTimeout(() => player = updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
-    return player
+    result = queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
+    return result.result || player
 }
 
 /**

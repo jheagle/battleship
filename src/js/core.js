@@ -111,7 +111,7 @@ const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
  * objects having the same attributes will overwrite starting from the end of the argument
- * list and bubbling up to overwrite the first object. The merged object is then returned.
+ * list and bubbling up to return a merged version of the first object.
  * WARNING: This is a recursive function.
  * @param args
  * @returns {*}
@@ -125,7 +125,7 @@ const mergeObjects = (...args) => {
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
  * objects having the same attributes will overwrite starting from the end of the argument
- * list and bubbling up to overwrite the first object. The merged object is then returned.
+ * list and bubbling up to return the overwritten first object.
  * WARNING: This is a recursive function.
  * WARNING: This will mutate the first object passed in as input
  * @param args
@@ -160,18 +160,19 @@ const buildArray = (item, length, useReference = false, arr = []) => --length > 
 const queueTimeout = (fn = {}, time = 0, ...args) => {
     queueTimeout.queue = queueTimeout.queue || []
     queueTimeout.isRunning = queueTimeout.isRunning || false
-    if (fn) {
-        queueTimeout.queue.push({func: fn, timeout: time, args: args});
-    }
+    let queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
+    if (fn)
+        queueTimeout.queue.push(queueItem)
+
     if (queueTimeout.queue.length && !queueTimeout.isRunning) {
         queueTimeout.isRunning = true
         let toRun = queueTimeout.queue.shift()
-        toRun.args = toRun.args || []
-        return setTimeout(() => {
-            toRun.func(...toRun.args)
+        toRun.id = setTimeout(() => {
+            toRun.result = toRun.func(...toRun.args)
             queueTimeout.isRunning = false
             return queueTimeout(false)
         }, toRun.timeout)
+        return toRun
     }
-    return queueTimeout.isRunning
+    return queueItem
 }
