@@ -36,23 +36,23 @@ const coordinate = (axisName) => ({
  * @param props
  */
 const matrix = (i, x, y, z = 1, ...props) => DOMItem({
+    tagName: 'div',
     attributes: {
-        element: 'div',
         class: 'matrix'
     },
     children: buildArray(DOMItem(coordinate('z'), {
+        tagName: 'div',
         attributes: {
-            element: 'div',
             class: 'layer'
         },
         children: buildArray(DOMItem(coordinate('y'), {
+            tagName: 'div',
             attributes: {
-                element: 'div',
                 class: 'row'
             },
             children: buildArray(DOMItem(coordinate('x'), {
+                tagName: 'div',
                 attributes: {
-                    element: 'div',
                     class: 'column'
                 }
             }, ...props, i), x)

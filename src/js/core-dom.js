@@ -8,18 +8,17 @@ const updateElement = (config) => {
     if (!(config.element instanceof HTMLElement)) {
         return config
     }
-    if (config.attributes) {
-        Object.keys(config.attributes).map((attr) => {
-            if (attr === 'styles') {
-                mapObject(config.attributes[attr], (param, key) => config.element.style[key] = param, config.element.style)
-            } else if (attr !== 'element') {
-                config.element.setAttribute(attr, config.attributes[attr])
-            }
-        })
-    }
-    if (config.elementProperties) {
-        Object.keys(config.elementProperties).map((prop) => config.element[prop] = config.elementProperties[prop])
-    }
+    config.attributes = mapObject(config.attributes, (attr, key) => {
+        if (key in config.element) {
+            config.element[key] = attr
+            return attr
+        } else if (key === 'styles') {
+            mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
+            return attr
+        }
+        config.element.setAttribute(key, attr)
+        return attr
+    })
     return config
 }
 
@@ -38,7 +37,7 @@ const updateElements = (config) => {
  * @param config
  */
 const generateElement = (config) => {
-    config.element = document.createElement(config.attributes.element)
+    config.element = document.createElement(config.tagName)
     return updateElement(config).element
 }
 
@@ -49,8 +48,8 @@ const generateElement = (config) => {
  * @param parent
  */
 const bindElements = (item, parent = documentItem) => DOMItem(item, {
-    attributes: item.attributes || {element: 'div', styles: {}},
-    elementProperties: item.elementProperties || {},
+    tagName: item.tagName || 'div',
+    attributes: item.attributes || {styles: {}},
     element: generateElement(item) || HTMLElement,
     parentItem: parent,
     children: item.children ? item.children.map(child => bindElements(child, item)) : []
@@ -121,7 +120,14 @@ const bindListeners = (item, ...extra) => {
  * @param item
  * @returns {Array}
  */
-const getChildrenFromAttribute = (attr, value, item = documentItem.body) => (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
+const getChildrenFromAttribute = (attr, value, item = documentItem.body) => {
+    if (item.attributes[attr]) {
+
+        if (item.attributes[attr] === value)
+            return item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item])
+    }
+    return item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
+}
 
 /**
  * Helper for getting all DOMItems starting at parent and having specified class attribute

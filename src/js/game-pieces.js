@@ -54,8 +54,8 @@ const playerSet = (board = {}, name = '') => ({
     board: board,
     shipFleet: [],
     playerStats: {},
+    tagName: 'div',
     attributes: {
-        element: 'div',
         class: 'player'
     },
     children: [
@@ -69,29 +69,23 @@ const playerSet = (board = {}, name = '') => ({
  * @param status
  */
 const playerStats = (player = {}, status = '') => ({
-    attributes: {
-        element: 'div'
-    },
+    tagName: 'div',
+    attributes: {},
     children: [
         {
+            tagName: 'span',
             attributes: {
-                element: 'span'
-            },
-            elementProperties: {
                 innerHTML: `<strong>${player.name}</strong>: ${status}`
             },
         },
         {
-            attributes: {
-                element: 'ul'
-            },
+            tagName: 'ul',
+            attributes: {},
             children: player.shipFleet.map(ship => ({
+                tagName: 'li',
                 attributes: {
-                    element: 'li',
-                },
-                elementProperties: {
                     innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
-                }
+                },
             }))
         }
     ]

@@ -5,11 +5,10 @@
  * @constructor
  */
 const DOMItem = (...attributes) => mergeObjectsMutable({
+    tagName: 'div',
     attributes: {
-        element: 'div',
         styles: {}
     },
-    elementProperties: {},
     element: {},
     eventListeners: {},
     parentItem: {},
@@ -22,24 +21,21 @@ const DOMItem = (...attributes) => mergeObjectsMutable({
 const documentDOMItem = () => {
     let children = [
         DOMItem({
-            attributes: {
-                element: 'head'
-            },
+            tagName: 'head',
+            attributes: {},
             element: document.head,
             children: []
         }),
         DOMItem({
-            attributes: {
-                element: 'body'
-            },
+            tagName: 'body',
+            attributes: {},
             element: document.body,
             children: []
         }),
     ]
     let rootItem = DOMItem({
-        attributes: {
-            element: 'html'
-        },
+        tagName: 'html',
+        attributes: {},
         element: document,
         children: children,
         head: children[0],

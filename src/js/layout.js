@@ -3,20 +3,20 @@
  * This will be the main menu for the game.
  */
 const mainMenu = () => ({
+    tagName: 'div',
     attributes: {
-        element: 'div',
         class: 'main-menu'
     },
     children: [
         {
+            tagName: 'div',
             attributes: {
-                element: 'div',
                 class: 'content'
             },
             children: [
                 {
+                    tagName: 'form',
                     attributes: {
-                        element: 'form',
                         class: 'main-menu-form',
                     },
                     children: [
@@ -26,17 +26,15 @@ const mainMenu = () => ({
                             },
                             children: [
                                 {
+                                    tagName: 'label',
                                     attributes: {
-                                        element: 'label',
-                                        for: 'human-players'
-                                    },
-                                    elementProperties: {
+                                        for: 'human-players',
                                         innerText: 'Humans'
-                                    }
+                                    },
                                 },
                                 {
+                                    tagName: 'input',
                                     attributes: {
-                                        element: 'input',
                                         id: 'human-players',
                                         name: 'human-players',
                                         type: 'number',
@@ -49,23 +47,21 @@ const mainMenu = () => ({
                             ]
                         },
                         {
+                            tagName: 'div',
                             attributes: {
-                                element: 'div',
                                 class: 'form-group'
                             },
                             children: [
                                 {
+                                    tagName: 'label',
                                     attributes: {
-                                        element: 'label',
-                                        for: 'robot-players'
-                                    },
-                                    elementProperties: {
+                                        for: 'robot-players',
                                         innerText: 'Robots'
-                                    }
+                                    },
                                 },
                                 {
+                                    tagName: 'input',
                                     attributes: {
-                                        element: 'input',
                                         id: 'robot-players',
                                         name: 'robot-players',
                                         type: 'number',
@@ -78,25 +74,23 @@ const mainMenu = () => ({
                             ]
                         },
                         {
+                            tagName: 'label',
                             attributes: {
-                                element: 'label',
-                                for: 'first-go-first'
-                            },
-                            elementProperties: {
+                                for: 'first-go-first',
                                 innerText: 'First Player Starts'
-                            }
+                            },
                         },
                         {
+                            tagName: 'input',
                             attributes: {
-                                element: 'input',
                                 id: 'first-go-first',
                                 name: 'first-go-first',
                                 type: 'checkbox',
                             }
                         },
                         {
+                            tagName: 'input',
                             attributes: {
-                                element: 'input',
                                 type: 'submit',
                                 value: 'Start'
                             }
@@ -112,40 +106,38 @@ const mainMenu = () => ({
  * Wrapper div for player data / boards
  */
 const boards = () => ({
+    tagName: 'div',
     attributes: {
-        element: 'div',
         class: 'boards'
     },
 })
 
 /**
- * 
+ *
  * @param players
  */
 const finalScore = (players) => ({
+    tagName: 'div',
     attributes: {
-        element: 'div',
         class: 'final-scores'
     },
     children: [
         {
+            tagName: 'div',
             attributes: {
-                element: 'div',
                 class: 'score-cards'
             },
             children: players.map(player => ({
+                tagName: 'div',
                 attributes: {
-                    element: 'div',
-                    class: 'score-card'
-                },
-                elementProperties: {
+                    class: 'score-card',
                     innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${Math.round(player.status * 100) / 100}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
-                }
+                },
             }))
         },
         {
+            tagName: 'input',
             attributes: {
-                element: 'input',
                 type: 'button',
                 value: 'Restart'
             },
