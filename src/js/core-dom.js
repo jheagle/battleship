@@ -15,6 +15,9 @@ const updateElement = (config) => {
         } else if (key === 'styles') {
             mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
             return attr
+        } else if (key === 'class') {
+            config.element.className += config.element.className ? ` ${attr}` : attr
+            return attr
         }
         config.element.setAttribute(key, attr)
         return attr
@@ -94,18 +97,49 @@ const removeChild = (item, parent = documentItem.body) => {
 }
 
 /**
+ *
+ * @param options
+ * @returns {boolean}
+ */
+const listenerOptions = options => {
+    if (typeof listenerOptions.supportsOptions === 'undefined') {
+        listenerOptions.supportsOptions = true
+        try {
+            window.addEventListener('test', null, {capture: false, once: false, passive: false})
+        } catch (err) {
+            listenerOptions.supportsOptions = false
+        }
+    }
+    return (typeof options === 'object' && listenerOptions.supportsOptions) ? options : false
+}
+
+/**
+ *
+ * @param trigger
+ * @param elem
+ * @param fn
+ * @param options
+ * @returns {*}
+ */
+const assignListener = (trigger, elem, fn, options) =>
+    elem.addEventListener ? elem.addEventListener(trigger, fn, listenerOptions(options)) :
+        elem.attachEvent ? elem.attachEvent(`on${trigger}`, fn) :
+            elem[`on${trigger}`] = fn
+
+/**
  * Attach an event listener to each cell in the matrix.
  * Accepts an unlimited number of additional arguments to be passed to the action function.
  * WARNING: This is a recursive function.
  * @param item
+ * @param options
  * @param extra
  * @returns {*}
  */
-const bindListeners = (item, ...extra) => {
+const bindListeners = (item, options = false, ...extra) => {
     if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
-        Object.keys(item.eventListeners).map(event => item.element.addEventListener(event, (e) => item.eventListeners[event](e, item, ...extra)))
+        item.element = mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr(e, item, ...extra), options), item.element)
     } else {
-        item.children.map(i => bindListeners(i, ...extra))
+        item.children.map(i => bindListeners(i, options, ...extra))
     }
     return item
 }
@@ -120,14 +154,7 @@ const bindListeners = (item, ...extra) => {
  * @param item
  * @returns {Array}
  */
-const getChildrenFromAttribute = (attr, value, item = documentItem.body) => {
-    if (item.attributes[attr]) {
-
-        if (item.attributes[attr] === value)
-            return item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item])
-    }
-    return item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
-}
+const getChildrenFromAttribute = (attr, value, item = documentItem.body) => (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
 
 /**
  * Helper for getting all DOMItems starting at parent and having specified class attribute
@@ -145,3 +172,16 @@ const getChildrenByName = curry(getChildrenFromAttribute)('name')
  * @param item
  */
 const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
+
+/**
+ * This is a shortcut for building the specified HTML elements and appending them to the DOM
+ * with associated listeners.
+ * The final two arguments are specific for adding event listeners with options and additional arguments
+ * eventListeners functions.
+ * @param DOMTemplate
+ * @param parent
+ * @param options
+ * @param args
+ * @returns {*}
+ */
+const renderHTML = (DOMTemplate, parent = documentItem, options = false, ...args) => bindListeners(appendHTML(bindElements(DOMTemplate, parent), parent.body), options, ...inArray(args, parent) ? args : [parent])

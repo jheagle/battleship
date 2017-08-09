@@ -21,8 +21,8 @@ const curry = (fn) => {
  * @param args
  * @returns {Array|*|{annotation}}
  */
-const mapObject = (obj, fn, initObj = {}, ...args) => Array.isArray(obj) ? obj.map((prop, i) => fn(prop, i, ...args)) : Object.keys(obj).reduce((newObj, curr) => {
-        newObj[curr] = fn(obj[curr], curr, ...args)
+const mapObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.map((prop, i) => fn(prop, i)) : Object.keys(obj).reduce((newObj, curr) => {
+        newObj[curr] = fn(obj[curr], curr)
         return newObj
     }, initObj)
 

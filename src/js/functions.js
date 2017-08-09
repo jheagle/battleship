@@ -170,7 +170,7 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     let stats = bindElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
     player.playerStats = stats
     player.children.push(stats)
-    player = bindListeners(...buildArray(player, 2, true), players)
+    player = bindListeners(player, false, player, players)
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, parent, players)
 }
@@ -217,7 +217,7 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    bindListeners(mergeObjectsMutable(getChildrenByClass('main-menu-form', appendHTML(bindElements(mainMenu(), parent), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
+    renderHTML(mainMenu(), parent)
     return parent
 }
 

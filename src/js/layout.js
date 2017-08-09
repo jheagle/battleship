@@ -19,8 +19,10 @@ const mainMenu = () => ({
                     attributes: {
                         class: 'main-menu-form',
                     },
+                    eventListeners: {submit: beginRound},
                     children: [
                         {
+                            tagName: 'div',
                             attributes: {
                                 class: 'form-group'
                             },
