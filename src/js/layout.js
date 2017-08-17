@@ -1,8 +1,10 @@
 // Custom layout objects leveraging the DOMItem object
 /**
  * This will be the main menu for the game.
+ * @param parent
+ * @returns {{tagName: string, attributes: {class: string}, children: [*]}}
  */
-const mainMenu = () => ({
+const mainMenu = (parent = {}) => ({
     tagName: 'div',
     attributes: {
         class: 'main-menu'
@@ -19,7 +21,7 @@ const mainMenu = () => ({
                     attributes: {
                         class: 'main-menu-form',
                     },
-                    eventListeners: {submit: beginRound},
+                    eventListeners: {submit: {listenerFunc: beginRound, listenerArgs: {parent: parent}}},
                     children: [
                         {
                             tagName: 'div',
@@ -106,6 +108,7 @@ const mainMenu = () => ({
 
 /**
  * Wrapper div for player data / boards
+ * @returns {{tagName: string, attributes: {class: string}}}
  */
 const boards = () => ({
     tagName: 'div',
@@ -117,8 +120,10 @@ const boards = () => ({
 /**
  *
  * @param players
+ * @param parent
+ * @returns {{tagName: string, attributes: {class: string}, children: [*,*]}}
  */
-const finalScore = (players) => ({
+const finalScore = (players, parent = {}) => ({
     tagName: 'div',
     attributes: {
         class: 'final-scores'
@@ -144,7 +149,7 @@ const finalScore = (players) => ({
                 value: 'Restart'
             },
             eventListeners: {
-                click: restart
+                click: {listenerFunc: restart, listenerArgs: {parent: parent}}
             }
         }
     ]

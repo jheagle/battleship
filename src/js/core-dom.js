@@ -1,28 +1,74 @@
 // Core DOM management functions
 /**
+ *
+ * @param element
+ * @param key
+ * @param attr
+ * @returns {*}
+ */
+const elementHasAttribute = (element, key, attr) => {
+    if (!(element instanceof HTMLElement))
+        return false
+
+    if (key in element) {
+        return element[key] === attr
+    } else if (key === 'styles') {
+        return Object.keys(attr).filter(cl => (!inArray(Object.keys(element.style), cl) || attr[cl] !== element.style[cl])).concat(Object.keys(element.style)).reduce((returnObj, b) => {
+            returnObj[b] = inArray(Object.keys(attr), b) ?
+                !inArray(Object.keys(element.style), b) ? 1 :
+                    0 :
+                -1
+            return returnObj
+        }, {})
+    } else if (key === 'class') {
+        return attr.split(' ').filter(cl => !inArray(element.className.split(' '), cl)).concat(element.className.split(' ')).filter(cl => !!cl.length).reduce((returnObj, b) => {
+            returnObj[b] = inArray(attr.split(' '), b) ?
+                inArray(element.className.split(' '), b) ? 1 :
+                    0 :
+                -1
+            return returnObj
+        }, {})
+    }
+
+    return (element.hasAttribute(key) && element.getAttribute(key) === attr)
+}
+
+/**
+ *
+ * @param config
+ * @returns {*}
+ */
+const elementChanges = config => (config.element.tagName.toLowerCase() === config.tagName.toLowerCase()) ? mergeObjects(config, {
+        attributes: filterObject(config.attributes, (attr1, key1) => filterObject(mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'class') ? filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 !== 1 || attr3 === false) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => (typeof attr4 === 'object' && !Object.keys(attr4).length) ? false : attr4)[key1])
+    }) : generateElement(config)
+
+/**
  * Update a single DOMItem element with the provided attributes / styles / elementProperties
  * @param config
  * @returns {*}
  */
 const updateElement = (config) => {
-    if (!(config.element instanceof HTMLElement)) {
-        return config
-    }
-    config.attributes = mapObject(config.attributes, (attr, key) => {
-        if (key in config.element) {
-            config.element[key] = attr
-            return attr
-        } else if (key === 'styles') {
-            mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
-            return attr
-        } else if (key === 'class') {
-            config.element.className += config.element.className ? ` ${attr}` : attr
-            return attr
-        }
-        config.element.setAttribute(key, attr)
-        return attr
-    })
-    return config
+    // config.attributes.styles.color = 'blue'
+    console.log(config)
+    console.log(config.attributes)
+    // console.log(elementChanges(config).attributes)
+    // console.log(mergeObjects(config.attributes, config.attributes))
+    return (config.element instanceof HTMLElement) ? mergeObjects(config, {
+            attributes: mapObject(config.attributes, (attr, key) => {
+                if (key in config.element) {
+                    config.element[key] = attr
+                    return attr
+                } else if (key === 'styles') {
+                    mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
+                    return attr
+                } else if (key === 'class') {
+                    config.element.className = attr
+                    return attr
+                }
+                config.element.setAttribute(key, attr)
+                return attr
+            })
+        }) : config
 }
 
 /**
@@ -53,7 +99,8 @@ const generateElement = (config) => {
 const bindElements = (item, parent = documentItem) => DOMItem(item, {
     tagName: item.tagName || 'div',
     attributes: item.attributes || {styles: {}},
-    element: generateElement(item) || HTMLElement,
+    element: (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item),
+    eventListeners: item.eventListeners || {},
     parentItem: parent,
     children: item.children ? item.children.map(child => bindElements(child, item)) : []
 })
@@ -97,7 +144,7 @@ const removeChild = (item, parent = documentItem.body) => {
 }
 
 /**
- *
+ * Provide compatibility for using the options parameter of addEventListener
  * @param options
  * @returns {boolean}
  */
@@ -114,7 +161,7 @@ const listenerOptions = options => {
 }
 
 /**
- *
+ * Provide compatibility for assigning listeners.
  * @param trigger
  * @param elem
  * @param fn
@@ -132,17 +179,14 @@ const assignListener = (trigger, elem, fn, options) =>
  * WARNING: This is a recursive function.
  * @param item
  * @param options
- * @param extra
  * @returns {*}
  */
-const bindListeners = (item, options = false, ...extra) => {
-    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
-        item.element = mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr(e, item, ...extra), options), item.element)
-    } else {
-        item.children.map(i => bindListeners(i, options, ...extra))
-    }
-    return item
-}
+const bindListeners = (item, options = false) => mergeObjects(item, {
+    element: (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) ?
+        mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options), item.element) :
+        item.element,
+    children: item.children.map(i => bindListeners(i, options))
+})
 
 /**
  * A selector function for retrieving existing child DOMItems from the given parent item.
@@ -181,7 +225,6 @@ const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopPar
  * @param DOMTemplate
  * @param parent
  * @param options
- * @param args
  * @returns {*}
  */
-const renderHTML = (DOMTemplate, parent = documentItem, options = false, ...args) => bindListeners(appendHTML(bindElements(DOMTemplate, parent), parent.body), options, ...inArray(args, parent) ? args : [parent])
+const renderHTML = (DOMTemplate, parent = documentItem, options = false) => bindListeners(appendHTML(mergeObjectsMutable(bindElements(DOMTemplate(), parent), DOMTemplate(parent)), parent.body), options)

@@ -166,11 +166,12 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     let board = bindElements(bindPointData(square(waterTile(), 10)), parent)
     let player = bindElements(playerSet(board, `Player ${players.length + 1}`), parent)
     player.isRobot = humans <= 0
-    player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
+    player.shipFleet = defaultFleet(player.board, true) // generate fleet of ships
     let stats = bindElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
     player.playerStats = stats
     player.children.push(stats)
-    player = bindListeners(player, false, player, players)
+    // player = bindListeners(mergeObjectsMutable(player, {board: square(waterTile(player, players), 10)}), false)
+    console.log(player)
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, parent, players)
 }
@@ -180,10 +181,10 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
  * (selects random start player and calls computer attack if it is AI starting)
  * @param e
  * @param mainForm
- * @param parent
+ * @param args
  * @returns {boolean}
  */
-const beginRound = (e, mainForm, parent = documentItem) => {
+const beginRound = (e, mainForm, args = {parent: documentItem}) => {
     e.preventDefault()
     let humans = parseInt(getChildrenByName('human-players', mainForm)[0].element.value)
     let robots = parseInt(getChildrenByName('robot-players', mainForm)[0].element.value)
@@ -198,10 +199,11 @@ const beginRound = (e, mainForm, parent = documentItem) => {
     if (humans === 1) {
         robots = robots < 1 ? 1 : robots
     }
-    removeChild(getChildrenByClass('main-menu', parent.body)[0], parent.body)
-    let playerBoards = appendHTML(bindElements(boards(), parent.body), parent.body)
+    removeChild(getChildrenByClass('main-menu', args.parent.body)[0], args.parent.body)
+    let playerBoards = appendHTML(bindElements(boards(), args.parent.body), args.parent.body)
     let players = buildPlayers(humans, robots, playerBoards)
     appendHTML(players, playerBoards) // create div for storing players
+    console.log(players)
     let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
     if (firstAttacker.isRobot) {
         computerAttack(firstAttacker, players, false)
@@ -217,8 +219,8 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    renderHTML(mainMenu(), parent)
+    renderHTML(mainMenu, parent)
     return parent
 }
 
-const restart = (e, button, parent) => main(parent)
+const restart = (e, button, args) => main(args.parent)

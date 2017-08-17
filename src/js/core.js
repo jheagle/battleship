@@ -7,7 +7,9 @@
  * @returns {function(...[*]): function(...[*])}
  */
 const curry = (fn) => {
-    let curried = (...args) => args.length >= fn.length ? fn(...args) : (...a) => curried(...[...args, ...a])
+    let curried = (...args) => args.length >= fn.length ?
+        fn(...args) :
+        (...a) => curried(...[...args, ...a])
     return curried
 }
 
@@ -18,11 +20,26 @@ const curry = (fn) => {
  * @param obj
  * @param fn
  * @param initObj
- * @param args
  * @returns {Array|*|{annotation}}
  */
-const mapObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.map((prop, i) => fn(prop, i)) : Object.keys(obj).reduce((newObj, curr) => {
-        newObj[curr] = fn(obj[curr], curr)
+const mapObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.map((prop, i) => fn.length === 1 ? fn(prop) : fn(prop, i)) : Object.keys(obj).reduce((newObj, curr) => {
+        newObj[curr] = fn.length === 1 ? fn(obj[curr]) : fn(obj[curr], curr)
+        return newObj
+    }, initObj)
+
+/**
+ *
+ * @param obj
+ * @param fn
+ * @param initObj
+ * @returns {Array.<T>|*}
+ */
+const filterObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.filter((prop, i) => fn.length === 1 ? fn(prop) : fn(prop, i)) : Object.keys(obj).reduce((newObj, curr) => {
+        if ((fn.length === 1 ? fn(obj[curr]) : fn(obj[curr], curr))) {
+            newObj[curr] = obj[curr]
+        } else {
+            delete newObj[curr]
+        }
         return newObj
     }, initObj)
 
@@ -86,7 +103,7 @@ const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(prop, key) 
  * @param extraTest
  * @returns {function(*=, *=)}
  */
-const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || key === 'parentItem' || (extraTest ? extraTest(prop, key) : false)
+const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || key === 'parentItem' || key === 'listenerArgs' || (extraTest ? extraTest(prop, key) : false)
 
 /**
  * A helper for cloneExclusions to simplify that function
@@ -106,7 +123,9 @@ const cloneExMap = (cloned, object, parents, fn) => mapObject(object, recursiveM
  * @param parents
  * @returns {*}
  */
-const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object) ? cloneExMap(cloned, object, parents, cloneExclusions) : cloned
+const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object) ?
+    cloneExMap(cloned, object, parents, cloneExclusions) :
+    cloned
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -116,11 +135,13 @@ const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(
  * @param args
  * @returns {*}
  */
-const mergeObjects = (...args) => {
-    if (args.length === 2)
-        return (notEmptyObjectOrArray(args[1])) ? mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjects), cloneObject(args[0])) : args[1]
-    return args.length === 1 ? args[0] : args.reduce((obj1, obj2) => mergeObjects(obj1, obj2), {})
-}
+const mergeObjects = (...args) => (args.length === 2) ?
+    (notEmptyObjectOrArray(args[1])) ?
+        mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjects), cloneObject(args[0])) :
+        args[1] :
+    args.length === 1 ?
+        args[0] :
+        args.reduce((obj1, obj2) => mergeObjects(obj1, obj2), {})
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -131,11 +152,13 @@ const mergeObjects = (...args) => {
  * @param args
  * @returns {*}
  */
-const mergeObjectsMutable = (...args) => {
-    if (args.length === 2)
-        return (notEmptyObjectOrArray(args[1])) ? mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjectsMutable), args[0]) : args[1]
-    return args.length === 1 ? args[0] : args.reduce((obj1, obj2) => mergeObjectsMutable(obj1, obj2), {})
-}
+const mergeObjectsMutable = (...args) => (args.length === 2) ?
+    (notEmptyObjectOrArray(args[1])) ?
+        mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjectsMutable), args[0]) :
+        args[1] :
+    args.length === 1 ?
+        args[0] :
+        args.reduce((obj1, obj2) => mergeObjectsMutable(obj1, obj2), {})
 
 
 /**
@@ -147,7 +170,11 @@ const mergeObjectsMutable = (...args) => {
  * @param arr
  * @returns {Array.<*>}
  */
-const buildArray = (item, length, useReference = false, arr = []) => --length > 0 ? buildArray((useReference ? item : cloneObject(item)), length, useReference, arr.concat([item])) : arr.concat([item])
+const buildArray = (item, length, useReference = false, arr = []) => --length > 0 ?
+    buildArray((useReference ?
+        item :
+        cloneObject(item)), length, useReference, arr.concat([item])) :
+    arr.concat([item])
 
 /**
  * Run Timeout functions one after the other in queue

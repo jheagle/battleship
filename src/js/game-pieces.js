@@ -1,48 +1,58 @@
 // Game specific objects
 /**
  * Default properties for a tile in the battleship game.
+ * @param player
+ * @param players
+ * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {func: attackListener, args: {player: {}, players: Array}}}}}
  */
-const gameTile = () => ( {
+const gameTile = (player = {}, players = []) => ({
     hasShip: false,
     isHit: false,
     eventListeners: {
-        click: attackListener
+        click: {listenerFunc: attackListener, listenerArgs: {player: player, players: players}}
     },
 })
 
 /**
  * Set the style for tiles representing water.
+ * @param player
+ * @param players
+ * @returns {*}
  */
-const waterTile = () => mergeObjects(gameTile(), tile())
+const waterTile = (player = {}, players = []) => mergeObjects(gameTile(player, players), tile())
 
 /**
  * Set status and custom properties for tiles that have a ship
+ * @returns {{hasShip: boolean}}
  */
-const shipTile = () => ( {
+const shipTile = () => ({
     hasShip: true,
-} )
+})
 
 /**
  * Store properties of a ship which includes an array of all associated ship tiles.
  * @param name
+ * @returns {{name: string, status: number, parts: Array}}
  */
-const ship = (name = '') => ( {
+const ship = (name = '') => ({
     name: name,
     status: 100,
     parts: [],
-} )
+})
 
 /**
  * Set the status of the tile to hit.
+ * @returns {{isHit: boolean}}
  */
-const hitTile = () => ( {
+const hitTile = () => ({
     isHit: true,
-} )
+})
 
 /**
  * Store the player attributes.
  * @param board
  * @param name
+ * @returns {{name: string, isRobot: boolean, status: number, turnCnt: number, attacker: boolean, attacks: {hit: number, miss: number, sunk: number}, board: {}, shipFleet: Array, playerStats: {}, tagName: string, attributes: {class: string}, children: [*]}}
  */
 const playerSet = (board = {}, name = '') => ({
     name: name,
@@ -64,9 +74,10 @@ const playerSet = (board = {}, name = '') => ({
 })
 
 /**
- *
+ * The defined attributes for each player
  * @param player
  * @param status
+ * @returns {{tagName: string, attributes: {}, children: [*,*]}}
  */
 const playerStats = (player = {}, status = '') => ({
     tagName: 'div',
