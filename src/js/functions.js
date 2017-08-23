@@ -150,30 +150,21 @@ const generateRandomFleet = (ships, matrix, view = false) => {
  * Returns an array of players.
  * @param humans
  * @param robots
- * @param parent
  * @param players
  * @returns {Array}
  */
-const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) => {
+const buildPlayers = (humans, robots = 0, players = []) => {
     if (humans < 1 && robots < 1) {
         return players
     }
-    // 1. generate matrix for player board
-    // 2. bind point data to each item in matrix
-    // 3. bind HTML element data to each item in matrix
-    // 4. bind event listeners to each board tile
-    // 5. append the elements as HTML
-    let board = bindElements(bindPointData(square(waterTile(), 10)), parent)
-    let player = bindElements(playerSet(board, `Player ${players.length + 1}`), parent)
+    let player = playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans <= 0
-    player.shipFleet = defaultFleet(player.board, true) // generate fleet of ships
-    let stats = bindElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
-    player.playerStats = stats
-    player.children.push(stats)
-    // player = bindListeners(mergeObjectsMutable(player, {board: square(waterTile(player, players), 10)}), false)
-    console.log(player)
+    player.board = bindPointData(square(waterTile(player, players), 10))
+    player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
+    player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`)
+    player.children = [player.board, player.playerStats]
     players.push(player)
-    return buildPlayers(--humans, humans < 0 ? --robots : robots, parent, players)
+    return buildPlayers(--humans, humans < 0 ? --robots : robots, players)
 }
 
 /**
@@ -200,10 +191,7 @@ const beginRound = (e, mainForm, args = {parent: documentItem}) => {
         robots = robots < 1 ? 1 : robots
     }
     removeChild(getChildrenByClass('main-menu', args.parent.body)[0], args.parent.body)
-    let playerBoards = appendHTML(bindElements(boards(), args.parent.body), args.parent.body)
-    let players = buildPlayers(humans, robots, playerBoards)
-    appendHTML(players, playerBoards) // create div for storing players
-    console.log(players)
+    let players = renderHTML(boards(buildPlayers(humans, robots)), args.parent).children
     let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
     if (firstAttacker.isRobot) {
         computerAttack(firstAttacker, players, false)
@@ -219,7 +207,7 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    renderHTML(mainMenu, parent)
+    renderHTML(mainMenu(parent), parent)
     return parent
 }
 

@@ -21,7 +21,13 @@ const mainMenu = (parent = {}) => ({
                     attributes: {
                         class: 'main-menu-form',
                     },
-                    eventListeners: {submit: {listenerFunc: beginRound, listenerArgs: {parent: parent}}},
+                    eventListeners: {
+                        submit: {
+                            listenerFunc: beginRound,
+                            listenerArgs: {parent: parent},
+                            listenerOptions: false
+                        }
+                    },
                     children: [
                         {
                             tagName: 'div',
@@ -110,11 +116,12 @@ const mainMenu = (parent = {}) => ({
  * Wrapper div for player data / boards
  * @returns {{tagName: string, attributes: {class: string}}}
  */
-const boards = () => ({
+const boards = (players = []) => ({
     tagName: 'div',
     attributes: {
         class: 'boards'
     },
+    children: players
 })
 
 /**
@@ -149,7 +156,7 @@ const finalScore = (players, parent = {}) => ({
                 value: 'Restart'
             },
             eventListeners: {
-                click: {listenerFunc: restart, listenerArgs: {parent: parent}}
+                click: {listenerFunc: restart, listenerArgs: {parent: parent}, listenerOptions: false}
             }
         }
     ]

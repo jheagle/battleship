@@ -7,24 +7,28 @@
  * @returns {*}
  */
 const elementHasAttribute = (element, key, attr) => {
+    // if element is not a valid element then return false
     if (!(element instanceof HTMLElement))
         return false
 
+    // check the key is a property of the element
     if (key in element) {
-        return element[key] === attr
-    } else if (key === 'styles') {
+        return element[key] === attr // compare current to new one
+    } else if (key === 'styles') { // compare each style and return
+        // 0 = add style; 1 = no change; -1 = remove style
         return Object.keys(attr).filter(cl => (!inArray(Object.keys(element.style), cl) || attr[cl] !== element.style[cl])).concat(Object.keys(element.style)).reduce((returnObj, b) => {
             returnObj[b] = inArray(Object.keys(attr), b) ?
-                !inArray(Object.keys(element.style), b) ? 1 :
-                    0 :
+                inArray(Object.keys(element.style), b) ?
+                    1 : 0 :
                 -1
             return returnObj
         }, {})
-    } else if (key === 'class') {
+    } else if (key === 'class') { // compare each class and return
+        // 0 = add class; 1 = no change; -1 = remove class
         return attr.split(' ').filter(cl => !inArray(element.className.split(' '), cl)).concat(element.className.split(' ')).filter(cl => !!cl.length).reduce((returnObj, b) => {
             returnObj[b] = inArray(attr.split(' '), b) ?
-                inArray(element.className.split(' '), b) ? 1 :
-                    0 :
+                inArray(element.className.split(' '), b) ?
+                    1 : 0 :
                 -1
             return returnObj
         }, {})
@@ -38,38 +42,35 @@ const elementHasAttribute = (element, key, attr) => {
  * @param config
  * @returns {*}
  */
-const elementChanges = config => (config.element.tagName.toLowerCase() === config.tagName.toLowerCase()) ? mergeObjects(config, {
-        attributes: filterObject(config.attributes, (attr1, key1) => filterObject(mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'class') ? filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 !== 1 || attr3 === false) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => (typeof attr4 === 'object' && !Object.keys(attr4).length) ? false : attr4)[key1])
-    }) : generateElement(config)
+const elementChanges = config => {
+    if (config.element.tagName.toLowerCase() !== config.tagName.toLowerCase()) {
+        return generateElement(config)
+    }
+    config.attributes = filterObject(config.attributes, (attr1, key1) => filterObject(mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'class') ? filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => !attr3) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => (typeof attr4 === 'object' && !Object.keys(attr4).length) ? false : attr4)[key1])
+    return config
+}
 
 /**
  * Update a single DOMItem element with the provided attributes / styles / elementProperties
  * @param config
  * @returns {*}
  */
-const updateElement = (config) => {
-    // config.attributes.styles.color = 'blue'
-    console.log(config)
-    console.log(config.attributes)
-    // console.log(elementChanges(config).attributes)
-    // console.log(mergeObjects(config.attributes, config.attributes))
-    return (config.element instanceof HTMLElement) ? mergeObjects(config, {
-            attributes: mapObject(config.attributes, (attr, key) => {
-                if (key in config.element) {
-                    config.element[key] = attr
-                    return attr
-                } else if (key === 'styles') {
-                    mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
-                    return attr
-                } else if (key === 'class') {
-                    config.element.className = attr
-                    return attr
-                }
-                config.element.setAttribute(key, attr)
+const updateElement = (config) => (config.element instanceof HTMLElement) ? mergeObjects(config, {
+        attributes: mapObject(elementChanges(config).attributes, (attr, key) => {
+            if (key in config.element) {
+                config.element[key] = attr
                 return attr
-            })
-        }) : config
-}
+            } else if (key === 'styles') {
+                mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
+                return attr
+            } else if (key === 'class') {
+                config.element.className = attr
+                return attr
+            }
+            config.element.setAttribute(key, attr)
+            return attr
+        })
+    }) : config
 
 /**
  * Generate HTML element data for each object in the matrix
@@ -87,7 +88,7 @@ const updateElements = (config) => {
  */
 const generateElement = (config) => {
     config.element = document.createElement(config.tagName)
-    return updateElement(config).element
+    return updateElement(config)
 }
 
 /**
@@ -99,7 +100,7 @@ const generateElement = (config) => {
 const bindElements = (item, parent = documentItem) => DOMItem(item, {
     tagName: item.tagName || 'div',
     attributes: item.attributes || {styles: {}},
-    element: (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item),
+    element: (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item).element,
     eventListeners: item.eventListeners || {},
     parentItem: parent,
     children: item.children ? item.children.map(child => bindElements(child, item)) : []
@@ -181,7 +182,7 @@ const assignListener = (trigger, elem, fn, options) =>
  * @param options
  * @returns {*}
  */
-const bindListeners = (item, options = false) => mergeObjects(item, {
+const bindListeners = (item, options = false) => DOMItem(item, {
     element: (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) ?
         mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options), item.element) :
         item.element,
@@ -198,7 +199,9 @@ const bindListeners = (item, options = false) => mergeObjects(item, {
  * @param item
  * @returns {Array}
  */
-const getChildrenFromAttribute = (attr, value, item = documentItem.body) => (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
+const getChildrenFromAttribute = (attr, value, item = documentItem.body) => {
+    return (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
+}
 
 /**
  * Helper for getting all DOMItems starting at parent and having specified class attribute
@@ -220,11 +223,10 @@ const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopPar
 /**
  * This is a shortcut for building the specified HTML elements and appending them to the DOM
  * with associated listeners.
- * The final two arguments are specific for adding event listeners with options and additional arguments
- * eventListeners functions.
+ * The final argument is specific for adding event listeners with options.
  * @param DOMTemplate
  * @param parent
  * @param options
  * @returns {*}
  */
-const renderHTML = (DOMTemplate, parent = documentItem, options = false) => bindListeners(appendHTML(mergeObjectsMutable(bindElements(DOMTemplate(), parent), DOMTemplate(parent)), parent.body), options)
+const renderHTML = (DOMTemplate, parent = documentItem, options = false) => bindListeners(appendHTML(bindElements(DOMTemplate, parent), parent.body), options)

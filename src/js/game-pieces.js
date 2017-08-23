@@ -9,7 +9,7 @@ const gameTile = (player = {}, players = []) => ({
     hasShip: false,
     isHit: false,
     eventListeners: {
-        click: {listenerFunc: attackListener, listenerArgs: {player: player, players: players}}
+        click: {listenerFunc: attackListener, listenerArgs: {player: player, players: players}, listenerOptions: false}
     },
 })
 
