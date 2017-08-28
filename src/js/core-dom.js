@@ -55,13 +55,14 @@ const elementChanges = config => {
  * @param config
  * @returns {*}
  */
-const updateElement = (config) => (config.element instanceof HTMLElement) ? mergeObjects(config, {
-        attributes: mapObject(elementChanges(config).attributes, (attr, key) => {
+const updateElement = (config) => {
+    if (config.element instanceof HTMLElement) {
+        config.attributes = mapObject(elementChanges(config).attributes, (attr, key) => {
             if (key in config.element) {
                 config.element[key] = attr
                 return attr
             } else if (key === 'styles') {
-                mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
+                config.attributes.styles = mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
                 return attr
             } else if (key === 'class') {
                 config.element.className = attr
@@ -70,7 +71,9 @@ const updateElement = (config) => (config.element instanceof HTMLElement) ? merg
             config.element.setAttribute(key, attr)
             return attr
         })
-    }) : config
+    }
+    return config
+}
 
 /**
  * Generate HTML element data for each object in the matrix
@@ -97,7 +100,7 @@ const generateElement = (config) => {
  * @param item
  * @param parent
  */
-const bindElements = (item, parent = documentItem) => DOMItem(item, {
+const bindAllElements = (item, parent = documentItem) => DOMItem(item, {
     tagName: item.tagName || 'div',
     attributes: item.attributes || {styles: {}},
     element: (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item).element,
@@ -105,6 +108,18 @@ const bindElements = (item, parent = documentItem) => DOMItem(item, {
     parentItem: parent,
     children: item.children ? item.children.map(child => bindElements(child, item)) : []
 })
+
+/**
+ * Generate HTML element data for each object in the matrix
+ * WARNING: This is a recursive function.
+ * @param item
+ */
+const bindElement = (item) => {
+    if (!item.element || !(item.element instanceof HTMLElement)) {
+        item.element = generateElement(item)
+    }
+    return item
+}
 
 /**
  * Append each HTML element data in a combined HTML element
@@ -123,13 +138,31 @@ const buildHTML = (item) => {
  * @param parent
  * @returns {*}
  */
-const appendHTML = (item, parent = documentItem.body) => {
+const appendAllHTML = (item, parent = documentItem.body) => {
     if (Array.isArray(item)) {
         item.map(i => parent.children.push(i))
     } else {
         parent.children.push(item)
     }
     buildHTML(parent)
+    return item
+}
+
+/**
+ * Select the parent HTML element for appending new elements
+ * @param item
+ * @param parent
+ * @returns {*}
+ */
+const appendHTML = (item, parent = documentItem.body) => {
+    parentItem = parent.body ? parent.body : parent
+    if (!inArray(parentItem.children, item)) {
+        parentItem.children.push(item)
+    }
+    if (!item.element || !(item.element instanceof HTMLElement)) {
+        item = bindElement(item)
+    }
+    parentItem.element.appendChild(item.element)
     return item
 }
 
@@ -169,10 +202,12 @@ const listenerOptions = options => {
  * @param options
  * @returns {*}
  */
-const assignListener = (trigger, elem, fn, options) =>
+const assignListener = (trigger, elem, fn, options) => {
     elem.addEventListener ? elem.addEventListener(trigger, fn, listenerOptions(options)) :
         elem.attachEvent ? elem.attachEvent(`on${trigger}`, fn) :
             elem[`on${trigger}`] = fn
+    return fn
+}
 
 /**
  * Attach an event listener to each cell in the matrix.
@@ -182,12 +217,30 @@ const assignListener = (trigger, elem, fn, options) =>
  * @param options
  * @returns {*}
  */
-const bindListeners = (item, options = false) => DOMItem(item, {
-    element: (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) ?
-        mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options), item.element) :
-        item.element,
-    children: item.children.map(i => bindListeners(i, options))
-})
+const bindAllListeners = (item, options = false) => {
+    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
+        let results = mapObject(item.eventListeners, (attr, key) => {
+            return assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options)
+        })
+    }
+    item.children = item.children.map(i => bindAllListeners(i, options))
+    return item
+}
+
+/**
+ * Attach an event listener to each cell in the matrix.
+ * Accepts an unlimited number of additional arguments to be passed to the action function.
+ * WARNING: This is a recursive function.
+ * @param item
+ * @param options
+ * @returns {*}
+ */
+const bindListeners = (item, options = false) => {
+    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
+        mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options))
+    }
+    return item
+}
 
 /**
  * A selector function for retrieving existing child DOMItems from the given parent item.
@@ -220,13 +273,25 @@ const getChildrenByName = curry(getChildrenFromAttribute)('name')
  */
 const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
 
+
 /**
  * This is a shortcut for building the specified HTML elements and appending them to the DOM
  * with associated listeners.
  * The final argument is specific for adding event listeners with options.
- * @param DOMTemplate
+ * @param item
  * @param parent
  * @param options
  * @returns {*}
  */
-const renderHTML = (DOMTemplate, parent = documentItem, options = false) => bindListeners(appendHTML(bindElements(DOMTemplate, parent), parent.body), options)
+const renderHTML = (item, parent = documentItem, options = false) => {
+    item.tagName = item.tagName || 'div'
+    item.attributes = item.attributes || {styles: {}}
+    item.element = (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item).element
+    item.parentItem = parent.body || parent
+    item.children = item.children || []
+    item = bindListeners(appendHTML(item, parent), options)
+    item.children.map(child => renderHTML(child, item))
+    item.attributes.styles = item.attributes.styles || {}
+    item.eventListeners = item.eventListeners || {}
+    return item
+}
