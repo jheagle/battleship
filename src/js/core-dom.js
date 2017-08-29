@@ -46,7 +46,7 @@ const elementChanges = config => {
     if (config.element.tagName.toLowerCase() !== config.tagName.toLowerCase()) {
         return generateElement(config)
     }
-    config.attributes = filterObject(config.attributes, (attr1, key1) => filterObject(mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'class') ? filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => !attr3) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => (typeof attr4 === 'object' && !Object.keys(attr4).length) ? false : attr4)[key1])
+    config.attributes = filterObject(config.attributes, (attr1, key1) => filterObject(mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'class') ? filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => !attr3) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => !!attr4)[key1])
     return config
 }
 
@@ -252,9 +252,7 @@ const bindListeners = (item, options = false) => {
  * @param item
  * @returns {Array}
  */
-const getChildrenFromAttribute = (attr, value, item = documentItem.body) => {
-    return (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
-}
+const getChildrenFromAttribute = (attr, value, item = documentItem.body) => (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
 
 /**
  * Helper for getting all DOMItems starting at parent and having specified class attribute
@@ -284,14 +282,10 @@ const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopPar
  * @returns {*}
  */
 const renderHTML = (item, parent = documentItem, options = false) => {
-    item.tagName = item.tagName || 'div'
-    item.attributes = item.attributes || {styles: {}}
+    mapObject(DOMItem(item), (prop) => prop, item)
     item.element = (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item).element
     item.parentItem = parent.body || parent
-    item.children = item.children || []
     item = bindListeners(appendHTML(item, parent), options)
     item.children.map(child => renderHTML(child, item))
-    item.attributes.styles = item.attributes.styles || {}
-    item.eventListeners = item.eventListeners || {}
     return item
 }
