@@ -150,7 +150,6 @@ const generateRandomFleet = (ships, matrix, view = false) => {
  * Returns an array of players.
  * @param humans
  * @param robots
- * @param parent
  * @param players
  * @returns {Array}
  */
@@ -158,19 +157,18 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     if (humans < 1 && robots < 1) {
         return players
     }
-    // 1. generate matrix for player board
-    // 2. bind point data to each item in matrix
-    // 3. bind HTML element data to each item in matrix
-    // 4. bind event listeners to each board tile
-    // 5. append the elements as HTML
     let board = bindElements(bindPointData(square(waterTile(), 10)), parent)
     let player = bindElements(playerSet(board, `Player ${players.length + 1}`), parent)
+    // let player = playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans <= 0
+    // player.board = bindPointData(square(waterTile(player, players), 10))
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
     let stats = bindElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
     player.playerStats = stats
     player.children.push(stats)
     player = bindListeners(...buildArray(player, 2, true), players)
+    // player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`)
+    // player.children = [player.board, player.playerStats]
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, parent, players)
 }
@@ -180,7 +178,7 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
  * (selects random start player and calls computer attack if it is AI starting)
  * @param e
  * @param mainForm
- * @param parent
+ * @param args
  * @returns {boolean}
  */
 const beginRound = (e, mainForm, parent = documentItem) => {
@@ -202,6 +200,8 @@ const beginRound = (e, mainForm, parent = documentItem) => {
     let playerBoards = appendHTML(bindElements(boards(), parent.body), parent.body)
     let players = buildPlayers(humans, robots, playerBoards)
     appendHTML(players, playerBoards) // create div for storing players
+    // removeChild(getChildrenByClass('main-menu', args.parent.body)[0], args.parent.body)
+    // let players = renderHTML(boards(buildPlayers(humans, robots)), args.parent).children
     let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
     if (firstAttacker.isRobot) {
         computerAttack(firstAttacker, players, false)
@@ -218,6 +218,7 @@ const main = (parent = documentItem) => {
         removeChild(parent.body.children[i], parent.body)
     }
     bindListeners(mergeObjectsMutable(getChildrenByClass('main-menu-form', appendHTML(bindElements(mainMenu(), parent), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
+    // renderHTML(mainMenu(parent), parent)
     return parent
 }
 
