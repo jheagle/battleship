@@ -1,24 +1,77 @@
 // Core DOM management functions
 /**
+ *
+ * @param element
+ * @param key
+ * @param attr
+ * @returns {*}
+ */
+const elementHasAttribute = (element, key, attr) => {
+    // if element is not a valid element then return false
+    if (!(element instanceof HTMLElement))
+        return false
+
+    // check the key is a property of the element
+    if (key in element) {
+        return element[key] === attr // compare current to new one
+    } else if (key === 'styles') { // compare each style and return
+        // 0 = add style; 1 = no change; -1 = remove style
+        return Object.keys(attr).filter(cl => (!inArray(Object.keys(element.style), cl) || attr[cl] !== element.style[cl])).concat(Object.keys(element.style)).reduce((returnObj, b) => {
+            returnObj[b] = inArray(Object.keys(attr), b) ?
+                inArray(Object.keys(element.style), b) ?
+                    1 : 0 :
+                -1
+            return returnObj
+        }, {})
+    } else if (key === 'class') { // compare each class and return
+        // 0 = add class; 1 = no change; -1 = remove class
+        return attr.split(' ').filter(cl => !inArray(element.className.split(' '), cl)).concat(element.className.split(' ')).filter(cl => !!cl.length).reduce((returnObj, b) => {
+            returnObj[b] = inArray(attr.split(' '), b) ?
+                inArray(element.className.split(' '), b) ?
+                    1 : 0 :
+                -1
+            return returnObj
+        }, {})
+    }
+
+    return (element.hasAttribute(key) && element.getAttribute(key) === attr)
+}
+
+/**
+ *
+ * @param config
+ * @returns {*}
+ */
+const elementChanges = config => {
+    if (config.element.tagName.toLowerCase() !== config.tagName.toLowerCase()) {
+        return generateElement(config)
+    }
+    config.attributes = filterObject(config.attributes, (attr1, key1) => filterObject(mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'class') ? filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => !attr3) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => !!attr4)[key1])
+    return config
+}
+
+/**
  * Update a single DOMItem element with the provided attributes / styles / elementProperties
  * @param config
  * @returns {*}
  */
 const updateElement = (config) => {
-    if (!(config.element instanceof HTMLElement)) {
-        return config
+    if (config.element instanceof HTMLElement) {
+        config.attributes = mapObject(elementChanges(config).attributes, (attr, key) => {
+            if (key in config.element) {
+                config.element[key] = attr
+                return attr
+            } else if (key === 'styles') {
+                config.attributes.styles = mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
+                return attr
+            } else if (key === 'class') {
+                config.element.className = attr
+                return attr
+            }
+            config.element.setAttribute(key, attr)
+            return attr
+        })
     }
-    config.attributes = mapObject(config.attributes, (attr, key) => {
-        if (key in config.element) {
-            config.element[key] = attr
-            return attr
-        } else if (key === 'styles') {
-            mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
-            return attr
-        }
-        config.element.setAttribute(key, attr)
-        return attr
-    })
     return config
 }
 
@@ -38,7 +91,7 @@ const updateElements = (config) => {
  */
 const generateElement = (config) => {
     config.element = document.createElement(config.tagName)
-    return updateElement(config).element
+    return updateElement(config)
 }
 
 /**
@@ -47,13 +100,26 @@ const generateElement = (config) => {
  * @param item
  * @param parent
  */
-const bindElements = (item, parent = documentItem) => DOMItem(item, {
+const bindAllElements = (item, parent = documentItem) => DOMItem(item, {
     tagName: item.tagName || 'div',
     attributes: item.attributes || {styles: {}},
-    element: generateElement(item) || HTMLElement,
+    element: (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item).element,
+    eventListeners: item.eventListeners || {},
     parentItem: parent,
-    children: item.children ? item.children.map(child => bindElements(child, item)) : []
+    children: item.children ? item.children.map(child => bindAllElements(child, item)) : []
 })
+
+/**
+ * Generate HTML element data for each object in the matrix
+ * WARNING: This is a recursive function.
+ * @param item
+ */
+const bindElement = (item) => {
+    if (!item.element || !(item.element instanceof HTMLElement)) {
+        item.element = generateElement(item)
+    }
+    return item
+}
 
 /**
  * Append each HTML element data in a combined HTML element
@@ -72,13 +138,31 @@ const buildHTML = (item) => {
  * @param parent
  * @returns {*}
  */
-const appendHTML = (item, parent = documentItem.body) => {
+const appendAllHTML = (item, parent = documentItem.body) => {
     if (Array.isArray(item)) {
         item.map(i => parent.children.push(i))
     } else {
         parent.children.push(item)
     }
     buildHTML(parent)
+    return item
+}
+
+/**
+ * Select the parent HTML element for appending new elements
+ * @param item
+ * @param parent
+ * @returns {*}
+ */
+const appendHTML = (item, parent = documentItem.body) => {
+    parentItem = parent.body ? parent.body : parent
+    if (!inArray(parentItem.children, item)) {
+        parentItem.children.push(item)
+    }
+    if (!item.element || !(item.element instanceof HTMLElement)) {
+        item = bindElement(item)
+    }
+    parentItem.element.appendChild(item.element)
     return item
 }
 
@@ -94,16 +178,67 @@ const removeChild = (item, parent = documentItem.body) => {
 }
 
 /**
+ * Provide compatibility for using the options parameter of addEventListener
+ * @param options
+ * @returns {boolean}
+ */
+const listenerOptions = options => {
+    if (typeof listenerOptions.supportsOptions === 'undefined') {
+        listenerOptions.supportsOptions = true
+        try {
+            window.addEventListener('test', null, {capture: false, once: false, passive: false})
+        } catch (err) {
+            listenerOptions.supportsOptions = false
+        }
+    }
+    return (typeof options === 'object' && listenerOptions.supportsOptions) ? options : false
+}
+
+/**
+ * Provide compatibility for assigning listeners.
+ * @param trigger
+ * @param elem
+ * @param fn
+ * @param options
+ * @returns {*}
+ */
+const assignListener = (trigger, elem, fn, options) => {
+    elem.addEventListener ? elem.addEventListener(trigger, fn, listenerOptions(options)) :
+        elem.attachEvent ? elem.attachEvent(`on${trigger}`, fn) :
+            elem[`on${trigger}`] = fn
+    return fn
+}
+
+/**
  * Attach an event listener to each cell in the matrix.
  * Accepts an unlimited number of additional arguments to be passed to the action function.
  * WARNING: This is a recursive function.
  * @param item
- * @param extra
+ * @param options
+ * @returns {*}
+ */
+const bindAllListeners = (item, options = false) => {
+    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
+        let results = mapObject(item.eventListeners, (attr, key) => {
+            return assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options)
+        })
+    }
+    item.children = item.children.map(i => bindAllListeners(i, options))
+    return item
+}
+
+/**
+ * Attach an event listener to each cell in the matrix.
+ * Accepts an unlimited number of additional arguments to be passed to the action function.
+ * WARNING: This is a recursive function.
+ * @param item
+ * @param options
  * @returns {*}
  */
 const bindListeners = (item, ...extra) => {
     if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
         Object.keys(item.eventListeners).map(event => item.element.addEventListener(event, (e) => item.eventListeners[event](e, item, ...extra)))
+        // mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options))
     } else {
         item.children.map(i => bindListeners(i, ...extra))
     }
@@ -120,14 +255,7 @@ const bindListeners = (item, ...extra) => {
  * @param item
  * @returns {Array}
  */
-const getChildrenFromAttribute = (attr, value, item = documentItem.body) => {
-    if (item.attributes[attr]) {
-
-        if (item.attributes[attr] === value)
-            return item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item])
-    }
-    return item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
-}
+const getChildrenFromAttribute = (attr, value, item = documentItem.body) => (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
 
 /**
  * Helper for getting all DOMItems starting at parent and having specified class attribute
@@ -145,3 +273,22 @@ const getChildrenByName = curry(getChildrenFromAttribute)('name')
  * @param item
  */
 const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
+
+
+/**
+ * This is a shortcut for building the specified HTML elements and appending them to the DOM
+ * with associated listeners.
+ * The final argument is specific for adding event listeners with options.
+ * @param item
+ * @param parent
+ * @param options
+ * @returns {*}
+ */
+const renderHTML = (item, parent = documentItem, options = false) => {
+    mapObject(DOMItem(item), (prop) => prop, item)
+    item.element = (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item).element
+    item.parentItem = parent.body || parent
+    item = bindListeners(appendHTML(item, parent), options)
+    item.children.map(child => renderHTML(child, item))
+    return item
+}

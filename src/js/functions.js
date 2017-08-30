@@ -157,13 +157,13 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
     if (humans < 1 && robots < 1) {
         return players
     }
-    let board = bindElements(bindPointData(square(waterTile(), 10)), parent)
-    let player = bindElements(playerSet(board, `Player ${players.length + 1}`), parent)
+    let board = bindAllElements(bindPointData(square(waterTile(), 10)), parent)
+    let player = bindAllElements(playerSet(board, `Player ${players.length + 1}`), parent)
     // let player = playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans <= 0
     // player.board = bindPointData(square(waterTile(player, players), 10))
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
-    let stats = bindElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
+    let stats = bindAllElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
     player.playerStats = stats
     player.children.push(stats)
     player = bindListeners(...buildArray(player, 2, true), players)
@@ -197,9 +197,9 @@ const beginRound = (e, mainForm, parent = documentItem) => {
         robots = robots < 1 ? 1 : robots
     }
     removeChild(getChildrenByClass('main-menu', parent.body)[0], parent.body)
-    let playerBoards = appendHTML(bindElements(boards(), parent.body), parent.body)
+    let playerBoards = appendAllHTML(bindAllElements(boards(), parent.body), parent.body)
     let players = buildPlayers(humans, robots, playerBoards)
-    appendHTML(players, playerBoards) // create div for storing players
+    appendAllHTML(players, playerBoards) // create div for storing players
     // removeChild(getChildrenByClass('main-menu', args.parent.body)[0], args.parent.body)
     // let players = renderHTML(boards(buildPlayers(humans, robots)), args.parent).children
     let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
@@ -217,7 +217,7 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    bindListeners(mergeObjectsMutable(getChildrenByClass('main-menu-form', appendHTML(bindElements(mainMenu(), parent), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
+    bindListeners(mergeObjectsMutable(getChildrenByClass('main-menu-form', appendAllHTML(bindAllElements(mainMenu(), parent), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
     // renderHTML(mainMenu(parent), parent)
     return parent
 }
