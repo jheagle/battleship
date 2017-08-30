@@ -4,7 +4,7 @@
     /**
      * Create new private reference to the document
      */
-    let documentItem = main(documentDOMItem())
+    const documentItem = main(documentDOMItem())
 
     console.log(documentItem);
 
