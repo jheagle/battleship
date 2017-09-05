@@ -132,7 +132,7 @@ const endGame = (winner) => {
     let players = winner.parentItem.children
     players.map(player => updatePlayerStats(player))
     winner = updatePlayerStats(winner, 'WINNER')
-    bindListeners(appendAllHTML(bindAllElements(finalScore(players), parent.body), parent.body), parent)
+    renderHTML(appendListener(finalScore(players), 'click', restart), parent)
     return [winner]
 }
 
@@ -225,4 +225,4 @@ const attackFleet = (target, player, players) => {
     return updateScore(player, hitCell.hasShip, sunkShip, players, target)
 }
 
-const attackListener = (e, target, ...extra) => attackFleet(target.point, ...extra)
+const attackListener = (e, target, args) => attackFleet(target.point, ...[args.player, args.players])

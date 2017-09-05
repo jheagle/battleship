@@ -153,24 +153,19 @@ const generateRandomFleet = (ships, matrix, view = false) => {
  * @param players
  * @returns {Array}
  */
-const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) => {
+const buildPlayers = (humans, robots = 0, players = []) => {
     if (humans < 1 && robots < 1) {
         return players
     }
-    let board = bindAllElements(bindPointData(square(waterTile(), 10)), parent)
-    let player = bindAllElements(playerSet(board, `Player ${players.length + 1}`), parent)
-    // let player = playerSet({}, `Player ${players.length + 1}`)
+    let player = playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans <= 0
-    // player.board = bindPointData(square(waterTile(player, players), 10))
+    player.board = bindPointData(square(waterTile(player, players), 10))
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
-    let stats = bindAllElements(playerStats(player, `${Math.round(player.status * 100) / 100}%`), player)
-    player.playerStats = stats
-    player.children.push(stats)
-    player = bindListeners(...buildArray(player, 2, true), players)
-    // player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`)
-    // player.children = [player.board, player.playerStats]
+    player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`)
+    player.children = [player.board, player.playerStats]
+    player = appendListener(player, 'click', attackListener, {player: player, players: players})
     players.push(player)
-    return buildPlayers(--humans, humans < 0 ? --robots : robots, parent, players)
+    return buildPlayers(--humans, humans < 0 ? --robots : robots, players)
 }
 
 /**
@@ -181,8 +176,9 @@ const buildPlayers = (humans, robots = 0, parent = documentItem, players = []) =
  * @param args
  * @returns {boolean}
  */
-const beginRound = (e, mainForm, parent = documentItem) => {
+const beginRound = (e, mainForm) => {
     e.preventDefault()
+    let parent = getTopParentItem(mainForm)
     let humans = parseInt(getChildrenByName('human-players', mainForm)[0].element.value)
     let robots = parseInt(getChildrenByName('robot-players', mainForm)[0].element.value)
     if (humans < 0 || humans > 100 || robots < 0 || robots > 100) {
@@ -197,11 +193,7 @@ const beginRound = (e, mainForm, parent = documentItem) => {
         robots = robots < 1 ? 1 : robots
     }
     removeChild(getChildrenByClass('main-menu', parent.body)[0], parent.body)
-    let playerBoards = appendAllHTML(bindAllElements(boards(), parent.body), parent.body)
-    let players = buildPlayers(humans, robots, playerBoards)
-    appendAllHTML(players, playerBoards) // create div for storing players
-    // removeChild(getChildrenByClass('main-menu', args.parent.body)[0], args.parent.body)
-    // let players = renderHTML(boards(buildPlayers(humans, robots)), args.parent).children
+    let players = renderHTML(boards(buildPlayers(humans, robots)), parent).children
     let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
     if (firstAttacker.isRobot) {
         computerAttack(firstAttacker, players, false)
@@ -217,9 +209,8 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    bindListeners(mergeObjectsMutable(getChildrenByClass('main-menu-form', appendAllHTML(bindAllElements(mainMenu(), parent), parent.body))[0], {eventListeners: {submit: beginRound}}), parent)
-    // renderHTML(mainMenu(parent), parent)
+    renderHTML(appendListener(mainMenu(), 'submit', beginRound), parent)
     return parent
 }
 
-const restart = (e, button, parent) => main(parent)
+const restart = (e, button) => main(getTopParentItem(button))

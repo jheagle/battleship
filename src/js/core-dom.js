@@ -100,14 +100,13 @@ const generateElement = (config) => {
  * @param item
  * @param parent
  */
-const bindAllElements = (item, parent = documentItem) => DOMItem(item, {
-    tagName: item.tagName || 'div',
-    attributes: item.attributes || {styles: {}},
-    element: (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item).element,
-    eventListeners: item.eventListeners || {},
-    parentItem: parent,
-    children: item.children ? item.children.map(child => bindAllElements(child, item)) : []
-})
+const bindAllElements = (item, parent = documentItem) => {
+    mapObject(DOMItem(item), (prop) => prop, item)
+    item.element = (item.element && item.element instanceof HTMLElement) ? item.element : bindElement(item).element
+    item.parentItem = parent.body || parent
+    item.children.map(child => bindAllElements(child, item))
+    return item
+}
 
 /**
  * Generate HTML element data for each object in the matrix
@@ -116,7 +115,7 @@ const bindAllElements = (item, parent = documentItem) => DOMItem(item, {
  */
 const bindElement = (item) => {
     if (!item.element || !(item.element instanceof HTMLElement)) {
-        item.element = generateElement(item)
+        item.element = generateElement(item).element
     }
     return item
 }
@@ -128,8 +127,8 @@ const bindElement = (item) => {
  * @returns {*}
  */
 const buildHTML = (item) => {
-    item.children.map(i => item.element.appendChild(buildHTML(i)))
-    return item.element
+    item.children.map(i => item.element.appendChild(buildHTML(i).element))
+    return item
 }
 
 /**
@@ -139,13 +138,11 @@ const buildHTML = (item) => {
  * @returns {*}
  */
 const appendAllHTML = (item, parent = documentItem.body) => {
-    if (Array.isArray(item)) {
-        item.map(i => parent.children.push(i))
-    } else {
-        parent.children.push(item)
+    parentItem = parent.body ? parent.body : parent
+    if (!inArray(parentItem.children, item)) {
+        parentItem.children.push(item)
     }
-    buildHTML(parent)
-    return item
+    return buildHTML(parentItem)
 }
 
 /**
@@ -210,6 +207,24 @@ const assignListener = (trigger, elem, fn, options) => {
 }
 
 /**
+ *
+ * @param item
+ * @param event
+ * @param listener
+ * @param args
+ * @param options
+ * @returns {*}
+ */
+const appendListener = (item, event, listener, args = {}, options = false) => {
+    if (item.eventListeners && item.eventListeners[event]) {
+        item.eventListeners[event] = {listenerFunc: listener, listenerArgs: args, listenerOptions: options}
+    } else {
+        item.children.map(i => bindListeners(i, event, listener, args, options))
+    }
+    return item
+}
+
+/**
  * Attach an event listener to each cell in the matrix.
  * Accepts an unlimited number of additional arguments to be passed to the action function.
  * WARNING: This is a recursive function.
@@ -235,13 +250,9 @@ const bindAllListeners = (item, options = false) => {
  * @param options
  * @returns {*}
  */
-const bindListeners = (item, ...extra) => {
-    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
-        Object.keys(item.eventListeners).map(event => item.element.addEventListener(event, (e) => item.eventListeners[event](e, item, ...extra)))
-        // mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options))
-    } else {
-        item.children.map(i => bindListeners(i, ...extra))
-    }
+const bindListeners = (item, options = false) => {
+    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement)
+        mapObject(item.eventListeners, (attr, event) => assignListener(event, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options))
     return item
 }
 
@@ -286,7 +297,7 @@ const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopPar
  */
 const renderHTML = (item, parent = documentItem, options = false) => {
     mapObject(DOMItem(item), (prop) => prop, item)
-    item.element = (item.element && item.element instanceof HTMLElement) ? item.element : generateElement(item).element
+    item.element = (item.element && item.element instanceof HTMLElement) ? item.element : bindElement(item).element
     item.parentItem = parent.body || parent
     item = bindListeners(appendHTML(item, parent), options)
     item.children.map(child => renderHTML(child, item))

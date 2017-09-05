@@ -5,11 +5,11 @@
  * @param players
  * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {func: attackListener, args: {player: {}, players: Array}}}}}
  */
-const gameTile = () => ({
+const gameTile = (player = {}, players = []) => ({
     hasShip: false,
     isHit: false,
     eventListeners: {
-        click: attackListener
+        click: {listenerFunc: attackListener, listenerArgs: {player: player, players: players}, listenerOptions: false}
     },
 })
 
@@ -19,7 +19,7 @@ const gameTile = () => ({
  * @param players
  * @returns {*}
  */
-const waterTile = () => mergeObjects(gameTile(), tile())
+const waterTile = (player = {}, players = []) => mergeObjects(gameTile(player, players), tile())
 
 /**
  * Set status and custom properties for tiles that have a ship
