@@ -183,18 +183,18 @@ const updateScore = (player, hitShip, sunkShip, players, target) => {
 /**
  * Perform attack on an enemy board / cell
  * @param target
- * @param player
- * @param players
  * @returns {*}
  */
-const attackFleet = (target, player, players) => {
+const attackFleet = (target) => {
     attackFleet.isLocked = attackFleet.isLocked || false
+    let player = getParentsFromAttribute('class', 'player', target)[0]
+    let players = getParentsFromAttribute('class', 'boards', target)[0].children
     // Player cannot attack themselves (current attacker) or if they have bad status
     if (player.status <= 0 || player.attacker || attackFleet.isLocked) {
         return players
     }
     // Update cell to hit
-    let hitCell = setHit(player.board, target.x, target.y, target.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
+    let hitCell = setHit(player.board, target.point.x, target.point.y, target.point.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
     let hitShip = false
     let sunkShip = 0
     if (hitCell.hasShip) {
@@ -203,7 +203,7 @@ const attackFleet = (target, player, players) => {
         player.shipFleet.map((ship) => {
             // Get all healthy ships
             let healthy = ship.parts.filter((part) => {
-                if (checkEqualPoints(part.point, target)) {
+                if (checkEqualPoints(part.point, target.point)) {
                     hitShip = ship
                 }
                 return !part.isHit
@@ -222,7 +222,7 @@ const attackFleet = (target, player, players) => {
         // Check if the hit ship was sunk
         sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
     }
-    return updateScore(player, hitCell.hasShip, sunkShip, players, target)
+    return updateScore(player, hitCell.hasShip, sunkShip, players, target.point)
 }
 
-const attackListener = (e, target, args) => attackFleet(target.point, ...[args.player, args.players])
+const attackListener = (e, target, args = {}) => attackFleet(target)

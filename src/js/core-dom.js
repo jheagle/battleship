@@ -279,6 +279,23 @@ const getChildrenByClass = curry(getChildrenFromAttribute)('class')
 const getChildrenByName = curry(getChildrenFromAttribute)('name')
 
 /**
+ * A selector function for retrieving existing child DOMItems from the given parent item.
+ * This function will check all the children starting from item, and scan the attributes
+ * property for matches. The return array contains children matching from all levels.
+ * WARNING: This is a recursive function.
+ * @param attr
+ * @param value
+ * @param item
+ * @returns {Array}
+ */
+const getParentsFromAttribute = (attr, value, item = documentItem.body) =>
+    Object.keys(item.parentItem).length ?
+        (item.attributes[attr] && item.attributes[attr] === value) ?
+            getParentsFromAttribute(attr, value, item.parentItem).concat([item]) :
+            getParentsFromAttribute(attr, value, item.parentItem) :
+        []
+
+/**
  * Get the upper parentItem for the provided child. (usually this is a documentItem reference)
  * WARNING: This is a recursive function.
  * @param item
