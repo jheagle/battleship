@@ -152,7 +152,7 @@ const appendAllHTML = (item, parent = documentItem.body) => {
  * @returns {*}
  */
 const appendHTML = (item, parent = documentItem.body) => {
-    parentItem = parent.body ? parent.body : parent
+    let parentItem = parent.body ? parent.body : parent
     if (!inArray(parentItem.children, item)) {
         parentItem.children.push(item)
     }
