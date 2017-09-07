@@ -33,7 +33,7 @@ const selectTargetCoord = (victim) => {
                 let targetPoints = getInBetween(hitParts[0].point, hitParts[i].point, victim.board, checkIfHitCell, false)
                 if (targetPoints.false.length) {
                     displayTargets(targetPoints.false, targetPoints.false[0], victim)
-                    return targetPoints.false[0]
+                    return getDOMItemFromPoint(targetPoints.false[0], victim.board)
                 }
             }
             // If there are not points between, attack the outer points first.
@@ -43,7 +43,7 @@ const selectTargetCoord = (victim) => {
             let target = dirPnts.reduce((a, b) => checkIfHitCell(a, victim.board) ? b : a)
             if (target) {
                 displayTargets(dirPnts, target, victim)
-                return target
+                return getDOMItemFromPoint(target, victim.board)
             }
         }
         // If there is only one hit part, then set that as the lastTarget for detecting adjacent parts.
@@ -54,7 +54,7 @@ const selectTargetCoord = (victim) => {
     displayTargets(finalTargets, target, victim)
 
     // If there are available targets then hit one at random
-    return target;
+    return getDOMItemFromPoint(target, victim.board);
 }
 
 /**
@@ -96,5 +96,5 @@ const resetTargets = data => {
 const computerAttack = (player, players, lastTarget = {}) => {
     let victim = selectTargetPlayer(players.filter(p => !p.attacker))
     attackFleet.isLocked = false
-    attackFleet(selectTargetCoord(victim, lastTarget), victim, players)
+    attackFleet(selectTargetCoord(victim, lastTarget))
 }

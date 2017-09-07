@@ -163,6 +163,7 @@ const buildPlayers = (humans, robots = 0, players = []) => {
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
     player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`)
     player.children = [player.board, player.playerStats]
+    player = appendListener(player, 'click', attackListener)
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, players)
 }
@@ -175,8 +176,9 @@ const buildPlayers = (humans, robots = 0, players = []) => {
  * @param args
  * @returns {boolean}
  */
-const beginRound = (e, mainForm, args = {parent: documentItem}) => {
+const beginRound = (e, mainForm) => {
     e.preventDefault()
+    let parent = getTopParentItem(mainForm)
     let humans = parseInt(getChildrenByName('human-players', mainForm)[0].element.value)
     let robots = parseInt(getChildrenByName('robot-players', mainForm)[0].element.value)
     if (humans < 0 || humans > 100 || robots < 0 || robots > 100) {
@@ -190,8 +192,8 @@ const beginRound = (e, mainForm, args = {parent: documentItem}) => {
     if (humans === 1) {
         robots = robots < 1 ? 1 : robots
     }
-    removeChild(getChildrenByClass('main-menu', args.parent.body)[0], args.parent.body)
-    let players = renderHTML(boards(buildPlayers(humans, robots)), args.parent).children
+    removeChild(getChildrenByClass('main-menu', parent.body)[0], parent.body)
+    let players = renderHTML(boards(buildPlayers(humans, robots)), parent).children
     let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
     if (firstAttacker.isRobot) {
         computerAttack(firstAttacker, players, false)
@@ -207,8 +209,8 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    renderHTML(mainMenu(parent), parent)
+    renderHTML(appendListener(mainMenu(), 'submit', beginRound), parent)
     return parent
 }
 
-const restart = (e, button, args) => main(args.parent)
+const restart = (e, button) => main(getTopParentItem(button))

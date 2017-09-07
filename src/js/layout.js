@@ -24,9 +24,9 @@ const mainMenu = (parent = {}) => ({
                     eventListeners: {
                         submit: {
                             listenerFunc: beginRound,
-                            listenerArgs: {parent: parent},
+                            listenerArgs: {},
                             listenerOptions: false
-                        }
+                        },
                     },
                     children: [
                         {
@@ -156,8 +156,8 @@ const finalScore = (players, parent = {}) => ({
                 value: 'Restart'
             },
             eventListeners: {
-                click: {listenerFunc: restart, listenerArgs: {parent: parent}, listenerOptions: false}
-            }
+                click: {listenerFunc: restart, listenerArgs: {}, listenerOptions: false}
+            },
         }
     ]
 })
