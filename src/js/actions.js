@@ -7,18 +7,21 @@
  */
 const configureHtml = (config, isRobot) => {
     // Update cell colour once it has been hit
-    if (config.isHit) {
-        config.attributes.styles.backgroundColor = config.hasShip ? 'red' : 'white'
-    }
     // Add any other style changes to the cell
     if (isRobot) {
         attackFleet.isLocked = true
         queueTimeout(() => {
+            if (config.isHit) {
+                config.attributes.styles.backgroundColor = config.hasShip ? 'red' : 'white'
+            }
             config = updateElement(config)
             attackFleet.isLocked = false
             return config
         }, 0)
     } else {
+        if (config.isHit) {
+            config.attributes.styles.backgroundColor = config.hasShip ? 'red' : 'white'
+        }
         config = updateElement(config)
     }
     return config
@@ -102,7 +105,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                         }
                     }
                 })))))
-            }, 400)
+            }, 200)
             ++player.turnCnt
         } else {
             result = queueTimeout(() => {
@@ -115,7 +118,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                         }
                     }
                 })))))
-            }, 0)
+            }, 200)
         }
     }
     result = queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
