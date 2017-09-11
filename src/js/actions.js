@@ -118,7 +118,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                         }
                     }
                 })))))
-            }, 200)
+            }, 0)
         }
     }
     result = queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)

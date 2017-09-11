@@ -73,7 +73,7 @@ html, body
 .matrix
   font-size: 1rem
   position: relative
-  transition: all 600ms 400ms
+  transition: all 600ms linear 400ms
 
   .layer
     display: inline-block
@@ -81,7 +81,7 @@ html, body
     margin: 0 auto
     border: 2px solid #333
     border: 0.2em solid #333
-    transition: all 600ms
+    transition: all 600ms linear
 
     .row
       display: flex
@@ -96,7 +96,7 @@ html, body
         background-color: blue
         cursor: pointer
         display: inline-block
-        transition: all 250ms 50ms
+        transition: all 350ms cubic-bezier(.19,1,.22,1) 50ms
 
         &:hover
           opacity: 0.7

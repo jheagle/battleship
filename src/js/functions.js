@@ -173,7 +173,6 @@ const buildPlayers = (humans, robots = 0, players = []) => {
  * (selects random start player and calls computer attack if it is AI starting)
  * @param e
  * @param mainForm
- * @param args
  * @returns {boolean}
  */
 const beginRound = (e, mainForm) => {
