@@ -215,12 +215,12 @@ const assignListener = (trigger, elem, fn, options) => {
  * @param options
  * @returns {*}
  */
-const appendListener = (item, event, listener, args = {}, options = false) => {
+const appendListeners = (item, event, listener, args = {}, options = false) => {
+    item.children = item.children || []
     if (item.eventListeners && item.eventListeners[event]) {
         item.eventListeners[event] = {listenerFunc: listener, listenerArgs: args, listenerOptions: options}
-    } else {
-        item.children.map(i => bindListeners(i, event, listener, args, options))
     }
+    item.children.map(i => appendListeners(i, event, listener, args, options))
     return item
 }
 
@@ -229,16 +229,15 @@ const appendListener = (item, event, listener, args = {}, options = false) => {
  * Accepts an unlimited number of additional arguments to be passed to the action function.
  * WARNING: This is a recursive function.
  * @param item
- * @param options
  * @returns {*}
  */
-const bindAllListeners = (item, options = false) => {
+const bindAllListeners = (item) => {
     if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
         let results = mapObject(item.eventListeners, (attr, key) => {
-            return assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options)
+            return assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions)
         })
     }
-    item.children = item.children.map(i => bindAllListeners(i, options))
+    item.children = item.children.map(i => bindAllListeners(i))
     return item
 }
 
@@ -247,12 +246,11 @@ const bindAllListeners = (item, options = false) => {
  * Accepts an unlimited number of additional arguments to be passed to the action function.
  * WARNING: This is a recursive function.
  * @param item
- * @param options
  * @returns {*}
  */
-const bindListeners = (item, options = false) => {
+const bindListeners = (item) => {
     if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement)
-        mapObject(item.eventListeners, (attr, event) => assignListener(event, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), options))
+        mapObject(item.eventListeners, (attr, event) => assignListener(event, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
     return item
 }
 
@@ -322,11 +320,11 @@ const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopPar
  * @param options
  * @returns {*}
  */
-const renderHTML = (item, parent = documentItem, options = false) => {
+const renderHTML = (item, parent = documentItem) => {
     mapObject(DOMItem(item), (prop) => prop, item)
     item.element = (item.element && item.element instanceof HTMLElement) ? item.element : bindElement(item).element
     item.parentItem = parent.body || parent
-    item = bindListeners(appendHTML(item, parent), options)
+    item = bindListeners(appendHTML(item, parent))
     item.children.map(child => renderHTML(child, item))
     return item
 }

@@ -163,7 +163,6 @@ const buildPlayers = (humans, robots = 0, players = []) => {
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
     player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`)
     player.children = [player.board, player.playerStats]
-    player = appendListener(player, 'click', attackListener)
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, players)
 }
@@ -208,7 +207,7 @@ const main = (parent = documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
         removeChild(parent.body.children[i], parent.body)
     }
-    renderHTML(appendListener(mainMenu(), 'submit', beginRound), parent)
+    renderHTML(mainMenu(), parent)
     return parent
 }
 

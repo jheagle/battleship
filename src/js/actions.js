@@ -135,7 +135,7 @@ const endGame = (winner) => {
     let players = winner.parentItem.children
     players.map(player => updatePlayerStats(player))
     winner = updatePlayerStats(winner, 'WINNER')
-    renderHTML(appendListener(finalScore(players), 'click', restart), parent)
+    renderHTML(finalScore(players), parent)
     return [winner]
 }
 
