@@ -85,6 +85,7 @@ const resetTargets = data => {
         data.victim.board.children.map(l => updateElement(mergeObjects(l, {attributes: {styles: {borderColor: 'yellow'}}})))
         data.targets.forEach(t => updateElement(mergeObjects(getDOMItemFromPoint(t, data.victim.board), {attributes: {styles: {borderColor: 'yellow'}}})))
     }
+    return data
 }
 
 /**
@@ -96,5 +97,5 @@ const resetTargets = data => {
 const computerAttack = (player, players, lastTarget = {}) => {
     let victim = selectTargetPlayer(players.filter(p => !p.attacker))
     attackFleet.isLocked = false
-    attackFleet(selectTargetCoord(victim, lastTarget))
+    return attackFleet(selectTargetCoord(victim, lastTarget))
 }
