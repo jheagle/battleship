@@ -105,7 +105,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                         }
                     }
                 })))))
-            }, 200)
+            }, 400)
             ++player.turnCnt
         } else {
             result = queueTimeout(() => {
