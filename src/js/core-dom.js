@@ -1,6 +1,7 @@
 // Core DOM management functions
 /**
- *
+ * Check if the provided HTMLElement has the provided attributes.
+ * Returns a boolean, or an array of 1 / 0 / -1 based on the comparison status.
  * @param element
  * @param key
  * @param attr
@@ -38,7 +39,8 @@ const elementHasAttribute = (element, key, attr) => {
 }
 
 /**
- *
+ * Given a DOMItem as config, this function will return the changes to be applied
+ * to the stored element property.
  * @param config
  * @returns {*}
  */
@@ -138,7 +140,7 @@ const buildHTML = (item) => {
  * @returns {*}
  */
 const appendAllHTML = (item, parent = documentItem.body) => {
-    parentItem = parent.body ? parent.body : parent
+    let parentItem = parent.body ? parent.body : parent
     if (!inArray(parentItem.children, item)) {
         parentItem.children.push(item)
     }
@@ -207,7 +209,11 @@ const assignListener = (trigger, elem, fn, options) => {
 }
 
 /**
- *
+ * When there may be extra data needed for the event listener function
+ * call this function may be used as a helper to pass the additional data.
+ * Also, if it is desirable to add event listeners during run-time, this
+ * function can be used to achieve this.
+ * WARNING: This is a recursive function.
  * @param item
  * @param event
  * @param listener
@@ -225,26 +231,23 @@ const appendListeners = (item, event, listener, args = {}, options = false) => {
 }
 
 /**
- * Attach an event listener to each cell in the matrix.
- * Accepts an unlimited number of additional arguments to be passed to the action function.
+ * Based on the eventListeners property of the provided item, bind the
+ * listeners to the associated element property for each item in the DOMItem structure.
  * WARNING: This is a recursive function.
  * @param item
  * @returns {*}
  */
 const bindAllListeners = (item) => {
     if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
-        let results = mapObject(item.eventListeners, (attr, key) => {
-            return assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions)
-        })
+        mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
     }
     item.children = item.children.map(i => bindAllListeners(i))
     return item
 }
 
 /**
- * Attach an event listener to each cell in the matrix.
- * Accepts an unlimited number of additional arguments to be passed to the action function.
- * WARNING: This is a recursive function.
+ * Based on the eventListeners property of the provided item, bind the
+ * listeners to the associated element property for the provided DOMItem.
  * @param item
  * @returns {*}
  */
@@ -264,7 +267,10 @@ const bindListeners = (item) => {
  * @param item
  * @returns {Array}
  */
-const getChildrenFromAttribute = (attr, value, item = documentItem.body) => (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
+const getChildrenFromAttribute = (attr, value, item = documentItem.body) =>
+    (item.attributes[attr] && item.attributes[attr] === value) ?
+        item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) :
+        item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
 
 /**
  * Helper for getting all DOMItems starting at parent and having specified class attribute
@@ -308,7 +314,10 @@ const getParentsByName = curry(getParentsFromAttribute)('name')
  * WARNING: This is a recursive function.
  * @param item
  */
-const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
+const getTopParentItem = item =>
+    Object.keys(item.parentItem).length ?
+        getTopParentItem(item.parentItem) :
+        item
 
 
 /**
@@ -317,7 +326,6 @@ const getTopParentItem = item => Object.keys(item.parentItem).length ? getTopPar
  * The final argument is specific for adding event listeners with options.
  * @param item
  * @param parent
- * @param options
  * @returns {*}
  */
 const renderHTML = (item, parent = documentItem) => {
