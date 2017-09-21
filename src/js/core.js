@@ -140,7 +140,7 @@ const mergeObjects = (...args) => (args.length === 2) ?
         mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjects), cloneObject(args[0])) :
         args[1] :
     args.length === 1 ?
-        args[0] :
+        cloneObject(args[0]) :
         args.reduce((obj1, obj2) => mergeObjects(obj1, obj2), {})
 
 /**
