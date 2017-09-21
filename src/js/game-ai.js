@@ -92,10 +92,9 @@ const resetTargets = data => {
  * Main AI logic for computer to attack, selects a target then performs attack function.
  * @param player
  * @param players
- * @param lastTarget
  */
-const computerAttack = (player, players, lastTarget = {}) => {
+const computerAttack = (player, players) => {
     let victim = selectTargetPlayer(players.filter(p => !p.attacker))
     attackFleet.isLocked = false
-    return attackFleet(selectTargetCoord(victim, lastTarget))
+    return attackFleet(selectTargetCoord(victim))
 }

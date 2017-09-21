@@ -194,7 +194,7 @@ const beginRound = (e, mainForm) => {
     let players = renderHTML(boards(buildPlayers(humans, robots)), parent).children
     let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
     if (firstAttacker.isRobot) {
-        computerAttack(firstAttacker, players, false)
+        computerAttack(firstAttacker, players)
     }
     return false
 }

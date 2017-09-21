@@ -178,7 +178,7 @@ const updateScore = (player, hitShip, sunkShip, players, target) => {
     }
     let nextAttacker = getNextAttacker(attacker, players, hitShip)
     if (nextAttacker.isRobot) {
-        queueTimeout(computerAttack, 0, nextAttacker, players, hitShip ? target : false)
+        queueTimeout(computerAttack, 0, nextAttacker, players)
     }
     return players
 }
