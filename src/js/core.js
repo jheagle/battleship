@@ -44,6 +44,15 @@ const filterObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.filter(
     }, initObj)
 
 /**
+ *
+ * @param obj
+ * @param fn
+ * @param initObj
+ * @returns {Array.<T>|*}
+ */
+const reduceObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.reduce(fn, initObj) : Object.keys(obj).reduce((newObj, curr) => fn(newObj, obj[curr]), initObj)
+
+/**
  * Helper function for testing if the item is an Object or Array that contains properties or elements
  * @param item
  * @returns {boolean}

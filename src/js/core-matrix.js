@@ -32,6 +32,30 @@ const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, 
  */
 const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
 
+/**
+ *
+ * @param start
+ * @param end
+ * @returns {*}
+ */
+const pointDirection = (start, end) => {
+    let pntDiff = pointDifference(start, end)
+    let hasNegative = !!Object.keys(filterObject(pntDiff, (attr, key) => attr < 0)).length
+    let coordSearch = reduceObject(pntDiff, (prev, next) => ((hasNegative && next < prev) || (!hasNegative && next > prev)) ? next : prev, 0)
+    let changeKey = Object.keys(pntDiff).filter((key) => pntDiff[key] === coordSearch)[0]
+    let result = point(0, 0, 0)
+    result[changeKey] = hasNegative ? -1 : 1
+    return result
+}
+
+/**
+ *
+ * @param start
+ * @param end
+ * @param line
+ * @returns {Array.<*>}
+ */
+const getPointsLine = (start, end, line = []) => checkEqualPoints(start, end) ? line.concat([start]) : getPointsLine(nextCell(start, pointDirection(start, end)), end, line.concat([start]))
 
 /**
  * Given a start and end point, test the points between with the provided function.
@@ -42,45 +66,10 @@ const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === 
  * @param func
  * @returns {{true: Array, false: Array}}
  */
-const testPointsBetween = (start, end, matrix, func) => {
-    let points = {
-        true: [],
-        false: []
-    }
-    // Find the differences between the two points to get the ship direction
-    let pntDiff = pointDifference(start, end)
-    // Whichever difference is greater than 0 indicates that axis direction,
-    // we then loop through all cells in that direction
-    if (pntDiff.x > 1) {
-        for (let i = start.x; i < end.x; ++i) {
-            let test = point(i, start.y, start.z)
-            if (func(test, matrix)) {
-                points.true.push(test)
-            } else {
-                points.false.push(test)
-            }
-        }
-    } else if (pntDiff.y > 1) {
-        for (let i = start.y; i < end.y; ++i) {
-            let test = point(start.x, i, start.z)
-            if (func(test, matrix)) {
-                points.true.push(test)
-            } else {
-                points.false.push(test)
-            }
-        }
-    } else if (pntDiff.z > 1) {
-        for (let i = start.z; i < end.z; ++i) {
-            let test = point(start.x, start.y, i)
-            if (func(test, matrix)) {
-                points.true.push(test)
-            } else {
-                points.false.push(test)
-            }
-        }
-    }
-    return points
-}
+const testPointsBetween = (start, end, matrix, func) => getPointsLine(start, end).reduce((newPoints, next) => {
+    newPoints[`${!!func(next, matrix)}`].push(next)
+    return newPoints
+}, {true: [], false: []})
 
 /**
  * Retrieve all points between start and end as either true or

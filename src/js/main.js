@@ -5,7 +5,6 @@
      * Create new private reference to the document
      */
     const documentItem = main(documentDOMItem())
-
     console.log(documentItem);
 
     // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
