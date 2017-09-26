@@ -41,11 +41,9 @@ const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === 
 const pointDirection = (start, end) => {
     let pntDiff = pointDifference(start, end)
     let hasNegative = !!Object.keys(filterObject(pntDiff, (attr, key) => attr < 0)).length
-    let coordSearch = reduceObject(pntDiff, (prev, next) => ((hasNegative && next < prev) || (!hasNegative && next > prev)) ? next : prev, 0)
+    let coordSearch = reduceObject(pntDiff, curry(getMaxOrMin)(!hasNegative), 0)
     let changeKey = Object.keys(pntDiff).filter((key) => pntDiff[key] === coordSearch)[0]
-    let result = point(0, 0, 0)
-    result[changeKey] = hasNegative ? -1 : 1
-    return result
+    return mergeObjects(point(0, 0, 0), {[`${changeKey}`]: hasNegative ? -1 : 1})
 }
 
 /**

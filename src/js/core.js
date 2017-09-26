@@ -76,6 +76,25 @@ const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.st
 const inArray = (arr, prop) => arr.indexOf(prop) >= 0
 
 /**
+ * A simple function usable with reduce to get the max or min value
+ * @param getMax
+ * @param num1
+ * @param num2
+ * @returns {number}
+ */
+const getMaxOrMin = (getMax, num1, num2) => ((getMax && num2 > num1) || (!getMax && num2 < num1)) ? num2 : num1
+
+/**
+ * Helper for returning max value
+ */
+const getMax = curry(getMaxOrMin)(true)
+
+/**
+ * Helper for returning min value
+ */
+const getMin = curry(getMaxOrMin)(false)
+
+/**
  * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
  * @param key
  * @param val
@@ -135,6 +154,10 @@ const cloneExMap = (cloned, object, parents, fn) => mapObject(object, recursiveM
 const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object) ?
     cloneExMap(cloned, object, parents, cloneExclusions) :
     cloned
+
+const mergeObjectsBase = (isMutable, obj1, obj2) => {
+    
+}
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
