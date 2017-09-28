@@ -155,9 +155,14 @@ const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(
     cloneExMap(cloned, object, parents, cloneExclusions) :
     cloned
 
-const mergeObjectsBase = (isMutable, obj1, obj2) => {
-    
-}
+/**
+ *
+ * @param isMutable
+ * @param obj1
+ * @param obj2
+ * @returns {*}
+ */
+const mergeObjectsBase = (isMutable, obj1, obj2) => (notEmptyObjectOrArray(obj2)) ? mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), isMutable ? mergeObjectsMutable : mergeObjects), isMutable ? obj1 : cloneObject(obj1)) : obj2
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -167,13 +172,11 @@ const mergeObjectsBase = (isMutable, obj1, obj2) => {
  * @param args
  * @returns {*}
  */
-const mergeObjects = (...args) => (args.length === 2) ?
-    (notEmptyObjectOrArray(args[1])) ?
-        mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjects), cloneObject(args[0])) :
-        args[1] :
+const mergeObjects = (...args) => args.length === 2 ?
+    mergeObjectsBase(false, args[0], args[1]) :
     args.length === 1 ?
         cloneObject(args[0]) :
-        args.reduce((obj1, obj2) => mergeObjects(obj1, obj2), {})
+        args.reduce(curry(mergeObjectsBase)(false), {})
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -184,14 +187,11 @@ const mergeObjects = (...args) => (args.length === 2) ?
  * @param args
  * @returns {*}
  */
-const mergeObjectsMutable = (...args) => (args.length === 2) ?
-    (notEmptyObjectOrArray(args[1])) ?
-        mapObject(args[1], recursiveMap(args[0], cloneRules(args[0]), mergeObjectsMutable), args[0]) :
-        args[1] :
+const mergeObjectsMutable = (...args) => args.length === 2 ?
+    mergeObjectsBase(true, args[0], args[1]) :
     args.length === 1 ?
         args[0] :
-        args.reduce((obj1, obj2) => mergeObjectsMutable(obj1, obj2), {})
-
+        args.reduce(curry(mergeObjectsBase)(true), {})
 
 /**
  * Generate an array of specified item extending to specified length
