@@ -33,18 +33,26 @@ const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, 
 const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
 
 /**
+ * Check if there is a negative coordinate within the point provided
+ * @param pnt
+ * @returns {boolean}
+ */
+const pointHasNegative = pnt => !!Object.keys(filterObject(pnt, (attr, key) => attr < 0)).length
+
+/**
+ *
+ * @param pnt
+ * @returns {*}
+ */
+const getHighAbsoluteValueAxis = pnt => Object.keys(pnt).filter((key) => pnt[key] === reduceObject(pnt, curry(getMaxOrMin)(!pointHasNegative(pnt)), 0))[0]
+
+/**
  *
  * @param start
  * @param end
  * @returns {*}
  */
-const pointDirection = (start, end) => {
-    let pntDiff = pointDifference(start, end)
-    let hasNegative = !!Object.keys(filterObject(pntDiff, (attr, key) => attr < 0)).length
-    let coordSearch = reduceObject(pntDiff, curry(getMaxOrMin)(!hasNegative), 0)
-    let changeKey = Object.keys(pntDiff).filter((key) => pntDiff[key] === coordSearch)[0]
-    return mergeObjects(point(0, 0, 0), {[`${changeKey}`]: hasNegative ? -1 : 1})
-}
+const pointDirection = (start, end) => mergeObjects(point(0, 0, 0), {[`${getHighAbsoluteValueAxis(pointDifference(start, end))}`]: pointHasNegative(pointDifference(start, end)) ? -1 : 1})
 
 /**
  *
