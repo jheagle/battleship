@@ -67,7 +67,7 @@ const selectTargetCoord = (victim) => {
 const displayTargets = (targets, target, victim) => {
     return [
         queueTimeout(resetTargets, 0, {targets: targets, victim: victim}),
-        queueTimeout(resetTargets, 400, {targets: targets, target: target, victim: victim})
+        queueTimeout(resetTargets, 200, {targets: targets, target: target, victim: victim})
     ]
 }
 

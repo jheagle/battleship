@@ -174,7 +174,7 @@ const updateScore = (player, hitShip, sunkShip, players, target) => {
     let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
     attacker = updatePlayer(attacker, hitShip, sunkShip)
     if (players.length < 2) {
-        return queueTimeout(() => endGame(players[0]), 400)
+        return queueTimeout(() => endGame(players[0]), 200)
     }
     let nextAttacker = getNextAttacker(attacker, players, hitShip)
     if (nextAttacker.isRobot) {

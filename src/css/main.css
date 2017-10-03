@@ -63,14 +63,14 @@ html, body {
 .matrix {
   font-size: 1rem;
   position: relative;
-  transition: all 600ms linear 400ms; }
+  transition: all 400ms linear 100ms; }
   .matrix .layer {
     display: inline-block;
     position: relative;
     margin: 0 auto;
     border: 2px solid #333;
     border: 0.2em solid #333;
-    transition: all 600ms linear; }
+    transition: all 400ms linear; }
     .matrix .layer .row {
       display: flex; }
       .matrix .layer .row .column {
