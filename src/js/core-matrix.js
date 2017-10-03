@@ -90,10 +90,7 @@ const getPointsLine = (start, end, line = []) => checkEqualPoints(start, end) ? 
  * @param func
  * @returns {{true: Array, false: Array}}
  */
-const testPointsBetween = (start, end, matrix, func) => getPointsLine(start, end).reduce((newPoints, next) => {
-    newPoints[`${!!func(next, matrix)}`].push(next)
-    return newPoints
-}, {true: [], false: []})
+const testPointsBetween = (start, end, matrix, func) => getPointsLine(start, end).reduce((newPoints, next) => mergeObjects(newPoints, {[`${!!func(next, matrix)}`]: [next]}), {true: [], false: []})
 
 /**
  * Retrieve all points between start and end as either true or
