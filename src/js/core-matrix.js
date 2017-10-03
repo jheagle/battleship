@@ -88,9 +88,13 @@ const getPointsLine = (start, end, line = []) => checkEqualPoints(start, end) ? 
  * @param end
  * @param matrix
  * @param func
+ * @param inclusive
  * @returns {{true: Array, false: Array}}
  */
-const testPointsBetween = (start, end, matrix, func) => getPointsLine(start, end).reduce((newPoints, next) => mergeObjects(newPoints, {[`${!!func(next, matrix)}`]: [next]}), {true: [], false: []})
+const testPointsBetween = (start, end, matrix, func, inclusive = true) => getPointsLine(start, end).filter((prop, i, line) => ((i !== 0 && i !== line.length - 1) || inclusive)).reduce((newPoints, next) => mergeObjects(newPoints, {[`${!!func(next, matrix)}`]: [next]}), {
+    true: [],
+    false: []
+})
 
 /**
  * Retrieve all points between start and end as either true or
@@ -102,28 +106,10 @@ const testPointsBetween = (start, end, matrix, func) => getPointsLine(start, end
  * @param inclusive
  * @returns {{true: Array, false: Array}}
  */
-const getInBetween = (start, end, matrix, func, inclusive = true) => {
-    let points = {
-        true: [],
-        false: []
-    }
-
-    // Return true if either of the two points have a ship
-    if (inclusive) {
-        if (func(start, matrix)) {
-            points.true.push(start)
-        } else {
-            points.false.push(start)
-        }
-        if (func(end, matrix)) {
-            points.true.push(end)
-        } else {
-            points.false.push(end)
-        }
-    }
-
-    return mergeObjects(points, testPointsBetween(start, end, matrix, func))
-}
+const getInBetween = (start, end, matrix, func, inclusive = true) => mergeObjects({
+    true: [],
+    false: []
+}, testPointsBetween(start, end, matrix, func, inclusive))
 
 /**
  * Given two points, check the cells between using specified function.
