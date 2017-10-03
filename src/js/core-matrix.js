@@ -33,29 +33,47 @@ const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, 
 const checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
 
 /**
- * Check if there is a negative coordinate within the point provided
+ * Check if there is a negative coordinate value within the point provided
  * @param pnt
  * @returns {boolean}
  */
 const pointHasNegative = pnt => !!Object.keys(filterObject(pnt, (attr, key) => attr < 0)).length
 
 /**
- *
+ * Return the first coordinate number with the highest absolute value.
+ * @param pnt
+ * @returns {Array.<T>|*}
+ */
+const getHighAbsoluteCoord = pnt => reduceObject(pnt, curry(getMaxOrMin)(!pointHasNegative(pnt)), 0)
+
+/**
+ * Having provided a coordinate number, find all corresponding axis.
+ * @param pnt
+ * @param coord
+ * @returns {*}
+ */
+const getAxisOfCoord = (pnt, coord) => Object.keys(pnt).filter((key) => pnt[key] === coord)
+
+/**
+ * Find all axis of the highest absolute value coordinate
  * @param pnt
  * @returns {*}
  */
-const getHighAbsoluteValueAxis = pnt => Object.keys(pnt).filter((key) => pnt[key] === reduceObject(pnt, curry(getMaxOrMin)(!pointHasNegative(pnt)), 0))[0]
+const getHighAbsoluteCoordAxis = pnt => getAxisOfCoord(pnt, getHighAbsoluteCoord(pnt))
 
 /**
- *
+ * Retrieve a directional coordinate value based on two provided points
+ * (directions consist of two zero points and a single point of 1 / -1)
  * @param start
  * @param end
  * @returns {*}
  */
-const pointDirection = (start, end) => mergeObjects(point(0, 0, 0), {[`${getHighAbsoluteValueAxis(pointDifference(start, end))}`]: pointHasNegative(pointDifference(start, end)) ? -1 : 1})
+const pointDirection = (start, end) => mergeObjects(point(0, 0, 0), {[`${getHighAbsoluteCoordAxis(pointDifference(start, end))[0]}`]: pointHasNegative(pointDifference(start, end)) ? -1 : 1})
 
 /**
- *
+ * Having provided two points, return an array of transition points
+ * connecting 'start' and 'end'. return array includes 'start' (line[0])
+ * and 'end' (line[line.length-1])
  * @param start
  * @param end
  * @param line
