@@ -160,20 +160,10 @@ const getDOMItemFromPoint = (pnt, matrix) => checkValidPoint(pnt, matrix) ? matr
 /**
  * Return an array of all the points in the matrix
  * @param matrix
+ * @param allPoints
  * @returns {Array}
  */
-const getAllPoints = matrix => {
-    let lengths = getAxisLengths(matrix)
-    let allPoints = []
-    for (let z = 0; z < lengths.z; ++z) {
-        for (let y = 0; y < lengths.y; ++y) {
-            for (let x = 0; x < lengths.x; ++x) {
-                allPoints.push(matrix.children[z].children[y].children[x].point)
-            }
-        }
-    }
-    return allPoints
-}
+const getAllPoints = (matrix, allPoints = []) => (matrix.point) ? allPoints.concat([matrix.point]) : matrix.children.reduce((allPoints, child) => allPoints.concat(getAllPoints(child, [])), [])
 
 /**
  * Return all valid points surrounding a provided point
