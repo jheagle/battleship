@@ -82,6 +82,14 @@ const pointDirection = (start, end) => mergeObjects(point(0, 0, 0), {[`${getHigh
 const getPointsLine = (start, end, line = []) => checkEqualPoints(start, end) ? line.concat([start]) : getPointsLine(nextCell(start, pointDirection(start, end)), end, line.concat([start]))
 
 /**
+ * Takes an array of arrays containing two points each. Calls getPointsLine for each array of points.
+ * Returns and array of all points captured for each line segment
+ * @param lines
+ * @returns {Array.<*>}
+ */
+const getPointsLines = lines => lines.reduce((first, next) => first.concat(getPointsLine(...next)), [])
+
+/**
  * Given a start and end point, test the points between with the provided function.
  * Return the points as part of true or/and false properties based on the test.
  * @param start
@@ -171,25 +179,13 @@ const getAllPoints = (matrix, allPoints = []) => (matrix.point) ? allPoints.conc
  * @param matrix
  * @returns {Array}
  */
-const adjacentPoints = (pnt, matrix) => {
-    let adjPoints = []
-    for (let z = -1; z < 2; ++z) {
-        for (let y = -1; y < 2; ++y) {
-            for (let x = -1; x < 2; ++x) {
-                let testPoint = point(pnt.x + x, pnt.y + y, pnt.z + z)
-                if (checkValidPoint(testPoint, matrix) && point !== testPoint) {
-                    adjPoints.push(testPoint)
-                }
-            }
-        }
-    }
-    return adjPoints
-}
+const adjacentPoints = (pnt, matrix) => getPointsLines([[point(-1, 1, 1), point(1, -1, -1)], [point(1, 1, 1), point(-1, 1, -1)], [point(-1, -1, 1), point(1, -1, 1)], [point(1, 0, 0), point(1, 1, -1)], [point(-1, 1, 0), point(1, 1, 0)]]).concat([point(0, 0, 1), point(1, 0, 0), point(-1, 0, -1), point(0, 0, -1)])
+    .map(p => nextCell(pnt, p)).filter(p => checkValidPoint(nextCell(pnt, p), matrix))
 
 /**
  * Return all points which touch on edges (not diagonal)
  * @param pnt
  * @param matrix
  */
-const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), point(0, -1, 0), point(0, 1, 0), point(0, 0, -1), point(0, 0, 1)].map(p => point(pnt.x + p.x, pnt.y + p.y, pnt.z + p.z)).filter(p => checkValidPoint(p, matrix))
+const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), point(0, -1, 0), point(0, 1, 0), point(0, 0, -1), point(0, 0, 1)].map(p => nextCell(pnt, p)).filter(p => checkValidPoint(p, matrix))
 
