@@ -95,7 +95,7 @@ const getMax = curry(getMaxOrMin)(true)
 const getMin = curry(getMaxOrMin)(false)
 
 /**
- * Create a single random number where range is within length. And with optional offset,
+ * Create a single random number within provide range. And with optional offset,
  * The distance between the result numbers can be adjusted with interval.
  * @param range
  * @param offset
@@ -104,7 +104,7 @@ const getMin = curry(getMaxOrMin)(false)
 const randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range + offset) * interval
 
 /**
- * Create a single random integer where range is within length. And with optional offset,
+ * Create a single random integer within provide range. And with optional offset,
  * The distance between the result numbers can be adjusted with interval.
  * @param range
  * @param offset
