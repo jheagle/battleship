@@ -86,18 +86,14 @@ const filterAdjacentPoints = pnt => ((pnt.z % 2 === 0 && ((pnt.x % 2 === 0 && pn
  * The visibility of the ship on the board is determined by the view parameter.
  * @param shipInfo
  * @param start
- * @param dir
+ * @param end
  * @param matrix
  * @param view
  * @returns {{name: string, status: number, parts: Array}}
  */
-const buildShip = (shipInfo, start, dir, matrix, view = false) => {
+const buildShip = (shipInfo, start, end, matrix, view = false) => {
     let unit = ship(shipInfo.name)
-    let cur = start
-    for (let i = 0; i < shipInfo.size; ++i) {
-        unit.parts.push(setShip(matrix, cur, view))
-        cur = nextCell(cur, dir)
-    }
+    unit.parts = getPointsLine(start, end).map(p => setShip(matrix, p, view))
     return unit
 }
 
@@ -107,19 +103,23 @@ const buildShip = (shipInfo, start, dir, matrix, view = false) => {
  * @param matrix
  * @param shipLength
  * @param lengths
- * @param useCoords
  * @returns {{start: *, dir}}
  */
-const generateStartDir = (matrix, shipLength, lengths, useCoords) => {
+const generateStartEnd = (matrix, shipLength, lengths) => {
     // randomly select ship direction
-    let dir = randDirection(useCoords)
+    let dir = randDirection([point(1, 0, 0), point(0, 1, 0), point(0, 0, 1)].filter(p => lengths[getAxisOfCoord(p, 1)] > shipLength))
+    if (getHighAbsoluteCoord(dir) === 0)
+        return {
+            start: point(0, 0, 0),
+            end: point(0, 0, 0)
+        }
     // generate start and end coordinates based on direction and ensuring start is far enough from edge of matrix
     let start = point(randCoords(lengths.x, shipLength, dir.x), randCoords(lengths.y, shipLength, dir.y), randCoords(lengths.z, shipLength, dir.z))
     let end = point(start.x + dir.x * (shipLength - 1), start.y + dir.y * (shipLength - 1), start.z + dir.z * (shipLength - 1))
-    return checkInBetween(start, end, matrix, checkIfShipCell) ? generateStartDir(matrix, shipLength, lengths, useCoords) :
+    return checkInBetween(start, end, matrix, checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) :
         {
             start: start,
-            dir: dir
+            end: end
         }
 }
 
@@ -132,27 +132,12 @@ const generateStartDir = (matrix, shipLength, lengths, useCoords) => {
  * @returns {Array}
  */
 const generateRandomFleet = (ships, matrix, view = false) => {
-    let shipFleet = [] // Create array to store generated ships
-    let lengths = getAxisLengths(matrix) // store the length of each dimension
     // Loop through all of the provided lengths to create a ship for each
-    for (let ship in ships) {
-        let useCoords = []
-        if (ships[ship].size <= lengths.x) {
-            useCoords.push(point(1, 0, 0))
-        }
-        if (ships[ship].size <= lengths.y) {
-            useCoords.push(point(0, 1, 0))
-        }
-        if (ships[ship].size <= lengths.z) {
-            useCoords.push(point(0, 0, 1))
-        }
-        if (useCoords.length) {
-            // generate and test ship coordinates, if the test fails re-generate and test again till success
-            let startDir = generateStartDir(matrix, ships[ship].size, lengths, useCoords)
-            shipFleet.push(buildShip(ships[ship], startDir.start, startDir.dir, matrix, view)) // once coordinates pass test, generate the ship and pass to the Fleet
-        }
-    }
-    return shipFleet
+    return ships.map(ship => {
+        // generate and test ship coordinates, if the test fails re-generate and test again till success
+        let startEnd = generateStartEnd(matrix, ship.size, getAxisLengths(matrix))
+        return buildShip(ship, startEnd.start, startEnd.end, matrix, view) // once coordinates pass test, generate the ship and pass to the Fleet
+    })
 }
 
 /**
