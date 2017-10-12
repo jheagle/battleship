@@ -95,6 +95,24 @@ const getMax = curry(getMaxOrMin)(true)
 const getMin = curry(getMaxOrMin)(false)
 
 /**
+ * Create a single random number where range is within length. And with optional offset,
+ * The distance between the result numbers can be adjusted with interval.
+ * @param range
+ * @param offset
+ * @param interval
+ */
+const randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range + offset) * interval
+
+/**
+ * Create a single random integer where range is within length. And with optional offset,
+ * The distance between the result numbers can be adjusted with interval.
+ * @param range
+ * @param offset
+ * @param interval
+ */
+const randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.random() * range) + offset) * interval
+
+/**
  * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
  * @param key
  * @param val

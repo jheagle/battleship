@@ -138,18 +138,10 @@ const checkInBetween = (start, end, matrix, func, inclusive = true) => (inclusiv
 const getAxisLengths = (matrix) => point(matrix.children[0].children[0].children.length, matrix.children[0].children.length, matrix.children.length)
 
 /**
- * Create a single random number where range is within length. The number is adjusted by the provided direction (0 or 1)
- * @param length
- * @param range
- * @param dirAdjust
- */
-const randCoords = (length, range = 0, dirAdjust = 0) => Math.floor(Math.random() * (length - ((range - 1) * dirAdjust)))
-
-/**
  * Get random direction point
  * @param useCoords
  */
-const randDirection = (useCoords = []) => useCoords.length ? useCoords[Math.floor(Math.random() * useCoords.length)] : point(0, 0, 0)
+const randDirection = (useCoords = []) => useCoords.length ? useCoords[randomInteger(useCoords.length)] : point(0, 0, 0)
 
 /**
  * Test if the provided point exists in the matrix.

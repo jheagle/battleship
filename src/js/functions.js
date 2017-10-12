@@ -114,7 +114,7 @@ const generateStartEnd = (matrix, shipLength, lengths) => {
             end: point(0, 0, 0)
         }
     // generate start and end coordinates based on direction and ensuring start is far enough from edge of matrix
-    let start = point(randCoords(lengths.x, shipLength, dir.x), randCoords(lengths.y, shipLength, dir.y), randCoords(lengths.z, shipLength, dir.z))
+    let start = point(randomInteger(lengths.x - ((shipLength - 1) * dir.x)), randomInteger(lengths.y - ((shipLength - 1) * dir.y)), randomInteger(lengths.z - ((shipLength - 1) * dir.z)))
     let end = point(start.x + dir.x * (shipLength - 1), start.y + dir.y * (shipLength - 1), start.z + dir.z * (shipLength - 1))
     return checkInBetween(start, end, matrix, checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) :
         {
@@ -189,7 +189,7 @@ const beginRound = (e, mainForm) => {
     }
     removeChild(getChildrenByClass('main-menu', parent.body)[0], parent.body)
     let players = renderHTML(boards(buildPlayers(humans, robots)), parent).children
-    let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[Math.floor(Math.random() * players.length)])
+    let firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[randomInteger(players.length)])
     if (firstAttacker.isRobot) {
         computerAttack(firstAttacker, players)
     }

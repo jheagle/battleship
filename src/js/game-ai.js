@@ -8,7 +8,7 @@ const selectTargetPlayer = (players) => {
     // Get a list of all players with broken ships or with lowest status.
     let victims = getBrokenShipsPlayers(players).length ? getBrokenShipsPlayers(players) : getLowStatusItems(players)
     // If more than one possible victim, select a random target, otherwise return the lowest status player.
-    return victims.length === 1 ? victims[0] : victims[Math.floor(Math.random() * victims.length)]
+    return victims.length === 1 ? victims[0] : victims[randomInteger(victims.length)]
 }
 
 /**
@@ -50,7 +50,7 @@ const selectTargetCoord = (victim) => {
         availTargets = getAdjEdgeNonHitCells(hitParts[0].point, victim.board)
     }
     let finalTargets = availTargets.length ? availTargets : getAllNonHitCells(victim.board).filter(t => filterAdjacentPoints(t))
-    let target = finalTargets[Math.floor(Math.random() * finalTargets.length)]
+    let target = finalTargets[randomInteger(finalTargets.length)]
     displayTargets(finalTargets, target, victim)
 
     // If there are available targets then hit one at random
