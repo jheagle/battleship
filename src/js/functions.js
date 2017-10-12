@@ -3,6 +3,7 @@
  * Return the hasShip tile boolean at the specified point.
  * @param pnt
  * @param matrix
+ * @returns {boolean}
  */
 const checkIfShipCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].hasShip
 
@@ -10,12 +11,14 @@ const checkIfShipCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].
  * Return the isHit tile boolean at the specified point.
  * @param pnt
  * @param matrix
+ * @returns {boolean}
  */
 const checkIfHitCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].isHit
 
 /**
  * Get all points which were not yet hit in the matrix.
  * @param matrix
+ * @returns {Array}
  */
 const getAllNonHitCells = matrix => getAllPoints(matrix).filter(p => !checkIfHitCell(p, matrix))
 
@@ -23,6 +26,7 @@ const getAllNonHitCells = matrix => getAllPoints(matrix).filter(p => !checkIfHit
  * Get the points surrounding a provided point which were not hit.
  * @param pnt
  * @param matrix
+ * @returns {Array}
  */
 const getAdjNonHitCells = (pnt, matrix) => adjacentPoints(pnt, matrix).filter(p => !checkIfHitCell(p, matrix))
 
@@ -30,30 +34,35 @@ const getAdjNonHitCells = (pnt, matrix) => adjacentPoints(pnt, matrix).filter(p 
  * Get the points which have same edges with the provided point and are not hit.
  * @param pnt
  * @param matrix
+ * @returns {Array}
  */
 const getAdjEdgeNonHitCells = (pnt, matrix) => adjacentEdgePoints(pnt, matrix).filter(p => !checkIfHitCell(p, matrix))
 
 /**
  * Given an array of items, return the item with the lowest status property (at the end of the array)
  * @param items
+ * @returns {Array}
  */
 const getALowStatusItem = items => items.reduce((a, b) => b.status <= a.status ? b : a)
 
 /**
  * Given an array of items, return all items which have the lowest status property
  * @param items
+ * @returns {Array}
  */
 const getLowStatusItems = items => items.filter(i => i.status <= getALowStatusItem(items).status)
 
 /**
  * Given an array of items, return all of the items which have a status less than 100, but more than 0
  * @param items
+ * @returns {Array}
  */
 const getBrokenItems = items => items.filter(i => i.status < 100 && i.status > 0)
 
 /**
  * Return all of the players which have broken ships.
  * @param players
+ * @returns {Array}
  */
 const getBrokenShipsPlayers = players => players.filter(p => getBrokenItems(p.shipFleet).length)
 
@@ -61,23 +70,26 @@ const getBrokenShipsPlayers = players => players.filter(p => getBrokenItems(p.sh
  * Return the number of damaged ship parts. Performs math on the number of parts vs the damaged status.
  * @param total
  * @param status
+ * @returns {number}
  */
 const numDamangedParts = (total, status) => total - Math.ceil(((status / 100) * total))
 
 /**
- *
+ * Used to generate 'checkerboard' style attack by only attacking every non-edge-touching cell
  * @param pnt
+ * @returns {boolean}
  */
 const filterAdjacentPoints = pnt => ((pnt.z % 2 === 0 && ((pnt.x % 2 === 0 && pnt.y % 2 === 0) || (pnt.x % 2 !== 0 && pnt.y % 2 !== 0))) || (pnt.z % 2 !== 0 && ((pnt.x % 2 !== 0 && pnt.y % 2 === 0) || (pnt.x % 2 === 0 && pnt.y % 2 !== 0))))
 
 /**
  * Generate a ship with the specified length, beginning and direction.
  * The visibility of the ship on the board is determined by the view parameter.
- * @param length
+ * @param shipInfo
  * @param start
  * @param dir
  * @param matrix
  * @param view
+ * @returns {{name: string, status: number, parts: Array}}
  */
 const buildShip = (shipInfo, start, dir, matrix, view = false) => {
     let unit = ship(shipInfo.name)
@@ -91,6 +103,7 @@ const buildShip = (shipInfo, start, dir, matrix, view = false) => {
 
 /**
  * Get a qualifying start and direction point for a ship of specified length
+ * WARNING: This is a recursive function.
  * @param matrix
  * @param shipLength
  * @param lengths
@@ -123,8 +136,6 @@ const generateRandomFleet = (ships, matrix, view = false) => {
     let lengths = getAxisLengths(matrix) // store the length of each dimension
     // Loop through all of the provided lengths to create a ship for each
     for (let ship in ships) {
-        let start = point(0, 0, 0) // default initial ship coordinates
-        let end = point(0, 0, 0) // default final ship coordinates
         let useCoords = []
         if (ships[ship].size <= lengths.x) {
             useCoords.push(point(1, 0, 0))
@@ -148,6 +159,7 @@ const generateRandomFleet = (ships, matrix, view = false) => {
  * Create players and associated properties.
  * Takes an integer for the number of players to generate.
  * Returns an array of players.
+ * WARNING: This is a recursive function.
  * @param humans
  * @param robots
  * @param players
