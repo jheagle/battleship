@@ -174,10 +174,10 @@ const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(
     cloned
 
 /**
- *
- * @param isMutable
- * @param obj1
- * @param obj2
+ * Merge two objects and provide clone or original based on isMutable parameter.
+ * @param {boolean} isMutable
+ * @param {Object} obj1
+ * @param {Object} obj2
  * @returns {*}
  */
 const mergeObjectsBase = (isMutable, obj1, obj2) => (notEmptyObjectOrArray(obj2)) ? mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), isMutable ? mergeObjectsMutable : mergeObjects), isMutable ? obj1 : cloneObject(obj1)) : obj2
@@ -187,8 +187,8 @@ const mergeObjectsBase = (isMutable, obj1, obj2) => (notEmptyObjectOrArray(obj2)
  * objects having the same attributes will overwrite starting from the end of the argument
  * list and bubbling up to return a merged version of the first object.
  * WARNING: This is a recursive function.
- * @param args
- * @returns {*}
+ * @param {...Object} args
+ * @returns {Object}
  */
 const mergeObjects = (...args) => args.length === 2 ?
     mergeObjectsBase(false, args[0], args[1]) :
@@ -202,8 +202,8 @@ const mergeObjects = (...args) => args.length === 2 ?
  * list and bubbling up to return the overwritten first object.
  * WARNING: This is a recursive function.
  * WARNING: This will mutate the first object passed in as input
- * @param args
- * @returns {*}
+ * @param {...Object} args
+ * @returns {Object}
  */
 const mergeObjectsMutable = (...args) => args.length === 2 ?
     mergeObjectsBase(true, args[0], args[1]) :

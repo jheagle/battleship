@@ -82,20 +82,34 @@ const numDamangedParts = (total, status) => total - Math.ceil(((status / 100) * 
 const filterAdjacentPoints = pnt => ((pnt.z % 2 === 0 && ((pnt.x % 2 === 0 && pnt.y % 2 === 0) || (pnt.x % 2 !== 0 && pnt.y % 2 !== 0))) || (pnt.z % 2 !== 0 && ((pnt.x % 2 !== 0 && pnt.y % 2 === 0) || (pnt.x % 2 === 0 && pnt.y % 2 !== 0))))
 
 /**
- * Generate a ship with the specified length, beginning and direction.
+ * Generate a ship with the provided line of points.
  * The visibility of the ship on the board is determined by the view parameter.
  * @param shipInfo
- * @param start
- * @param end
+ * @param line
  * @param matrix
  * @param view
  * @returns {{name: string, status: number, parts: Array}}
  */
-const buildShip = (shipInfo, start, end, matrix, view = false) => {
-    let unit = ship(shipInfo.name)
-    unit.parts = getPointsLine(start, end).map(p => setShip(matrix, p, view))
-    return unit
-}
+const buildShip = (shipInfo, line, matrix, view = false) => mergeObjects(ship(shipInfo.name), {parts: line.map(p => setShip(matrix, p, view))})
+
+/**
+ *
+ * @param lengths
+ * @param shipLength
+ */
+const selectShipDirection = (lengths, shipLength) => randDirection([point(1, 0, 0), point(0, 1, 0), point(0, 0, 1)].filter(p => lengths[getAxisOfCoord(p, 1)] > shipLength))
+
+/**
+ *
+ * @param lengths
+ * @param shipLength
+ * @param dir
+ * @returns {{start: {x: number, y: number, z: number}, dir}}
+ */
+const randomStartDir = (lengths, shipLength, dir = selectShipDirection(lengths, shipLength)) => ({
+    start: randomStart(shipLength, dir, lengths),
+    dir: dir
+})
 
 /**
  * Get a qualifying start and direction point for a ship of specified length
@@ -103,42 +117,25 @@ const buildShip = (shipInfo, start, end, matrix, view = false) => {
  * @param matrix
  * @param shipLength
  * @param lengths
- * @returns {{start: *, dir}}
+ * @param startDir
+ * @returns {[null,null]}
  */
-const generateStartEnd = (matrix, shipLength, lengths) => {
-    // randomly select ship direction
-    let dir = randDirection([point(1, 0, 0), point(0, 1, 0), point(0, 0, 1)].filter(p => lengths[getAxisOfCoord(p, 1)] > shipLength))
-    if (getHighAbsoluteCoord(dir) === 0)
-        return {
-            start: point(0, 0, 0),
-            end: point(0, 0, 0)
-        }
-    // generate start and end coordinates based on direction and ensuring start is far enough from edge of matrix
-    let start = point(randomInteger(lengths.x - ((shipLength - 1) * dir.x)), randomInteger(lengths.y - ((shipLength - 1) * dir.y)), randomInteger(lengths.z - ((shipLength - 1) * dir.z)))
-    let end = point(start.x + dir.x * (shipLength - 1), start.y + dir.y * (shipLength - 1), start.z + dir.z * (shipLength - 1))
-    return checkInBetween(start, end, matrix, checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) :
-        {
-            start: start,
-            end: end
-        }
-}
+const generateStartEnd = (matrix, shipLength, lengths, startDir = randomStartDir(lengths, shipLength)) =>
+    getHighAbsoluteCoord(startDir.dir) === 0 ?
+        [point(0, 0, 0), point(0, 0, 0)] :
+        checkInBetween(...[startDir.start, lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, checkIfShipCell) ?
+            generateStartEnd(matrix, shipLength, lengths) :
+            [startDir.start, lineEndPoint(startDir.start, shipLength, startDir.dir)]
 
 /**
  * Create a series of randomly placed ships based on the provided shipLengths.
  * The optional parameter view will set the visibility of the ships.
- * @param ships
- * @param matrix
- * @param view
+ * @param {Array} ships
+ * @param {Object} matrix
+ * @param {boolean} [view=false]
  * @returns {Array}
  */
-const generateRandomFleet = (ships, matrix, view = false) => {
-    // Loop through all of the provided lengths to create a ship for each
-    return ships.map(ship => {
-        // generate and test ship coordinates, if the test fails re-generate and test again till success
-        let startEnd = generateStartEnd(matrix, ship.size, getAxisLengths(matrix))
-        return buildShip(ship, startEnd.start, startEnd.end, matrix, view) // once coordinates pass test, generate the ship and pass to the Fleet
-    })
-}
+const generateRandomFleet = (ships, matrix, view = false) => ships.map(ship => buildShip(ship, getPointsLine(...generateStartEnd(matrix, ship.size, getAxisLengths(matrix))), matrix, view))
 
 /**
  * Create players and associated properties.

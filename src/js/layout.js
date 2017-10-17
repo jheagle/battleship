@@ -1,8 +1,8 @@
 // Custom layout objects leveraging the DOMItem object
 /**
  * This will be the main menu for the game.
- * @param parent
- * @returns {{tagName: string, attributes: {class: string}, children: [*]}}
+ * @param {Object} parent
+ * @returns {{tagName: string, attributes: {class: string}, children: [{tagName: string, attributes: {class: string}, children: [{tagName: string, attributes: {class: string}, eventListeners: {submit: {listenerFunc: beginRound, listenerArgs: {}, listenerOptions: boolean}}, children: [Object,Object,Object,Object,Object]}]}]}}
  */
 const mainMenu = (parent = {}) => ({
     tagName: 'div',
@@ -114,7 +114,8 @@ const mainMenu = (parent = {}) => ({
 
 /**
  * Wrapper div for player data / boards
- * @returns {{tagName: string, attributes: {class: string}}}
+ * @param {Array} [players=[]]
+ * @returns {{tagName: string, attributes: {class: string}, children: Array}}
  */
 const boards = (players = []) => ({
     tagName: 'div',
@@ -125,10 +126,10 @@ const boards = (players = []) => ({
 })
 
 /**
- *
- * @param players
- * @param parent
- * @returns {{tagName: string, attributes: {class: string}, children: [*,*]}}
+ * Display the final scores after a game has ended and have a button to restart.
+ * @param {Array} players
+ * @param {Object} [parent={}]
+ * @returns {{tagName: string, attributes: {class: string}, children: [{tagName: string, attributes: {class: string}, children},{tagName: string, attributes: {type: string, value: string}, eventListeners: {click: {listenerFunc: restart, listenerArgs: {}, listenerOptions: boolean}}}]}}
  */
 const finalScore = (players, parent = {}) => ({
     tagName: 'div',

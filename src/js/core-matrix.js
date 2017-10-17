@@ -71,6 +71,24 @@ const getHighAbsoluteCoordAxis = pnt => getAxisOfCoord(pnt, getHighAbsoluteCoord
 const pointDirection = (start, end) => mergeObjects(point(0, 0, 0), {[`${getHighAbsoluteCoordAxis(pointDifference(start, end))[0]}`]: pointHasNegative(pointDifference(start, end)) ? -1 : 1})
 
 /**
+ * Generate a random starting point for a line with the provided length and direction.
+ * @param length
+ * @param dir
+ * @param lengthLimits
+ * @returns {{x: number, y: number, z: number}}
+ */
+const randomStart = (length, dir, lengthLimits = point(10, 10, 10)) => point(randomInteger(lengthLimits.x - ((length - 1) * dir.x)), randomInteger(lengthLimits.y - ((length - 1) * dir.y)), randomInteger(lengthLimits.z - ((length - 1) * dir.z)))
+
+/**
+ * Given a start point, line length, and a direction, generate the end point of the line.
+ * @param start
+ * @param length
+ * @param dir
+ * @returns {{x: number, y: number, z: number}}
+ */
+const lineEndPoint = (start, length, dir) => point(start.x + dir.x * (length - 1), start.y + dir.y * (length - 1), start.z + dir.z * (length - 1))
+
+/**
  * Having provided two points, return an array of transition points
  * connecting 'start' and 'end'. return array includes 'start' (line[0])
  * and 'end' (line[line.length-1])

@@ -1,9 +1,9 @@
 // Game specific objects
 /**
  * Default properties for a tile in the battleship game.
- * @param player
- * @param players
- * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {func: attackListener, args: {player: {}, players: Array}}}}}
+ * @param {Object} [player={}]
+ * @param {Array} [players=[]]
+ * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}}}
  */
 const gameTile = (player = {}, players = []) => ({
     hasShip: false,
@@ -15,9 +15,9 @@ const gameTile = (player = {}, players = []) => ({
 
 /**
  * Set the style for tiles representing water.
- * @param player
- * @param players
- * @returns {*}
+ * @param {Object} [player={}]
+ * @param {Array} [players=[]]
+ * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}, point: {}}}
  */
 const waterTile = (player = {}, players = []) => mergeObjects(gameTile(player, players), tile())
 
@@ -31,7 +31,7 @@ const shipTile = () => ({
 
 /**
  * Store properties of a ship which includes an array of all associated ship tiles.
- * @param name
+ * @param {string} name
  * @returns {{name: string, status: number, parts: Array}}
  */
 const ship = (name = '') => ({
@@ -50,9 +50,9 @@ const hitTile = () => ({
 
 /**
  * Store the player attributes.
- * @param board
- * @param name
- * @returns {{name: string, isRobot: boolean, status: number, turnCnt: number, attacker: boolean, attacks: {hit: number, miss: number, sunk: number}, board: {}, shipFleet: Array, playerStats: {}, tagName: string, attributes: {class: string}, children: [*]}}
+ * @param {Object} board
+ * @param {string} name
+ * @returns {{name: string, isRobot: boolean, status: number, turnCnt: number, attacker: boolean, attacks: {hit: number, miss: number, sunk: number}, board: {}, shipFleet: Array, playerStats: {}, tagName: string, attributes: {class: string}, children: [Object]}}
  */
 const playerSet = (board = {}, name = '') => ({
     name: name,
@@ -75,9 +75,9 @@ const playerSet = (board = {}, name = '') => ({
 
 /**
  * The defined attributes for each player
- * @param player
- * @param status
- * @returns {{tagName: string, attributes: {}, children: [*,*]}}
+ * @param {Object} [player={}]
+ * @param {Object} [status=]
+ * @returns {{tagName: string, attributes: {}, children: [{tagName: string, attributes: {innerHTML: string}},{tagName: string, attributes: {}, children: Array}]}}
  */
 const playerStats = (player = {}, status = '') => ({
     tagName: 'div',
@@ -104,6 +104,7 @@ const playerStats = (player = {}, status = '') => ({
 
 /**
  * Create a default fleet using the standard battleship lengths.
+ * @type {Array}
  */
 const defaultFleet = curry(generateRandomFleet)([
     {name: 'Aircraft Carrier', size: 5},
