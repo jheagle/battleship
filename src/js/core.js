@@ -67,7 +67,7 @@ const notEmptyObjectOrArray = item => !!((typeof item === 'object' && Object.key
  * A function to use with mapObject or just map which will either return the result
  * of re-running a function or return the original item.
  * Pass in the object to be used with map.
- * Pass in the conditions as a test function.
+ * Pass in the conditions as a test function: True returns the object; False continues recursion.
  * Pass in the recursive function.
  * Add any other args to that function.
  * @param {Object} obj
@@ -92,17 +92,17 @@ const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop 
  * @param {Object} object
  * @param {Array} parents
  * @param {function} fn
- * @returns {Array|*|{annotation}}
+ * @returns {Object|Array}
  */
 const cloneExMap = (cloned, object, parents, fn) => mapObject(object, recursiveMap(cloned, cloneRules(cloned, curry(inArray)(parents.concat([object]))), fn, parents.concat([object])))
 
 /**
  * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
  * WARNING: This is a recursive function.
- * @param cloned
- * @param object
- * @param parents
- * @returns {*}
+ * @param {Object} cloned
+ * @param {Object} object
+ * @param {Array} parents
+ * @returns {Object|Array}
  */
 const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object) ?
     cloneExMap(cloned, object, parents, cloneExclusions) :
@@ -110,10 +110,10 @@ const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(
 
 /**
  * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
- * @param key
- * @param val
- * @param parents
- * @returns {*}
+ * @param {string|number} key
+ * @param {*} val
+ * @param {Array} [parents=[]]
+ * @returns {undefined|*}
  */
 const removeCircularReference = (key, val, parents = []) => {
     if (typeof val === 'object') {
@@ -133,13 +133,16 @@ const removeCircularReference = (key, val, parents = []) => {
 const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
 
 /**
- * Merge two objects and provide clone or original based on isMutable parameter.
- * @param {boolean} isMutable
+ * Merge two objects and provide clone or original on the provided function.
+ * The passed function should accept a minimum of two objects to be merged.
+ * If the desire is to mutate the input objects, then the function name should
+ * have the word 'mutable' in the name (case-insensitive).
+ * @param {function} fn
  * @param {Object} obj1
  * @param {Object} obj2
- * @returns {*}
+ * @returns {Object}
  */
-const mergeObjectsBase = (isMutable, obj1, obj2) => (notEmptyObjectOrArray(obj2)) ? mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), isMutable ? mergeObjectsMutable : mergeObjects), isMutable ? obj1 : cloneObject(obj1)) : obj2
+const mergeObjectsBase = (fn, obj1, obj2) => (notEmptyObjectOrArray(obj2)) ? mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), fn), /mutable/i.test(fn.name) ? obj1 : cloneObject(obj1)) : obj2
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -150,10 +153,10 @@ const mergeObjectsBase = (isMutable, obj1, obj2) => (notEmptyObjectOrArray(obj2)
  * @returns {Object}
  */
 const mergeObjects = (...args) => args.length === 2 ?
-    mergeObjectsBase(false, args[0], args[1]) :
+    mergeObjectsBase(mergeObjects, args[0], args[1]) :
     args.length === 1 ?
         cloneObject(args[0]) :
-        args.reduce(curry(mergeObjectsBase)(false), {})
+        args.reduce(curry(mergeObjectsBase)(mergeObjects), {})
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -165,25 +168,44 @@ const mergeObjects = (...args) => args.length === 2 ?
  * @returns {Object}
  */
 const mergeObjectsMutable = (...args) => args.length === 2 ?
-    mergeObjectsBase(true, args[0], args[1]) :
+    mergeObjectsBase(mergeObjectsMutable, args[0], args[1]) :
     args.length === 1 ?
         args[0] :
-        args.reduce(curry(mergeObjectsBase)(true), {})
+        args.reduce(curry(mergeObjectsBase)(mergeObjectsMutable), {})
 
 /**
- * Generate an array of specified item extending to specified length
+ * Generate an array filled with a copy of the provided item or references to the provided item.
+ * The length defines how long the array should be.
  * WARNING: This is a recursive function.
- * @param item
- * @param length
- * @param useReference
- * @param arr
+ * @param {boolean} useReference
+ * @param {*} item
+ * @param {number} length
+ * @param {Array} [arr=[]}
  * @returns {Array.<*>}
  */
-const buildArray = (item, length, useReference = false, arr = []) => --length > 0 ?
-    buildArray((useReference ?
-        item :
-        cloneObject(item)), length, useReference, arr.concat([item])) :
-    arr.concat([item])
+const buildArrayBase = (useReference, item, length, arr = []) => --length > 0 ? buildArrayBase(useReference, (useReference ? item : cloneObject(item)), length, arr.concat([item])) : arr.concat([item])
+
+/**
+ * Leverage buildArrayBase to generate an array filled with a copy of the provided item.
+ * The length defines how long the array should be.
+ * @function buildArray
+ * @param {*} item
+ * @param {number} length
+ * @param {Array} [arr=[]}
+ * @returns {Array.<*>}
+ */
+const buildArray = curry(buildArrayBase)(false)
+
+/**
+ * Leverage buildArrayBase to generate an array filled with references to the provided item.
+ * The length defines how long the array should be.
+ * @function buildArrayOfReferences
+ * @param {*} item
+ * @param {number} length
+ * @param {Array} [arr=[]}
+ * @returns {Array.<*>}
+ */
+const buildArrayOfReferences = curry(buildArrayBase)(true)
 
 /**
  * A simple function to check if an item is in an array
