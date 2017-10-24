@@ -4,7 +4,7 @@
     /**
      * Create new private reference to the document
      */
-    const documentItem = main(documentDOMItem())
+    const documentItem = main(documentDOMItem([beginRound, attackListener]))
     console.log(documentItem);
     // let mtrx = bindPointData(cube(mergeObjects(DOMItem(), tile()), 10))
     // console.log(mtrx)

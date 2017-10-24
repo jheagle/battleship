@@ -177,6 +177,30 @@ const removeChild = (item, parent = documentItem.body) => {
 }
 
 /**
+ * Register a single listener function as part of the root DOMItem.
+ * @param {function} listener
+ * @param {Object} [parent]
+ * @returns {function}
+ */
+const registerListener = (listener, parent = documentItem) => parent.eventListeners[listener.name] = parent.head.parentItem.eventListeners[listener.name] = parent.body.parentItem.eventListeners[listener.name] = listener
+
+/**
+ * Register multiple listeners from an array of functions.
+ * @param {Array.<function>} listeners
+ * @param {Object} [parent]
+ * @returns {Object}
+ */
+const registerListeners = (listeners, parent = documentItem) => mergeObjects(parent, {eventListeners: listeners.reduce((initial, listener) => mergeObjects(initial, {[`${listener.name}`]: registerListener(listener, parent)}), parent.eventListeners)})
+
+/**
+ * Based on the provided function / listener name, retrieve the associated function from the root DOMItem
+ * @param listenerName
+ * @param parent
+ * @returns {{}}
+ */
+const retrieveListener = (listenerName, parent = documentItem) => inArray(Object.keys(parent.eventListeners), listenerName) ? parent.eventListeners[listenerName] : {}
+
+/**
  * Provide compatibility for using the options parameter of addEventListener
  * @param options
  * @returns {boolean}
@@ -331,6 +355,7 @@ const getTopParentItem = item =>
 const renderHTML = (item, parent = documentItem) => {
     mapObject(DOMItem(item), (prop) => prop, item)
     item.element = (item.element && item.element instanceof HTMLElement) ? item.element : bindElement(item).element
+    item.eventListeners = mapObject(item.eventListeners, prop => mergeObjects(prop, {listenerFunc: retrieveListener(prop.listenerFunc, getTopParentItem(parent))}))
     item.parentItem = parent.body || parent
     item = bindListeners(appendHTML(item, parent))
     item.children.map(child => renderHTML(child, item))

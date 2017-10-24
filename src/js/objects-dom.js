@@ -38,12 +38,14 @@ const initChildren = () => [
 /**
  * Initiate the Root for DocumentItem. This is primary a helper for documentDOMItem.
  * @param {Array} children
+ * @param {Array.<function>} listeners
  * @returns {{tagName: string, attributes: {}, element: HTMLDocument, children: Array, head: {Object}, body: {Object}}}
  */
-const initRoot = children => DOMItem({
+const initRoot = (children, listeners = []) => DOMItem({
     tagName: 'html',
     attributes: {},
     element: document,
+    eventListeners: listeners.reduce((initial, listener) => mergeObjects(initial, {[`${listener.name}`]: listener}), {}),
     children: children,
     head: children[0],
     body: children[1],
@@ -52,10 +54,11 @@ const initRoot = children => DOMItem({
 /**
  * Return a DOMItem style reference to the document. The rootItem argument is a
  * system function and not necessary to implement.
+ * @param {Array.<function>} listeners
  * @param {Object} [rootItem={{tagName: string, attributes: {}, element: HTMLDocument, children: Array, head: {Object}, body: {Object}}}]
  * @returns {{tagName: string, attributes: {styles: {}}, element: {}, eventListeners: {}, parentItem: {}, children: Array}}
  */
-const documentDOMItem = (rootItem = initRoot(initChildren())) => DOMItem(rootItem, {
+const documentDOMItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => DOMItem(rootItem, {
     children: rootItem.children.map(child => DOMItem(child, {parentItem: rootItem}))
 })
 
