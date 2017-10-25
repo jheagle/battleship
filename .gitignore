@@ -1,4 +1,4 @@
 .idea
 .idea/*
-/nbproject/private/
-/nbproject/*
+nbproject
+node_modules
