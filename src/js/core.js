@@ -265,10 +265,10 @@ const randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.rand
 /**
  * Run Timeout functions one after the other in queue
  * WARNING: This is a recursive function.
- * @param fn
- * @param time
- * @param args
- * @returns {*}
+ * @param {function} fn
+ * @param {number} time
+ * @param {...*} args
+ * @returns {{id: number, func: function, timeout: number, args: *[], result: *}}
  */
 const queueTimeout = (fn = {}, time = 0, ...args) => {
     queueTimeout.queue = queueTimeout.queue || []

@@ -2,10 +2,10 @@
 /**
  * Check if the provided HTMLElement has the provided attributes.
  * Returns a boolean, or an array of 1 / 0 / -1 based on the comparison status.
- * @param element
- * @param key
- * @param attr
- * @returns {*}
+ * @param {HTMLElement} element
+ * @param {string} key
+ * @param {string} attr
+ * @returns {boolean|Object.<string, number>}
  */
 const elementHasAttribute = (element, key, attr) => {
     // if element is not a valid element then return false
@@ -41,8 +41,8 @@ const elementHasAttribute = (element, key, attr) => {
 /**
  * Given a DOMItem as config, this function will return the changes to be applied
  * to the stored element property.
- * @param config
- * @returns {*}
+ * @param {Object} config
+ * @returns {Object}
  */
 const elementChanges = config => {
     if (config.element.tagName.toLowerCase() !== config.tagName.toLowerCase()) {
