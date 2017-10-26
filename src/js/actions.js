@@ -68,8 +68,7 @@ const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, poi
  * @returns {*}
  */
 const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
-    player.playerStats = mergeObjects(player.playerStats, playerStats(player, status))
-    updateElements(player.playerStats)
+    player.playerStats = updateElements(mergeObjects(player.playerStats, playerStats(player, status)))
     return player
 }
 

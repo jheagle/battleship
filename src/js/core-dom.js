@@ -81,10 +81,12 @@ const updateElement = (config) => {
  * Generate HTML element data for each object in the matrix
  * WARNING: This is a recursive function.
  * @param config
+ * @returns {*}
  */
 const updateElements = (config) => {
     config = updateElement(config)
     config.children.map(child => updateElements(child))
+    return config
 }
 
 /**
