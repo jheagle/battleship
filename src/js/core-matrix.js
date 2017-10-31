@@ -12,7 +12,7 @@ const bindPointData = (item, pnt = point(0, 0, 0)) => mergeObjects(item, (item.p
  * Based on provided point and point direction generate next point.
  * @param pnt
  * @param dir
- * @returns {number, number, number}
+ * @returns {Object.<string, number>}
  */
 const nextCell = (pnt, dir) => point(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z)
 
@@ -20,7 +20,7 @@ const nextCell = (pnt, dir) => point(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z
  * Based on provided point and point direction generate next point.
  * @param start
  * @param end
- * @returns {number, number, number}
+ * @returns {Object.<string, number>}
  */
 const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, end.z - start.z)
 
@@ -84,7 +84,7 @@ const randomStart = (length, dir, lengthLimits = point(10, 10, 10)) => point(ran
  * @param start
  * @param length
  * @param dir
- * @returns {{x: number, y: number, z: number}}
+ * @returns {Object.<string, number>}
  */
 const lineEndPoint = (start, length, dir) => point(start.x + dir.x * (length - 1), start.y + dir.y * (length - 1), start.z + dir.z * (length - 1))
 

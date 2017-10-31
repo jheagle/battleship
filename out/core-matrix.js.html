@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: core-matrix.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: core-matrix.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Core matrix functions for working with a grid of points
+/**
+ * Generate point data for each item in the matrix
+ * WARNING: This is a recursive function.
+ * @param item
+ * @param pnt
+ * @returns {*}
+ */
+const bindPointData = (item, pnt = point(0, 0, 0)) => mergeObjects(item, (item.point ? {point: cloneObject(pnt)} : {children: item.children.map((el, i) => bindPointData(el, mergeObjects(pnt, {[el.axis]: i})))}))
+
+/**
+ * Based on provided point and point direction generate next point.
+ * @param pnt
+ * @param dir
+ * @returns {Object.&lt;string, number>}
+ */
+const nextCell = (pnt, dir) => point(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z)
+
+/**
+ * Based on provided point and point direction generate next point.
+ * @param start
+ * @param end
+ * @returns {Object.&lt;string, number>}
+ */
+const pointDifference = (start, end) => point(end.x - start.x, end.y - start.y, end.z - start.z)
+
+/**
+ * Given two points, compare the x, y, and z of each to see if they are the same
+ * @param p1
+ * @param p2
+ * @returns {boolean}
+ */
+const checkEqualPoints = (p1, p2) => p1.x === p2.x &amp;&amp; p1.y === p2.y &amp;&amp; p1.z === p2.z
+
+/**
+ * Check if there is a negative coordinate value within the point provided
+ * @param pnt
+ * @returns {boolean}
+ */
+const pointHasNegative = pnt => !!Object.keys(filterObject(pnt, (attr, key) => attr &lt; 0)).length
+
+/**
+ * Return the first coordinate number with the highest absolute value.
+ * @param pnt
+ * @returns {Array.&lt;T>|*}
+ */
+const getHighAbsoluteCoord = pnt => reduceObject(pnt, curry(getMaxOrMin)(!pointHasNegative(pnt)), 0)
+
+/**
+ * Having provided a coordinate number, find all corresponding axis.
+ * @param pnt
+ * @param coord
+ * @returns {*}
+ */
+const getAxisOfCoord = (pnt, coord) => Object.keys(pnt).filter((key) => pnt[key] === coord)
+
+/**
+ * Find all axis of the highest absolute value coordinate
+ * @param pnt
+ * @returns {*}
+ */
+const getHighAbsoluteCoordAxis = pnt => getAxisOfCoord(pnt, getHighAbsoluteCoord(pnt))
+
+/**
+ * Retrieve a directional coordinate value based on two provided points
+ * (directions consist of two zero points and a single point of 1 / -1)
+ * @param start
+ * @param end
+ * @returns {*}
+ */
+const pointDirection = (start, end) => mergeObjects(point(0, 0, 0), {[`${getHighAbsoluteCoordAxis(pointDifference(start, end))[0]}`]: pointHasNegative(pointDifference(start, end)) ? -1 : 1})
+
+/**
+ * Generate a random starting point for a line with the provided length and direction.
+ * @param length
+ * @param dir
+ * @param lengthLimits
+ * @returns {{x: number, y: number, z: number}}
+ */
+const randomStart = (length, dir, lengthLimits = point(10, 10, 10)) => point(randomInteger(lengthLimits.x - ((length - 1) * dir.x)), randomInteger(lengthLimits.y - ((length - 1) * dir.y)), randomInteger(lengthLimits.z - ((length - 1) * dir.z)))
+
+/**
+ * Given a start point, line length, and a direction, generate the end point of the line.
+ * @param start
+ * @param length
+ * @param dir
+ * @returns {Object.&lt;string, number>}
+ */
+const lineEndPoint = (start, length, dir) => point(start.x + dir.x * (length - 1), start.y + dir.y * (length - 1), start.z + dir.z * (length - 1))
+
+/**
+ * Having provided two points, return an array of transition points
+ * connecting 'start' and 'end'. return array includes 'start' (line[0])
+ * and 'end' (line[line.length-1])
+ * @param start
+ * @param end
+ * @param line
+ * @returns {Array.&lt;*>}
+ */
+const getPointsLine = (start, end, line = []) => checkEqualPoints(start, end) ? line.concat([start]) : getPointsLine(nextCell(start, pointDirection(start, end)), end, line.concat([start]))
+
+/**
+ * Takes an array of arrays containing two points each. Calls getPointsLine for each array of points.
+ * Returns and array of all points captured for each line segment
+ * @param lines
+ * @returns {Array.&lt;*>}
+ */
+const getPointsLines = lines => lines.reduce((first, next) => first.concat(getPointsLine(...next)), [])
+
+/**
+ * Given a start and end point, test the points between with the provided function.
+ * Return the points as part of true or/and false properties based on the test.
+ * @param start
+ * @param end
+ * @param matrix
+ * @param func
+ * @param inclusive
+ * @returns {{true: Array, false: Array}}
+ */
+const testPointsBetween = (start, end, matrix, func, inclusive = true) => getPointsLine(start, end).filter((prop, i, line) => ((i !== 0 &amp;&amp; i !== line.length - 1) || inclusive)).reduce((newPoints, next) => mergeObjects(newPoints, {[`${!!func(next, matrix)}`]: [next]}), {
+    true: [],
+    false: []
+})
+
+/**
+ * Retrieve all points between start and end as either true or
+ * false properties based on the function used.
+ * @param start
+ * @param end
+ * @param matrix
+ * @param func
+ * @param inclusive
+ * @returns {{true: Array, false: Array}}
+ */
+const getInBetween = (start, end, matrix, func, inclusive = true) => mergeObjects({
+    true: [],
+    false: []
+}, testPointsBetween(start, end, matrix, func, inclusive))
+
+/**
+ * Given two points, check the cells between using specified function.
+ * When inclusive is set to true the provided start and end points will also be tested
+ * @param start
+ * @param end
+ * @param matrix
+ * @param func
+ * @param inclusive
+ * @returns {boolean}
+ */
+const checkInBetween = (start, end, matrix, func, inclusive = true) => (inclusive &amp;&amp; (func(start, matrix) || func(end, matrix))) ? true : !!testPointsBetween(start, end, matrix, func).true.length
+
+/**
+ * Return point-like object with all of the axis lengths.
+ * @param matrix
+ */
+const getAxisLengths = (matrix) => point(matrix.children[0].children[0].children.length, matrix.children[0].children.length, matrix.children.length)
+
+/**
+ * Get random direction point
+ * @param useCoords
+ */
+const randDirection = (useCoords = []) => useCoords.length ? useCoords[randomInteger(useCoords.length)] : point(0, 0, 0)
+
+/**
+ * Test if the provided point exists in the matrix.
+ * @param pnt
+ * @param matrix
+ */
+const checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] &amp;&amp; !!matrix.children[pnt.z].children[pnt.y] &amp;&amp; !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] &amp;&amp; !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
+
+/**
+ * Test if the provided point exists in the matrix.
+ * @param pnt
+ * @param matrix
+ */
+const getDOMItemFromPoint = (pnt, matrix) => checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false;
+
+/**
+ * Return an array of all the points in the matrix
+ * @param matrix
+ * @param allPoints
+ * @returns {Array}
+ */
+const getAllPoints = (matrix, allPoints = []) => (matrix.point) ? allPoints.concat([matrix.point]) : matrix.children.reduce((allPoints, child) => allPoints.concat(getAllPoints(child, [])), [])
+
+/**
+ * Return all valid points surrounding a provided point
+ * @param pnt
+ * @param matrix
+ * @returns {Array}
+ */
+const adjacentPoints = (pnt, matrix) => getPointsLines([[point(-1, 1, 1), point(1, -1, -1)], [point(1, 1, 1), point(-1, 1, -1)], [point(-1, -1, 1), point(1, -1, 1)], [point(1, 0, 0), point(1, 1, -1)], [point(-1, 1, 0), point(1, 1, 0)]]).concat([point(0, 0, 1), point(1, 0, 0), point(-1, 0, -1), point(0, 0, -1)])
+    .map(p => nextCell(pnt, p)).filter(p => checkValidPoint(nextCell(pnt, p), matrix))
+
+/**
+ * Return all points which touch on edges (not diagonal)
+ * @param pnt
+ * @param matrix
+ */
+const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), point(0, -1, 0), point(0, 1, 0), point(0, 0, -1), point(0, 0, 1)].map(p => nextCell(pnt, p)).filter(p => checkValidPoint(p, matrix))
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="global.html#DOMItem">DOMItem</a></li></ul><h3>Global</h3><ul><li><a href="global.html#adjacentEdgePoints">adjacentEdgePoints</a></li><li><a href="global.html#adjacentPoints">adjacentPoints</a></li><li><a href="global.html#appendAllHTML">appendAllHTML</a></li><li><a href="global.html#appendHTML">appendHTML</a></li><li><a href="global.html#appendListeners">appendListeners</a></li><li><a href="global.html#assignListener">assignListener</a></li><li><a href="global.html#attackFleet">attackFleet</a></li><li><a href="global.html#beginRound">beginRound</a></li><li><a href="global.html#bindAllElements">bindAllElements</a></li><li><a href="global.html#bindAllListeners">bindAllListeners</a></li><li><a href="global.html#bindElement">bindElement</a></li><li><a href="global.html#bindListeners">bindListeners</a></li><li><a href="global.html#bindPointData">bindPointData</a></li><li><a href="global.html#boards">boards</a></li><li><a href="global.html#buildArray">buildArray</a></li><li><a href="global.html#buildArrayBase">buildArrayBase</a></li><li><a href="global.html#buildArrayOfReferences">buildArrayOfReferences</a></li><li><a href="global.html#buildHTML">buildHTML</a></li><li><a href="global.html#buildPlayers">buildPlayers</a></li><li><a href="global.html#buildShip">buildShip</a></li><li><a href="global.html#checkEqualPoints">checkEqualPoints</a></li><li><a href="global.html#checkIfHitCell">checkIfHitCell</a></li><li><a href="global.html#checkIfShipCell">checkIfShipCell</a></li><li><a href="global.html#checkInBetween">checkInBetween</a></li><li><a href="global.html#checkValidPoint">checkValidPoint</a></li><li><a href="global.html#cloneExclusions">cloneExclusions</a></li><li><a href="global.html#cloneExMap">cloneExMap</a></li><li><a href="global.html#cloneObject">cloneObject</a></li><li><a href="global.html#cloneRules">cloneRules</a></li><li><a href="global.html#computerAttack">computerAttack</a></li><li><a href="global.html#configureHtml">configureHtml</a></li><li><a href="global.html#coordinate">coordinate</a></li><li><a href="global.html#cube">cube</a></li><li><a href="global.html#curry">curry</a></li><li><a href="global.html#defaultFleet">defaultFleet</a></li><li><a href="global.html#displayTargets">displayTargets</a></li><li><a href="global.html#documentDOMItem">documentDOMItem</a></li><li><a href="global.html#documentItem">documentItem</a></li><li><a href="global.html#elementChanges">elementChanges</a></li><li><a href="global.html#elementHasAttribute">elementHasAttribute</a></li><li><a href="global.html#endGame">endGame</a></li><li><a href="global.html#filterAdjacentPoints">filterAdjacentPoints</a></li><li><a href="global.html#filterObject">filterObject</a></li><li><a href="global.html#finalScore">finalScore</a></li><li><a href="global.html#findNextAttacker">findNextAttacker</a></li><li><a href="global.html#gameTile">gameTile</a></li><li><a href="global.html#generateElement">generateElement</a></li><li><a href="global.html#generateRandomFleet">generateRandomFleet</a></li><li><a href="global.html#generateStartEnd">generateStartEnd</a></li><li><a href="global.html#getAdjEdgeNonHitCells">getAdjEdgeNonHitCells</a></li><li><a href="global.html#getAdjNonHitCells">getAdjNonHitCells</a></li><li><a href="global.html#getAllNonHitCells">getAllNonHitCells</a></li><li><a href="global.html#getAllPoints">getAllPoints</a></li><li><a href="global.html#getALowStatusItem">getALowStatusItem</a></li><li><a href="global.html#getAxisLengths">getAxisLengths</a></li><li><a href="global.html#getAxisOfCoord">getAxisOfCoord</a></li><li><a href="global.html#getBrokenItems">getBrokenItems</a></li><li><a href="global.html#getBrokenShipsPlayers">getBrokenShipsPlayers</a></li><li><a href="global.html#getChildrenByClass">getChildrenByClass</a></li><li><a href="global.html#getChildrenByName">getChildrenByName</a></li><li><a href="global.html#getChildrenFromAttribute">getChildrenFromAttribute</a></li><li><a href="global.html#getDOMItemFromPoint">getDOMItemFromPoint</a></li><li><a href="global.html#getHighAbsoluteCoord">getHighAbsoluteCoord</a></li><li><a href="global.html#getHighAbsoluteCoordAxis">getHighAbsoluteCoordAxis</a></li><li><a href="global.html#getInBetween">getInBetween</a></li><li><a href="global.html#getLowStatusItems">getLowStatusItems</a></li><li><a href="global.html#getMax">getMax</a></li><li><a href="global.html#getMaxOrMin">getMaxOrMin</a></li><li><a href="global.html#getMin">getMin</a></li><li><a href="global.html#getNextAttacker">getNextAttacker</a></li><li><a href="global.html#getParentsByClass">getParentsByClass</a></li><li><a href="global.html#getParentsByName">getParentsByName</a></li><li><a href="global.html#getParentsFromAttribute">getParentsFromAttribute</a></li><li><a href="global.html#getPointsLine">getPointsLine</a></li><li><a href="global.html#getPointsLines">getPointsLines</a></li><li><a href="global.html#getTopParentItem">getTopParentItem</a></li><li><a href="global.html#hitTile">hitTile</a></li><li><a href="global.html#inArray">inArray</a></li><li><a href="global.html#initChildren">initChildren</a></li><li><a href="global.html#initRoot">initRoot</a></li><li><a href="global.html#lineEndPoint">lineEndPoint</a></li><li><a href="global.html#listenerOptions">listenerOptions</a></li><li><a href="global.html#main">main</a></li><li><a href="global.html#mainMenu">mainMenu</a></li><li><a href="global.html#mapObject">mapObject</a></li><li><a href="global.html#matrix">matrix</a></li><li><a href="global.html#mergeObjects">mergeObjects</a></li><li><a href="global.html#mergeObjectsBase">mergeObjectsBase</a></li><li><a href="global.html#mergeObjectsMutable">mergeObjectsMutable</a></li><li><a href="global.html#nextCell">nextCell</a></li><li><a href="global.html#notEmptyObjectOrArray">notEmptyObjectOrArray</a></li><li><a href="global.html#numDamangedParts">numDamangedParts</a></li><li><a href="global.html#playerSet">playerSet</a></li><li><a href="global.html#playerStats">playerStats</a></li><li><a href="global.html#point">point</a></li><li><a href="global.html#pointDifference">pointDifference</a></li><li><a href="global.html#pointDirection">pointDirection</a></li><li><a href="global.html#pointHasNegative">pointHasNegative</a></li><li><a href="global.html#queueTimeout">queueTimeout</a></li><li><a href="global.html#randDirection">randDirection</a></li><li><a href="global.html#randomInteger">randomInteger</a></li><li><a href="global.html#randomNumber">randomNumber</a></li><li><a href="global.html#randomStart">randomStart</a></li><li><a href="global.html#randomStartDir">randomStartDir</a></li><li><a href="global.html#recursiveMap">recursiveMap</a></li><li><a href="global.html#reduceObject">reduceObject</a></li><li><a href="global.html#registerListener">registerListener</a></li><li><a href="global.html#registerListeners">registerListeners</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeCircularReference">removeCircularReference</a></li><li><a href="global.html#renderHTML">renderHTML</a></li><li><a href="global.html#resetTargets">resetTargets</a></li><li><a href="global.html#retrieveListener">retrieveListener</a></li><li><a href="global.html#selectShipDirection">selectShipDirection</a></li><li><a href="global.html#selectTargetCoord">selectTargetCoord</a></li><li><a href="global.html#selectTargetPlayer">selectTargetPlayer</a></li><li><a href="global.html#setHiddenShip">setHiddenShip</a></li><li><a href="global.html#setHit">setHit</a></li><li><a href="global.html#setShip">setShip</a></li><li><a href="global.html#setViewShip">setViewShip</a></li><li><a href="global.html#ship">ship</a></li><li><a href="global.html#shipTile">shipTile</a></li><li><a href="global.html#square">square</a></li><li><a href="global.html#testPointsBetween">testPointsBetween</a></li><li><a href="global.html#tile">tile</a></li><li><a href="global.html#update3dCell">update3dCell</a></li><li><a href="global.html#updateElement">updateElement</a></li><li><a href="global.html#updateElements">updateElements</a></li><li><a href="global.html#updatePlayer">updatePlayer</a></li><li><a href="global.html#updatePlayerStats">updatePlayerStats</a></li><li><a href="global.html#updateScore">updateScore</a></li><li><a href="global.html#waterTile">waterTile</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 31 2017 08:12:26 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
