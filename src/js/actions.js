@@ -127,7 +127,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
 /**
  * Final state once a game is won (only one player remains)
  * @param winner
- * @returns {[*]}
+ * @returns {Array.<*>}
  */
 const endGame = (winner) => {
     let parent = getTopParentItem(winner)

@@ -2,7 +2,7 @@
 /**
  * This will be the main menu for the game.
  * @param {Object} parent
- * @returns {{tagName: string, attributes: {class: string}, children: [{tagName: string, attributes: {class: string}, children: [{tagName: string, attributes: {class: string}, eventListeners: {submit: {listenerFunc: beginRound, listenerArgs: {}, listenerOptions: boolean}}, children: [Object,Object,Object,Object,Object]}]}]}}
+ * @returns {DOMIem}
  */
 const mainMenu = (parent = {}) => ({
     tagName: 'div',
@@ -115,7 +115,7 @@ const mainMenu = (parent = {}) => ({
 /**
  * Wrapper div for player data / boards
  * @param {Array} [players=[]]
- * @returns {{tagName: string, attributes: {class: string}, children: Array}}
+ * @returns {DOMIem}
  */
 const boards = (players = []) => ({
     tagName: 'div',
@@ -129,7 +129,7 @@ const boards = (players = []) => ({
  * Display the final scores after a game has ended and have a button to restart.
  * @param {Array} players
  * @param {Object} [parent={}]
- * @returns {{tagName: string, attributes: {class: string}, children: [{tagName: string, attributes: {class: string}, children},{tagName: string, attributes: {type: string, value: string}, eventListeners: {click: {listenerFunc: restart, listenerArgs: {}, listenerOptions: boolean}}}]}}
+ * @returns {DOMIem}
  */
 const finalScore = (players, parent = {}) => ({
     tagName: 'div',
