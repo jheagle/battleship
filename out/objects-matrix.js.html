@@ -28,63 +28,91 @@
         <article>
             <pre class="prettyprint source linenums"><code>// Core Matrix Objects
 /**
- * Store the point data for an x, y, z matrix.
- * @param {number} x
- * @param {number} y
- * @param {number} [z=0]
- * @returns {{x: number, y: number, z: number}}
+ * A string representing an axis: x, y, z
+ * @typedef {string} axis
  */
-const point = (x, y, z = 0) => {
-    return ({
-        x: x,
-        y: y,
-        z: z,
-    })
-}
 
 /**
- * A default tile in the matrix
- * @returns {{point: {}}}
+ * A number representing a coordinate in a {@link Matrix}
+ * @typedef {number} coordinate
+ */
+
+/**
+ * Point stores a location in a {@link Matrix} defined by three key-value pairs ({@link axis}=>{@link coordinate})
+ * @typedef {Object.&lt;axis, coordinate>} Point
+ * @property {coordinate} x - The X-coordinate of a Point
+ * @property {coordinate} y - The Y-coordinate of a Point
+ * @property {coordinate} z - The Z-coordinate of a Point
+ */
+
+/**
+ * Store the point data for an x, y, z {@link Matrix}.
+ * @param {coordinate} x - The numeric value for X-coordinate
+ * @param {coordinate} y - The numeric value for Y-coordinate
+ * @param {coordinate} [z=0] - The numeric value for Z-coordinate (default to 0 for 2D {@link Matrix})
+ * @returns {Point}
+ */
+const point = (x, y, z = 0) => ({
+    x: x,
+    y: y,
+    z: z,
+})
+
+/**
+ * MatrixTile is an Object which stores a reference a {@link Point} and can be populated with additionally associated fields.
+ * @typedef {Object.&lt;string, Point>} MatrixTile
+ * @property {Point} point - a reference to its location in a {@link Matrix}
+ */
+
+/**
+ * A default tile in the {@link Matrix}
+ * @returns {MatrixTile}
  */
 const tile = () => ({
     point: {},
 })
 
 /**
- * Add a name for coordinates (x / y / z)
- * @param {string} axisName
- * @returns {{axis: string}}
+ * Matrix is a multi-level {@link DOMItem} which is used to visually represent a mathematical grid / matrix.
+ * The matrix consists of four DOMItem levels, at the top tier is the Matrix container with class matrix.
+ * The second tier represents the z axis (with property axis='z') and has the class layer.
+ * The third tier represents the y axis (with property axis='y') and has the class row.
+ * The fourth (final) tier represents the x axis (with property axis='x') and has the class column.
+ * The {@link MatrixTile} is attached on the x axis tier.
+ * The number of children at each level is defined by the size of the matrix, the end result is a multidimensional array.
+ * @typedef {DOMItem} Matrix
+ * @augments DOMItem
  */
-const coordinate = (axisName) => ({
-    axis: axisName
-})
 
 /**
  * Create a 3d matrix of i with x by y by z size,
  * add additional objects for each layer as well
- * @param {Object} i
- * @param {number} x
- * @param {number} y
- * @param {number} [z=1]
- * @param {...Object} [props]
- * @returns {{tagName: string, attributes: {styles: {}}, element: {}, eventListeners: {}, parentItem: {}, children: Array}}
+ * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
+ * @param {coordinate} x - A number / coordinate defining the width of the matrix.
+ * @param {coordinate} y - A number / coordinate defining the height of the matrix.
+ * @param {coordinate} [z=1] - A number / coordinate defining the depth of the matrix.
+ * @param {...Object} [props] - Additional data may be merged into every level of the matrix.
+ * @returns {Matrix}
  */
 const matrix = (i, x, y, z = 1, ...props) => DOMItem({
     tagName: 'div',
     attributes: {
         class: 'matrix'
     },
-    children: buildArray(DOMItem(coordinate('z'), {
+    children: buildArray(DOMItem({
+        axis: 'z',
         tagName: 'div',
         attributes: {
             class: 'layer'
         },
-        children: buildArray(DOMItem(coordinate('y'), {
+        children: buildArray(DOMItem({
+            axis: 'y',
             tagName: 'div',
             attributes: {
                 class: 'row'
             },
-            children: buildArray(DOMItem(coordinate('x'), {
+            children: buildArray(DOMItem({
+                axis: 'x',
                 tagName: 'div',
                 attributes: {
                     class: 'column'
@@ -94,20 +122,19 @@ const matrix = (i, x, y, z = 1, ...props) => DOMItem({
     }, ...props), z)
 })
 
-
 /**
  * Return a single layer matrix where x and y are equal
- * @param {Object} i
- * @param {number} size
- * @returns {{tagName: string, attributes: {styles: {}}, element: {}, eventListeners: {}, parentItem: {}, children: Array}}
+ * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
+ * @param {number} size - Used to define height and width as equal values (depth is set to 1)
+ * @returns {Matrix}
  */
 const square = (i, size) => matrix(i, size, size)
 
 /**
  * Return a matrix where x, y, and z are equal
- * @param {Object} i
- * @param {number} size
- * @returns {{tagName: string, attributes: {styles: {}}, element: {}, eventListeners: {}, parentItem: {}, children: Array}}
+ * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
+ * @param {number} size - Used to define height, width, and depth as equal values
+ * @returns {Matrix}
  */
 const cube = (i, size) => matrix(i, size, size, size)
 </code></pre>
@@ -120,13 +147,13 @@ const cube = (i, size) => matrix(i, size, size, size)
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="global.html#DOMItem">DOMItem</a></li></ul><h3>Global</h3><ul><li><a href="global.html#adjacentEdgePoints">adjacentEdgePoints</a></li><li><a href="global.html#adjacentPoints">adjacentPoints</a></li><li><a href="global.html#appendAllHTML">appendAllHTML</a></li><li><a href="global.html#appendHTML">appendHTML</a></li><li><a href="global.html#appendListeners">appendListeners</a></li><li><a href="global.html#assignListener">assignListener</a></li><li><a href="global.html#attackFleet">attackFleet</a></li><li><a href="global.html#beginRound">beginRound</a></li><li><a href="global.html#bindAllElements">bindAllElements</a></li><li><a href="global.html#bindAllListeners">bindAllListeners</a></li><li><a href="global.html#bindElement">bindElement</a></li><li><a href="global.html#bindListeners">bindListeners</a></li><li><a href="global.html#bindPointData">bindPointData</a></li><li><a href="global.html#boards">boards</a></li><li><a href="global.html#buildArray">buildArray</a></li><li><a href="global.html#buildArrayBase">buildArrayBase</a></li><li><a href="global.html#buildArrayOfReferences">buildArrayOfReferences</a></li><li><a href="global.html#buildHTML">buildHTML</a></li><li><a href="global.html#buildPlayers">buildPlayers</a></li><li><a href="global.html#buildShip">buildShip</a></li><li><a href="global.html#checkEqualPoints">checkEqualPoints</a></li><li><a href="global.html#checkIfHitCell">checkIfHitCell</a></li><li><a href="global.html#checkIfShipCell">checkIfShipCell</a></li><li><a href="global.html#checkInBetween">checkInBetween</a></li><li><a href="global.html#checkValidPoint">checkValidPoint</a></li><li><a href="global.html#cloneExclusions">cloneExclusions</a></li><li><a href="global.html#cloneExMap">cloneExMap</a></li><li><a href="global.html#cloneObject">cloneObject</a></li><li><a href="global.html#cloneRules">cloneRules</a></li><li><a href="global.html#computerAttack">computerAttack</a></li><li><a href="global.html#configureHtml">configureHtml</a></li><li><a href="global.html#coordinate">coordinate</a></li><li><a href="global.html#cube">cube</a></li><li><a href="global.html#curry">curry</a></li><li><a href="global.html#defaultFleet">defaultFleet</a></li><li><a href="global.html#displayTargets">displayTargets</a></li><li><a href="global.html#documentDOMItem">documentDOMItem</a></li><li><a href="global.html#documentItem">documentItem</a></li><li><a href="global.html#elementChanges">elementChanges</a></li><li><a href="global.html#elementHasAttribute">elementHasAttribute</a></li><li><a href="global.html#endGame">endGame</a></li><li><a href="global.html#filterAdjacentPoints">filterAdjacentPoints</a></li><li><a href="global.html#filterObject">filterObject</a></li><li><a href="global.html#finalScore">finalScore</a></li><li><a href="global.html#findNextAttacker">findNextAttacker</a></li><li><a href="global.html#gameTile">gameTile</a></li><li><a href="global.html#generateElement">generateElement</a></li><li><a href="global.html#generateRandomFleet">generateRandomFleet</a></li><li><a href="global.html#generateStartEnd">generateStartEnd</a></li><li><a href="global.html#getAdjEdgeNonHitCells">getAdjEdgeNonHitCells</a></li><li><a href="global.html#getAdjNonHitCells">getAdjNonHitCells</a></li><li><a href="global.html#getAllNonHitCells">getAllNonHitCells</a></li><li><a href="global.html#getAllPoints">getAllPoints</a></li><li><a href="global.html#getALowStatusItem">getALowStatusItem</a></li><li><a href="global.html#getAxisLengths">getAxisLengths</a></li><li><a href="global.html#getAxisOfCoord">getAxisOfCoord</a></li><li><a href="global.html#getBrokenItems">getBrokenItems</a></li><li><a href="global.html#getBrokenShipsPlayers">getBrokenShipsPlayers</a></li><li><a href="global.html#getChildrenByClass">getChildrenByClass</a></li><li><a href="global.html#getChildrenByName">getChildrenByName</a></li><li><a href="global.html#getChildrenFromAttribute">getChildrenFromAttribute</a></li><li><a href="global.html#getDOMItemFromPoint">getDOMItemFromPoint</a></li><li><a href="global.html#getHighAbsoluteCoord">getHighAbsoluteCoord</a></li><li><a href="global.html#getHighAbsoluteCoordAxis">getHighAbsoluteCoordAxis</a></li><li><a href="global.html#getInBetween">getInBetween</a></li><li><a href="global.html#getLowStatusItems">getLowStatusItems</a></li><li><a href="global.html#getMax">getMax</a></li><li><a href="global.html#getMaxOrMin">getMaxOrMin</a></li><li><a href="global.html#getMin">getMin</a></li><li><a href="global.html#getNextAttacker">getNextAttacker</a></li><li><a href="global.html#getParentsByClass">getParentsByClass</a></li><li><a href="global.html#getParentsByName">getParentsByName</a></li><li><a href="global.html#getParentsFromAttribute">getParentsFromAttribute</a></li><li><a href="global.html#getPointsLine">getPointsLine</a></li><li><a href="global.html#getPointsLines">getPointsLines</a></li><li><a href="global.html#getTopParentItem">getTopParentItem</a></li><li><a href="global.html#hitTile">hitTile</a></li><li><a href="global.html#inArray">inArray</a></li><li><a href="global.html#initChildren">initChildren</a></li><li><a href="global.html#initRoot">initRoot</a></li><li><a href="global.html#lineEndPoint">lineEndPoint</a></li><li><a href="global.html#listenerOptions">listenerOptions</a></li><li><a href="global.html#main">main</a></li><li><a href="global.html#mainMenu">mainMenu</a></li><li><a href="global.html#mapObject">mapObject</a></li><li><a href="global.html#matrix">matrix</a></li><li><a href="global.html#mergeObjects">mergeObjects</a></li><li><a href="global.html#mergeObjectsBase">mergeObjectsBase</a></li><li><a href="global.html#mergeObjectsMutable">mergeObjectsMutable</a></li><li><a href="global.html#nextCell">nextCell</a></li><li><a href="global.html#notEmptyObjectOrArray">notEmptyObjectOrArray</a></li><li><a href="global.html#numDamangedParts">numDamangedParts</a></li><li><a href="global.html#playerSet">playerSet</a></li><li><a href="global.html#playerStats">playerStats</a></li><li><a href="global.html#point">point</a></li><li><a href="global.html#pointDifference">pointDifference</a></li><li><a href="global.html#pointDirection">pointDirection</a></li><li><a href="global.html#pointHasNegative">pointHasNegative</a></li><li><a href="global.html#queueTimeout">queueTimeout</a></li><li><a href="global.html#randDirection">randDirection</a></li><li><a href="global.html#randomInteger">randomInteger</a></li><li><a href="global.html#randomNumber">randomNumber</a></li><li><a href="global.html#randomStart">randomStart</a></li><li><a href="global.html#randomStartDir">randomStartDir</a></li><li><a href="global.html#recursiveMap">recursiveMap</a></li><li><a href="global.html#reduceObject">reduceObject</a></li><li><a href="global.html#registerListener">registerListener</a></li><li><a href="global.html#registerListeners">registerListeners</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeCircularReference">removeCircularReference</a></li><li><a href="global.html#renderHTML">renderHTML</a></li><li><a href="global.html#resetTargets">resetTargets</a></li><li><a href="global.html#retrieveListener">retrieveListener</a></li><li><a href="global.html#selectShipDirection">selectShipDirection</a></li><li><a href="global.html#selectTargetCoord">selectTargetCoord</a></li><li><a href="global.html#selectTargetPlayer">selectTargetPlayer</a></li><li><a href="global.html#setHiddenShip">setHiddenShip</a></li><li><a href="global.html#setHit">setHit</a></li><li><a href="global.html#setShip">setShip</a></li><li><a href="global.html#setViewShip">setViewShip</a></li><li><a href="global.html#ship">ship</a></li><li><a href="global.html#shipTile">shipTile</a></li><li><a href="global.html#square">square</a></li><li><a href="global.html#testPointsBetween">testPointsBetween</a></li><li><a href="global.html#tile">tile</a></li><li><a href="global.html#update3dCell">update3dCell</a></li><li><a href="global.html#updateElement">updateElement</a></li><li><a href="global.html#updateElements">updateElements</a></li><li><a href="global.html#updatePlayer">updatePlayer</a></li><li><a href="global.html#updatePlayerStats">updatePlayerStats</a></li><li><a href="global.html#updateScore">updateScore</a></li><li><a href="global.html#waterTile">waterTile</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="global.html#DOMItem">DOMItem</a></li></ul><h3>Global</h3><ul><li><a href="global.html#appendAllHTML">appendAllHTML</a></li><li><a href="global.html#appendHTML">appendHTML</a></li><li><a href="global.html#appendListeners">appendListeners</a></li><li><a href="global.html#assignListener">assignListener</a></li><li><a href="global.html#bindAllElements">bindAllElements</a></li><li><a href="global.html#bindAllListeners">bindAllListeners</a></li><li><a href="global.html#bindElement">bindElement</a></li><li><a href="global.html#bindListeners">bindListeners</a></li><li><a href="global.html#buildArray">buildArray</a></li><li><a href="global.html#buildArrayBase">buildArrayBase</a></li><li><a href="global.html#buildArrayOfReferences">buildArrayOfReferences</a></li><li><a href="global.html#buildHTML">buildHTML</a></li><li><a href="global.html#cloneExclusions">cloneExclusions</a></li><li><a href="global.html#cloneExMap">cloneExMap</a></li><li><a href="global.html#cloneObject">cloneObject</a></li><li><a href="global.html#cloneRules">cloneRules</a></li><li><a href="global.html#cube">cube</a></li><li><a href="global.html#curry">curry</a></li><li><a href="global.html#documentDOMItem">documentDOMItem</a></li><li><a href="global.html#documentItem">documentItem</a></li><li><a href="global.html#elementChanges">elementChanges</a></li><li><a href="global.html#elementHasAttribute">elementHasAttribute</a></li><li><a href="global.html#filterObject">filterObject</a></li><li><a href="global.html#generateElement">generateElement</a></li><li><a href="global.html#getChildrenByClass">getChildrenByClass</a></li><li><a href="global.html#getChildrenByName">getChildrenByName</a></li><li><a href="global.html#getChildrenFromAttribute">getChildrenFromAttribute</a></li><li><a href="global.html#getMax">getMax</a></li><li><a href="global.html#getMaxOrMin">getMaxOrMin</a></li><li><a href="global.html#getMin">getMin</a></li><li><a href="global.html#getParentsByClass">getParentsByClass</a></li><li><a href="global.html#getParentsByName">getParentsByName</a></li><li><a href="global.html#getParentsFromAttribute">getParentsFromAttribute</a></li><li><a href="global.html#getTopParentItem">getTopParentItem</a></li><li><a href="global.html#inArray">inArray</a></li><li><a href="global.html#initChildren">initChildren</a></li><li><a href="global.html#initRoot">initRoot</a></li><li><a href="global.html#listenerOptions">listenerOptions</a></li><li><a href="global.html#mapObject">mapObject</a></li><li><a href="global.html#matrix">matrix</a></li><li><a href="global.html#mergeObjects">mergeObjects</a></li><li><a href="global.html#mergeObjectsBase">mergeObjectsBase</a></li><li><a href="global.html#mergeObjectsMutable">mergeObjectsMutable</a></li><li><a href="global.html#notEmptyObjectOrArray">notEmptyObjectOrArray</a></li><li><a href="global.html#point">point</a></li><li><a href="global.html#queueTimeout">queueTimeout</a></li><li><a href="global.html#randomInteger">randomInteger</a></li><li><a href="global.html#randomNumber">randomNumber</a></li><li><a href="global.html#recursiveMap">recursiveMap</a></li><li><a href="global.html#reduceObject">reduceObject</a></li><li><a href="global.html#registerListener">registerListener</a></li><li><a href="global.html#registerListeners">registerListeners</a></li><li><a href="global.html#removeChild">removeChild</a></li><li><a href="global.html#removeCircularReference">removeCircularReference</a></li><li><a href="global.html#renderHTML">renderHTML</a></li><li><a href="global.html#retrieveListener">retrieveListener</a></li><li><a href="global.html#square">square</a></li><li><a href="global.html#tile">tile</a></li><li><a href="global.html#updateElement">updateElement</a></li><li><a href="global.html#updateElements">updateElements</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Oct 31 2017 08:12:26 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Nov 01 2017 10:55:04 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>
