@@ -1,15 +1,3 @@
-html {
-  font-size: 62.5%; }
-
-html, body {
-  background-color: #333;
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-  font-family: Verdana, Geneva, sans-serif; }
-
 .main-menu-form {
   margin: 0 auto 3rem;
   padding-top: 3rem;
@@ -42,50 +30,6 @@ html, body {
     margin: 1rem auto; }
     .main-menu-form .form-group label {
       display: block; }
-
-.player {
-  color: white;
-  font-size: 1.6rem;
-  display: inline-block;
-  min-width: 370px;
-  min-width: 37em;
-  width: 50%;
-  margin: 10px auto;
-  margin: 1em auto; }
-  .player ul {
-    list-style: none;
-    padding: 0; }
-
-.boards {
-  margin: 0 auto 3rem;
-  padding-top: 3rem; }
-
-.matrix {
-  font-size: 1rem;
-  position: relative;
-  transition: all 400ms linear 100ms; }
-  .matrix .layer {
-    display: inline-block;
-    position: relative;
-    margin: 0 auto;
-    border: 2px solid #333;
-    border: 0.2em solid #333;
-    transition: all 400ms linear; }
-    .matrix .layer .row {
-      display: flex; }
-      .matrix .layer .row .column {
-        height: 35px;
-        height: 3.5em;
-        width: 35px;
-        width: 3.5em;
-        border: 1px solid #333;
-        border: 0.1em solid #333;
-        background-color: blue;
-        cursor: pointer;
-        display: inline-block;
-        transition: all 250ms cubic-bezier(0.19, 1, 0.22, 1) 50ms; }
-        .matrix .layer .row .column:hover {
-          opacity: 0.7; }
 
 .final-scores input {
   margin: 1rem 2rem;
