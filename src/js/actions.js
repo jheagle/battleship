@@ -12,7 +12,7 @@ const configureHtml = (config, isRobot) => {
         attackFleet.isLocked = true
         queueTimeout(() => {
             if (config.isHit) {
-                config.attributes.styles.backgroundColor = config.hasShip ? 'red' : 'white'
+                config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
             }
             config = updateElement(config)
             attackFleet.isLocked = false
@@ -20,7 +20,7 @@ const configureHtml = (config, isRobot) => {
         }, 0)
     } else {
         if (config.isHit) {
-            config.attributes.styles.backgroundColor = config.hasShip ? 'red' : 'white'
+            config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
         }
         config = updateElement(config)
     }
@@ -41,7 +41,7 @@ const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml
 /**
  *
  */
-const setViewShip = curry(update3dCell)(mergeObjects(shipTile(), {attributes: {styles: {backgroundColor: '#777',},},}))
+const setViewShip = curry(update3dCell)(mergeObjects(shipTile(), {attributes: {style: {backgroundColor: '#777',},},}))
 
 /**
  *
@@ -98,7 +98,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                 attackFleet.isLocked = false
                 return player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
                     attributes: {
-                        styles: {
+                        style: {
                             width: '17px',
                             height: '17px'
                         }
@@ -111,7 +111,7 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
                 attackFleet.isLocked = false
                 return player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
                     attributes: {
-                        styles: {
+                        style: {
                             width: '35px',
                             height: '35px'
                         }

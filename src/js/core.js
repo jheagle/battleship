@@ -263,6 +263,17 @@ const randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range
 const randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.random() * range) + offset) * interval
 
 /**
+ * Compare two numbers and return:
+ * -1 to indicate val1 is less than val2
+ * 0 to indicate both values are the equal
+ * 1 to indicate val1 is greater than val2
+ * @param {number} val1
+ * @param {number} val2
+ * @returns {number}
+ */
+const compare = (val1, val2) => val1 === val2 ? 0 : val1 > val2 ? 1 : -1
+
+/**
  * Run Timeout functions one after the other in queue
  * WARNING: This is a recursive function.
  * @param {function} fn

@@ -19,7 +19,7 @@
  * DOMItem defines the structure for a single element in the DOM
  * @typedef {Object} DOMItem
  * @property {string} tagName - This is any valid HTMLElement tagName
- * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here (including the defaulted styles object)
+ * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here (including the defaulted style object)
  * @property {(Object|HTMLElement)} element - A reference to an existing HTML element will be stored here (default empty object)
  * @property {Object.<Event, EventListener>} eventListeners - An object holding all events to be registered for the associated element
  * @property {DOMItem} parentItem - A reference to the parent of this object
@@ -35,7 +35,7 @@
 const DOMItem = (...attributes) => mergeObjectsMutable({
     tagName: 'div',
     attributes: {
-        styles: {}
+        style: {}
     },
     element: {},
     eventListeners: {},

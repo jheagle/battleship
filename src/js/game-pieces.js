@@ -52,7 +52,7 @@ const hitTile = () => ({
  * Store the player attributes.
  * @param {Object} board
  * @param {string} name
- * @returns {{name: string, isRobot: boolean, status: number, turnCnt: number, attacker: boolean, attacks: {hit: number, miss: number, sunk: number}, board: {}, shipFleet: Array, playerStats: {}, tagName: string, attributes: {class: string}, children: [Object]}}
+ * @returns {{name: string, isRobot: boolean, status: number, turnCnt: number, attacker: boolean, attacks: {hit: number, miss: number, sunk: number}, board: {}, shipFleet: Array, playerStats: {}, tagName: string, attributes: {className: string}, children: [Object]}}
  */
 const playerSet = (board = {}, name = '') => ({
     name: name,
@@ -66,7 +66,7 @@ const playerSet = (board = {}, name = '') => ({
     playerStats: {},
     tagName: 'div',
     attributes: {
-        class: 'player'
+        className: 'player'
     },
     children: [
         board

@@ -7,19 +7,19 @@
 const mainMenu = (parent = {}) => ({
     tagName: 'div',
     attributes: {
-        class: 'main-menu'
+        className: 'main-menu'
     },
     children: [
         {
             tagName: 'div',
             attributes: {
-                class: 'content'
+                className: 'content'
             },
             children: [
                 {
                     tagName: 'form',
                     attributes: {
-                        class: 'main-menu-form',
+                        className: 'main-menu-form',
                     },
                     eventListeners: {
                         submit: {
@@ -32,7 +32,7 @@ const mainMenu = (parent = {}) => ({
                         {
                             tagName: 'div',
                             attributes: {
-                                class: 'form-group'
+                                className: 'form-group'
                             },
                             children: [
                                 {
@@ -59,7 +59,7 @@ const mainMenu = (parent = {}) => ({
                         {
                             tagName: 'div',
                             attributes: {
-                                class: 'form-group'
+                                className: 'form-group'
                             },
                             children: [
                                 {
@@ -120,7 +120,7 @@ const mainMenu = (parent = {}) => ({
 const boards = (players = []) => ({
     tagName: 'div',
     attributes: {
-        class: 'boards'
+        className: 'boards'
     },
     children: players
 })
@@ -134,18 +134,18 @@ const boards = (players = []) => ({
 const finalScore = (players, parent = {}) => ({
     tagName: 'div',
     attributes: {
-        class: 'final-scores'
+        className: 'final-scores'
     },
     children: [
         {
             tagName: 'div',
             attributes: {
-                class: 'score-cards'
+                className: 'score-cards'
             },
             children: players.map(player => ({
                 tagName: 'div',
                 attributes: {
-                    class: 'score-card',
+                    className: 'score-card',
                     innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${Math.round(player.status * 100) / 100}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
                 },
             }))

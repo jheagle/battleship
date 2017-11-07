@@ -13,28 +13,20 @@ const elementHasAttribute = (element, key, attr) => {
         return false
 
     // check the key is a property of the element
+    // compare current to new one
     if (key in element) {
-        return element[key] === attr // compare current to new one
-    } else if (key === 'styles') { // compare each style and return
-        // 0 = add style; 1 = no change; -1 = remove style
-        return Object.keys(attr).filter(cl => (!inArray(Object.keys(element.style), cl) || attr[cl] !== element.style[cl])).concat(Object.keys(element.style)).reduce((returnObj, b) => {
-            returnObj[b] = inArray(Object.keys(attr), b) ?
-                inArray(Object.keys(element.style), b) ?
-                    1 : 0 :
-                -1
-            return returnObj
-        }, {})
-    } else if (key === 'class') { // compare each class and return
-        // 0 = add class; 1 = no change; -1 = remove class
-        return attr.split(' ').filter(cl => !inArray(element.className.split(' '), cl)).concat(element.className.split(' ')).filter(cl => !!cl.length).reduce((returnObj, b) => {
-            returnObj[b] = inArray(attr.split(' '), b) ?
-                inArray(element.className.split(' '), b) ?
-                    1 : 0 :
-                -1
-            return returnObj
-        }, {})
+        // For attributes which are objects or multi-part strings
+        // -1 = remove attribute, 0 = no change, 1 = add attribute
+        if (/^(style|className)$/.test(key)) {
+            let attrArray = typeof attr === 'string' ? attr.split(' ') : Object.keys(attr)
+            let elemArray = typeof attr === 'string' ?  element[key].split(' ') : Object.keys(element[key])
+            return attrArray.filter(a => (!inArray(elemArray, a) || attr[a] !== element[key][a])).concat(elemArray).filter(a => !!a.length).reduce((returnObj, b) => {
+                returnObj[b] = compare(attrArray.filter(val => val === b).length, elemArray.filter(val => val === b).length)
+                return returnObj
+            }, {})
+        }
+        return element[key] === attr
     }
-
     return (element.hasAttribute(key) && element.getAttribute(key) === attr)
 }
 
@@ -48,12 +40,12 @@ const elementChanges = config => {
     if (config.element.tagName.toLowerCase() !== config.tagName.toLowerCase()) {
         return generateElement(config)
     }
-    config.attributes = filterObject(config.attributes, (attr1, key1) => filterObject(mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'class') ? filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => !attr3) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => !!attr4)[key1])
+    config.attributes = filterObject(config.attributes, (attr1, key1) => filterObject(mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'className') ? filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 === 1) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => !!attr4)[key1])
     return config
 }
 
 /**
- * Update a single DOMItem element with the provided attributes / styles / elementProperties
+ * Update a single DOMItem element with the provided attributes / style / elementProperties
  * @param config
  * @returns {*}
  */
@@ -61,14 +53,10 @@ const updateElement = (config) => {
     if (config.element instanceof HTMLElement) {
         config.attributes = mapObject(elementChanges(config).attributes, (attr, key) => {
             if (key in config.element) {
-                config.element[key] = attr
-                return attr
-            } else if (key === 'styles') {
-                config.attributes.styles = mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
-                return attr
-            } else if (key === 'class') {
-                config.element.className = attr
-                return attr
+                if (notEmptyObjectOrArray(attr)) {
+                    return config.attributes[key] = mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
+                }
+                return config.element[key] = attr
             }
             config.element.setAttribute(key, attr)
             return attr
@@ -299,9 +287,9 @@ const getChildrenFromAttribute = (attr, value, item = documentItem.body) =>
         item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
 
 /**
- * Helper for getting all DOMItems starting at parent and having specified class attribute
+ * Helper for getting all DOMItems starting at parent and having specified className attribute
  */
-const getChildrenByClass = curry(getChildrenFromAttribute)('class')
+const getChildrenByClass = curry(getChildrenFromAttribute)('className')
 
 /**
  * Helper for getting all DOMItems starting at parent and having specified name attribute
@@ -326,9 +314,9 @@ const getParentsFromAttribute = (attr, value, item = documentItem.body) =>
         []
 
 /**
- * Helper for getting all DOMItems starting at child and having specified class attribute
+ * Helper for getting all DOMItems starting at child and having specified className attribute
  */
-const getParentsByClass = curry(getParentsFromAttribute)('class')
+const getParentsByClass = curry(getParentsFromAttribute)('className')
 
 /**
  * Helper for getting all DOMItems starting at child and having specified name attribute
