@@ -4,7 +4,7 @@
     /**
      * Create new private reference to the document
      */
-    const documentItem = main(documentDOMItem([beginRound, attackListener]))
+    const documentItem = main(documentDOMItem([beginRound, attackListener, restart]))
     console.log(documentItem);
 
     // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer

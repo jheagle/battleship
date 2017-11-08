@@ -18,12 +18,7 @@ const elementHasAttribute = (element, key, attr) => {
         // For attributes which are objects or multi-part strings
         // -1 = remove attribute, 0 = no change, 1 = add attribute
         if (/^(style|className)$/.test(key)) {
-            let attrArray = typeof attr === 'string' ? attr.split(' ') : Object.keys(attr)
-            let elemArray = typeof attr === 'string' ?  element[key].split(' ') : Object.keys(element[key])
-            return attrArray.filter(a => (!inArray(elemArray, a) || attr[a] !== element[key][a])).concat(elemArray).filter(a => !!a.length).reduce((returnObj, b) => {
-                returnObj[b] = compare(attrArray.filter(val => val === b).length, elemArray.filter(val => val === b).length)
-                return returnObj
-            }, {})
+            return compareArrays(typeof attr === 'string' ? element[key].split(' ') : Object.keys(element[key]), typeof attr === 'string' ? attr.split(' ') : Object.keys(attr))
         }
         return element[key] === attr
     }

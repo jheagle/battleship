@@ -14,47 +14,75 @@ const curry = (fn) => {
 }
 
 /**
+ * Function that produces a property of the new Object, taking three arguments
+ * @callback mapCallback
+ * @param {*} currentProperty - The current property being processed in the object.
+ * @param {string} [currentIndex] - The property name of the current property being processed in the object.
+ * @param {Object|Array} [object] - The object map was called upon.
+ * @returns {*}
+ */
+
+/**
  * This function is intended to replicate behaviour of the Array.map() function but for Objects.
  * If an array is passed in instead then it will perform standard map(). It is recommended to
  * always use the standard map() function when it is known that the object is actually an array.
  * @param {Object|Array} obj - The Object (or Array) to be mapped
- * @param {function} fn - The function to be processed for each mapped element
- * @param {Object|Array} initObj - Provide some initial return properties to the mapped object
+ * @param {mapCallback} fn - The function to be processed for each mapped property
+ * @param {Object|Array} [thisArg] - Opional. Value to use as this when executing callback.
  * @returns {Object|Array}
  */
-const mapObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.map((prop, i) => fn.length === 1 ? fn(prop) : fn(prop, i)) : Object.keys(obj).reduce((newObj, curr) => {
-    newObj[curr] = fn.length === 1 ? fn(obj[curr]) : fn(obj[curr], curr)
+const mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
+    newObj[curr] = fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))
     return newObj
-}, initObj)
+}, initObj = thisArg || {})
+
+/**
+ * Function is a predicate, to test each property value of the object. Return true to keep the element, false otherwise, taking three arguments:
+ * @callback filterCallback
+ * @param {*} currentProperty - The current property being processed in the object.
+ * @param {string} [currentIndex] - The property name of the current property being processed in the object.
+ * @param {Object|Array} [object] - The object filter was called upon.
+ * @returns {boolean}
+ */
 
 /**
  * This function is intended to replicate behaviour of the Array.filter() function but for Objects.
  * If an array is passed in instead then it will perform standard filter(). It is recommended to
  * always use the standard filter() function when it is known that the object is actually an array.
- * @param {Object|Array} obj
- * @param {function} fn
- * @param {Object|Array} initObj
+ * @param {Object|Array} obj - The Object (or Array) to be filtered
+ * @param {filterCallback} fn - The function to be processed for each filtered property
+ * @param {Object|Array} [thisArg] - Opional. Value to use as this when executing callback.
  * @returns {Object|Array}
  */
-const filterObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.filter((prop, i) => fn.length === 1 ? fn(prop) : fn(prop, i)) : Object.keys(obj).reduce((newObj, curr) => {
-    if ((fn.length === 1 ? fn(obj[curr]) : fn(obj[curr], curr))) {
+const filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
+    if (fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))) {
         newObj[curr] = obj[curr]
     } else {
         delete newObj[curr]
     }
     return newObj
-}, initObj)
+}, initObj = thisArg || {})
+
+/**
+ * Function to execute on each property in the object, taking four arguments:
+ * @callback reduceCallback
+ * @param {*} accumulator - The accumulator accumulates the callback's return values; it is the accumulated value previously returned in the last invocation of the callback, or initialValue, if supplied (see below).
+ * @param {*} currentProperty - The current property being processed in the object.
+ * @param {string} [currentIndex] - The index of the current element being processed in the array. Starts at index 0, if an initObj is provided, and at index 1 otherwise.
+ * @param {Object|Array} [object] - The object reduce was called upon.
+ * @returns {*}
+ */
 
 /**
  * This function is intended to replicate behaviour of the Array.reduce() function but for Objects.
  * If an array is passed in instead then it will perform standard reduce(). It is recommended to
  * always use the standard reduce() function when it is known that the object is actually an array.
- * @param {Object|Array} obj
- * @param {function} fn
- * @param {Object|Array} initObj
+ * @param {Object|Array} obj - The Object (or Array) to be filtered
+ * @param {reduceCallback} fn - The function to be processed for each filtered property
+ * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty array without an initial value is an error.
  * @returns {Object|Array}
  */
-const reduceObject = (obj, fn, initObj = {}) => Array.isArray(obj) ? obj.reduce(fn, initObj) : Object.keys(obj).reduce((newObj, curr) => fn(newObj, obj[curr]), initObj)
+const reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]) => Array.isArray(obj) ? obj.reduce(fn, initialValue) : Object.keys(obj).reduce((newObj, curr) => fn(...[newObj, obj[curr], curr, obj].slice(0, fn.length || 2)), initialValue)
 
 /**
  * Helper function for testing if the item is an Object or Array that contains properties or elements
@@ -267,11 +295,27 @@ const randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.rand
  * -1 to indicate val1 is less than val2
  * 0 to indicate both values are the equal
  * 1 to indicate val1 is greater than val2
- * @param {number} val1
- * @param {number} val2
+ * @param {number} val1 - The first number to compare
+ * @param {number} val2 - The second number to compare
  * @returns {number}
  */
 const compare = (val1, val2) => val1 === val2 ? 0 : val1 > val2 ? 1 : -1
+
+/**
+ * Compare two Arrays and return the Object where the value for each property is as follows:
+ * -1 to indicate val1 is less than val2
+ * 0 to indicate both values are the equal
+ * 1 to indicate val1 is greater than val2
+ * The returned Object uses the element values as the property names
+ * @param {Array} arr1 - The first array to compare
+ * @param {Array} arr2 - The second array to compare
+ * @param {Array} [parents=[]] - Used to track circular references
+ * @returns {Object.<string, number>}
+ */
+const compareArrays = (arr1, arr2, parents = []) => arr2.filter((attr, key) => !inArray(arr1, attr) || arr1[key] !== attr).concat(arr1).reduce((returnObj, attr) => {
+    returnObj[JSON.stringify(attr, (key, val) => removeCircularReference(key, val, parents))] = compare(arr2.filter(val => val === attr).length, arr1.filter(val => val === attr).length)
+    return returnObj
+}, {})
 
 /**
  * Run Timeout functions one after the other in queue
