@@ -28,7 +28,7 @@ const curry = (fn) => {
  * always use the standard map() function when it is known that the object is actually an array.
  * @param {Object|Array} obj - The Object (or Array) to be mapped
  * @param {mapCallback} fn - The function to be processed for each mapped property
- * @param {Object|Array} [thisArg] - Opional. Value to use as this when executing callback.
+ * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
  * @returns {Object|Array}
  */
 const mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
@@ -51,7 +51,7 @@ const mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map
  * always use the standard filter() function when it is known that the object is actually an array.
  * @param {Object|Array} obj - The Object (or Array) to be filtered
  * @param {filterCallback} fn - The function to be processed for each filtered property
- * @param {Object|Array} [thisArg] - Opional. Value to use as this when executing callback.
+ * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
  * @returns {Object|Array}
  */
 const filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
@@ -86,10 +86,27 @@ const reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]
 
 /**
  * Helper function for testing if the item is an Object or Array that contains properties or elements
- * @param {Object|Array} item
+ * @param {Object|Array} item - Object or Array to test
  * @returns {boolean}
  */
 const notEmptyObjectOrArray = item => !!((typeof item === 'object' && Object.keys(item).length) || (Array.isArray(item) && item.length))
+
+/**
+ * Function is a predicate, accepts optional arguments of a property and a propertyName to be used in the test.
+ * @callback recursiveMapTest
+ * @param {*} [property] - The property value to be tested.
+ * @param {string} [propertyName] - The current property being processed in the object.
+ * @returns {boolean}
+ */
+
+/**
+ * Function to execute on each property in the object, taking four arguments:
+ * @callback recursiveMapCallback
+ * @param {*} propertyReference - A reference to the current property being processed.
+ * @param {*} [propertyValue] - The value of the current property being processed.
+ * @param {...*} [args] - Additional arguments that may be needed for the recursive function callback.
+ * @returns {*}
+ */
 
 /**
  * A function to use with mapObject or just map which will either return the result
@@ -99,12 +116,12 @@ const notEmptyObjectOrArray = item => !!((typeof item === 'object' && Object.key
  * Pass in the recursive function.
  * Add any other args to that function.
  * @param {Object} obj
- * @param {function} test
- * @param {function} fn
+ * @param {recursiveMapTest} test - The condition which either continues or terminates recursion.
+ * @param {recursiveMapCallback} fn
  * @param {...*} [args]
  * @returns {*|function(*=, *)}
  */
-const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(prop, key) ? prop : fn(obj[key], prop, ...args)
+const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(...[prop, key].slice(0, test.length)) ? prop : fn(...[obj[key], prop].slice(0, fn.length || 2), ...args)
 
 /**
  * Tests exceptions to what must be returned as reference vs cloned.
