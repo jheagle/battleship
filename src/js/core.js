@@ -100,7 +100,7 @@ const notEmptyObjectOrArray = item => !!((typeof item === 'object' && Object.key
  */
 
 /**
- * Function to execute on each property in the object, taking four arguments:
+ * This is typically a reference to the calling function which will be called recursively.
  * @callback recursiveMapCallback
  * @param {*} propertyReference - A reference to the current property being processed.
  * @param {*} [propertyValue] - The value of the current property being processed.
@@ -115,25 +115,33 @@ const notEmptyObjectOrArray = item => !!((typeof item === 'object' && Object.key
  * Pass in the conditions as a test function: True returns the object; False continues recursion.
  * Pass in the recursive function.
  * Add any other args to that function.
- * @param {Object} obj
+ * @param {Object|Array} obj -> The Object or array being processed.
  * @param {recursiveMapTest} test - The condition which either continues or terminates recursion.
- * @param {recursiveMapCallback} fn
- * @param {...*} [args]
- * @returns {*|function(*=, *)}
+ * @param {recursiveMapCallback} fn - A reference to the calling function to be recursively run.
+ * @param {...*} [args] - Additional args which might be needed for recursiveMapCallback.
+ * @returns {*|recursiveMapCallback}
  */
 const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(...[prop, key].slice(0, test.length)) ? prop : fn(...[obj[key], prop].slice(0, fn.length || 2), ...args)
 
 /**
- * Tests exceptions to what must be returned as reference vs cloned.
- * @param {Object} obj
- * @param {boolean} [extraTest=false]
+* A predicate to determin if the provided input meets the conditions.
+* @callback cloneExtraTest
+* @param {*} property - A reference to the current property being processed.
+* @param {String|number} propertyName - The value of the current property being processed.
+* @returns {boolean}
+*/
+
+/**
+ * Tests exceptions to what must be returned as reference vs cloned. Returns true for return reference vs false for return clone.
+ * @param {Object|Array} obj - The Object or Array to be tested.
+ * @param {cloneExtraTest} [extraTest=false] - Additional function which can be used in the test.
  * @returns {boolean}
  */
-const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || key === 'parentItem' || key === 'listenerArgs' || (extraTest ? extraTest(prop, key) : false)
+const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || /^(parentItem|listenerArgs)$/.test(key) || (extraTest ? extraTest(prop, key) : false)
 
 /**
  * A helper for cloneExclusions to simplify that function
- * @param {Object} cloned
+ * @param {Object} cloned -
  * @param {Object} object
  * @param {Array} parents
  * @param {function} fn
