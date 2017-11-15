@@ -79,9 +79,7 @@ const displayTargets = (targets, target, victim) => {
 const resetTargets = data => {
     data.victim.board.children.map(l => updateElement(mergeObjects(l, {attributes: {style: {borderColor: '#333'}}})))
     data.targets.forEach(t => updateElement(mergeObjects(getDOMItemFromPoint(t, data.victim.board), {attributes: {style: {borderColor: '#333'}}})))
-    if (data.target) {
-        return setHit(data.victim.board, data.target.x, data.target.y, data.target.z, data.victim.isRobot)
-    } else {
+    if (!data.target) {
         data.victim.board.children.map(l => updateElement(mergeObjects(l, {attributes: {style: {borderColor: 'yellow'}}})))
         data.targets.forEach(t => updateElement(mergeObjects(getDOMItemFromPoint(t, data.victim.board), {attributes: {style: {borderColor: 'yellow'}}})))
     }
