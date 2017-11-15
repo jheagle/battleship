@@ -34,7 +34,7 @@ const curry = (fn) => {
 const mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
     newObj[curr] = fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))
     return newObj
-}, initObj = thisArg || {})
+}, thisArg || {})
 
 /**
  * Function is a predicate, to test each property value of the object. Return true to keep the element, false otherwise, taking three arguments:
@@ -61,14 +61,14 @@ const filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.
         delete newObj[curr]
     }
     return newObj
-}, initObj = thisArg || {})
+}, thisArg || {})
 
 /**
  * Function to execute on each property in the object, taking four arguments:
  * @callback reduceCallback
  * @param {*} accumulator - The accumulator accumulates the callback's return values; it is the accumulated value previously returned in the last invocation of the callback, or initialValue, if supplied (see below).
  * @param {*} currentProperty - The current property being processed in the object.
- * @param {string} [currentIndex] - The index of the current element being processed in the array. Starts at index 0, if an initObj is provided, and at index 1 otherwise.
+ * @param {string} [currentIndex] - The index of the current element being processed in the array. Starts at index 0, if an initialValue is provided, and at index 1 otherwise.
  * @param {Object|Array} [object] - The object reduce was called upon.
  * @returns {*}
  */
