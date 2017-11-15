@@ -69,25 +69,25 @@ const tile = () => ({
 const matrix = (i, x, y, z = 1, ...props) => DOMItem({
     tagName: 'div',
     attributes: {
-        class: 'matrix'
+        className: 'matrix'
     },
     children: buildArray(DOMItem({
         axis: 'z',
         tagName: 'div',
         attributes: {
-            class: 'layer'
+            className: 'layer'
         },
         children: buildArray(DOMItem({
             axis: 'y',
             tagName: 'div',
             attributes: {
-                class: 'row'
+                className: 'row'
             },
             children: buildArray(DOMItem({
                 axis: 'x',
                 tagName: 'div',
                 attributes: {
-                    class: 'column'
+                    className: 'column'
                 }
             }, ...props, i), x)
         }, ...props), y)
