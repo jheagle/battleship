@@ -118,9 +118,12 @@ const initRoot = (children, listeners = []) => DOMItem({
  * @param {Object} [rootItem=DOMItemRoot] - This is a reference to DOMItemRoot which will be defaulted with {@link initRoot}
  * @returns {DOMItemRoot}
  */
-const documentDOMItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => DOMItem(rootItem, {
-    children: rootItem.children.map(child => DOMItem(child, {parentItem: rootItem}))
-})
+const documentDOMItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
+    rootItem.children = rootItem.children.map(child => DOMItem(child, {parentItem: rootItem}))
+    rootItem.head = rootItem.children[0]
+    rootItem.body = rootItem.children[1]
+    return DOMItem(rootItem)
+}
 
 /**
  * Create reference for storing document changes
