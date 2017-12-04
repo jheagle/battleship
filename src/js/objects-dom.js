@@ -33,14 +33,14 @@
  * @constructor
  */
 const DOMItem = (...attributes) => mergeObjectsMutable({
-    tagName: 'div',
-    attributes: {
-        style: {}
-    },
-    element: {},
-    eventListeners: {},
-    parentItem: {},
-    children: []
+  tagName: 'div',
+  attributes: {
+    style: {}
+  },
+  element: {},
+  eventListeners: {},
+  parentItem: {},
+  children: []
 }, ...attributes)
 
 /**
@@ -68,18 +68,18 @@ const DOMItem = (...attributes) => mergeObjectsMutable({
  * @returns {Array.<DOMItemHead|DOMItemBody>}
  */
 const initChildren = () => [
-    DOMItem({
-        tagName: 'head',
-        attributes: {},
-        element: document.head,
-        children: []
-    }),
-    DOMItem({
-        tagName: 'body',
-        attributes: {},
-        element: document.body,
-        children: []
-    }),
+  DOMItem({
+    tagName: 'head',
+    attributes: {},
+    element: document.head,
+    children: []
+  }),
+  DOMItem({
+    tagName: 'body',
+    attributes: {},
+    element: document.body,
+    children: []
+  }),
 ]
 
 /**
@@ -102,13 +102,13 @@ const initChildren = () => [
  * @returns {DOMItemRoot}
  */
 const initRoot = (children, listeners = []) => DOMItem({
-    tagName: 'html',
-    attributes: {},
-    element: document,
-    eventListeners: listeners.reduce((initial, listener) => mergeObjects(initial, {[`${listener.name}`]: listener}), {}),
-    children: children,
-    head: children[0],
-    body: children[1],
+  tagName: 'html',
+  attributes: {},
+  element: document,
+  eventListeners: listeners.reduce((initial, listener) => mergeObjects(initial, {[`${listener.name}`]: listener}), {}),
+  children: children,
+  head: children[0],
+  body: children[1],
 })
 
 /**
@@ -119,10 +119,10 @@ const initRoot = (children, listeners = []) => DOMItem({
  * @returns {DOMItemRoot}
  */
 const documentDOMItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
-    rootItem.children = rootItem.children.map(child => DOMItem(child, {parentItem: rootItem}))
-    rootItem.head = rootItem.children[0]
-    rootItem.body = rootItem.children[1]
-    return DOMItem(rootItem)
+  rootItem.children = rootItem.children.map(child => DOMItem(child, {parentItem: rootItem}))
+  rootItem.head = rootItem.children[0]
+  rootItem.body = rootItem.children[1]
+  return DOMItem(rootItem)
 }
 
 /**

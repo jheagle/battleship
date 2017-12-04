@@ -6,25 +6,25 @@
  * @returns {*}
  */
 const configureHtml = (config, isRobot) => {
-    // Update cell colour once it has been hit
-    // Add any other style changes to the cell
-    if (isRobot) {
-        attackFleet.isLocked = true
-        queueTimeout(() => {
-            if (config.isHit) {
-                config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
-            }
-            config = updateElement(config)
-            attackFleet.isLocked = false
-            return config
-        }, 0)
-    } else {
-        if (config.isHit) {
-            config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
-        }
-        config = updateElement(config)
+  // Update cell colour once it has been hit
+  // Add any other style changes to the cell
+  if (isRobot) {
+    attackFleet.isLocked = true
+    queueTimeout(() => {
+      if (config.isHit) {
+        config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
+      }
+      config = updateElement(config)
+      attackFleet.isLocked = false
+      return config
+    }, 0)
+  } else {
+    if (config.isHit) {
+      config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
     }
-    return config
+    config = updateElement(config)
+  }
+  return config
 }
 
 /**
@@ -68,8 +68,8 @@ const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, poi
  * @returns {*}
  */
 const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
-    player.playerStats = updateElements(mergeObjects(player.playerStats, playerStats(player, status)))
-    return player
+  player.playerStats = updateElements(mergeObjects(player.playerStats, playerStats(player, status)))
+  return player
 }
 
 /**
@@ -79,49 +79,49 @@ const updatePlayerStats = (player, status = `${Math.round(player.status * 100) /
  * @param sunkShip
  */
 const updatePlayer = (player, playAgain, sunkShip = 0) => {
+  if (player.attacker) {
+    if (playAgain) {
+      ++player.attacks.hit
+    } else {
+      ++player.attacks.miss
+    }
+    if (sunkShip) {
+      ++player.attacks.sunk
+    }
+  }
+  let result = {}
+  if (!playAgain) {
+    player.attacker = !player.attacker
+    attackFleet.isLocked = true
     if (player.attacker) {
-        if (playAgain) {
-            ++player.attacks.hit
-        } else {
-            ++player.attacks.miss
-        }
-        if (sunkShip) {
-            ++player.attacks.sunk
-        }
+      result = queueTimeout(() => {
+        attackFleet.isLocked = false
+        return player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
+          attributes: {
+            style: {
+              width: '17px',
+              height: '17px'
+            }
+          }
+        })))))
+      }, 400)
+      ++player.turnCnt
+    } else {
+      result = queueTimeout(() => {
+        attackFleet.isLocked = false
+        return player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
+          attributes: {
+            style: {
+              width: '35px',
+              height: '35px'
+            }
+          }
+        })))))
+      }, 0)
     }
-    let result = {}
-    if (!playAgain) {
-        player.attacker = !player.attacker
-        attackFleet.isLocked = true
-        if (player.attacker) {
-            result = queueTimeout(() => {
-                attackFleet.isLocked = false
-                return player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
-                    attributes: {
-                        style: {
-                            width: '17px',
-                            height: '17px'
-                        }
-                    }
-                })))))
-            }, 400)
-            ++player.turnCnt
-        } else {
-            result = queueTimeout(() => {
-                attackFleet.isLocked = false
-                return player.board.children.map(l => l.children.map(r => r.children.map(c => updateElement(mergeObjects(c, {
-                    attributes: {
-                        style: {
-                            width: '35px',
-                            height: '35px'
-                        }
-                    }
-                })))))
-            }, 0)
-        }
-    }
-    result = queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
-    return result.result || player
+  }
+  result = queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
+  return result.result || player
 }
 
 /**
@@ -130,12 +130,12 @@ const updatePlayer = (player, playAgain, sunkShip = 0) => {
  * @returns {Array.<*>}
  */
 const endGame = (winner) => {
-    let parent = getTopParentItem(winner)
-    let players = winner.parentItem.children
-    players.map(player => updatePlayerStats(player))
-    winner = updatePlayerStats(winner, 'WINNER')
-    renderHTML(finalScore(players), parent)
-    return [winner]
+  let parent = getTopParentItem(winner)
+  let players = winner.parentItem.children
+  players.map(player => updatePlayerStats(player))
+  winner = updatePlayerStats(winner, 'WINNER')
+  renderHTML(finalScore(players), parent)
+  return [winner]
 }
 
 /**
@@ -146,8 +146,8 @@ const endGame = (winner) => {
  * @returns {*}
  */
 const findNextAttacker = (attacker, players, attackerIndex) => {
-    let nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex]
-    return nextAttacker.status > 0 ? nextAttacker : findNextAttacker(attacker, players, attackerIndex) // Only use players with a positive status
+  let nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex]
+  return nextAttacker.status > 0 ? nextAttacker : findNextAttacker(attacker, players, attackerIndex) // Only use players with a positive status
 }
 
 /**
@@ -169,17 +169,17 @@ const getNextAttacker = (attacker, players, playAgain) => playAgain ? attacker :
  * @returns {*}
  */
 const updateScore = (player, hitShip, sunkShip, players, target) => {
-    players = players.filter((p) => p.status > 0)
-    let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
-    attacker = updatePlayer(attacker, hitShip, sunkShip)
-    if (players.length < 2) {
-        return queueTimeout(() => endGame(players[0]), 200)
-    }
-    let nextAttacker = getNextAttacker(attacker, players, hitShip)
-    if (nextAttacker.isRobot) {
-        queueTimeout(computerAttack, 0, nextAttacker, players)
-    }
-    return players
+  players = players.filter((p) => p.status > 0)
+  let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
+  attacker = updatePlayer(attacker, hitShip, sunkShip)
+  if (players.length < 2) {
+    return queueTimeout(() => endGame(players[0]), 200)
+  }
+  let nextAttacker = getNextAttacker(attacker, players, hitShip)
+  if (nextAttacker.isRobot) {
+    queueTimeout(computerAttack, 0, nextAttacker, players)
+  }
+  return players
 }
 
 /**
@@ -188,43 +188,43 @@ const updateScore = (player, hitShip, sunkShip, players, target) => {
  * @returns {*}
  */
 const attackFleet = (target) => {
-    attackFleet.isLocked = attackFleet.isLocked || false
-    let player = getParentsByClass('player', target)[0]
-    let players = getParentsByClass('boards', target)[0].children
-    // Player cannot attack themselves (current attacker) or if they have bad status
-    if (player.status <= 0 || player.attacker || attackFleet.isLocked) {
-        return players
-    }
-    // Update cell to hit
-    let hitCell = setHit(player.board, target.point.x, target.point.y, target.point.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
-    let hitShip = false
-    let sunkShip = 0
-    if (hitCell.hasShip) {
-        let status = 0
-        // Update all ship status and player status by checking all ships / parts
-        player.shipFleet.map((ship) => {
-            // Get all healthy ships
-            let healthy = ship.parts.filter((part) => {
-                if (checkEqualPoints(part.point, target.point)) {
-                    hitShip = ship
-                }
-                return !part.isHit
-            })
-            // Create percentage health status
-            ship.status = healthy.length / ship.parts.length * 100
-            // Create sum of ship status
-            status += ship.status
-            return ship
-        })
-        // Divide sum of ship statuses by number of ships to get player status
-        player.status = status / player.shipFleet.length
-    }
-    if (hitShip) {
-        player = updatePlayerStats(player, `${Math.round(player.status * 100) / 100}%`)
-        // Check if the hit ship was sunk
-        sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
-    }
-    return updateScore(player, hitCell.hasShip, sunkShip, players, target.point)
+  attackFleet.isLocked = attackFleet.isLocked || false
+  let player = getParentsByClass('player', target)[0]
+  let players = getParentsByClass('boards', target)[0].children
+  // Player cannot attack themselves (current attacker) or if they have bad status
+  if (player.status <= 0 || player.attacker || attackFleet.isLocked) {
+    return players
+  }
+  // Update cell to hit
+  let hitCell = setHit(player.board, target.point.x, target.point.y, target.point.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
+  let hitShip = false
+  let sunkShip = 0
+  if (hitCell.hasShip) {
+    let status = 0
+    // Update all ship status and player status by checking all ships / parts
+    player.shipFleet.map((ship) => {
+      // Get all healthy ships
+      let healthy = ship.parts.filter((part) => {
+        if (checkEqualPoints(part.point, target.point)) {
+          hitShip = ship
+        }
+        return !part.isHit
+      })
+      // Create percentage health status
+      ship.status = healthy.length / ship.parts.length * 100
+      // Create sum of ship status
+      status += ship.status
+      return ship
+    })
+    // Divide sum of ship statuses by number of ships to get player status
+    player.status = status / player.shipFleet.length
+  }
+  if (hitShip) {
+    player = updatePlayerStats(player, `${Math.round(player.status * 100) / 100}%`)
+    // Check if the hit ship was sunk
+    sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
+  }
+  return updateScore(player, hitCell.hasShip, sunkShip, players, target.point)
 }
 
 const attackListener = (e, target, args = {}) => attackFleet(target)

@@ -6,11 +6,11 @@
  * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}}}
  */
 const gameTile = (player = {}, players = []) => ({
-    hasShip: false,
-    isHit: false,
-    eventListeners: {
-        click: {listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false}
-    },
+  hasShip: false,
+  isHit: false,
+  eventListeners: {
+    click: {listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false}
+  },
 })
 
 /**
@@ -26,7 +26,7 @@ const waterTile = (player = {}, players = []) => mergeObjects(gameTile(player, p
  * @returns {{hasShip: boolean}}
  */
 const shipTile = () => ({
-    hasShip: true,
+  hasShip: true,
 })
 
 /**
@@ -35,9 +35,9 @@ const shipTile = () => ({
  * @returns {{name: string, status: number, parts: Array}}
  */
 const ship = (name = '') => ({
-    name: name,
-    status: 100,
-    parts: [],
+  name: name,
+  status: 100,
+  parts: [],
 })
 
 /**
@@ -45,7 +45,7 @@ const ship = (name = '') => ({
  * @returns {{isHit: boolean}}
  */
 const hitTile = () => ({
-    isHit: true,
+  isHit: true,
 })
 
 /**
@@ -55,22 +55,22 @@ const hitTile = () => ({
  * @returns {{name: string, isRobot: boolean, status: number, turnCnt: number, attacker: boolean, attacks: {hit: number, miss: number, sunk: number}, board: {}, shipFleet: Array, playerStats: {}, tagName: string, attributes: {className: string}, children: [Object]}}
  */
 const playerSet = (board = {}, name = '') => ({
-    name: name,
-    isRobot: false,
-    status: 100,
-    turnCnt: 0,
-    attacker: false,
-    attacks: {hit: 0, miss: 0, sunk: 0},
-    board: board,
-    shipFleet: [],
-    playerStats: {},
-    tagName: 'div',
-    attributes: {
-        className: 'player'
-    },
-    children: [
-        board
-    ]
+  name: name,
+  isRobot: false,
+  status: 100,
+  turnCnt: 0,
+  attacker: false,
+  attacks: {hit: 0, miss: 0, sunk: 0},
+  board: board,
+  shipFleet: [],
+  playerStats: {},
+  tagName: 'div',
+  attributes: {
+    className: 'player'
+  },
+  children: [
+    board
+  ]
 })
 
 /**
@@ -80,26 +80,26 @@ const playerSet = (board = {}, name = '') => ({
  * @returns {{tagName: string, attributes: {}, children: [{tagName: string, attributes: {innerHTML: string}},{tagName: string, attributes: {}, children: Array}]}}
  */
 const playerStats = (player = {}, status = '') => ({
-    tagName: 'div',
-    attributes: {},
-    children: [
-        {
-            tagName: 'span',
-            attributes: {
-                innerHTML: `<strong>${player.name}</strong>: ${status}`
-            },
+  tagName: 'div',
+  attributes: {},
+  children: [
+    {
+      tagName: 'span',
+      attributes: {
+        innerHTML: `<strong>${player.name}</strong>: ${status}`
+      },
+    },
+    {
+      tagName: 'ul',
+      attributes: {},
+      children: player.shipFleet.map(ship => ({
+        tagName: 'li',
+        attributes: {
+          innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
         },
-        {
-            tagName: 'ul',
-            attributes: {},
-            children: player.shipFleet.map(ship => ({
-                tagName: 'li',
-                attributes: {
-                    innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
-                },
-            }))
-        }
-    ]
+      }))
+    }
+  ]
 })
 
 /**
@@ -107,9 +107,9 @@ const playerStats = (player = {}, status = '') => ({
  * @type {Array}
  */
 const defaultFleet = curry(generateRandomFleet)([
-    {name: 'Aircraft Carrier', size: 5},
-    {name: 'Battleship', size: 4},
-    {name: 'Submarine', size: 3},
-    {name: 'Cruiser', size: 3},
-    {name: 'Destroyer', size: 2}
+  {name: 'Aircraft Carrier', size: 5},
+  {name: 'Battleship', size: 4},
+  {name: 'Submarine', size: 3},
+  {name: 'Cruiser', size: 3},
+  {name: 'Destroyer', size: 2}
 ])

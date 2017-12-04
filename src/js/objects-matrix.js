@@ -25,9 +25,9 @@
  * @returns {Point}
  */
 const point = (x, y, z = 0) => ({
-    x: x,
-    y: y,
-    z: z,
+  x: x,
+  y: y,
+  z: z,
 })
 
 /**
@@ -41,7 +41,7 @@ const point = (x, y, z = 0) => ({
  * @returns {MatrixTile}
  */
 const tile = () => ({
-    point: {},
+  point: {},
 })
 
 /**
@@ -67,31 +67,31 @@ const tile = () => ({
  * @returns {Matrix}
  */
 const matrix = (i, x, y, z = 1, ...props) => DOMItem({
+  tagName: 'div',
+  attributes: {
+    className: 'matrix'
+  },
+  children: buildArray(DOMItem({
+    axis: 'z',
     tagName: 'div',
     attributes: {
-        className: 'matrix'
+      className: 'layer'
     },
     children: buildArray(DOMItem({
-        axis: 'z',
+      axis: 'y',
+      tagName: 'div',
+      attributes: {
+        className: 'row'
+      },
+      children: buildArray(DOMItem({
+        axis: 'x',
         tagName: 'div',
         attributes: {
-            className: 'layer'
-        },
-        children: buildArray(DOMItem({
-            axis: 'y',
-            tagName: 'div',
-            attributes: {
-                className: 'row'
-            },
-            children: buildArray(DOMItem({
-                axis: 'x',
-                tagName: 'div',
-                attributes: {
-                    className: 'column'
-                }
-            }, ...props, i), x)
-        }, ...props), y)
-    }, ...props), z)
+          className: 'column'
+        }
+      }, ...props, i), x)
+    }, ...props), y)
+  }, ...props), z)
 })
 
 /**

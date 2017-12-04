@@ -118,8 +118,8 @@ const getPointsLines = lines => lines.reduce((first, next) => first.concat(getPo
  * @returns {{true: Array, false: Array}}
  */
 const testPointsBetween = (start, end, matrix, func, inclusive = true) => getPointsLine(start, end).filter((prop, i, line) => ((i !== 0 && i !== line.length - 1) || inclusive)).reduce((newPoints, next) => mergeObjects(newPoints, {[`${!!func(next, matrix)}`]: [next]}), {
-    true: [],
-    false: []
+  true: [],
+  false: []
 })
 
 /**
@@ -133,8 +133,8 @@ const testPointsBetween = (start, end, matrix, func, inclusive = true) => getPoi
  * @returns {{true: Array, false: Array}}
  */
 const getInBetween = (start, end, matrix, func, inclusive = true) => mergeObjects({
-    true: [],
-    false: []
+  true: [],
+  false: []
 }, testPointsBetween(start, end, matrix, func, inclusive))
 
 /**
@@ -173,7 +173,7 @@ const checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.ch
  * @param pnt
  * @param matrix
  */
-const getDOMItemFromPoint = (pnt, matrix) => checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false;
+const getDOMItemFromPoint = (pnt, matrix) => checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false
 
 /**
  * Return an array of all the points in the matrix
@@ -190,7 +190,7 @@ const getAllPoints = (matrix, allPoints = []) => (matrix.point) ? allPoints.conc
  * @returns {Array}
  */
 const adjacentPoints = (pnt, matrix) => getPointsLines([[point(-1, 1, 1), point(1, -1, -1)], [point(1, 1, 1), point(-1, 1, -1)], [point(-1, -1, 1), point(1, -1, 1)], [point(1, 0, 0), point(1, 1, -1)], [point(-1, 1, 0), point(1, 1, 0)]]).concat([point(0, 0, 1), point(1, 0, 0), point(-1, 0, -1), point(0, 0, -1)])
-    .map(p => nextCell(pnt, p)).filter(p => checkValidPoint(nextCell(pnt, p), matrix))
+  .map(p => nextCell(pnt, p)).filter(p => checkValidPoint(nextCell(pnt, p), matrix))
 
 /**
  * Return all points which touch on edges (not diagonal)

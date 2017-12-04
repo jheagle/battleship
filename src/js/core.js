@@ -7,10 +7,10 @@
  * @returns {function(...[*]): function(...[*])}
  */
 const curry = (fn) => {
-    let curried = (...args) => args.length >= fn.length ?
-        fn(...args) :
-        (...a) => curried(...[...args, ...a])
-    return curried
+  const curried = (...args) => args.length >= fn.length
+    ? fn(...args)
+    : (...a) => curried(...[...args, ...a])
+  return curried
 }
 
 /**
@@ -32,8 +32,8 @@ const curry = (fn) => {
  * @returns {Object|Array}
  */
 const mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
-    newObj[curr] = fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))
-    return newObj
+  newObj[curr] = fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))
+  return newObj
 }, thisArg || {})
 
 /**
@@ -55,12 +55,12 @@ const mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map
  * @returns {Object|Array}
  */
 const filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
-    if (fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))) {
-        newObj[curr] = obj[curr]
-    } else {
-        delete newObj[curr]
-    }
-    return newObj
+  if (fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))) {
+    newObj[curr] = obj[curr]
+  } else {
+    delete newObj[curr]
+  }
+  return newObj
 }, thisArg || {})
 
 /**
@@ -124,12 +124,12 @@ const notEmptyObjectOrArray = item => !!((typeof item === 'object' && Object.key
 const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(...[prop, key].slice(0, test.length)) ? prop : fn(...[obj[key], prop].slice(0, fn.length || 2), ...args)
 
 /**
-* A predicate to determin if the provided input meets the conditions.
-* @callback cloneExtraTest
-* @param {*} property - A reference to the current property being processed.
-* @param {String|number} propertyName - The value of the current property being processed.
-* @returns {boolean}
-*/
+ * A predicate to determin if the provided input meets the conditions.
+ * @callback cloneExtraTest
+ * @param {*} property - A reference to the current property being processed.
+ * @param {String|number} propertyName - The value of the current property being processed.
+ * @returns {boolean}
+ */
 
 /**
  * Tests exceptions to what must be returned as reference vs cloned. Returns true for return reference vs false for return clone.
@@ -137,7 +137,7 @@ const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(...[prop, k
  * @param {cloneExtraTest} [extraTest=false] - Additional function which can be used in the test.
  * @returns {boolean}
  */
-const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || /^(parentItem|listenerArgs)$/.test(key) || (extraTest ? extraTest(prop, key) : false)
+const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof window.HTMLElement || /^(parentItem|listenerArgs)$/.test(key) || (extraTest ? extraTest(prop, key) : false)
 
 /**
  * A helper for cloneExclusions to simplify that function
@@ -157,9 +157,9 @@ const cloneExMap = (cloned, object, parents, fn) => mapObject(object, recursiveM
  * @param {Array} parents
  * @returns {Object|Array}
  */
-const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object) ?
-    cloneExMap(cloned, object, parents, cloneExclusions) :
-    cloned
+const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object)
+  ? cloneExMap(cloned, object, parents, cloneExclusions)
+  : cloned
 
 /**
  * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
@@ -169,12 +169,13 @@ const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(
  * @returns {undefined|*}
  */
 const removeCircularReference = (key, val, parents = []) => {
-    if (typeof val === 'object') {
-        if (inArray(parents, val))
-            return undefined
-        parents.push(val)
+  if (typeof val === 'object') {
+    if (inArray(parents, val)) {
+      return undefined
     }
-    return val
+    parents.push(val)
+  }
+  return val
 }
 
 /**
@@ -183,7 +184,9 @@ const removeCircularReference = (key, val, parents = []) => {
  * @param {Array} [parents=[]]
  * @returns {Object}
  */
-const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
+const cloneObject = (object, parents = []) => {
+  cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
+}
 
 /**
  * Merge two objects and provide clone or original on the provided function.
@@ -205,11 +208,11 @@ const mergeObjectsBase = (fn, obj1, obj2) => (notEmptyObjectOrArray(obj2)) ? map
  * @param {...Object} args
  * @returns {Object}
  */
-const mergeObjects = (...args) => args.length === 2 ?
-    mergeObjectsBase(mergeObjects, args[0], args[1]) :
-    args.length === 1 ?
-        cloneObject(args[0]) :
-        args.reduce(curry(mergeObjectsBase)(mergeObjects), {})
+const mergeObjects = (...args) => args.length === 2
+  ? mergeObjectsBase(mergeObjects, args[0], args[1])
+  : args.length === 1
+    ? cloneObject(args[0])
+    : args.reduce(curry(mergeObjectsBase)(mergeObjects), {})
 
 /**
  * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -220,11 +223,11 @@ const mergeObjects = (...args) => args.length === 2 ?
  * @param {...Object} args
  * @returns {Object}
  */
-const mergeObjectsMutable = (...args) => args.length === 2 ?
-    mergeObjectsBase(mergeObjectsMutable, args[0], args[1]) :
-    args.length === 1 ?
-        args[0] :
-        args.reduce(curry(mergeObjectsBase)(mergeObjectsMutable), {})
+const mergeObjectsMutable = (...args) => args.length === 2
+  ? mergeObjectsBase(mergeObjectsMutable, args[0], args[1])
+  : args.length === 1
+    ? args[0]
+    : args.reduce(curry(mergeObjectsBase)(mergeObjectsMutable), {})
 
 /**
  * Generate an array filled with a copy of the provided item or references to the provided item.
@@ -338,8 +341,8 @@ const compare = (val1, val2) => val1 === val2 ? 0 : val1 > val2 ? 1 : -1
  * @returns {Object.<string, number>}
  */
 const compareArrays = (arr1, arr2, parents = []) => arr2.filter((attr, key) => !inArray(arr1, attr) || arr1[key] !== attr).concat(arr1).reduce((returnObj, attr) => {
-    returnObj[JSON.stringify(attr, (key, val) => removeCircularReference(key, val, parents))] = compare(arr2.filter(val => val === attr).length, arr1.filter(val => val === attr).length)
-    return returnObj
+  returnObj[JSON.stringify(attr, (key, val) => removeCircularReference(key, val, parents))] = compare(arr2.filter(val => val === attr).length, arr1.filter(val => val === attr).length)
+  return returnObj
 }, {})
 
 /**
@@ -351,21 +354,21 @@ const compareArrays = (arr1, arr2, parents = []) => arr2.filter((attr, key) => !
  * @returns {{id: number, func: function, timeout: number, args: {Array}, result: *}}
  */
 const queueTimeout = (fn = {}, time = 0, ...args) => {
-    queueTimeout.queue = queueTimeout.queue || []
-    queueTimeout.isRunning = queueTimeout.isRunning || false
-    let queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
-    if (fn)
-        queueTimeout.queue.push(queueItem)
-
-    if (queueTimeout.queue.length && !queueTimeout.isRunning) {
-        queueTimeout.isRunning = true
-        let toRun = queueTimeout.queue.shift()
-        toRun.id = setTimeout(() => {
-            toRun.result = toRun.func(...toRun.args)
-            queueTimeout.isRunning = false
-            return queueTimeout(false)
-        }, toRun.timeout)
-        return toRun
-    }
-    return queueItem
+  queueTimeout.queue = queueTimeout.queue || []
+  queueTimeout.isRunning = queueTimeout.isRunning || false
+  let queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
+  if (fn) {
+    queueTimeout.queue.push(queueItem)
+  }
+  if (queueTimeout.queue.length && !queueTimeout.isRunning) {
+    queueTimeout.isRunning = true
+    let toRun = queueTimeout.queue.shift()
+    toRun.id = setTimeout(() => {
+      toRun.result = toRun.func(...toRun.args)
+      queueTimeout.isRunning = false
+      return queueTimeout(false)
+    }, toRun.timeout)
+    return toRun
+  }
+  return queueItem
 }
