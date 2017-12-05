@@ -1,3 +1,3 @@
 let core = require('../src/js/core.js')
 
-console.log(core.randomInteger(100))
+console.log(core.randomNumber(100))
