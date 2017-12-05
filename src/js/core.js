@@ -3,6 +3,12 @@
 (function () {
   let root = this
   const exportFunctions = {}
+  const previousCore = exportFunctions
+
+  exportFunctions.noConflict = () => {
+    root.exportFunctions = previousCore
+    return exportFunctions
+  }
 
   /**
    * Return a curried version of the passed function.
@@ -383,6 +389,15 @@
     return queueItem
   }
   exportFunctions.queueTimeout = queueTimeout
+
+  const previousExports = mapObject(exportFunctions, (prop, key) => root[key])
+
+  mapObject(exportFunctions, (prop, key) => mergeObjectsMutable(prop, {
+    noConflict: () => {
+      root[key] = previousExports[key]
+      return prop
+    }
+  }))
 
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
