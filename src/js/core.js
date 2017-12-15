@@ -196,7 +196,7 @@
    * @param {Array} [parents=[]]
    * @returns {Object}
    */
-  const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
+  const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents)
   exportFunctions.cloneObject = cloneObject
 
   /**
