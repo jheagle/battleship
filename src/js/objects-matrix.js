@@ -1,3 +1,4 @@
+'use strict'
 // Core Matrix Objects
 /**
  * A string representing an axis: x, y, z
@@ -27,7 +28,7 @@
 const point = (x, y, z = 0) => ({
   x: x,
   y: y,
-  z: z,
+  z: z
 })
 
 /**
@@ -41,7 +42,7 @@ const point = (x, y, z = 0) => ({
  * @returns {MatrixTile}
  */
 const tile = () => ({
-  point: {},
+  point: {}
 })
 
 /**

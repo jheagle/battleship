@@ -1,3 +1,4 @@
+'use strict'
 // Core DOM management functions
 /**
  * Check if the provided HTMLElement has the provided attributes.
@@ -9,8 +10,9 @@
  */
 const elementHasAttribute = (element, key, attr) => {
   // if element is not a valid element then return false
-  if (!(element instanceof HTMLElement))
+  if (!(element instanceof HTMLElement)) {
     return false
+  }
 
   // check the key is a property of the element
   // compare current to new one
@@ -48,10 +50,9 @@ const updateElement = (config) => {
   if (config.element instanceof HTMLElement) {
     config.attributes = mapObject(elementChanges(config).attributes, (attr, key) => {
       if (key in config.element) {
-        if (notEmptyObjectOrArray(attr)) {
-          return config.attributes[key] = mapObject(attr, (param, k) => config.element.style[k] = param, config.element.style)
-        }
-        return config.element[key] = attr
+        return notEmptyObjectOrArray(attr)
+          ? config.attributes[key] = mapObject(filterObject(attr, (param, k) => /^\D+$/.test(k)), (p, i) => config.element.style[i] = p, config.element.style)
+          : config.element[key] = attr
       }
       config.element.setAttribute(key, attr)
       return attr

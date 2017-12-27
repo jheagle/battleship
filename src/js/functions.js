@@ -1,3 +1,4 @@
+'use strict'
 // Game specific functions
 /**
  * Return the hasShip tile boolean at the specified point.

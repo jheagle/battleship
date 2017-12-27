@@ -1,3 +1,4 @@
+'use strict'
 // Functions used for live updating
 /**
  * Update view based on actions performed

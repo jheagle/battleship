@@ -1,3 +1,4 @@
+'use strict'
 // Core DOM Objects
 /**
  * This is the standard definition of a listenerFunction to be used
@@ -79,7 +80,7 @@ const initChildren = () => [
     attributes: {},
     element: document.body,
     children: []
-  }),
+  })
 ]
 
 /**
@@ -108,7 +109,7 @@ const initRoot = (children, listeners = []) => DOMItem({
   eventListeners: listeners.reduce((initial, listener) => mergeObjects(initial, {[`${listener.name}`]: listener}), {}),
   children: children,
   head: children[0],
-  body: children[1],
+  body: children[1]
 })
 
 /**

@@ -1,6 +1,5 @@
-'use strict';
-(function () {
-
+'use strict'
+;(function () {
   /**
    * Create new private reference to the document
    */

@@ -1,3 +1,4 @@
+'use strict'
 // Functions for computer generated actions
 /**
  * Choose which player to attack.

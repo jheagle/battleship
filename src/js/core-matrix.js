@@ -1,3 +1,4 @@
+'use strict'
 // Core matrix functions for working with a grid of points
 /**
  * Generate point data for each item in the matrix
@@ -198,4 +199,3 @@ const adjacentPoints = (pnt, matrix) => getPointsLines([[point(-1, 1, 1), point(
  * @param matrix
  */
 const adjacentEdgePoints = (pnt, matrix) => [point(-1, 0, 0), point(1, 0, 0), point(0, -1, 0), point(0, 1, 0), point(0, 0, -1), point(0, 0, 1)].map(p => nextCell(pnt, p)).filter(p => checkValidPoint(p, matrix))
-

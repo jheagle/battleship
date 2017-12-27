@@ -1,3 +1,4 @@
+'use strict'
 // Game specific objects
 /**
  * Default properties for a tile in the battleship game.
@@ -10,7 +11,7 @@ const gameTile = (player = {}, players = []) => ({
   isHit: false,
   eventListeners: {
     click: {listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false}
-  },
+  }
 })
 
 /**
@@ -26,7 +27,7 @@ const waterTile = (player = {}, players = []) => mergeObjects(gameTile(player, p
  * @returns {{hasShip: boolean}}
  */
 const shipTile = () => ({
-  hasShip: true,
+  hasShip: true
 })
 
 /**
@@ -37,7 +38,7 @@ const shipTile = () => ({
 const ship = (name = '') => ({
   name: name,
   status: 100,
-  parts: [],
+  parts: []
 })
 
 /**
@@ -45,7 +46,7 @@ const ship = (name = '') => ({
  * @returns {{isHit: boolean}}
  */
 const hitTile = () => ({
-  isHit: true,
+  isHit: true
 })
 
 /**
@@ -87,7 +88,7 @@ const playerStats = (player = {}, status = '') => ({
       tagName: 'span',
       attributes: {
         innerHTML: `<strong>${player.name}</strong>: ${status}`
-      },
+      }
     },
     {
       tagName: 'ul',
@@ -96,7 +97,7 @@ const playerStats = (player = {}, status = '') => ({
         tagName: 'li',
         attributes: {
           innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
-        },
+        }
       }))
     }
   ]

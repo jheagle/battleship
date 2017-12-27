@@ -1,3 +1,4 @@
+'use strict'
 // Custom layout objects leveraging the DOMItem object
 /**
  * This will be the main menu for the game.
@@ -19,7 +20,7 @@ const mainMenu = (parent = {}) => ({
         {
           tagName: 'form',
           attributes: {
-            className: 'main-menu-form',
+            className: 'main-menu-form'
           },
           eventListeners: {
             submit: {
@@ -40,7 +41,7 @@ const mainMenu = (parent = {}) => ({
                   attributes: {
                     for: 'human-players',
                     innerText: 'Humans'
-                  },
+                  }
                 },
                 {
                   tagName: 'input',
@@ -67,7 +68,7 @@ const mainMenu = (parent = {}) => ({
                   attributes: {
                     for: 'robot-players',
                     innerText: 'Robots'
-                  },
+                  }
                 },
                 {
                   tagName: 'input',
@@ -88,14 +89,14 @@ const mainMenu = (parent = {}) => ({
               attributes: {
                 for: 'first-go-first',
                 innerText: 'First Player Starts'
-              },
+              }
             },
             {
               tagName: 'input',
               attributes: {
                 id: 'first-go-first',
                 name: 'first-go-first',
-                type: 'checkbox',
+                type: 'checkbox'
               }
             },
             {
@@ -147,7 +148,7 @@ const finalScore = (players, parent = {}) => ({
         attributes: {
           className: 'score-card',
           innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${Math.round(player.status * 100) / 100}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
-        },
+        }
       }))
     },
     {
@@ -158,7 +159,7 @@ const finalScore = (players, parent = {}) => ({
       },
       eventListeners: {
         click: {listenerFunc: 'restart', listenerArgs: {}, listenerOptions: false}
-      },
+      }
     }
   ]
 })

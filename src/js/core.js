@@ -1,3 +1,4 @@
+'use strict'
 // Core system functions
 /**
  * Return a curried version of the passed function.
@@ -342,8 +343,9 @@ const queueTimeout = (fn = {}, time = 0, ...args) => {
   queueTimeout.queue = queueTimeout.queue || []
   queueTimeout.isRunning = queueTimeout.isRunning || false
   let queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
-  if (fn)
+  if (fn) {
     queueTimeout.queue.push(queueItem)
+  }
 
   if (queueTimeout.queue.length && !queueTimeout.isRunning) {
     queueTimeout.isRunning = true
