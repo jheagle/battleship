@@ -10,7 +10,7 @@
  */
 const elementHasAttribute = (element, key, attr) => {
   // if element is not a valid element then return false
-  if (!(element instanceof HTMLElement)) {
+  if (!(element instanceof HTMLElement || element instanceof PseudoHTMLElement)) {
     return false
   }
 
@@ -47,7 +47,7 @@ const elementChanges = config => {
  * @returns {*}
  */
 const updateElement = (config) => {
-  if (config.element instanceof HTMLElement) {
+  if (config.element instanceof HTMLElement || config.element instanceof PseudoHTMLElement) {
     config.attributes = mapObject(elementChanges(config).attributes, (attr, key) => {
       if (key in config.element) {
         return notEmptyObjectOrArray(attr)
@@ -90,7 +90,7 @@ const generateElement = (config) => {
  */
 const bindAllElements = (item, parent = documentItem) => {
   mapObject(DOMItem(item), (prop) => prop, item)
-  item.element = (item.element && item.element instanceof HTMLElement) ? item.element : bindElement(item).element
+  item.element = (item.element && (item.element instanceof HTMLElement || item.element instanceof PseudoHTMLElement)) ? item.element : bindElement(item).element
   item.parentItem = parent.body || parent
   item.children.map(child => bindAllElements(child, item))
   return item
@@ -102,7 +102,7 @@ const bindAllElements = (item, parent = documentItem) => {
  * @param item
  */
 const bindElement = (item) => {
-  if (!item.element || !(item.element instanceof HTMLElement)) {
+  if (!item.element || !(item.element instanceof HTMLElement || item.element instanceof PseudoHTMLElement)) {
     item.element = generateElement(item).element
   }
   return item
@@ -144,7 +144,7 @@ const appendHTML = (item, parent = documentItem.body) => {
   if (!inArray(parentItem.children, item)) {
     parentItem.children.push(item)
   }
-  if (!item.element || !(item.element instanceof HTMLElement)) {
+  if (!item.element || !(item.element instanceof HTMLElement || item.element instanceof PseudoHTMLElement)) {
     item = bindElement(item)
   }
   parentItem.element.appendChild(item.element)
@@ -246,7 +246,7 @@ const appendListeners = (item, event, listener, args = {}, options = false) => {
  * @returns {*}
  */
 const bindAllListeners = (item) => {
-  if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement) {
+  if (item.eventListeners && Object.keys(item.eventListeners).length && (item.element instanceof HTMLElement || item.element instanceof PseudoHTMLElement)) {
     mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
   }
   item.children = item.children.map(i => bindAllListeners(i))
@@ -260,7 +260,7 @@ const bindAllListeners = (item) => {
  * @returns {*}
  */
 const bindListeners = (item) => {
-  if (item.eventListeners && Object.keys(item.eventListeners).length && item.element instanceof HTMLElement)
+  if (item.eventListeners && Object.keys(item.eventListeners).length && (item.element instanceof HTMLElement || item.element instanceof PseudoHTMLElement))
     mapObject(item.eventListeners, (attr, event) => assignListener(event, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
   return item
 }
@@ -329,7 +329,7 @@ const getTopParentItem = item =>
  */
 const renderHTML = (item, parent = documentItem) => {
   mapObject(DOMItem(item), (prop) => prop, item)
-  item.element = (item.element && item.element instanceof HTMLElement) ? item.element : bindElement(item).element
+  item.element = (item.element && (item.element instanceof HTMLElement || item.element instanceof PseudoHTMLElement)) ? item.element : bindElement(item).element
   item.eventListeners = mapObject(item.eventListeners, prop => mergeObjects(prop, {listenerFunc: retrieveListener(prop.listenerFunc, getTopParentItem(parent))}))
   item.parentItem = parent.body || parent
   item = bindListeners(appendHTML(item, parent))
