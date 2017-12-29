@@ -80,7 +80,7 @@
       this.style = {}
       for (let {name: n, value: v} of attributes) {
         this[n] = v
-        this.attributes.concat([{name: n, value: v}])
+        this.attributes.push({name: n, value: v})
       }
       return this
     }
@@ -101,8 +101,8 @@
      * @param childElement
      * @returns {*}
      */
-    static appendChild (childElement) {
-      this.children.concat([childElement])
+    appendChild (childElement) {
+      this.children.push(childElement)
       return childElement
     }
 
@@ -111,7 +111,7 @@
      * @param childElement
      * @returns {T}
      */
-    static removeChild (childElement) {
+    removeChild (childElement) {
       return this.children.splice(this.children.indexOf(childElement), 1)[0]
     }
 
@@ -120,7 +120,7 @@
      * @param attributeName
      * @returns {boolean}
      */
-    static hasAttribute (attributeName) {
+    hasAttribute (attributeName) {
       return this.attributes.find((attribute) => attribute.name = attributeName) !== 'undefined'
     }
 
@@ -130,10 +130,10 @@
      * @param attributeValue
      * @returns {undefined}
      */
-    static setAttribute (attributeName, attributeValue) {
+    setAttribute (attributeName, attributeValue) {
       if (this.hasAttribute(attributeName) || this[attributeName] === 'undefined') {
         this[attributeName] = attributeValue
-        this.attributes.concat([{name: attributeName, value: attributeValue}])
+        this.attributes.push({name: attributeName, value: attributeValue})
       }
       return undefined
     }
@@ -143,7 +143,7 @@
      * @param attributeName
      * @returns {*}
      */
-    static getAttribute (attributeName) {
+    getAttribute (attributeName) {
       return this.attributes.find((attribute) => attribute.name = attributeName)
     }
 
@@ -151,7 +151,7 @@
      *
      * @param attributeName
      */
-    static removeAttribute (attributeName) {
+    removeAttribute (attributeName) {
       if (this.hasAttribute(attributeName)) {
         delete this[attributeName]
         delete this.attributes.find((attribute) => attribute.name = attributeName)
@@ -187,6 +187,15 @@
         tagName: 'html',
         children: [head, body]
       })]
+    }
+
+    /**
+     *
+     * @param tagName
+     * @returns {PseudoHTMLElement}
+     */
+    createElement (tagName = 'div') {
+      return new PseudoHTMLElement({tagName: tagName})
     }
   }
 
