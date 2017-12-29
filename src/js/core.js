@@ -1,13 +1,51 @@
 'use strict'
 // Core system functions
 ;(function () {
+  /**
+   * Store a reference to this scope which will be Window if rendered via browser
+   */
   let root = this
-  const exportFunctions = {}
-  const previousCore = exportFunctions
 
-  exportFunctions.noConflict = () => {
-    root.exportFunctions = previousCore
-    return exportFunctions
+  /**
+   * Store reference to any pre-existing module of the same name
+   * @type {jDomCore|*}
+   */
+  const previous_jDomCore = root.jDomCore
+
+  /**
+   * @typedef {Object} jDomCore
+   * @property {jDomCore} jDomCore
+   * @property {function} buildArray
+   * @property {function} buildArrayOfReferences
+   * @property {function} cloneObject
+   * @property {function} compare
+   * @property {function} compareArrays
+   * @property {function} curry
+   * @property {function} filterObject
+   * @property {function} getMax
+   * @property {function} getMaxOrMin
+   * @property {function} getMin
+   * @property {function} inArray
+   * @property {function} mapObject
+   * @property {function} mergeObjects
+   * @property {function} mergeObjectsMutable
+   * @property {function} noConflict
+   * @property {function} notEmptyObjectOrArray
+   * @property {function} queueTimeout
+   * @property {function} randomInteger
+   * @property {function} randomNumber
+   * @property {function} reduceObject
+   */
+
+  /**
+   * A reference to all functions to be used globally / exported
+   * @type {jDomCore}
+   */
+  const exportFunctions = {
+    noConflict: () => {
+      root.jDomCore = previous_jDomCore
+      return exportFunctions
+    }
   }
 
   /**
@@ -151,7 +189,7 @@
    * @param {cloneExtraTest} [extraTest=false] - Additional function which can be used in the test.
    * @returns {boolean}
    */
-  const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || prop instanceof HTMLElement || /^(parentItem|listenerArgs)$/.test(key) || (extraTest ? extraTest(prop, key) : false)
+  const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || /^(parentItem|listenerArgs|element)$/.test(key) || (extraTest ? extraTest(prop, key) : false)
 
   /**
    * A helper for cloneExclusions to simplify that function
@@ -389,22 +427,34 @@
   }
   exportFunctions.queueTimeout = queueTimeout
 
-  const previousExports = mapObject(exportFunctions, (prop, key) => root[key])
+  /**
+   * For each exported function, store a reference to similarly named functions from the global scope
+   * @type {Object}
+   */
+  const previousExports = Object.keys(exportFunctions).reduce((start, next) => {
+    start[next] = root[next]
+    return start
+  }, {})
 
-  mapObject(exportFunctions, (prop, key) => mergeObjectsMutable(prop, {
-    noConflict: () => {
-      root[key] = previousExports[key]
-      return prop
-    }
-  }))
+  /**
+   * Ensure each exported function has an a noConflict associated
+   */
+  mapObject(exportFunctions, (prop, key) => prop.noConflict = () => {
+    root[key] = previousExports[key]
+    return prop
+  })
 
+  /**
+   * Either export all functions to be exported, or assign to the Window context
+   */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
       exports = module.exports = exportFunctions
     }
     exports = mergeObjectsMutable(exports, exportFunctions)
   } else {
+    exportFunctions.jDomCore = exportFunctions
     root = mergeObjectsMutable(root, exportFunctions)
   }
-}).call(this)
+}).call(this) // Use the external context to assign this, which will be Window if rendered via browser
 
