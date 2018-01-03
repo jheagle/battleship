@@ -13,13 +13,13 @@
   const previous_jDomObjects = root.jDomObjects
 
   /**
+   * All methods exported from this module are encapsulated within jDomObjects.
    * @typedef {Object} jDomObjects
    * @property {jDomObjects} jDomObjects
-   * @property {Object} PseudoHTMLElement
-   * @property {Object} PseudoHTMLDocument
+   * @property {DOMItemRoot} documentItem
    * @property {function} DOMItem
    * @property {function} documentDOMItem
-   * @property {function} documentItem
+   * @property {function} noConflict
    */
 
   /**
@@ -51,161 +51,23 @@
   }
 
   /**
-   * Define mergeObjectsMutable as retrieved from jDomCore
-   * @type {Function}
+   * Verify availability of document
+   * @type {HTMLDocument|PseudoHTMLDocument}
    */
-  const mergeObjectsMutable = jDomCore.mergeObjectsMutable
+  let document = root.document
 
   /**
-   * Define mapObject as retrieved from jDomCore
-   * @type {Function}
+   * If document remains undefined, attempt to retrieve it as a module
    */
-  const mapObject = jDomCore.mapObject
-
-  /**
-   *
-   */
-  class PseudoHTMLElement {
-    /**
-     *
-     * @param tagName
-     * @param attributes
-     * @param children
-     * @returns {PseudoHTMLElement}
-     */
-    constructor ({tagName = 'div', attributes = [], children = []} = {}) {
-      this.tagName = tagName
-      this.attributes = []
-      this.children = children
-      this.style = {}
-      for (let {name: n, value: v} of attributes) {
-        this[n] = v
-        this.attributes.push({name: n, value: v})
-      }
-      return this
-    }
-
-    /**
-     *
-     * @param tagName
-     * @param attributes
-     * @param children
-     * @returns {PseudoHTMLElement}
-     */
-    static generate ({tagName = '', attributes = [], children = []} = {}) {
-      return new PseudoHTMLElement({tagName: tagName, attributes: attributes, children: children})
-    }
-
-    /**
-     *
-     * @param childElement
-     * @returns {*}
-     */
-    appendChild (childElement) {
-      this.children.push(childElement)
-      return childElement
-    }
-
-    /**
-     *
-     * @param childElement
-     * @returns {T}
-     */
-    removeChild (childElement) {
-      return this.children.splice(this.children.indexOf(childElement), 1)[0]
-    }
-
-    /**
-     *
-     * @param attributeName
-     * @returns {boolean}
-     */
-    hasAttribute (attributeName) {
-      return this.attributes.find((attribute) => attribute.name = attributeName) !== 'undefined'
-    }
-
-    /**
-     *
-     * @param attributeName
-     * @param attributeValue
-     * @returns {undefined}
-     */
-    setAttribute (attributeName, attributeValue) {
-      if (this.hasAttribute(attributeName) || this[attributeName] === 'undefined') {
-        this[attributeName] = attributeValue
-        this.attributes.push({name: attributeName, value: attributeValue})
-      }
-      return undefined
-    }
-
-    /**
-     *
-     * @param attributeName
-     * @returns {*}
-     */
-    getAttribute (attributeName) {
-      return this.attributes.find((attribute) => attribute.name = attributeName)
-    }
-
-    /**
-     *
-     * @param attributeName
-     */
-    removeAttribute (attributeName) {
-      if (this.hasAttribute(attributeName)) {
-        delete this[attributeName]
-        delete this.attributes.find((attribute) => attribute.name = attributeName)
-      }
+  if (typeof document === 'undefined') {
+    if (typeof require !== 'undefined') {
+      const jDomPseudoDom = require('./pseudo-dom.js')
+      root = jDomPseudoDom.generate()
+      document = root.document
+    } else {
+      console.error('objects-dom.js requires jDomPseudoDom')
     }
   }
-
-  exportFunctions.PseudoHTMLElement = PseudoHTMLElement
-
-  /**
-   *
-   * @type {HTMLElement|PseudoHTMLElement}
-   */
-  const HTMLElement = this.HTMLElement || new PseudoHTMLElement()
-
-  /**
-   *
-   */
-  class PseudoHTMLDocument extends PseudoHTMLElement {
-    /**
-     *
-     * @param tagName
-     * @param attributes
-     * @param children
-     */
-    constructor ({tagName = '', attributes = [], children = []} = {}) {
-      super({tagName: tagName, attributes: attributes, children: children})
-      const head = new PseudoHTMLElement({tagName: 'head'})
-      const body = new PseudoHTMLElement({tagName: 'body'})
-      this.head = head
-      this.body = body
-      this.children = [new PseudoHTMLElement({
-        tagName: 'html',
-        children: [head, body]
-      })]
-    }
-
-    /**
-     *
-     * @param tagName
-     * @returns {PseudoHTMLElement}
-     */
-    createElement (tagName = 'div') {
-      return new PseudoHTMLElement({tagName: tagName})
-    }
-  }
-
-  exportFunctions.PseudoHTMLDocument = PseudoHTMLDocument
-
-  /**
-   *
-   * @type {Document|PseudoHTMLDocument}
-   */
-  const document = this.document || new PseudoHTMLDocument()
 
   /**
    * This is the standard definition of a listenerFunction to be used
@@ -240,7 +102,7 @@
    * @returns {DOMItem}
    * @constructor
    */
-  const DOMItem = (...attributes) => mergeObjectsMutable({
+  const DOMItem = (...attributes) => jDomCore.mergeObjectsMutable({
     tagName: 'div',
     attributes: {
       style: {}
@@ -314,7 +176,7 @@
     tagName: 'html',
     attributes: {},
     element: document,
-    eventListeners: listeners.reduce((initial, listener) => mergeObjectsMutable(initial, {[`${listener.name}`]: listener}), {}),
+    eventListeners: listeners.reduce((initial, listener) => jDomCore.mergeObjectsMutable(initial, {[`${listener.name}`]: listener}), {}),
     children: children,
     head: children[0],
     body: children[1]
@@ -353,9 +215,9 @@
   /**
    * Ensure each exported function has an a noConflict associated
    */
-  mapObject(exportFunctions, (prop, key) => prop.noConflict = () => {
+  Object.keys(exportFunctions).map((key) => exportFunctions[key].noConflict = () => {
     root[key] = previousExports[key]
-    return prop
+    return exportFunctions[key]
   })
 
   /**
@@ -365,9 +227,9 @@
     if (typeof module !== 'undefined' && module.exports) {
       exports = module.exports = exportFunctions
     }
-    exports = mergeObjectsMutable(exports, exportFunctions)
+    exports = Object.assign(exports, exportFunctions)
   } else {
     exportFunctions.jDomObjects = exportFunctions
-    root = mergeObjectsMutable(root, exportFunctions)
+    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser

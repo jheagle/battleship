@@ -13,6 +13,7 @@
   const previous_jDomCore = root.jDomCore
 
   /**
+   * All methods exported from this module are encapsulated within jDomCore.
    * @typedef {Object} jDomCore
    * @property {jDomCore} jDomCore
    * @property {function} buildArray
@@ -439,9 +440,9 @@
   /**
    * Ensure each exported function has an a noConflict associated
    */
-  mapObject(exportFunctions, (prop, key) => prop.noConflict = () => {
+  Object.keys(exportFunctions).map((key) => exportFunctions[key].noConflict = () => {
     root[key] = previousExports[key]
-    return prop
+    return exportFunctions[key]
   })
 
   /**
@@ -451,10 +452,10 @@
     if (typeof module !== 'undefined' && module.exports) {
       exports = module.exports = exportFunctions
     }
-    exports = mergeObjectsMutable(exports, exportFunctions)
+    exports = Object.assign(exports, exportFunctions)
   } else {
     exportFunctions.jDomCore = exportFunctions
-    root = mergeObjectsMutable(root, exportFunctions)
+    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser
 
