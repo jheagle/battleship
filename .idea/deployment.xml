@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="battleship.local">
+    <serverData>
+      <paths name="battleship.local">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="src/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

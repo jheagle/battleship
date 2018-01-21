@@ -10,7 +10,7 @@
    * Store reference to any pre-existing module of the same name
    * @type {jDomObjects|*}
    */
-  const previous_jDomObjects = root.jDomObjects
+  const previousJDomObjects = root.jDomObjects
 
   /**
    * All methods exported from this module are encapsulated within jDomObjects.
@@ -28,7 +28,7 @@
    */
   const exportFunctions = {
     noConflict: () => {
-      root.jDomObjects = previous_jDomObjects
+      root.jDomObjects = previousJDomObjects
       return exportFunctions
     }
   }
@@ -215,9 +215,12 @@
   /**
    * Ensure each exported function has an a noConflict associated
    */
-  Object.keys(exportFunctions).map((key) => exportFunctions[key].noConflict = () => {
-    root[key] = previousExports[key]
-    return exportFunctions[key]
+  Object.keys(exportFunctions).map((key) => {
+    exportFunctions[key].noConflict = () => {
+      root[key] = previousExports[key]
+      return exportFunctions[key]
+    }
+    return key
   })
 
   /**

@@ -10,7 +10,7 @@
    * Store reference to any pre-existing module of the same name
    * @type {jDomCoreDom|*}
    */
-  const previous_jDomCoreDom = root.jDomCoreDom
+  const previousJDomCoreDom = root.jDomCoreDom
 
   /**
    * All methods exported from this module are encapsulated within jDomCoreDom.
@@ -32,6 +32,7 @@
    * @property {function} getChildrenByName
    * @property {function} getChildrenFromAttribute
    * @property {function} getParentsByClass
+   * @property {function} getParentsByName
    * @property {function} getTopParentItem
    * @property {function} noConflict
    * @property {function} registerListener
@@ -49,7 +50,7 @@
    */
   const exportFunctions = {
     noConflict: () => {
-      root.jDomCoreDom = previous_jDomCoreDom
+      root.jDomCoreDom = previousJDomCoreDom
       return exportFunctions
     }
   }
@@ -78,7 +79,7 @@
   let jDomObjects = root.jDomObjects
 
   /**
-   * If jDomCore remains undefined, attempt to retrieve it as a module
+   * If jDomObjects remains undefined, attempt to retrieve it as a module
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
@@ -140,9 +141,14 @@
     if (config.element.style) {
       config.attributes = jDomCore.mapObject(elementChanges(config).attributes, (attr, key) => {
         if (key in config.element) {
-          return jDomCore.notEmptyObjectOrArray(attr)
-            ? config.attributes[key] = jDomCore.mapObject(jDomCore.filterObject(attr, (param, k) => /^\D+$/.test(k)), (p, i) => config.element.style[i] = p, config.element.style)
-            : config.element[key] = attr
+          if (jDomCore.notEmptyObjectOrArray(attr)) {
+            return jDomCore.mapObject(jDomCore.filterObject(attr, (param, k) => /^\D+$/.test(k)), (p, i) => {
+              config.element.style[i] = p
+              return p
+            }, config.element.style)
+          }
+          config.element[key] = attr
+          return attr
         }
         config.element.setAttribute(key, attr)
         return attr
@@ -267,7 +273,7 @@
    * @param {Object} [parent]
    * @returns {function}
    */
-  const registerListener = (listener, parent = jDomObjects.documentItem) => parent.eventListeners[listener.name] = parent.head.parentItem.eventListeners[listener.name] = parent.body.parentItem.eventListeners[listener.name] = listener
+  const registerListener = (listener, parent = jDomObjects.documentItem) => Object.assign(parent.eventListeners, {[listener.name]: listener})
   exportFunctions.registerListener = registerListener
 
   /**
@@ -365,8 +371,9 @@
    * @returns {*}
    */
   const bindListeners = (item) => {
-    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element.style)
+    if (item.eventListeners && Object.keys(item.eventListeners).length && item.element.style) {
       jDomCore.mapObject(item.eventListeners, (attr, event) => assignListener(event, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
+    }
     return item
   }
   exportFunctions.bindListeners = bindListeners
@@ -420,7 +427,7 @@
    * Helper for getting all jDomObjects.DOMItems starting at child and having specified name attribute
    */
   const getParentsByName = jDomCore.curry(getParentsFromAttribute)('name')
-  exportFunctions.getParentsByClass = getParentsByClass
+  exportFunctions.getParentsByName = getParentsByName
 
   /**
    * Get the upper parentItem for the provided child. (usually this is a jDomObjects.documentItem reference)
@@ -462,9 +469,12 @@
   /**
    * Ensure each exported function has an a noConflict associated
    */
-  Object.keys(exportFunctions).map((key) => exportFunctions[key].noConflict = () => {
-    root[key] = previousExports[key]
-    return exportFunctions[key]
+  Object.keys(exportFunctions).map((key) => {
+    exportFunctions[key].noConflict = () => {
+      root[key] = previousExports[key]
+      return exportFunctions[key]
+    }
+    return key
   })
 
   /**

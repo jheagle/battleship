@@ -10,7 +10,7 @@
    * Store reference to any pre-existing module of the same name
    * @type {jDomCore|*}
    */
-  const previous_jDomCore = root.jDomCore
+  const previousJDomCore = root.jDomCore
 
   /**
    * All methods exported from this module are encapsulated within jDomCore.
@@ -32,10 +32,12 @@
    * @property {function} mergeObjectsMutable
    * @property {function} noConflict
    * @property {function} notEmptyObjectOrArray
+   * @property {function} pipe
    * @property {function} queueTimeout
    * @property {function} randomInteger
    * @property {function} randomNumber
    * @property {function} reduceObject
+   * @property {function} trace
    */
 
   /**
@@ -44,7 +46,7 @@
    */
   const exportFunctions = {
     noConflict: () => {
-      root.jDomCore = previous_jDomCore
+      root.jDomCore = previousJDomCore
       return exportFunctions
     }
   }
@@ -61,6 +63,16 @@
     return curried
   }
   exportFunctions.curry = curry
+
+  /**
+   * This was copied from a blog post on Composing Software written by Eric Elliott. The idea is to begin to make this
+   * code base somewhat easier to parse and introduce point-free notation.
+   * @author Eric Elliott
+   * @param {...function} fns - Takes a series of functions have the same parameter, which parameter is also returned.
+   * @returns {function(*=): (*|any)}
+   */
+  const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
+  exportFunctions.pipe = pipe
 
   /**
    * Function that produces a property of the new Object, taking three arguments
@@ -221,8 +233,9 @@
    */
   const removeCircularReference = (key, val, parents = []) => {
     if (typeof val === 'object') {
-      if (inArray(parents, val))
+      if (inArray(parents, val)) {
         return undefined
+      }
       parents.push(val)
     }
     return val
@@ -234,7 +247,7 @@
    * @param {Array} [parents=[]]
    * @returns {Object}
    */
-  const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, parents = [])
+  const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, [])
   exportFunctions.cloneObject = cloneObject
 
   /**
@@ -399,6 +412,20 @@
   exportFunctions.compareArrays = compareArrays
 
   /**
+   * This was adapted from a blog post on Composing Software written by Eric Elliott. Trace provides a way to traces
+   * steps through code via the console, while maintaining the functional-style return value.
+   * Returns a function which can then receive a value to output, the value will then be returned.
+   * @author Eric Elliott
+   * @param {string} label - Pass an identifying label of the value being output.
+   * @returns {function(*=)}
+   */
+  const trace = label => value => {
+    console.info(`${label}: `, value)
+    return value
+  }
+  exportFunctions.trace = trace
+
+  /**
    * Run Timeout functions one after the other in queue
    * WARNING: This is a recursive function.
    * @param {function} fn
@@ -440,9 +467,12 @@
   /**
    * Ensure each exported function has an a noConflict associated
    */
-  Object.keys(exportFunctions).map((key) => exportFunctions[key].noConflict = () => {
-    root[key] = previousExports[key]
-    return exportFunctions[key]
+  Object.keys(exportFunctions).map((key) => {
+    exportFunctions[key].noConflict = () => {
+      root[key] = previousExports[key]
+      return exportFunctions[key]
+    }
+    return key
   })
 
   /**
@@ -458,4 +488,3 @@
     root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser
-

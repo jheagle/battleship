@@ -10,7 +10,7 @@
    * Store reference to any pre-existing module of the same name
    * @type {jDomPseudoDom|*}
    */
-  const previous_jDomPseudoDom = root.jDomPseudoDom
+  const previousJDomPseudoDom = root.jDomPseudoDom
 
   /**
    * All methods exported from this module are encapsulated within jDomPseudoDom.
@@ -31,7 +31,7 @@
    */
   const exportFunctions = {
     noConflict: () => {
-      root.jDomPseudoDom = previous_jDomPseudoDom
+      root.jDomPseudoDom = previousJDomPseudoDom
       return exportFunctions
     }
   }
@@ -210,7 +210,7 @@
      * @param {string} attributeName - The attribute name to check
      * @returns {boolean}
      */
-    returnElement.hasAttribute = (attributeName) => returnElement.attributes.find((attribute) => attribute.name = attributeName) !== 'undefined'
+    returnElement.hasAttribute = (attributeName) => returnElement.attributes.find((attribute) => attribute.name === attributeName) !== 'undefined'
 
     /**
      * Assign a new attribute or overwrite an assigned attribute with name and value.
@@ -231,7 +231,7 @@
      * @param {string} attributeName - A string representing the name of the attribute to be retrieved
      * @returns {string|Object}
      */
-    returnElement.getAttribute = (attributeName) => returnElement.attributes.find((attribute) => attribute.name = attributeName)
+    returnElement.getAttribute = (attributeName) => returnElement.attributes.find((attribute) => attribute.name === attributeName)
 
     /**
      * Remove an assigned attribute from the Element
@@ -241,7 +241,7 @@
     returnElement.removeAttribute = (attributeName) => {
       if (returnElement.hasAttribute(attributeName)) {
         delete returnElement[attributeName]
-        delete returnElement.attributes.find((attribute) => attribute.name = attributeName)
+        delete returnElement.attributes.find((attribute) => attribute.name === attributeName)
       }
       return null
     }
@@ -416,9 +416,12 @@
   /**
    * Ensure each exported function has an a noConflict associated
    */
-  Object.keys(exportFunctions).map((key) => exportFunctions[key].noConflict = () => {
-    root[key] = previousExports[key]
-    return exportFunctions[key]
+  Object.keys(exportFunctions).map((key) => {
+    exportFunctions[key].noConflict = () => {
+      root[key] = previousExports[key]
+      return exportFunctions[key]
+    }
+    return key
   })
 
   /**
