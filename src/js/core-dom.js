@@ -79,6 +79,25 @@
   let jDomObjects = root.jDomObjects
 
   /**
+   * Verify availability of document
+   * @type {HTMLDocument|PseudoHTMLDocument}
+   */
+  let document = root.document
+
+  /**
+   * If document remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof document === 'undefined') {
+    if (typeof require !== 'undefined') {
+      const jDomPseudoDom = require('./pseudo-dom.js')
+      root = jDomPseudoDom.generate()
+      document = root.document
+    } else {
+      console.error('objects-dom.js requires jDomPseudoDom')
+    }
+  }
+
+  /**
    * If jDomObjects remains undefined, attempt to retrieve it as a module
    */
   if (typeof jDomObjects === 'undefined') {
