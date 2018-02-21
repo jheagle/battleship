@@ -18,11 +18,12 @@
    * @property {jDomPseudoDom} jDomPseudoDom
    * @property {function} generate
    * @property {function} noConflict
-   * @property {function} pseudoElement
-   * @property {function} pseudoEventTarget
-   * @property {function} pseudoHTMLDocument
-   * @property {function} pseudoHTMLElement
-   * @property {function} pseudoNode
+   * @property {function} PseudoElement
+   * @property {function} pseudoEvent
+   * @property {function} PseudoEventTarget
+   * @property {function} PseudoHTMLDocument
+   * @property {function} PseudoHTMLElement
+   * @property {function} PseudoNode
    */
 
   /**
@@ -37,38 +38,151 @@
   }
 
   /**
+   * Verify availability of jDomCore
+   * @type {*|jDomCore}
+   */
+  let jDomCore = root.jDomCore
+
+  /**
+   * If jDomCore remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof jDomCore === 'undefined') {
+    if (typeof require !== 'undefined') {
+      jDomCore = require('./core.js')
+    } else {
+      console.error('objects-dom.js requires jDomCore')
+    }
+  }
+
+  /**
+   * @typedef {Object} PseudoEvent
+   * @property {boolean} bubbles - A Boolean indicating whether the event bubbles up through the DOM or not.
+   * @property {boolean} cancelable - A Boolean indicating whether the event is cancelable.
+   * @property {boolean} composed - A Boolean value indicating whether or not the event can bubble across the boundary
+   * between the shadow DOM and the regular DOM.
+   * @property {function|composed} currentTarget - A reference to the currently registered target for the event. This
+   * is the object to which the event is currently slated to be sent; it's possible this has been changed along the way
+   * through retargeting.
+   * @property {boolean} defaultPrevent - Indicates whether or not event.preventDefault() has been called on the event.
+   * @property {string} eventPhase - Indicates which phase of the event flow is being processed.
+   * @property {EventTarget|PseudoEventTarget} target - A reference to the target to which the event was originally
+   * dispatched.
+   * @property {int} timeStamp - The time at which the event was created (in milliseconds). By specification, this
+   * value is time since epoch, but in reality browsers' definitions vary; in addition, work is underway to change this
+   * to be a DOMHighResTimeStamp instead.
+   * @property {string} type - The name of the event (case-insensitive).
+   * @property {boolean} isTrusted - Indicates whether or not the event was initiated by the browser (after a user
+   * click for instance) or by a script (using an event creation method, like event.initEvent)
+   * @property {function} createEvent - Creates a new event, which must then be initialized by calling its initEvent()
+   * method.
+   * @property {function} initEvent - Initializes the value of an Event created. If the event has already being
+   * dispatched, this method does nothing.
+   * @property {function} preventDefault - Cancels the event (if it is cancelable).
+   * @property {function} stopImmediatePropagation - For this particular event, no other listener will be called.
+   * Neither those attached on the same element, nor those attached on elements which will be traversed later (in
+   * capture phase, for instance)
+   * @property {function{ stopPropagation - Stops the propagation of events further along in the DOM.
+   */
+
+  /**
+   *
+   * @param typeArg
+   * @param bubbles
+   * @param cancelable
+   * @param composed
+   * @returns {PseudoEvent}
+   * @constructor
+   */
+  const pseudoEvent = (typeArg, {bubbles = false, cancelable = false, composed = false} = {}) => {
+    const event = base || {}
+    const returnEvent = Object.assign(
+      event,
+      {
+        bubbles: bubbles,
+        cancelable: cancelable,
+        composed: composed,
+        currentTarget: {},
+        defaultPrevented: false,
+        eventPhase: '',
+        target: {},
+        timeStamp: Math.floor(Date.now() / 1000),
+        type: typeArg,
+        isTrusted: true
+      }
+    )
+
+    returnEvent.createEvent = (type = '') => {
+      return pseudoEvent(type)
+    }
+
+    returnEvent.initEvent = (type, bubbles, cancelable) => {
+      returnEvent.type = type
+      returnEvent.bubbles = bubbles
+      returnEvent.cancelable = cancelable
+      returnEvent.isTrusted = false
+      return returnEvent
+    }
+
+    returnEvent.preventDefault = () => {
+      returnEvent.defaultPrevented = true
+      return null
+    }
+
+    returnEvent.stopImmediatePropagation = () => {
+      return null
+    }
+
+    returnEvent.stopPropagation = () => {
+      return null
+    }
+
+    return returnEvent
+  }
+
+  /**
    * @typedef {Object} PseudoEventTarget
    * @property {Object} listeners
    * @property {function} addEventListener
    * @property {function} removeEventListener
    * @property {function} dispatchEvent
    */
-
-  /**
-   *
-   * @returns {PseudoEventTarget}
-   * @constructor
-   */
-  const pseudoEventTarget = () => {
+  class PseudoEventTarget {
     /**
-     *
-     * @type {PseudoEventTarget}
+     * @constructor
      */
-    const returnEventTarget = Object.assign({}, {
-      listeners: {}
-    })
+    constructor () {
+      this.listeners = []
+    }
 
     /**
      *
      * @param {string} type
      * @param {function} callback
-     * @param {...} [options]
+     * @param {boolean|Object} [useCapture=false]
      */
-    returnEventTarget.addEventListener = (type, callback, ...options) => {
-      if (!(type in returnEventTarget.listeners)) {
-        returnEventTarget.listeners[type] = []
+    addEventListener (type, callback, useCapture = false) {
+      let options = {capture: false, once: false, passive: false}
+      if (typeof useCapture === 'object') {
+        options = Object.keys(useCapture).reduce((opts, opt) => {
+          opts[opt] = useCapture[opt]
+          return opts
+        }, options)
+      } else {
+        options.capture = useCapture
       }
-      returnEventTarget.listeners[type].push(callback)
+      if (!(type in this.listeners)) {
+        if (type === 'submit') {
+          console.log(this)
+        }
+        this[type] = () => {
+          const event = pseudoEvent.call(this, type)
+          event.target = this
+          event.currentTarget = this
+          return this.dispatchEvent(event)
+        }
+        this.listeners[type] = []
+      }
+      this.listeners[type].push(callback.bind(this))
     }
 
     /**
@@ -76,11 +190,11 @@
      * @param {string} type
      * @param {function} callback
      */
-    returnEventTarget.removeEventListener = (type, callback) => {
-      if (!(type in returnEventTarget.listeners)) {
+    removeEventListener (type, callback) {
+      if (!(type in this.listeners)) {
         return
       }
-      const stack = returnEventTarget.listeners[type]
+      const stack = this.listeners[type]
       for (let i = 0, l = stack.length; i < l; i++) {
         if (stack[i] === callback) {
           stack.splice(i, 1)
@@ -91,59 +205,55 @@
 
     /**
      *
-     * @param {Object} event
+     * @param {Event|PseudoEvent} event
      * @returns {boolean}
      */
-    returnEventTarget.dispatchEvent = (event) => {
-      if (!(event.type in returnEventTarget.listeners)) {
+    dispatchEvent (event) {
+      if (!(event.type in this.listeners)) {
         return true
       }
-      const stack = returnEventTarget.listeners[event.type]
+      const stack = this.listeners[event.type]
 
       for (let i = 0, l = stack.length; i < l; i++) {
-        stack[i].call(returnEventTarget, event)
+        stack[i].call(this, event)
       }
       return !event.defaultPrevented
     }
-    return returnEventTarget
+
   }
-  exportFunctions.pseudoEventTarget = pseudoEventTarget
+
+  exportFunctions.PseudoEventTarget = PseudoEventTarget
 
   /**
    * @typedef {Object} PseudoNode
+   * @augments PseudoEventTarget
    * @property {string} name
    * @property {Object} parent
    * @property {Array} children
    * @property {function} appendChild
    * @property {function} removeChild
    */
-
-  /**
-   *
-   * @param {PseudoNode} [parent=null]
-   * @param {Array} [children=[]]
-   * @returns {PseudoNode}
-   * @constructor
-   */
-  const pseudoNode = ({parent = null, children = []} = {}) => {
+  class PseudoNode extends PseudoEventTarget {
     /**
      *
-     * @type {PseudoNode}
+     * @param {PseudoNode} [parent=null]
+     * @param {Array} [children=[]]
+     * @constructor
      */
-    const returnNode = Object.assign({}, {
-      name: 'Node',
-      parent: parent,
-      children: children
-    })
+    constructor ({parent = null, children = []} = {}) {
+      super()
+      this.parent = parent
+      this.children = children
+    }
 
     /**
      *
      * @param {PseudoNode} childElement
      * @returns {PseudoNode}
      */
-    returnNode.appendChild = (childElement) => {
-      childElement.parent = returnNode
-      returnNode.children = returnNode.children.concat([childElement])
+    appendChild (childElement) {
+      childElement.parent = this
+      this.children = this.children.concat([childElement])
       return childElement
     }
 
@@ -152,14 +262,15 @@
      * @param {PseudoNode} childElement
      * @returns {PseudoNode}
      */
-    returnNode.removeChild = (childElement) => returnNode.children.splice(returnNode.children.indexOf(childElement), 1)[0]
-    return returnNode
+    removeChild (childElement) {
+      return this.children.splice(this.children.indexOf(childElement), 1)[0]
+    }
   }
-  exportFunctions.pseudoNode = pseudoNode
+
+  exportFunctions.PseudoNode = PseudoNode
 
   /**
-   * @typedef {PseudoNode} PseudoElement
-   * @augments PseudoEventTarget
+   * @typedef {Object} PseudoElement
    * @augments PseudoNode
    * @property {string} tagName
    * @property {Array} attributes
@@ -168,49 +279,41 @@
    * @property {function} getAttribute
    * @property {function} removeAttribute
    */
-
-  /**
-   * Simulate the Element object when the DOM is not available
-   * @param {string} [tagName=''] - The
-   * @param {array} [attributes=[]]
-   * @param {array} [children=[]]
-   * @returns {PseudoElement}
-   * @constructor
-   */
-  const pseudoElement = ({tagName = '', attributes = [], children = []} = {}) => {
+  class PseudoElement extends PseudoNode {
     /**
-     * Create the element to be returned
-     * @type {PseudoElement}
+     * Simulate the Element object when the DOM is not available
+     * @param {string} [tagName=''] - The
+     * @param {array} [attributes=[]]
+     * @param {PseudoNode} [parent=null]
+     * @param {Array} [children=[]]
+     * @constructor
      */
-    const returnElement = Object.assign(
-      {},
-      pseudoEventTarget(),
-      pseudoNode({children: children}),
-      {
-        name: 'Element',
-        tagName: tagName,
-        attributes: attributes.concat([
-          {name: 'className', value: ''},
-          {name: 'id', value: ''},
-          {name: 'innerHTML', value: ''}
-        ])
-      }
-    )
+    constructor ({tagName = '', attributes = [], parent = null, children = []} = {}) {
+      super({parent, children})
+      this.tagName = tagName
+      this.attributes = attributes.concat([
+        {name: 'className', value: ''},
+        {name: 'id', value: ''},
+        {name: 'innerHTML', value: ''}
+      ])
 
-    /**
-     * Map all incoming attributes to the attributes array and attach each as a property of this element
-     */
-    returnElement.attributes.map(({name: n, value: v}) => {
-      returnElement[n] = v
-      return {name: n, value: v}
-    })
+      /**
+       * Map all incoming attributes to the attributes array and attach each as a property of this element
+       */
+      this.attributes.map(({name, value}) => {
+        this[name] = value
+        return {name, value}
+      })
+    }
 
     /**
      * Check if an attribute is assigned to this element.
      * @param {string} attributeName - The attribute name to check
      * @returns {boolean}
      */
-    returnElement.hasAttribute = (attributeName) => returnElement.attributes.find((attribute) => attribute.name === attributeName) !== 'undefined'
+    hasAttribute (attributeName) {
+      return this.getAttribute(attributeName) !== 'undefined'
+    }
 
     /**
      * Assign a new attribute or overwrite an assigned attribute with name and value.
@@ -218,10 +321,10 @@
      * @param {string|Object} attributeValue - The value of the attribute to append
      * @returns {undefined}
      */
-    returnElement.setAttribute = (attributeName, attributeValue) => {
-      if (returnElement.hasAttribute(attributeName) || returnElement[attributeName] === 'undefined') {
-        returnElement[attributeName] = attributeValue
-        returnElement.attributes.push({name: attributeName, value: attributeValue})
+    setAttribute (attributeName, attributeValue) {
+      if (this.hasAttribute(attributeName) || this[attributeName] === 'undefined') {
+        this[attributeName] = attributeValue
+        this.attributes.push({name: attributeName, value: attributeValue})
       }
       return undefined
     }
@@ -231,27 +334,29 @@
      * @param {string} attributeName - A string representing the name of the attribute to be retrieved
      * @returns {string|Object}
      */
-    returnElement.getAttribute = (attributeName) => returnElement.attributes.find((attribute) => attribute.name === attributeName)
+    getAttribute (attributeName) {
+      return this.attributes.find(attribute => attribute.name === attributeName)
+    }
 
     /**
      * Remove an assigned attribute from the Element
      * @param {string} attributeName - The string name of the attribute to be removed
      * @returns {null}
      */
-    returnElement.removeAttribute = (attributeName) => {
-      if (returnElement.hasAttribute(attributeName)) {
-        delete returnElement[attributeName]
-        delete returnElement.attributes.find((attribute) => attribute.name === attributeName)
+    removeAttribute (attributeName) {
+      if (this.hasAttribute(attributeName)) {
+        delete this[attributeName]
+        delete this.getAttribute(attributeName)
       }
       return null
     }
-    return returnElement
   }
-  exportFunctions.pseudoElement = pseudoElement
+
+  exportFunctions.PseudoElement = PseudoElement
 
   /**
    * Simulate a HTMLElement when the DOM is unavailable
-   * @typedef {PseudoElement} PseudoHTMLElement
+   * @typedef {Object} PseudoHTMLElement
    * @augments PseudoElement
    * @property {boolean} hidden - State of whether element is visible
    * @property {number} offsetHeight - The height of the element as offset by the parent element
@@ -262,32 +367,33 @@
    * @property {Object} style - A container to define all applied inline-styles
    * @property {string} title - The title attribute which affects the text visible on hover
    */
+  class PseudoHTMLElement extends PseudoElement {
+    /**
+     * Simulate the HTMLELement object when the DOM is not available
+     * @param {string} [tagName=''] - The
+     * @param {PseudoNode} [parent=null]
+     * @param {Array} [children=[]]
+     * @returns {PseudoHTMLElement}
+     * @constructor
+     */
+    constructor ({tagName = '', parent = null, children = []} = {}) {
+      super({
+        tagName,
+        attributes: [
+          {name: 'hidden', value: false},
+          {name: 'offsetHeight', value: 0},
+          {name: 'offsetLeft', value: 0},
+          {name: 'offsetParent', value: null},
+          {name: 'offsetTop', value: 0},
+          {name: 'offsetWidth', value: 0},
+          {name: 'style', value: {}},
+          {name: 'title', value: ''}
+        ], parent, children
+      })
+    }
+  }
 
-  /**
-   *
-   * @param {string} [tagName=div]
-   * @returns {PseudoHTMLElement}
-   * @constructor
-   */
-  const pseudoHTMLElement = (tagName = 'div') => Object.assign(
-    {},
-    pseudoElement({
-      tagName: tagName,
-      attributes: [
-        {name: 'hidden', value: false},
-        {name: 'offsetHeight', value: 0},
-        {name: 'offsetLeft', value: 0},
-        {name: 'offsetParent', value: null},
-        {name: 'offsetTop', value: 0},
-        {name: 'offsetWidth', value: 0},
-        {name: 'style', value: {}},
-        {name: 'title', value: ''}
-      ],
-      children: []
-    }),
-    {name: 'HTMLElement'}
-  )
-  exportFunctions.pseudoHTMLElement = pseudoHTMLElement
+  exportFunctions.PseudoHTMLElement = PseudoHTMLElement
 
   /**
    * A representation of HTMLElement object when it is not available.
@@ -303,56 +409,48 @@
    * @returns {PseudoHTMLDocument}
    * @constructor
    */
-  const pseudoHTMLDocument = () => {
-    /**
-     * Create document head element
-     * @type {PseudoHTMLElement}
-     */
-    const head = pseudoHTMLElement('head')
-
-    /**
-     * Create document body element
-     * @type {PseudoHTMLElement}
-     */
-    const body = pseudoHTMLElement('body')
-
-    /**
-     * Create document child element
-     * @type {PseudoHTMLElement}
-     */
-    const html = pseudoHTMLElement('html')
-    html.children = [head, body]
+  class PseudoHTMLDocument extends PseudoHTMLElement {
 
     /**
      * Define the Object to be returned
      * @type {PseudoHTMLDocument}
      */
-    const returnHTMLDocument = Object.assign(
-      {},
-      pseudoHTMLElement(),
-      {
-        name: 'HTMLDocument',
-        head: head,
-        body: body,
-        children: [html]
-      }
-    )
+    constructor () {
+      super()
+      /**
+       * Create document head element
+       * @type {PseudoHTMLElement}
+       */
+      this.head = new PseudoHTMLElement({tagName: 'head'})
+
+      /**
+       * Create document body element
+       * @type {PseudoHTMLElement}
+       */
+      this.body = new PseudoHTMLElement({tagName: 'body'})
+
+      const html = new PseudoHTMLElement({tagName: 'html', parent: this, children: [this.head, this.body]})
+      /**
+       * Create document child element
+       * @type {PseudoHTMLElement}
+       */
+      this.children = [html]
+
+    }
 
     /**
      * Create and return a PseudoHTMLElement
      * @param {string} tagName - Tag Name is a string representing the type of DOM element this represents
      * @returns {PseudoHTMLElement}
      */
-    returnHTMLDocument.createElement = (tagName = 'div') => {
-      const returnElement = pseudoHTMLElement(tagName)
-      returnElement.parent = returnHTMLDocument
+    createElement (tagName = 'div') {
+      const returnElement = new PseudoHTMLElement({tagName})
+      returnElement.parent = this
       return returnElement
     }
-    html.parent = returnHTMLDocument
-    head.parent = body.parent = html
-    return returnHTMLDocument
   }
-  exportFunctions.pseudoHTMLDocument = pseudoHTMLDocument
+
+  exportFunctions.PseudoHTMLDocument = PseudoHTMLDocument
 
   /**
    *
@@ -364,12 +462,12 @@
      *
      * @type {Window|PseudoEventTarget}
      */
-    const window = typeof root.document === 'undefined' ? root : pseudoEventTarget()
+    const window = typeof root.document === 'undefined' ? root : new PseudoEventTarget()
 
     /**
      * @type {Node|PseudoNode}
      */
-    const Node = root.Node ? root.Node : pseudoNode()
+    const Node = root.Node ? root.Node : new PseudoNode()
     if (typeof window.Node === 'undefined') {
       window.Node = Node
     }
@@ -378,7 +476,7 @@
      *
      * @type {Element|PseudoElement}
      */
-    const Element = root.Element = root.Element || pseudoElement()
+    const Element = root.Element = root.Element || new PseudoElement()
     if (typeof window.Element === 'undefined') {
       window.Element = Element
     }
@@ -387,7 +485,7 @@
      * Create an instance of HTMLElement if not available
      * @type {HTMLElement|PseudoHTMLElement}
      */
-    const HTMLElement = root.HTMLElement || pseudoHTMLElement()
+    const HTMLElement = root.HTMLElement || new PseudoHTMLElement()
     if (typeof window.HTMLElement === 'undefined') {
       window.HTMLElement = HTMLElement
     }
@@ -396,7 +494,7 @@
      * Define document when not available
      * @type {Document|PseudoHTMLDocument}
      */
-    const document = root.document || pseudoHTMLDocument()
+    const document = root.document || new PseudoHTMLDocument()
     if (typeof window.document === 'undefined') {
       window.document = document
     }

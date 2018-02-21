@@ -53,6 +53,7 @@
           {
             tagName: 'form',
             attributes: {
+              name: 'mainMenuForm',
               className: 'main-menu-form'
             },
             eventListeners: {
