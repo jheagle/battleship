@@ -47,19 +47,19 @@
   }
 
   /**
-   * Verify availability of gameUtils
-   * @type {*|gameUtils}
+   * Verify availability of jDomCoreDom
+   * @type {*|jDomCoreDom}
    */
-  let gameUtils = root.gameUtils
+  let jDomCoreDom = root.jDomCoreDom
 
   /**
-   * If gameUtils remains undefined, attempt to retrieve it as a module
+   * If jDomCoreDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof gameUtils === 'undefined') {
+  if (typeof jDomCoreDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      gameUtils = require('./functions.js')
+      jDomCoreDom = require('./core-dom.js')
     } else {
-      console.error('main.js requires gameUtils')
+      console.error('main.js requires jDomCoreDom')
     }
   }
 
@@ -81,27 +81,28 @@
   }
 
   /**
-   * Create new private reference to the document
+   * Verify availability of gameStart
+   * @type {*|gameStart}
    */
-  const documentItem = gameUtils.main(jDomObjects.documentDOMItem([gameUtils.beginRound, gameActions.attackListener, gameUtils.restart]))
-  // console.log(documentItem)
-
-  /**
-   * Verify availability of jDomCoreDom
-   * @type {*|jDomCoreDom}
-   */
-  let jDomCoreDom = root.jDomCoreDom
+  let gameStart = root.gameStart
 
   /**
    * If jDomCoreDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomCoreDom === 'undefined') {
+  if (typeof gameStart === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreDom = require('./core-dom.js')
+      gameStart = require('./start-functions.js')
     } else {
-      console.error('game-ai.js requires jDomCoreDom')
+      console.error('main.js requires gameStart')
     }
   }
+
+  /**
+   * Create new private reference to the document
+   */
+  const documentItem = gameStart.main(jDomObjects.documentDOMItem([gameStart.beginRound, gameActions.attackListener, gameStart.restart]))
+  // console.log(documentItem)
+
   // const div = jDomCoreDom.getChildrenByClass('main-menu', documentItem.body)
   // console.log(div[0].element)
   const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)

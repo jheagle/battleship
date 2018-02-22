@@ -19,7 +19,7 @@
    * @property {function} generate
    * @property {function} noConflict
    * @property {function} PseudoElement
-   * @property {function} pseudoEvent
+   * @property {function} PseudoEvent
    * @property {function} PseudoEventTarget
    * @property {function} PseudoHTMLDocument
    * @property {function} PseudoHTMLElement
@@ -83,60 +83,53 @@
    * capture phase, for instance)
    * @property {function{ stopPropagation - Stops the propagation of events further along in the DOM.
    */
-
-  /**
-   *
-   * @param typeArg
-   * @param bubbles
-   * @param cancelable
-   * @param composed
-   * @returns {PseudoEvent}
-   * @constructor
-   */
-  const pseudoEvent = (typeArg, {bubbles = false, cancelable = false, composed = false} = {}) => {
-    const event = base || {}
-    const returnEvent = Object.assign(
-      event,
-      {
-        bubbles: bubbles,
-        cancelable: cancelable,
-        composed: composed,
-        currentTarget: {},
-        defaultPrevented: false,
-        eventPhase: '',
-        target: {},
-        timeStamp: Math.floor(Date.now() / 1000),
-        type: typeArg,
-        isTrusted: true
-      }
-    )
-
-    returnEvent.createEvent = (type = '') => {
-      return pseudoEvent(type)
+  class PseudoEvent {
+    /**
+     *
+     * @param typeArg
+     * @param bubbles
+     * @param cancelable
+     * @param composed
+     * @returns {PseudoEvent}
+     * @constructor
+     */
+    constructor (typeArg, {bubbles = false, cancelable = false, composed = false} = {}) {
+      this.bubbles = bubbles
+      this.cancelable = cancelable
+      this.composed = composed
+      this.currentTarget = {}
+      this.defaultPrevented = false
+      this.eventPhase = ''
+      this.target = {}
+      this.timeStamp = Math.floor(Date.now() / 1000)
+      this.type = typeArg
+      this.isTrusted = true
     }
 
-    returnEvent.initEvent = (type, bubbles, cancelable) => {
-      returnEvent.type = type
-      returnEvent.bubbles = bubbles
-      returnEvent.cancelable = cancelable
-      returnEvent.isTrusted = false
-      return returnEvent
+    createEvent (type = '') {
+      return new this(type)
     }
 
-    returnEvent.preventDefault = () => {
-      returnEvent.defaultPrevented = true
+    initEvent (type, bubbles, cancelable) {
+      this.type = type
+      this.bubbles = bubbles
+      this.cancelable = cancelable
+      this.isTrusted = false
+      return this
+    }
+
+    preventDefault () {
+      this.defaultPrevented = true
       return null
     }
 
-    returnEvent.stopImmediatePropagation = () => {
+    stopImmediatePropagation () {
       return null
     }
 
-    returnEvent.stopPropagation = () => {
+    stopPropagation () {
       return null
     }
-
-    return returnEvent
   }
 
   /**
@@ -171,11 +164,11 @@
         options.capture = useCapture
       }
       if (!(type in this.listeners)) {
-        if (type === 'submit') {
-          console.log(this)
+        if (type === 'submit' && (this.tagName || false) === 'form') {
+          // console.log(this.children)
         }
         this[type] = () => {
-          const event = pseudoEvent.call(this, type)
+          const event = new PseudoEvent(type)
           event.target = this
           event.currentTarget = this
           return this.dispatchEvent(event)
