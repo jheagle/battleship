@@ -110,7 +110,7 @@
   // form[0].element.submit()
   const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])
   // console.log(submitBtn[0].element)
-  // submitBtn[0].element.click()
+  submitBtn[0].element.click()
 
   // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
   // let results = mergeObjects({

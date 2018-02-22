@@ -33,6 +33,7 @@
    * @property {function} getChildrenFromAttribute
    * @property {function} getParentsByClass
    * @property {function} getParentsByName
+   * @property {function} getParentsByTagName
    * @property {function} getTopParentItem
    * @property {function} noConflict
    * @property {function} registerListener
@@ -434,7 +435,11 @@
    * @returns {Array}
    */
   const getParentsFromAttribute = (attr, value, item = jDomObjects.documentItem.body) =>
-    Object.keys(item.parentItem).length ? (item.attributes[attr] && item.attributes[attr] === value) ? getParentsFromAttribute(attr, value, item.parentItem).concat([item]) : getParentsFromAttribute(attr, value, item.parentItem) : []
+    !Object.keys(item.parentItem).length
+      ? []
+      : (item.attributes[attr] || item[attr] || false) === value
+      ? getParentsFromAttribute(attr, value, item.parentItem).concat([item])
+      : getParentsFromAttribute(attr, value, item.parentItem)
 
   /**
    * Helper for getting all jDomObjects.DOMItems starting at child and having specified className attribute
@@ -447,6 +452,12 @@
    */
   const getParentsByName = jDomCore.curry(getParentsFromAttribute)('name')
   exportFunctions.getParentsByName = getParentsByName
+
+  /**
+   * Helper for getting all jDomObjects.DOMItems starting at child and having specified tagName
+   */
+  const getParentsByTagName = jDomCore.curry(getParentsFromAttribute)('tagName')
+  exportFunctions.getParentsByTagName = getParentsByTagName
 
   /**
    * Get the upper parentItem for the provided child. (usually this is a jDomObjects.documentItem reference)

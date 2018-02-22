@@ -38,23 +38,6 @@
   }
 
   /**
-   * Verify availability of jDomCore
-   * @type {*|jDomCore}
-   */
-  let jDomCore = root.jDomCore
-
-  /**
-   * If jDomCore remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomCore === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomCore = require('./core.js')
-    } else {
-      console.error('objects-dom.js requires jDomCore')
-    }
-  }
-
-  /**
    * @typedef {Object} PseudoEvent
    * @property {boolean} bubbles - A Boolean indicating whether the event bubbles up through the DOM or not.
    * @property {boolean} cancelable - A Boolean indicating whether the event is cancelable.
@@ -164,9 +147,6 @@
         options.capture = useCapture
       }
       if (!(type in this.listeners)) {
-        if (type === 'submit' && (this.tagName || false) === 'form') {
-          // console.log(this.children)
-        }
         this[type] = () => {
           const event = new PseudoEvent(type)
           event.target = this
@@ -218,6 +198,23 @@
   exportFunctions.PseudoEventTarget = PseudoEventTarget
 
   /**
+   * A selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
+   * This function will check all the children starting from item, and scan the attributes
+   * property for matches. The return array contains children matching from all levels.
+   * WARNING: This is a recursive function.
+   * @param attr
+   * @param value
+   * @param node
+   * @returns {Array}
+   */
+  const getParentNodesFromAttribute = (attr, value, node) =>
+    !Object.keys(node.parent).length
+      ? []
+      : (node[attr] || false) === value
+      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
+      : getParentNodesFromAttribute(attr, value, node.parent)
+
+  /**
    * @typedef {Object} PseudoNode
    * @augments PseudoEventTarget
    * @property {string} name
@@ -229,11 +226,11 @@
   class PseudoNode extends PseudoEventTarget {
     /**
      *
-     * @param {PseudoNode} [parent=null]
+     * @param {PseudoNode} [parent={}]
      * @param {Array} [children=[]]
      * @constructor
      */
-    constructor ({parent = null, children = []} = {}) {
+    constructor ({parent = {}, children = []} = {}) {
       super()
       this.parent = parent
       this.children = children
@@ -247,6 +244,10 @@
     appendChild (childElement) {
       childElement.parent = this
       this.children = this.children.concat([childElement])
+      if (/^(button|input)$/i.test(childElement.tagName) && (childElement.type || '').toLowerCase() === 'submit') {
+        const forms = getParentNodesFromAttribute('tagName', 'form', childElement)
+        childElement.addEventListener('click', () => forms[0].submit())
+      }
       return childElement
     }
 
@@ -277,11 +278,11 @@
      * Simulate the Element object when the DOM is not available
      * @param {string} [tagName=''] - The
      * @param {array} [attributes=[]]
-     * @param {PseudoNode} [parent=null]
+     * @param {PseudoNode} [parent={}]
      * @param {Array} [children=[]]
      * @constructor
      */
-    constructor ({tagName = '', attributes = [], parent = null, children = []} = {}) {
+    constructor ({tagName = '', attributes = [], parent = {}, children = []} = {}) {
       super({parent, children})
       this.tagName = tagName
       this.attributes = attributes.concat([
@@ -364,12 +365,12 @@
     /**
      * Simulate the HTMLELement object when the DOM is not available
      * @param {string} [tagName=''] - The
-     * @param {PseudoNode} [parent=null]
+     * @param {PseudoNode} [parent={}]
      * @param {Array} [children=[]]
      * @returns {PseudoHTMLElement}
      * @constructor
      */
-    constructor ({tagName = '', parent = null, children = []} = {}) {
+    constructor ({tagName = '', parent = {}, children = []} = {}) {
       super({
         tagName,
         attributes: [
@@ -492,7 +493,7 @@
       window.document = document
     }
 
-    return Object.assign(root, window)
+    return context ? Object.assign(context, exportFunctions, window) : Object.assign(root, window)
   }
 
   /**
