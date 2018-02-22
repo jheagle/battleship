@@ -225,7 +225,9 @@
    */
   const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
     player.playerStats = jDomCoreDom.updateElements(jDomCore.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
-    console.log(player.playerStats.children[0].attributes.innerHTML)
+    if (player.playerStats.children[0].attributes.innerHTML) {
+      console.log(player.playerStats.children[0].attributes.innerHTML)
+    }
     return player
   }
 
@@ -261,7 +263,7 @@
               }
             }
           })))))
-        }, 400)
+        }, 100)
         ++player.turnCnt
       } else {
         result = jDomCore.queueTimeout(() => {
@@ -288,11 +290,12 @@
    * @returns {Array.<*>}
    */
   const endGame = (winner) => {
-    let parent = jDomCoreDom.getTopParentItem(winner)
-    let players = winner.parentItem.children
+    const parent = jDomCoreDom.getTopParentItem(winner)
+    const players = winner.parentItem.children
     players.map(player => updatePlayerStats(player))
     winner = updatePlayerStats(winner, 'WINNER')
-    console.log(jDomCoreDom.renderHTML(jDomLayout.finalScore(players), parent))
+    const finalScore = jDomCoreDom.renderHTML(jDomLayout.finalScore(players), parent)
+    finalScore.children[0].children.map(child => jDomCore.trace('Score Card: ')(child.attributes.innerHTML))
     return [winner]
   }
 
