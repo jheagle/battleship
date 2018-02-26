@@ -64,7 +64,7 @@
    * @property {function} stopImmediatePropagation - For this particular event, no other listener will be called.
    * Neither those attached on the same element, nor those attached on elements which will be traversed later (in
    * capture phase, for instance)
-   * @property {function{ stopPropagation - Stops the propagation of events further along in the DOM.
+   * @property {function} stopPropagation - Stops the propagation of events further along in the DOM.
    */
   class PseudoEvent {
     /**
@@ -192,7 +192,6 @@
       }
       return !event.defaultPrevented
     }
-
   }
 
   exportFunctions.PseudoEventTarget = PseudoEventTarget
@@ -211,8 +210,8 @@
     !Object.keys(node.parent).length
       ? []
       : (node[attr] || false) === value
-      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
-      : getParentNodesFromAttribute(attr, value, node.parent)
+        ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
+        : getParentNodesFromAttribute(attr, value, node.parent)
 
   /**
    * @typedef {Object} PseudoNode
@@ -382,7 +381,9 @@
           {name: 'offsetWidth', value: 0},
           {name: 'style', value: {}},
           {name: 'title', value: ''}
-        ], parent, children
+        ],
+        parent,
+        children
       })
     }
   }
@@ -404,7 +405,6 @@
    * @constructor
    */
   class PseudoHTMLDocument extends PseudoHTMLElement {
-
     /**
      * Define the Object to be returned
      * @type {PseudoHTMLDocument}
@@ -429,7 +429,6 @@
        * @type {PseudoHTMLElement}
        */
       this.children = [html]
-
     }
 
     /**

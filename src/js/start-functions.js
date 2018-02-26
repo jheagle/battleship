@@ -51,6 +51,23 @@
   }
 
   /**
+   * Verify availability of jDomObjects
+   * @type {*|jDomObjects}
+   */
+  let jDomObjects = root.jDomObjects
+
+  /**
+   * If jDomObjects remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof jDomObjects === 'undefined') {
+    if (typeof require !== 'undefined') {
+      jDomObjects = require('./objects-dom.js')
+    } else {
+      console.error('start-functions.js requires jDomObjects')
+    }
+  }
+
+  /**
    * Verify availability of jDomCoreDom
    * @type {*|jDomCoreDom}
    */

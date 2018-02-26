@@ -196,7 +196,7 @@
   /**
    *
    */
-  const setViewShip = jDomCore.curry(update3dCell)(jDomCore.mergeObjects(gamePieces.shipTile(), {attributes: {style: {backgroundColor: '#777',},},}))
+  const setViewShip = jDomCore.curry(update3dCell)(jDomCore.mergeObjects(gamePieces.shipTile(), {attributes: {style: {backgroundColor: '#777'}}}))
 
   /**
    *
@@ -225,9 +225,7 @@
    */
   const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
     player.playerStats = jDomCoreDom.updateElements(jDomCore.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
-    if (player.playerStats.children[0].attributes.innerHTML) {
-      console.log(player.playerStats.children[0].attributes.innerHTML)
-    }
+    console.log(gamePieces.playerStats(player, status).children[0].attributes.innerHTML)
     return player
   }
 
@@ -428,7 +426,7 @@
             return jDomCoreMatrix.getDOMItemFromPoint(targetPoints.false[0], victim.board)
           }
         }
-        // If there are not points between, attack the outer points first.
+        // If there are no points between, attack the outer points first.
         let pntDiff = jDomCoreMatrix.pointDifference(hitParts[0].point, hitParts[1].point)
         let dirPnts = (pntDiff.x > 0 ? [jDomObjectsMatrix.point(-1, 0, 0), jDomObjectsMatrix.point(1, 0, 0)] : [jDomObjectsMatrix.point(0, -1, 0), jDomObjectsMatrix.point(0, 1, 0)]).map((p, i) => jDomCoreMatrix.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => jDomCoreMatrix.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
         // Check outer points which are valid and not hit.

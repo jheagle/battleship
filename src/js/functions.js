@@ -84,14 +84,6 @@
   exportFunctions.getAllNonHitCells = getAllNonHitCells
 
   /**
-   * Get the points surrounding a provided point which were not hit.
-   * @param pnt
-   * @param matrix
-   * @returns {Array}
-   */
-  const getAdjNonHitCells = (pnt, matrix) => jDomCoreMatrix.adjacentPoints(pnt, matrix).filter(p => !checkIfHitCell(p, matrix))
-
-  /**
    * Get the points which have same edges with the provided point and are not hit.
    * @param pnt
    * @param matrix

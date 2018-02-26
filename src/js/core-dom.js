@@ -438,8 +438,8 @@
     !Object.keys(item.parentItem).length
       ? []
       : (item.attributes[attr] || item[attr] || false) === value
-      ? getParentsFromAttribute(attr, value, item.parentItem).concat([item])
-      : getParentsFromAttribute(attr, value, item.parentItem)
+        ? getParentsFromAttribute(attr, value, item.parentItem).concat([item])
+        : getParentsFromAttribute(attr, value, item.parentItem)
 
   /**
    * Helper for getting all jDomObjects.DOMItems starting at child and having specified className attribute

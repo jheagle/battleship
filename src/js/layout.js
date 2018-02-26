@@ -61,7 +61,7 @@
                 listenerFunc: 'beginRound',
                 listenerArgs: {},
                 listenerOptions: false
-              },
+              }
             },
             children: [
               {
