@@ -4,13 +4,13 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this
+  let root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
    * @type {jDomPseudoDom|*}
    */
-  const previousJDomPseudoDom = root.jDomPseudoDom
+  const previousJDomPseudoDom = root.jDomPseudoDom || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomPseudoDom.
@@ -36,6 +36,7 @@
       return exportFunctions
     }
   }
+  root.jDomPseudoDom = exportFunctions
 
   /**
    * @typedef {Object} PseudoEvent
@@ -210,8 +211,8 @@
     !Object.keys(node.parent).length
       ? []
       : (node[attr] || false) === value
-        ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
-        : getParentNodesFromAttribute(attr, value, node.parent)
+      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
+      : getParentNodesFromAttribute(attr, value, node.parent)
 
   /**
    * @typedef {Object} PseudoNode
@@ -523,8 +524,5 @@
       exports = module.exports = exportFunctions
     }
     exports = Object.assign(exports, exportFunctions)
-  } else {
-    exportFunctions.jDomPseudoDom = exportFunctions
-    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser

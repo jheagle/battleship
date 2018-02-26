@@ -4,13 +4,13 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this
+  let root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
    * @type {jDomLayout|*}
    */
-  const previousJDomLayout = root.jDomLayout
+  const previousJDomLayout = root.jDomLayout || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomLayout.
@@ -32,6 +32,7 @@
       return exportFunctions
     }
   }
+  root.jDomLayout = exportFunctions
 
   /**
    * This will be the main menu for the game.
@@ -229,8 +230,5 @@
       exports = module.exports = exportFunctions
     }
     exports = Object.assign(exports, exportFunctions)
-  } else {
-    exportFunctions.jDomLayout = exportFunctions
-    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser

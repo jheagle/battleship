@@ -4,13 +4,13 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this
+  let root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
    * @type {jDomCore|*}
    */
-  const previousJDomCore = root.jDomCore
+  const previousJDomCore = root.jDomCore || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomCore.
@@ -50,6 +50,7 @@
       return exportFunctions
     }
   }
+  root.jDomCore = exportFunctions
 
   /**
    * Return a curried version of the passed function.
@@ -71,8 +72,7 @@
    * @param {...function} fns - Takes a series of functions have the same parameter, which parameter is also returned.
    * @returns {function(*=): (*|any)}
    */
-  const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
-  exportFunctions.pipe = pipe
+  exportFunctions.pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
 
   /**
    * Function that produces a property of the new Object, taking three arguments
@@ -116,7 +116,7 @@
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
-  const filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
+  exportFunctions.filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
     if (fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))) {
       newObj[curr] = obj[curr]
     } else {
@@ -124,7 +124,6 @@
     }
     return newObj
   }, thisArg || {})
-  exportFunctions.filterObject = filterObject
 
   /**
    * Function to execute on each property in the object, taking four arguments:
@@ -145,8 +144,7 @@
    * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty array without an initial value is an error.
    * @returns {Object|Array}
    */
-  const reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]) => Array.isArray(obj) ? obj.reduce(fn, initialValue) : Object.keys(obj).reduce((newObj, curr) => fn(...[newObj, obj[curr], curr, obj].slice(0, fn.length || 2)), initialValue)
-  exportFunctions.reduceObject = reduceObject
+  exportFunctions.reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]) => Array.isArray(obj) ? obj.reduce(fn, initialValue) : Object.keys(obj).reduce((newObj, curr) => fn(...[newObj, obj[curr], curr, obj].slice(0, fn.length || 2)), initialValue)
 
   /**
    * Helper function for testing if the item is an Object or Array that contains properties or elements
@@ -306,8 +304,7 @@
    * @param {Array} [arr=[]]
    * @returns {Array.<*>}
    */
-  const buildArray = curry(buildArrayBase)(false)
-  exportFunctions.buildArray = buildArray
+  exportFunctions.buildArray = curry(buildArrayBase)(false)
 
   /**
    * Leverage buildArrayBase to generate an array filled with references to the provided item.
@@ -318,8 +315,7 @@
    * @param {Array} [arr=[]]
    * @returns {Array.<*>}
    */
-  const buildArrayOfReferences = curry(buildArrayBase)(true)
-  exportFunctions.buildArrayOfReferences = buildArrayOfReferences
+  exportFunctions.buildArrayOfReferences = curry(buildArrayBase)(true)
 
   /**
    * A simple function to check if an item is in an array
@@ -347,8 +343,7 @@
    * @param {number} num2
    * @returns {number}
    */
-  const getMax = curry(getMaxOrMin)(true)
-  exportFunctions.getMax = getMax
+  exportFunctions.getMax = curry(getMaxOrMin)(true)
 
   /**
    * Helper for returning min value
@@ -357,8 +352,7 @@
    * @param {number} num2
    * @returns {number}
    */
-  const getMin = curry(getMaxOrMin)(false)
-  exportFunctions.getMin = getMin
+  exportFunctions.getMin = curry(getMaxOrMin)(false)
 
   /**
    * Create a single random number within provided range. And with optional offset,
@@ -368,8 +362,7 @@
    * @param {number} [interval=1]
    * @returns {number}
    */
-  const randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range + offset) * interval
-  exportFunctions.randomNumber = randomNumber
+  exportFunctions.randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range + offset) * interval
 
   /**
    * Create a single random integer within provide range. And with optional offset,
@@ -379,8 +372,7 @@
    * @param {number} [interval=1]
    * @returns {number}
    */
-  const randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.random() * range) + offset) * interval
-  exportFunctions.randomInteger = randomInteger
+  exportFunctions.randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.random() * range) + offset) * interval
 
   /**
    * Compare two numbers and return:
@@ -405,11 +397,10 @@
    * @param {Array} [parents=[]] - Used to track circular references
    * @returns {Object.<string, number>}
    */
-  const compareArrays = (arr1, arr2, parents = []) => arr2.filter((attr, key) => !inArray(arr1, attr) || arr1[key] !== attr).concat(arr1).reduce((returnObj, attr) => {
+  exportFunctions.compareArrays = (arr1, arr2, parents = []) => arr2.filter((attr, key) => !inArray(arr1, attr) || arr1[key] !== attr).concat(arr1).reduce((returnObj, attr) => {
     returnObj[JSON.stringify(attr, (key, val) => removeCircularReference(key, val, parents))] = compare(arr2.filter(val => val === attr).length, arr1.filter(val => val === attr).length)
     return returnObj
   }, {})
-  exportFunctions.compareArrays = compareArrays
 
   /**
    * This was adapted from a blog post on Composing Software written by Eric Elliott. Trace provides a way to traces
@@ -419,11 +410,10 @@
    * @param {string} label - Pass an identifying label of the value being output.
    * @returns {function(*=)}
    */
-  const trace = label => value => {
+  exportFunctions.trace = label => value => {
     console.info(`${label}: `, value)
     return value
   }
-  exportFunctions.trace = trace
 
   /**
    * Run Timeout functions one after the other in queue
@@ -483,8 +473,5 @@
       exports = module.exports = exportFunctions
     }
     exports = Object.assign(exports, exportFunctions)
-  } else {
-    exportFunctions.jDomCore = exportFunctions
-    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser

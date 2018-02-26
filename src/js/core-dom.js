@@ -4,13 +4,13 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this
+  let root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
    * @type {jDomCoreDom|*}
    */
-  const previousJDomCoreDom = root.jDomCoreDom
+  const previousJDomCoreDom = root.jDomCoreDom || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomCoreDom.
@@ -55,6 +55,7 @@
       return exportFunctions
     }
   }
+  root.jDomCoreDom = exportFunctions
 
   /**
    * Verify availability of jDomCore
@@ -438,8 +439,8 @@
     !Object.keys(item.parentItem).length
       ? []
       : (item.attributes[attr] || item[attr] || false) === value
-        ? getParentsFromAttribute(attr, value, item.parentItem).concat([item])
-        : getParentsFromAttribute(attr, value, item.parentItem)
+      ? getParentsFromAttribute(attr, value, item.parentItem).concat([item])
+      : getParentsFromAttribute(attr, value, item.parentItem)
 
   /**
    * Helper for getting all jDomObjects.DOMItems starting at child and having specified className attribute
@@ -515,8 +516,5 @@
       exports = module.exports = exportFunctions
     }
     exports = Object.assign(exports, exportFunctions)
-  } else {
-    exportFunctions.jDomCoreDom = exportFunctions
-    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser

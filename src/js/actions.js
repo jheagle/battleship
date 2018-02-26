@@ -4,13 +4,13 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this
+  let root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
    * @type {gameActions|*}
    */
-  const previousGameActions = root.gameActions
+  const previousGameActions = root.gameActions || {}
 
   /**
    * All methods exported from this module are encapsulated within gameActions.
@@ -34,6 +34,7 @@
       return exportFunctions
     }
   }
+  root.gameActions = exportFunctions
 
   /**
    * Verify availability of jDomCore
@@ -214,8 +215,7 @@
    * @param point
    * @param view
    */
-  const setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, point.y, point.z) : setHiddenShip(matrix, point.x, point.y, point.z)
-  exportFunctions.setShip = setShip
+  exportFunctions.setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, point.y, point.z) : setHiddenShip(matrix, point.x, point.y, point.z)
 
   /**
    *
@@ -386,6 +386,13 @@
   }
   exportFunctions.attackFleet = attackFleet
 
+  /**
+   *
+   * @param e
+   * @param target
+   * @param args
+   * @returns {*}
+   */
   const attackListener = (e, target, args = {}) => attackFleet(target)
   exportFunctions.attackListener = attackListener
 
@@ -516,8 +523,5 @@
       exports = module.exports = exportFunctions
     }
     exports = Object.assign(exports, exportFunctions)
-  } else {
-    exportFunctions.gameActions = exportFunctions
-    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser

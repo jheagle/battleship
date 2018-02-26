@@ -3,13 +3,13 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this
+  let root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
    * @type {gameMain|*}
    */
-  const previousGameMain = root.gameMain
+  const previousGameMain = root.gameMain || {}
 
   /**
    * All methods exported from this module are encapsulated within gameMain.
@@ -28,6 +28,7 @@
       return exportFunctions
     }
   }
+  root.gameMain = exportFunctions
 
   /**
    * Verify availability of jDomObjects
@@ -151,8 +152,5 @@
       exports = module.exports = exportFunctions
     }
     exports = Object.assign(exports, exportFunctions)
-  } else {
-    exportFunctions.gameAI = exportFunctions
-    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser

@@ -4,13 +4,13 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this
+  let root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
    * @type {gameStart|*}
    */
-  const previousGameStart = root.gameStart
+  const previousGameStart = root.gameStart || {}
 
   /**
    * All methods exported from this module are encapsulated within gameStart.
@@ -32,6 +32,7 @@
       return exportFunctions
     }
   }
+  root.gameStart = exportFunctions
 
   /**
    * Verify availability of jDomCore
@@ -351,8 +352,5 @@
       exports = module.exports = exportFunctions
     }
     exports = Object.assign(exports, exportFunctions)
-  } else {
-    exportFunctions.gameStart = exportFunctions
-    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser

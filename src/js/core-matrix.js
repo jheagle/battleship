@@ -4,13 +4,13 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this
+  let root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
    * @type {jDomCoreMatrix|*}
    */
-  const previousJDomCoreMatrix = root.jDomCoreMatrix
+  const previousJDomCoreMatrix = root.jDomCoreMatrix || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomCoreMatrix.
@@ -52,6 +52,7 @@
       return exportFunctions
     }
   }
+  root.jDomCoreMatrix = exportFunctions
 
   /**
    * Verify availability of jDomObjectsMatrix
@@ -338,8 +339,5 @@
       exports = module.exports = exportFunctions
     }
     exports = Object.assign(exports, exportFunctions)
-  } else {
-    exportFunctions.jDomCoreMatrix = exportFunctions
-    root = Object.assign(root, exportFunctions)
   }
 }).call(this) // Use the external context to assign this, which will be Window if rendered via browser
