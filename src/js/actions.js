@@ -225,7 +225,7 @@
    */
   const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
     player.playerStats = jDomCoreDom.updateElements(jDomCore.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
-    console.log(gamePieces.playerStats(player, status).children[0].attributes.innerHTML)
+    // console.log(gamePieces.playerStats(player, status).children[0].attributes.innerHTML)
     return player
   }
 

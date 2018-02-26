@@ -102,16 +102,16 @@
    * Create new private reference to the document
    */
   const documentItem = gameStart.main(jDomObjects.documentDOMItem([gameStart.beginRound, gameActions.attackListener, gameStart.restart]))
-  // console.log(documentItem)
+  console.log(documentItem)
 
   // const div = jDomCoreDom.getChildrenByClass('main-menu', documentItem.body)
   // console.log(div[0].element)
-  const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)
+  // const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)
   // console.log(form[0].element)
   // form[0].element.submit()
-  const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])
+  // const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])
   // console.log(submitBtn[0].element)
-  submitBtn[0].element.click()
+  // submitBtn[0].element.click()
 
   // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
   // let results = mergeObjects({
