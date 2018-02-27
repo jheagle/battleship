@@ -1,15 +1,16 @@
-var gulp = require('gulp')
-var sass = require('gulp-sass')
-var browserSync = require('browser-sync')
-var useref = require('gulp-useref')
-var uglify = require('gulp-uglify')
-var gulpIf = require('gulp-if')
-var cssnano = require('gulp-cssnano')
-var imagemin = require('gulp-imagemin')
-var cache = require('gulp-cache')
-var del = require('del')
-var runSequence = require('run-sequence')
-var babel = require('gulp-babel')
+const gulp = require('gulp')
+const sass = require('gulp-sass')
+const browserSync = require('browser-sync')
+const useref = require('gulp-useref')
+const uglify = require('gulp-uglify')
+const gulpIf = require('gulp-if')
+const cssnano = require('gulp-cssnano')
+const imagemin = require('gulp-imagemin')
+const cache = require('gulp-cache')
+const del = require('del')
+const runSequence = require('run-sequence')
+const babel = require('gulp-babel')
+const prepack = require('gulp-prepack');
 
 // Development Tasks
 // -----------------
@@ -46,6 +47,7 @@ gulp.task('watch', function () {
 gulp.task('useref', function () {
   return gulp.src('src/*.html')
     .pipe(useref())
+    // .pipe(gulpIf('*.js', prepack()))
     .pipe(gulpIf('*.js', babel({
       presets: ['es2015']
     })))

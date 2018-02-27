@@ -7,6 +7,25 @@
   let root = this || {}
 
   /**
+   * Verify availability of document
+   * @type {HTMLDocument|PseudoHTMLDocument}
+   */
+  let document = root.document
+
+  /**
+   * If document remains undefined, attempt to retrieve it as a module
+   */
+  if (!Object.keys(root).length) {
+    if (typeof require !== 'undefined') {
+      const jDomPseudoDom = require('./pseudo-dom.js')
+      root = jDomPseudoDom.generate()
+      document = root.document
+    } else {
+      console.error('objects-dom.js requires jDomPseudoDom')
+    }
+  }
+
+  /**
    * Store reference to any pre-existing module of the same name
    * @type {jDomObjects|*}
    */
@@ -48,25 +67,6 @@
       jDomCore = require('./core.js')
     } else {
       console.error('objects-dom.js requires jDomCore')
-    }
-  }
-
-  /**
-   * Verify availability of document
-   * @type {HTMLDocument|PseudoHTMLDocument}
-   */
-  let document = root.document
-
-  /**
-   * If document remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof document === 'undefined') {
-    if (typeof require !== 'undefined') {
-      const jDomPseudoDom = require('./pseudo-dom.js')
-      root = jDomPseudoDom.generate()
-      document = root.document
-    } else {
-      console.error('objects-dom.js requires jDomPseudoDom')
     }
   }
 
@@ -170,14 +170,14 @@
   /**
    * Initiate the Root for DocumentItem. This is primary a helper for {@link documentDOMItem}.
    * @param {Array.<DOMItemHead|DOMItemBody>} children - Provide an array of Head and Body (usually via {@link initChildren})
-   * @param {Array.<listenerFunction>} listeners - An array of all event listeners to be registered in the DOM
+   * @param {Object.<string, listenerFunction>} listeners - An object of all event listeners to be registered in the DOM
    * @returns {DOMItemRoot}
    */
-  const initRoot = (children, listeners = []) => DOMItem({
+  const initRoot = (children, listeners = {}) => DOMItem({
     tagName: 'html',
     attributes: {},
     element: document,
-    eventListeners: listeners.reduce((initial, listener) => jDomCore.mergeObjectsMutable(initial, {[`${listener.name}`]: listener}), {}),
+    eventListeners: listeners,
     children: children,
     head: children[0],
     body: children[1]
@@ -186,7 +186,7 @@
   /**
    * Return a DOMItem style reference to the document. The rootItem argument is a
    * system function and not necessary to implement.
-   * @param {Array.<listenerFunction>} listeners - An array of all event listeners to be registered in the DOM
+   * @param {Object.<string, listenerFunction>} listeners - An object of all event listeners to be registered in the DOM
    * @param {Object} [rootItem=DOMItemRoot] - This is a reference to DOMItemRoot which will be defaulted with {@link initRoot}
    * @returns {DOMItemRoot}
    */
@@ -205,26 +205,6 @@
   exportFunctions.documentItem = documentDOMItem()
 
   /**
-   * For each exported function, store a reference to similarly named functions from the global scope
-   * @type {Object}
-   */
-  const previousExports = Object.keys(exportFunctions).reduce((start, next) => {
-    start[next] = root[next]
-    return start
-  }, {})
-
-  /**
-   * Ensure each exported function has an a noConflict associated
-   */
-  Object.keys(exportFunctions).map((key) => {
-    exportFunctions[key].noConflict = () => {
-      root[key] = previousExports[key]
-      return exportFunctions[key]
-    }
-    return key
-  })
-
-  /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
@@ -233,4 +213,4 @@
     }
     exports = Object.assign(exports, exportFunctions)
   }
-}).call(this) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

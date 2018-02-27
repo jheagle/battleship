@@ -1,4 +1,5 @@
 'use strict'
+const base = this || window || {}
 // Core system functions
 ;(function () {
   /**
@@ -446,26 +447,6 @@
   exportFunctions.queueTimeout = queueTimeout
 
   /**
-   * For each exported function, store a reference to similarly named functions from the global scope
-   * @type {Object}
-   */
-  const previousExports = Object.keys(exportFunctions).reduce((start, next) => {
-    start[next] = root[next]
-    return start
-  }, {})
-
-  /**
-   * Ensure each exported function has an a noConflict associated
-   */
-  Object.keys(exportFunctions).map((key) => {
-    exportFunctions[key].noConflict = () => {
-      root[key] = previousExports[key]
-      return exportFunctions[key]
-    }
-    return key
-  })
-
-  /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
@@ -474,4 +455,4 @@
     }
     exports = Object.assign(exports, exportFunctions)
   }
-}).call(this) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

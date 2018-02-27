@@ -282,7 +282,7 @@
    * @param mainForm
    * @returns {boolean}
    */
-  const beginRound = (e, mainForm) => {
+  exportFunctions.beginRound = (e, mainForm) => {
     e.preventDefault()
     let parent = jDomCoreDom.getTopParentItem(mainForm)
     let humans = parseInt(jDomCoreDom.getChildrenByName('human-players', mainForm)[0].element.value)
@@ -306,7 +306,6 @@
     }
     return false
   }
-  exportFunctions.beginRound = beginRound
 
   /**
    * The entry function
@@ -321,28 +320,7 @@
   }
   exportFunctions.main = main
 
-  const restart = (e, button) => main(jDomCoreDom.getTopParentItem(button))
-  exportFunctions.restart = restart
-
-  /**
-   * For each exported function, store a reference to similarly named functions from the global scope
-   * @type {Object}
-   */
-  const previousExports = Object.keys(exportFunctions).reduce((start, next) => {
-    start[next] = root[next]
-    return start
-  }, {})
-
-  /**
-   * Ensure each exported function has an a noConflict associated
-   */
-  Object.keys(exportFunctions).map((key) => {
-    exportFunctions[key].noConflict = () => {
-      root[key] = previousExports[key]
-      return exportFunctions[key]
-    }
-    return key
-  })
+  exportFunctions.restart = (e, button) => main(jDomCoreDom.getTopParentItem(button))
 
   /**
    * Either export all functions to be exported, or assign to the Window context
@@ -353,4 +331,4 @@
     }
     exports = Object.assign(exports, exportFunctions)
   }
-}).call(this) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

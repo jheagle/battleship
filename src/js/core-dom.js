@@ -7,6 +7,25 @@
   let root = this || {}
 
   /**
+   * Verify availability of document
+   * @type {HTMLDocument|PseudoHTMLDocument}
+   */
+  let document = root.document
+
+  /**
+   * If document remains undefined, attempt to retrieve it as a module
+   */
+  if (!Object.keys(root).length) {
+    if (typeof require !== 'undefined') {
+      const jDomPseudoDom = require('./pseudo-dom.js')
+      root = jDomPseudoDom.generate()
+      document = root.document
+    } else {
+      console.error('objects-dom.js requires jDomPseudoDom')
+    }
+  }
+
+  /**
    * Store reference to any pre-existing module of the same name
    * @type {jDomCoreDom|*}
    */
@@ -79,25 +98,6 @@
    * @type {*|jDomObjects}
    */
   let jDomObjects = root.jDomObjects
-
-  /**
-   * Verify availability of document
-   * @type {HTMLDocument|PseudoHTMLDocument}
-   */
-  let document = root.document
-
-  /**
-   * If document remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof document === 'undefined') {
-    if (typeof require !== 'undefined') {
-      const jDomPseudoDom = require('./pseudo-dom.js')
-      root = jDomPseudoDom.generate()
-      document = root.document
-    } else {
-      console.error('objects-dom.js requires jDomPseudoDom')
-    }
-  }
 
   /**
    * If jDomObjects remains undefined, attempt to retrieve it as a module
@@ -291,10 +291,11 @@
   /**
    * Register a single listener function as part of the root jDomObjects.DOMItem.
    * @param {function} listener
+   * @param {string} [name]
    * @param {Object} [parent]
    * @returns {function}
    */
-  const registerListener = (listener, parent = jDomObjects.documentItem) => Object.assign(parent.eventListeners, {[listener.name]: listener})
+  const registerListener = (listener, name = listener.name, parent = jDomObjects.documentItem) => Object.assign(parent.eventListeners, {name: listener})
   exportFunctions.registerListener = registerListener
 
   /**
@@ -303,7 +304,7 @@
    * @param {Object} [parent]
    * @returns {Object}
    */
-  const registerListeners = (listeners, parent = jDomObjects.documentItem) => jDomCore.mergeObjects(parent, {eventListeners: listeners.reduce((initial, listener) => jDomCore.mergeObjects(initial, {[`${listener.name}`]: registerListener(listener, parent)}), parent.eventListeners)})
+  const registerListeners = (listeners, parent = jDomObjects.documentItem) => jDomCore.mergeObjects(parent, {eventListeners: listeners}, parent.eventListeners)
   exportFunctions.registerListeners = registerListeners
 
   /**
@@ -489,26 +490,6 @@
   exportFunctions.renderHTML = renderHTML
 
   /**
-   * For each exported function, store a reference to similarly named functions from the global scope
-   * @type {Object}
-   */
-  const previousExports = Object.keys(exportFunctions).reduce((start, next) => {
-    start[next] = root[next]
-    return start
-  }, {})
-
-  /**
-   * Ensure each exported function has an a noConflict associated
-   */
-  Object.keys(exportFunctions).map((key) => {
-    exportFunctions[key].noConflict = () => {
-      root[key] = previousExports[key]
-      return exportFunctions[key]
-    }
-    return key
-  })
-
-  /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
@@ -517,4 +498,4 @@
     }
     exports = Object.assign(exports, exportFunctions)
   }
-}).call(this) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
