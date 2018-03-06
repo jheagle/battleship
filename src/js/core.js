@@ -16,7 +16,6 @@ const base = this || window || {}
   /**
    * All methods exported from this module are encapsulated within jDomCore.
    * @typedef {Object} jDomCore
-   * @property {jDomCore} jDomCore
    * @property {function} buildArray
    * @property {function} buildArrayOfReferences
    * @property {function} cloneObject
@@ -117,7 +116,7 @@ const base = this || window || {}
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
-  exportFunctions.filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
+  const filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
     if (fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))) {
       newObj[curr] = obj[curr]
     } else {
@@ -125,6 +124,7 @@ const base = this || window || {}
     }
     return newObj
   }, thisArg || {})
+  exportFunctions.filterObject = filterObject
 
   /**
    * Function to execute on each property in the object, taking four arguments:
@@ -145,7 +145,8 @@ const base = this || window || {}
    * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty array without an initial value is an error.
    * @returns {Object|Array}
    */
-  exportFunctions.reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]) => Array.isArray(obj) ? obj.reduce(fn, initialValue) : Object.keys(obj).reduce((newObj, curr) => fn(...[newObj, obj[curr], curr, obj].slice(0, fn.length || 2)), initialValue)
+  const reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]) => Array.isArray(obj) ? obj.reduce(fn, initialValue) : Object.keys(obj).reduce((newObj, curr) => fn(...[newObj, obj[curr], curr, obj].slice(0, fn.length || 2)), initialValue)
+  exportFunctions.reduceObject = reduceObject
 
   /**
    * Helper function for testing if the item is an Object or Array that contains properties or elements
@@ -205,10 +206,10 @@ const base = this || window || {}
 
   /**
    * A helper for cloneExclusions to simplify that function
-   * @param {Object} cloned -
-   * @param {Object} object
-   * @param {Array} parents
-   * @param {function} fn
+   * @param {Object} cloned - A value-only copy of the original object
+   * @param {Object} object - The original object that is being cloned
+   * @param {Array} parents - An array of all of the previously processed object levels so they do not get repeated
+   * @param {function} fn - A reference to the calling function to be recursively called for the next object level
    * @returns {Object|Array}
    */
   const cloneExMap = (cloned, object, parents, fn) => mapObject(object, recursiveMap(cloned, cloneRules(cloned, curry(inArray)(parents.concat([object]))), fn, parents.concat([object])))
@@ -216,18 +217,18 @@ const base = this || window || {}
   /**
    * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
    * WARNING: This is a recursive function.
-   * @param {Object} cloned
-   * @param {Object} object
-   * @param {Array} parents
+   * @param {Object} cloned - A value-only copy of the original object
+   * @param {Object} object - The original object that is being cloned
+   * @param {Array} [parents=[]] - An array of all of the previously processed object levels so they do not get repeated
    * @returns {Object|Array}
    */
   const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object) ? cloneExMap(cloned, object, parents, cloneExclusions) : cloned
 
   /**
    * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
-   * @param {string|number} key
-   * @param {*} val
-   * @param {Array} [parents=[]]
+   * @param {string|number} key - The current name of the object property being evaluated
+   * @param {*} val - The current property being evaluated
+   * @param {Array} [parents=[]] - An array of all of the previously processed object levels so they do not get repeated
    * @returns {undefined|*}
    */
   const removeCircularReference = (key, val, parents = []) => {
@@ -242,8 +243,8 @@ const base = this || window || {}
 
   /**
    * Clone objects for manipulation without data corruption, returns a copy of the provided object.
-   * @param {Object} object
-   * @param {Array} [parents=[]]
+   * @param {Object} object - The original object that is being cloned
+   * @param {Array} [parents=[]] - An array of all of the previously processed object levels so they do not get repeated
    * @returns {Object}
    */
   const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, [])
