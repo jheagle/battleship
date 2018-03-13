@@ -51,7 +51,7 @@ gulp.task('useref', function () {
     .pipe(gulpIf('*.js', babel({
       presets: ['es2015']
     })))
-    .pipe(gulpIf('*.js', uglify()))
+    // .pipe(gulpIf('*.js', uglify()))
     .pipe(gulpIf('*.css', cssnano()))
     .pipe(gulp.dest('dist'))
 })

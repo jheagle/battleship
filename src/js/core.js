@@ -211,40 +211,22 @@ const base = this || window || {}
    * @param {Object} object - The original object that is being cloned
    * @returns {Object|Array}
    */
-  const cloneExclusions = (cloned, object) =>
+  const cloneCopy = (object, cloned) =>
     notEmptyObjectOrArray(object)
       ? reduceObject(object, (start, prop, key) => {
         start[key] = (cloned[key] && !/^(parentItem|listenerArgs|element)$/.test(key))
-          ? cloneExclusions(cloned[key], prop)
+          ? cloneCopy(prop, cloned[key])
           : prop
         return start
       }, cloned)
       : cloned
 
   /**
-   * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
-   * @param {string|number} key - The current name of the object property being evaluated
-   * @param {*} val - The current property being evaluated
-   * @param {Array} [parents=[]] - An array of all of the previously processed object levels so they do not get repeated
-   * @returns {undefined|*}
-   */
-  const removeCircularReference = (key, val, parents = []) => {
-    if (typeof val === 'object') {
-      if (inArray(parents, val)) {
-        return undefined
-      }
-      parents.push(val)
-    }
-    return val
-  }
-
-  /**
    * Clone objects for manipulation without data corruption, returns a copy of the provided object.
    * @param {Object} object - The original object that is being cloned
-   * @param {Array} [parents=[]] - An array of all of the previously processed object levels so they do not get repeated
    * @returns {Object}
    */
-  const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object)
+  const cloneObject = (object) => cloneCopy(object, JSON.parse(JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)))
   exportFunctions.cloneObject = cloneObject
 
   /**
@@ -397,7 +379,7 @@ const base = this || window || {}
    * @returns {Object.<string, number>}
    */
   exportFunctions.compareArrays = (arr1, arr2, parents = []) => arr2.filter((attr, key) => !inArray(arr1, attr) || arr1[key] !== attr).concat(arr1).reduce((returnObj, attr) => {
-    returnObj[JSON.stringify(attr, (key, val) => removeCircularReference(key, val, parents))] = compare(arr2.filter(val => val === attr).length, arr1.filter(val => val === attr).length)
+    returnObj[JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)] = compare(arr2.filter(val => val === attr).length, arr1.filter(val => val === attr).length)
     return returnObj
   }, {})
 
