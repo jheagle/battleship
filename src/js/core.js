@@ -205,24 +205,21 @@ const base = this || window || {}
   const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || /^(parentItem|listenerArgs|element)$/.test(key) || (extraTest ? extraTest(prop, key) : false)
 
   /**
-   * A helper for cloneExclusions to simplify that function
-   * @param {Object} cloned - A value-only copy of the original object
-   * @param {Object} object - The original object that is being cloned
-   * @param {Array} parents - An array of all of the previously processed object levels so they do not get repeated
-   * @param {function} fn - A reference to the calling function to be recursively called for the next object level
-   * @returns {Object|Array}
-   */
-  const cloneExMap = (cloned, object, parents, fn) => mapObject(object, recursiveMap(cloned, cloneRules(cloned, curry(inArray)(parents.concat([object]))), fn, parents.concat([object])))
-
-  /**
    * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
    * WARNING: This is a recursive function.
    * @param {Object} cloned - A value-only copy of the original object
    * @param {Object} object - The original object that is being cloned
-   * @param {Array} [parents=[]] - An array of all of the previously processed object levels so they do not get repeated
    * @returns {Object|Array}
    */
-  const cloneExclusions = (cloned, object, parents = []) => notEmptyObjectOrArray(object) ? cloneExMap(cloned, object, parents, cloneExclusions) : cloned
+  const cloneExclusions = (cloned, object) =>
+    notEmptyObjectOrArray(object)
+      ? reduceObject(object, (start, prop, key) => {
+        start[key] = (cloned[key] && !/^(parentItem|listenerArgs|element)$/.test(key))
+          ? cloneExclusions(cloned[key], prop)
+          : prop
+        return start
+      }, cloned)
+      : cloned
 
   /**
    * Exclude cloning the same references multiple times. This ia utility function to be called with JSON.stringify
@@ -247,7 +244,7 @@ const base = this || window || {}
    * @param {Array} [parents=[]] - An array of all of the previously processed object levels so they do not get repeated
    * @returns {Object}
    */
-  const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object, [])
+  const cloneObject = (object, parents = []) => cloneExclusions(JSON.parse(JSON.stringify(object, (key, val) => removeCircularReference(key, val, parents))), object)
   exportFunctions.cloneObject = cloneObject
 
   /**
@@ -412,10 +409,11 @@ const base = this || window || {}
    * @param {string} label - Pass an identifying label of the value being output.
    * @returns {function(*=)}
    */
-  exportFunctions.trace = label => value => {
+  const trace = label => value => {
     console.info(`${label}: `, value)
     return value
   }
+  exportFunctions.trace = trace
 
   /**
    * Run Timeout functions one after the other in queue
