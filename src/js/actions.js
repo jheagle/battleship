@@ -261,7 +261,7 @@
               }
             }
           })))))
-        }, 100)
+        }, 400)
         ++player.turnCnt
       } else {
         result = jDomCore.queueTimeout(() => {
