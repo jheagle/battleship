@@ -237,9 +237,12 @@ const base = this || window || {}
    * @param {function} fn
    * @param {Object} obj1
    * @param {Object} obj2
+   * @param {boolean} [isMutable=false]
    * @returns {Object}
    */
-  const mergeObjectsBase = (fn, obj1, obj2) => (notEmptyObjectOrArray(obj2)) ? mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), fn), /mutable/i.test(fn.name) ? obj1 : cloneObject(obj1)) : obj2
+  const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => notEmptyObjectOrArray(obj2)
+    ? mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), fn), isMutable ? obj1 : cloneObject(obj1))
+    : obj2
 
   /**
    * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -261,7 +264,7 @@ const base = this || window || {}
    * @param {...Object} args
    * @returns {Object}
    */
-  const mergeObjectsMutable = (...args) => args.length === 2 ? mergeObjectsBase(mergeObjectsMutable, args[0], args[1]) : args.length === 1 ? args[0] : args.reduce(curry(mergeObjectsBase)(mergeObjectsMutable), {})
+  const mergeObjectsMutable = (...args) => args.length === 2 ? mergeObjectsBase(mergeObjectsMutable, args[0], args[1], true) : args.length === 1 ? args[0] : args.reduce(curry(mergeObjectsBase)(mergeObjectsMutable), {})
   exportFunctions.mergeObjectsMutable = mergeObjectsMutable
 
   /**

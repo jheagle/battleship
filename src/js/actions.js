@@ -293,7 +293,7 @@
     players.map(player => updatePlayerStats(player))
     winner = updatePlayerStats(winner, 'WINNER')
     const finalScore = jDomCoreDom.renderHTML(jDomLayout.finalScore(players), parent)
-    finalScore.children[0].children.map(child => jDomCore.trace('Score Card: ')(child.attributes.innerHTML))
+    finalScore.children[0].children.map(child => child.attributes.innerHTML)
     return [winner]
   }
 

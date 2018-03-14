@@ -10,7 +10,6 @@ const cache = require('gulp-cache')
 const del = require('del')
 const runSequence = require('run-sequence')
 const babel = require('gulp-babel')
-const prepack = require('gulp-prepack');
 
 // Development Tasks
 // -----------------
@@ -47,11 +46,10 @@ gulp.task('watch', function () {
 gulp.task('useref', function () {
   return gulp.src('src/*.html')
     .pipe(useref())
-    // .pipe(gulpIf('*.js', prepack()))
     .pipe(gulpIf('*.js', babel({
       presets: ['es2015']
     })))
-    // .pipe(gulpIf('*.js', uglify()))
+    .pipe(gulpIf('*.js', uglify()))
     .pipe(gulpIf('*.css', cssnano()))
     .pipe(gulp.dest('dist'))
 })
