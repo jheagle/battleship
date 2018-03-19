@@ -16,28 +16,28 @@ const base = this || window || {}
   /**
    * All methods exported from this module are encapsulated within jDomCore.
    * @typedef {Object} jDomCore
-   *  - buildArray
-   *  - buildArrayOfReferences
-   *  - cloneObject
-   *  - compare
-   *  - compareArrays
-   *  - curry
-   *  - filterObject
-   *  - getMax
-   *  - getMaxOrMin
-   *  - getMin
-   *  - inArray
-   *  - mapObject
-   *  - mergeObjects
-   *  - mergeObjectsMutable
-   *  - noConflict
-   *  - notEmptyObjectOrArray
-   *  - pipe
-   *  - queueTimeout
-   *  - randomInteger
-   *  - randomNumber
-   *  - reduceObject
-   *  - trace
+   * Functions exported as part of jDomCore:
+   *  - {@link buildArray}
+   *  - {@link buildArrayOfReferences}
+   *  - {@link cloneObject}
+   *  - {@link compare}
+   *  - {@link compareArrays}
+   *  - {@link curry}
+   *  - {@link filterObject}
+   *  - {@link getMax}
+   *  - {@link getMaxOrMin}
+   *  - {@link getMin}
+   *  - {@link inArray}
+   *  - {@link mapObject}
+   *  - {@link mergeObjects}
+   *  - {@link mergeObjectsMutable}
+   *  - {@link notEmptyObjectOrArray}
+   *  - {@link pipe}
+   *  - {@link queueTimeout}
+   *  - {@link randomInteger}
+   *  - {@link randomNumber}
+   *  - {@link reduceObject}
+   *  - {@link trace}
    */
 
   /**
@@ -180,29 +180,12 @@ const base = this || window || {}
    * Pass in the conditions as a test function: True returns the object; False continues recursion.
    * Pass in the recursive function.
    * Add any other args to that function.
-   * @param {Object|Array} obj -> The Object or array being processed.
-   * @param {recursiveMapTest} test - The condition which either continues or terminates recursion.
+   * @param {Object|Array} obj - The Object or array being processed.
    * @param {recursiveMapCallback} fn - A reference to the calling function to be recursively run.
    * @param {...*} [args] - Additional args which might be needed for recursiveMapCallback.
    * @returns {*|recursiveMapCallback}
    */
-  const recursiveMap = (obj, test, fn, ...args) => (prop, key) => test(...[prop, key].slice(0, test.length)) ? prop : fn(...[obj[key], prop].slice(0, fn.length || 2), ...args)
-
-  /**
-   * A predicate to determin if the provided input meets the conditions.
-   * @callback cloneExtraTest
-   * @param {*} property - A reference to the current property being processed.
-   * @param {String|number} propertyName - The value of the current property being processed.
-   * @returns {boolean}
-   */
-
-  /**
-   * Tests exceptions to what must be returned as reference vs cloned. Returns true for return reference vs false for return clone.
-   * @param {Object|Array} obj - The Object or Array to be tested.
-   * @param {cloneExtraTest} [extraTest=false] - Additional function which can be used in the test.
-   * @returns {boolean}
-   */
-  const cloneRules = (obj, extraTest = false) => (prop, key) => !obj[key] || /^(parentItem|listenerArgs|element)$/.test(key) || (extraTest ? extraTest(prop, key) : false)
+  const recursiveMap = (obj, fn, ...args) => (prop, key) => (!obj[key] || /^(parentItem|listenerArgs|element)$/.test(key)) ? prop : fn(obj[key], prop, ...args)
 
   /**
    * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
@@ -241,7 +224,7 @@ const base = this || window || {}
    * @returns {Object}
    */
   const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => notEmptyObjectOrArray(obj2)
-    ? mapObject(obj2, recursiveMap(obj1, cloneRules(obj1), fn), isMutable ? obj1 : cloneObject(obj1))
+    ? mapObject(obj2, recursiveMap(obj1, fn), isMutable ? obj1 : cloneObject(obj1))
     : obj2
 
   /**
