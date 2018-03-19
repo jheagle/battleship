@@ -157,37 +157,6 @@ const base = this || window || {}
   exportFunctions.notEmptyObjectOrArray = notEmptyObjectOrArray
 
   /**
-   * Function is a predicate, accepts optional arguments of a property and a propertyName to be used in the test.
-   * @callback recursiveMapTest
-   * @param {*} [property] - The property value to be tested.
-   * @param {string} [propertyName] - The current property being processed in the object.
-   * @returns {boolean}
-   */
-
-  /**
-   * This is typically a reference to the calling function which will be called recursively.
-   * @callback recursiveMapCallback
-   * @param {*} propertyReference - A reference to the current property being processed.
-   * @param {*} [propertyValue] - The value of the current property being processed.
-   * @param {...*} [args] - Additional arguments that may be needed for the recursive function callback.
-   * @returns {*}
-   */
-
-  /**
-   * A function to use with mapObject or just map which will either return the result
-   * of re-running a function or return the original item.
-   * Pass in the object to be used with map.
-   * Pass in the conditions as a test function: True returns the object; False continues recursion.
-   * Pass in the recursive function.
-   * Add any other args to that function.
-   * @param {Object|Array} obj - The Object or array being processed.
-   * @param {recursiveMapCallback} fn - A reference to the calling function to be recursively run.
-   * @param {...*} [args] - Additional args which might be needed for recursiveMapCallback.
-   * @returns {*|recursiveMapCallback}
-   */
-  const recursiveMap = (obj, fn, ...args) => (prop, key) => (!obj[key] || /^(parentItem|listenerArgs|element)$/.test(key)) ? prop : fn(obj[key], prop, ...args)
-
-  /**
    * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
    * WARNING: This is a recursive function.
    * @param {Object} cloned - A value-only copy of the original object
@@ -224,7 +193,7 @@ const base = this || window || {}
    * @returns {Object}
    */
   const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => notEmptyObjectOrArray(obj2)
-    ? mapObject(obj2, recursiveMap(obj1, fn), isMutable ? obj1 : cloneObject(obj1))
+    ? mapObject(obj2, (prop, key) => (!obj1[key] || /^(parentItem|listenerArgs|element)$/.test(key)) ? prop : fn(obj1[key], prop), isMutable ? obj1 : cloneObject(obj1))
     : obj2
 
   /**
