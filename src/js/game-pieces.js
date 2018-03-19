@@ -15,14 +15,13 @@
   /**
    * All methods exported from this module are encapsulated within gamePieces.
    * @typedef {Object} gamePieces
-   * @property {gamePieces} gamePieces
-   * @property {function} hitTile
-   * @property {function} noConflict
-   * @property {function} playerSet
-   * @property {function} playerStats
-   * @property {function} ship
-   * @property {function} shipTile
-   * @property {function} waterTile
+   *  - hitTile
+   *  - noConflict
+   *  - playerSet
+   *  - playerStats
+   *  - ship
+   *  - shipTile
+   *  - waterTile
    */
 
   /**

@@ -34,34 +34,33 @@
   /**
    * All methods exported from this module are encapsulated within jDomCoreDom.
    * @typedef {Object} jDomCoreDom
-   * @property {jDomCoreDom} jDomCoreDom
-   * @property {function} appendAllHTML
-   * @property {function} appendHTML
-   * @property {function} appendListeners
-   * @property {function} assignListener
-   * @property {function} bindAllElements
-   * @property {function} bindAllListeners
-   * @property {function} bindElement
-   * @property {function} bindListeners
-   * @property {function} buildHTML
-   * @property {function} elementChanges
-   * @property {function} elementHasAttribute
-   * @property {function} generateElement
-   * @property {function} getChildrenByClass
-   * @property {function} getChildrenByName
-   * @property {function} getChildrenFromAttribute
-   * @property {function} getParentsByClass
-   * @property {function} getParentsByName
-   * @property {function} getParentsByTagName
-   * @property {function} getTopParentItem
-   * @property {function} noConflict
-   * @property {function} registerListener
-   * @property {function} registerListeners
-   * @property {function} removeChild
-   * @property {function} renderHTML
-   * @property {function} retrieveListener
-   * @property {function} updateElement
-   * @property {function} updateElements
+   *  - appendAllHTML
+   *  - appendHTML
+   *  - appendListeners
+   *  - assignListener
+   *  - bindAllElements
+   *  - bindAllListeners
+   *  - bindElement
+   *  - bindListeners
+   *  - buildHTML
+   *  - elementChanges
+   *  - elementHasAttribute
+   *  - generateElement
+   *  - getChildrenByClass
+   *  - getChildrenByName
+   *  - getChildrenFromAttribute
+   *  - getParentsByClass
+   *  - getParentsByName
+   *  - getParentsByTagName
+   *  - getTopParentItem
+   *  - noConflict
+   *  - registerListener
+   *  - registerListeners
+   *  - removeChild
+   *  - renderHTML
+   *  - retrieveListener
+   *  - updateElement
+   *  - updateElements
    */
 
   /**

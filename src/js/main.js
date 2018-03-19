@@ -14,8 +14,7 @@
   /**
    * All methods exported from this module are encapsulated within gameMain.
    * @typedef {Object} gameMain
-   * @property {gameMain} gameMain
-   * @property {function} noConflict
+   *  - noConflict
    */
 
   /**

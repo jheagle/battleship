@@ -15,11 +15,10 @@
   /**
    * All methods exported from this module are encapsulated within gameStart.
    * @typedef {Object} gameStart
-   * @property {gameStart} gameStart
-   * @property {function} beginRound
-   * @property {function} main
-   * @property {function} noConflict
-   * @property {function} restart
+   *  - beginRound
+   *  - main
+   *  - noConflict
+   *  - restart
    */
 
   /**

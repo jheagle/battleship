@@ -15,13 +15,12 @@
   /**
    * All methods exported from this module are encapsulated within jDomObjectsMatrix.
    * @typedef {Object} jDomObjectsMatrix
-   * @property {jDomObjectsMatrix} jDomObjectsMatrix
-   * @property {function} cube
-   * @property {function} matrix
-   * @property {function} noConflict
-   * @property {function} point
-   * @property {function} square
-   * @property {function} tile
+   *  - cube
+   *  - matrix
+   *  - noConflict
+   *  - point
+   *  - square
+   *  - tile
    */
 
   /**

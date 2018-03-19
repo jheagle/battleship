@@ -16,28 +16,28 @@ const base = this || window || {}
   /**
    * All methods exported from this module are encapsulated within jDomCore.
    * @typedef {Object} jDomCore
-   * @property {function} buildArray
-   * @property {function} buildArrayOfReferences
-   * @property {function} cloneObject
-   * @property {function} compare
-   * @property {function} compareArrays
-   * @property {function} curry
-   * @property {function} filterObject
-   * @property {function} getMax
-   * @property {function} getMaxOrMin
-   * @property {function} getMin
-   * @property {function} inArray
-   * @property {function} mapObject
-   * @property {function} mergeObjects
-   * @property {function} mergeObjectsMutable
-   * @property {function} noConflict
-   * @property {function} notEmptyObjectOrArray
-   * @property {function} pipe
-   * @property {function} queueTimeout
-   * @property {function} randomInteger
-   * @property {function} randomNumber
-   * @property {function} reduceObject
-   * @property {function} trace
+   *  - buildArray
+   *  - buildArrayOfReferences
+   *  - cloneObject
+   *  - compare
+   *  - compareArrays
+   *  - curry
+   *  - filterObject
+   *  - getMax
+   *  - getMaxOrMin
+   *  - getMin
+   *  - inArray
+   *  - mapObject
+   *  - mergeObjects
+   *  - mergeObjectsMutable
+   *  - noConflict
+   *  - notEmptyObjectOrArray
+   *  - pipe
+   *  - queueTimeout
+   *  - randomInteger
+   *  - randomNumber
+   *  - reduceObject
+   *  - trace
    */
 
   /**

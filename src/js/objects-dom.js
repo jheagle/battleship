@@ -34,11 +34,10 @@
   /**
    * All methods exported from this module are encapsulated within jDomObjects.
    * @typedef {Object} jDomObjects
-   * @property {jDomObjects} jDomObjects
    * @property {DOMItemRoot} documentItem
-   * @property {function} DOMItem
-   * @property {function} documentDOMItem
-   * @property {function} noConflict
+   *  - DOMItem
+   *  - documentDOMItem
+   *  - noConflict
    */
 
   /**

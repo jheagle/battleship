@@ -15,15 +15,14 @@
   /**
    * All methods exported from this module are encapsulated within jDomPseudoDom.
    * @typedef {Object} jDomPseudoDom
-   * @property {jDomPseudoDom} jDomPseudoDom
-   * @property {function} generate
-   * @property {function} noConflict
-   * @property {function} PseudoElement
-   * @property {function} PseudoEvent
-   * @property {function} PseudoEventTarget
-   * @property {function} PseudoHTMLDocument
-   * @property {function} PseudoHTMLElement
-   * @property {function} PseudoNode
+   *  - generate
+   *  - noConflict
+   *  - PseudoElement
+   *  - PseudoEvent
+   *  - PseudoEventTarget
+   *  - PseudoHTMLDocument
+   *  - PseudoHTMLElement
+   *  - PseudoNode
    */
 
   /**

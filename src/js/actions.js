@@ -15,13 +15,12 @@
   /**
    * All methods exported from this module are encapsulated within gameActions.
    * @typedef {Object} gameActions
-   * @property {gameActions} gameActions
-   * @property {function} attackFleet
-   * @property {function} attackListener
-   * @property {function} computerAttack
-   * @property {function} noConflict
-   * @property {function} setShip
-   * @property {function} updatePlayer
+   *  - attackFleet
+   *  - attackListener
+   *  - computerAttack
+   *  - noConflict
+   *  - setShip
+   *  - updatePlayer
    */
 
   /**

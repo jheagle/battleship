@@ -15,18 +15,17 @@
   /**
    * All methods exported from this module are encapsulated within gameUtils.
    * @typedef {Object} gameUtils
-   * @property {gameUtils} gameUtils
-   * @property {function} checkIfHitCell
-   * @property {function} checkIfShipCell
-   * @property {function} filterAdjacentPoints
-   * @property {function} getALowStatusItem
-   * @property {function} getAdjEdgeNonHitCells
-   * @property {function} getAllNonHitCells
-   * @property {function} getBrokenItems
-   * @property {function} getBrokenShipsPlayers
-   * @property {function} getLowStatusItems
-   * @property {function} noConflict
-   * @property {function} numDamangedParts
+   *  - checkIfHitCell
+   *  - checkIfShipCell
+   *  - filterAdjacentPoints
+   *  - getALowStatusItem
+   *  - getAdjEdgeNonHitCells
+   *  - getAllNonHitCells
+   *  - getBrokenItems
+   *  - getBrokenShipsPlayers
+   *  - getLowStatusItems
+   *  - noConflict
+   *  - numDamangedParts
    */
 
   /**

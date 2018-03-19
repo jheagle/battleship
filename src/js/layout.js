@@ -15,11 +15,10 @@
   /**
    * All methods exported from this module are encapsulated within jDomLayout.
    * @typedef {Object} jDomLayout
-   * @property {jDomLayout} jDomLayout
-   * @property {function} boards
-   * @property {function} finalScore
-   * @property {function} mainMenu
-   * @property {function} noConflict
+   *  - boards
+   *  - finalScore
+   *  - mainMenu
+   *  - noConflict
    */
 
   /**

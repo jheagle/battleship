@@ -15,31 +15,30 @@
   /**
    * All methods exported from this module are encapsulated within jDomCoreMatrix.
    * @typedef {Object} jDomCoreMatrix
-   * @property {jDomCoreMatrix} jDomCoreMatrix
-   * @property {function} adjacentEdgePoints
-   * @property {function} adjacentPoints
-   * @property {function} bindPointData
-   * @property {function} checkEqualPoints
-   * @property {function} checkInBetween
-   * @property {function} checkValidPoint
-   * @property {function} getAllPoints
-   * @property {function} getAxisLengths
-   * @property {function} getAxisOfCoord
-   * @property {function} getDOMItemFromPoint
-   * @property {function} getHighAbsoluteCoord
-   * @property {function} getHighAbsoluteCoordAxis
-   * @property {function} getInBetween
-   * @property {function} getPointsLine
-   * @property {function} getPointsLines
-   * @property {function} lineEndPoint
-   * @property {function} nextCell
-   * @property {function} noConflict
-   * @property {function} pointDifference
-   * @property {function} pointDirection
-   * @property {function} pointHasNegative
-   * @property {function} randDirection
-   * @property {function} randomStart
-   * @property {function} testPointsBetween
+   *  - adjacentEdgePoints
+   *  - adjacentPoints
+   *  - bindPointData
+   *  - checkEqualPoints
+   *  - checkInBetween
+   *  - checkValidPoint
+   *  - getAllPoints
+   *  - getAxisLengths
+   *  - getAxisOfCoord
+   *  - getDOMItemFromPoint
+   *  - getHighAbsoluteCoord
+   *  - getHighAbsoluteCoordAxis
+   *  - getInBetween
+   *  - getPointsLine
+   *  - getPointsLines
+   *  - lineEndPoint
+   *  - nextCell
+   *  - noConflict
+   *  - pointDifference
+   *  - pointDirection
+   *  - pointHasNegative
+   *  - randDirection
+   *  - randomStart
+   *  - testPointsBetween
    */
 
   /**
