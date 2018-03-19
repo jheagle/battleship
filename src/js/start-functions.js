@@ -223,7 +223,7 @@
    * @param shipLength
    * @param lengths
    * @param startDir
-   * @returns {[null,null]}
+   * @returns {Array}
    */
   const generateStartEnd = (matrix, shipLength, lengths, startDir = randomStartDir(lengths, shipLength)) =>
     jDomCoreMatrix.getHighAbsoluteCoord(startDir.dir) === 0 ? [jDomObjectsMatrix.point(0, 0, 0), jDomObjectsMatrix.point(0, 0, 0)] : jDomCoreMatrix.checkInBetween(...[startDir.start, jDomCoreMatrix.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jDomCoreMatrix.lineEndPoint(startDir.start, shipLength, startDir.dir)]

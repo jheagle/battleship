@@ -56,6 +56,7 @@ const base = this || window || {}
    * Return a curried version of the passed function.
    * The returned function expects the same number of arguments minus the ones provided.
    * fn is the name of the function being curried.
+   * @function curry
    * @param {function} fn - Receives a function to be curried
    * @returns {function(...[*]): function(...[*])}
    */
@@ -175,6 +176,7 @@ const base = this || window || {}
 
   /**
    * Clone objects for manipulation without data corruption, returns a copy of the provided object.
+   * @function cloneObject
    * @param {Object} object - The original object that is being cloned
    * @returns {Object}
    */
@@ -201,6 +203,7 @@ const base = this || window || {}
    * objects having the same attributes will overwrite starting from the end of the argument
    * list and bubbling up to return a merged version of the first object.
    * WARNING: This is a recursive function.
+   * @function mergeObjects
    * @param {...Object} args
    * @returns {Object}
    */
@@ -213,6 +216,7 @@ const base = this || window || {}
    * list and bubbling up to return the overwritten first object.
    * WARNING: This is a recursive function.
    * WARNING: This will mutate the first object passed in as input
+   * @function mergeObjectsMutable
    * @param {...Object} args
    * @returns {Object}
    */
@@ -240,7 +244,8 @@ const base = this || window || {}
    * @param {Array} [arr=[]]
    * @returns {Array.<*>}
    */
-  exportFunctions.buildArray = curry(buildArrayBase)(false)
+  const buildArray = curry(buildArrayBase)(false)
+  exportFunctions.buildArray = buildArray
 
   /**
    * Leverage buildArrayBase to generate an array filled with references to the provided item.
@@ -251,10 +256,12 @@ const base = this || window || {}
    * @param {Array} [arr=[]]
    * @returns {Array.<*>}
    */
-  exportFunctions.buildArrayOfReferences = curry(buildArrayBase)(true)
+  const buildArrayOfReferences = curry(buildArrayBase)(true)
+  exportFunctions.buildArrayOfReferences = buildArrayOfReferences
 
   /**
    * A simple function to check if an item is in an array
+   * @function inArray
    * @param {Array} arr
    * @param {*} prop
    * @returns {boolean}
@@ -264,6 +271,7 @@ const base = this || window || {}
 
   /**
    * A simple function usable with reduce to get the max or min value
+   * @function getMaxOrMin
    * @param {boolean} getMax
    * @param {number} num1
    * @param {number} num2
@@ -279,7 +287,8 @@ const base = this || window || {}
    * @param {number} num2
    * @returns {number}
    */
-  exportFunctions.getMax = curry(getMaxOrMin)(true)
+  const getMax = curry(getMaxOrMin)(true)
+  exportFunctions.getMax = getMax
 
   /**
    * Helper for returning min value
@@ -289,32 +298,38 @@ const base = this || window || {}
    * @returns {number}
    */
   exportFunctions.getMin = curry(getMaxOrMin)(false)
+  exportFunctions.getMin = getMin
 
   /**
    * Create a single random number within provided range. And with optional offset,
    * The distance between the result numbers can be adjusted with interval.
+   * @function randomNumber
    * @param {number} range
    * @param {number} [offset=0]
    * @param {number} [interval=1]
    * @returns {number}
    */
-  exportFunctions.randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range + offset) * interval
+  const randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range + offset) * interval
+  exportFunctions.randomNumber = randomNumber
 
   /**
    * Create a single random integer within provide range. And with optional offset,
    * The distance between the result numbers can be adjusted with interval.
+   * @function randomInteger
    * @param {number} range
    * @param {number} [offset=0]
    * @param {number} [interval=1]
    * @returns {number}
    */
-  exportFunctions.randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.random() * range) + offset) * interval
+  const randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.random() * range) + offset) * interval
+  exportFunctions.randomInteger = randomInteger
 
   /**
    * Compare two numbers and return:
    * -1 to indicate val1 is less than val2
    * 0 to indicate both values are the equal
    * 1 to indicate val1 is greater than val2
+   * @function compare
    * @param {number} val1 - The first number to compare
    * @param {number} val2 - The second number to compare
    * @returns {number}
@@ -328,21 +343,24 @@ const base = this || window || {}
    * 0 to indicate both values are the equal
    * 1 to indicate val1 is greater than val2
    * The returned Object uses the element values as the property names
+   * @function compareArrays
    * @param {Array} arr1 - The first array to compare
    * @param {Array} arr2 - The second array to compare
    * @param {Array} [parents=[]] - Used to track circular references
    * @returns {Object.<string, number>}
    */
-  exportFunctions.compareArrays = (arr1, arr2, parents = []) => arr2.filter((attr, key) => !inArray(arr1, attr) || arr1[key] !== attr).concat(arr1).reduce((returnObj, attr) => {
+  const compareArrays = (arr1, arr2, parents = []) => arr2.filter((attr, key) => !inArray(arr1, attr) || arr1[key] !== attr).concat(arr1).reduce((returnObj, attr) => {
     returnObj[JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)] = compare(arr2.filter(val => val === attr).length, arr1.filter(val => val === attr).length)
     return returnObj
   }, {})
+  exportFunctions.compareArrays = compareArrays
 
   /**
    * This was adapted from a blog post on Composing Software written by Eric Elliott. Trace provides a way to traces
    * steps through code via the console, while maintaining the functional-style return value.
    * Returns a function which can then receive a value to output, the value will then be returned.
    * @author Eric Elliott
+   * @function trace
    * @param {string} label - Pass an identifying label of the value being output.
    * @returns {function(*=)}
    */
@@ -355,6 +373,7 @@ const base = this || window || {}
   /**
    * Run Timeout functions one after the other in queue
    * WARNING: This is a recursive function.
+   * @function queueTimeout
    * @param {function} fn
    * @param {number} time
    * @param {...*} args

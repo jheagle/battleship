@@ -458,7 +458,7 @@
    * @param targets
    * @param target
    * @param victim
-   * @returns {[*,*]}
+   * @returns {Array}
    */
   const displayTargets = (targets, target, victim) => {
     return [
