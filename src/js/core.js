@@ -297,7 +297,7 @@ const base = this || window || {}
    * @param {number} num2
    * @returns {number}
    */
-  exportFunctions.getMin = curry(getMaxOrMin)(false)
+  const getMin = curry(getMaxOrMin)(false)
   exportFunctions.getMin = getMin
 
   /**
