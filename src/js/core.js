@@ -17,27 +17,27 @@ const base = this || window || {}
    * All methods exported from this module are encapsulated within jDomCore.
    * @typedef {Object} jDomCore
    * Functions exported as part of jDomCore:
-   *  - {@link buildArray}
-   *  - {@link buildArrayOfReferences}
-   *  - {@link cloneObject}
-   *  - {@link compare}
-   *  - {@link compareArrays}
-   *  - {@link curry}
-   *  - {@link filterObject}
-   *  - {@link getMax}
-   *  - {@link getMaxOrMin}
-   *  - {@link getMin}
-   *  - {@link inArray}
-   *  - {@link mapObject}
-   *  - {@link mergeObjects}
-   *  - {@link mergeObjectsMutable}
-   *  - {@link notEmptyObjectOrArray}
-   *  - {@link pipe}
-   *  - {@link queueTimeout}
-   *  - {@link randomInteger}
-   *  - {@link randomNumber}
-   *  - {@link reduceObject}
-   *  - {@link trace}
+   * @property {function} buildArray - Reference: {@link buildArray}
+   * @property {function} buildArrayOfReferences - Reference: {@link buildArrayOfReferences}
+   * @property {function} cloneObject - Reference: {@link cloneObject}
+   * @property {function} compare - Reference: {@link compare}
+   * @property {function} compareArrays - Reference: {@link compareArrays}
+   * @property {function} curry - Reference: {@link curry}
+   * @property {function} filterObject - Reference: {@link filterObject}
+   * @property {function} getMax - Reference: {@link getMax}
+   * @property {function} getMaxOrMin - Reference: {@link getMaxOrMin}
+   * @property {function} getMin - Reference: {@link getMin}
+   * @property {function} inArray - Reference: {@link inArray}
+   * @property {function} mapObject - Reference: {@link mapObject}
+   * @property {function} mergeObjects - Reference: {@link mergeObjects}
+   * @property {function} mergeObjectsMutable - Reference: {@link mergeObjectsMutable}
+   * @property {function} notEmptyObjectOrArray - Reference: {@link notEmptyObjectOrArray}
+   * @property {function} pipe - Reference: {@link pipe}
+   * @property {function} queueTimeout - Reference: {@link queueTimeout}
+   * @property {function} randomInteger - Reference: {@link randomInteger}
+   * @property {function} randomNumber - Reference: {@link randomNumber}
+   * @property {function} reduceObject - Reference: {@link reduceObject}
+   * @property {method} trace - Reference: {@link trace}
    */
 
   /**
@@ -70,10 +70,12 @@ const base = this || window || {}
    * This was copied from a blog post on Composing Software written by Eric Elliott. The idea is to begin to make this
    * code base somewhat easier to parse and introduce point-free notation.
    * @author Eric Elliott
+   * @function pipe
    * @param {...function} fns - Takes a series of functions have the same parameter, which parameter is also returned.
    * @returns {function(*=): (*|any)}
    */
-  exportFunctions.pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
+  const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
+  exportFunctions.pipe = pipe
 
   /**
    * Function that produces a property of the new Object, taking three arguments
@@ -88,6 +90,7 @@ const base = this || window || {}
    * This function is intended to replicate behaviour of the Array.map() function but for Objects.
    * If an array is passed in instead then it will perform standard map(). It is recommended to
    * always use the standard map() function when it is known that the object is actually an array.
+   * @function mapObject
    * @param {Object|Array} obj - The Object (or Array) to be mapped
    * @param {mapCallback} fn - The function to be processed for each mapped property
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
@@ -112,6 +115,7 @@ const base = this || window || {}
    * This function is intended to replicate behaviour of the Array.filter() function but for Objects.
    * If an array is passed in instead then it will perform standard filter(). It is recommended to
    * always use the standard filter() function when it is known that the object is actually an array.
+   * @function filterObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
    * @param {filterCallback} fn - The function to be processed for each filtered property
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
@@ -141,6 +145,7 @@ const base = this || window || {}
    * This function is intended to replicate behaviour of the Array.reduce() function but for Objects.
    * If an array is passed in instead then it will perform standard reduce(). It is recommended to
    * always use the standard reduce() function when it is known that the object is actually an array.
+   * @function reduceObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
    * @param {reduceCallback} fn - The function to be processed for each filtered property
    * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty array without an initial value is an error.
@@ -151,6 +156,7 @@ const base = this || window || {}
 
   /**
    * Helper function for testing if the item is an Object or Array that contains properties or elements
+   * @function notEmptyObjectOrArray
    * @param {Object|Array} item - Object or Array to test
    * @returns {boolean}
    */
