@@ -195,7 +195,7 @@ const base = this || window || {}
    * @returns {Object}
    */
   const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => notEmptyObjectOrArray(obj2)
-    ? mapObject(obj2, (prop, key) => (!obj1[key] || /^(parentItem|listenerArgs|element)$/.test(key)) ? prop : fn(obj1[key], prop), isMutable ? obj1 : cloneObject(obj1))
+    ? mapObject(obj2, (prop, key) => (obj1[key] && !/^(parentItem|listenerArgs|element)$/.test(key)) ? fn(obj1[key], prop): prop, isMutable ? obj1 : cloneObject(obj1))
     : obj2
 
   /**
