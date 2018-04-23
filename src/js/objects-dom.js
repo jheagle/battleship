@@ -45,6 +45,11 @@
    * @type {jDomObjects}
    */
   const exportFunctions = {
+    /**
+     * Return a reference to this library while preserving the original same-named library
+     * @function noConflict
+     * @returns {jDomObjects}
+     */
     noConflict: () => {
       root.jDomObjects = previousJDomObjects
       return exportFunctions

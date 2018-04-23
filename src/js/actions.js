@@ -14,26 +14,19 @@
 
   /**
    * All methods exported from this module are encapsulated within gameActions.
-   * @typedef {Object} gameActions
-   *  - attackFleet
-   *  - attackListener
-   *  - computerAttack
-   *  - noConflict
-   *  - setShip
-   *  - updatePlayer
+   * @module gameActions
    */
+  const gameActions = {}
+  root.gameActions = gameActions
 
   /**
-   * A reference to all functions to be used globally / exported
-   * @type {gameActions}
+   * Return a reference to this library while preserving the original same-named library
+   * @returns {gameActions}
    */
-  const exportFunctions = {
-    noConflict: () => {
-      root.gameActions = previousGameActions
-      return exportFunctions
-    }
+  gameActions.noConflict = () => {
+    root.gameActions = previousGameActions
+    return gameActions
   }
-  root.gameActions = exportFunctions
 
   /**
    * Verify availability of jDomCore
@@ -164,13 +157,13 @@
     // Update cell colour once it has been hit
     // Add any other style changes to the cell
     if (isRobot) {
-      attackFleet.isLocked = true
+      gameActions.attackFleet.isLocked = true
       jDomCore.queueTimeout(() => {
         if (config.isHit) {
           config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
         }
         config = jDomCoreDom.updateElement(config)
-        attackFleet.isLocked = false
+        gameActions.attackFleet.isLocked = false
         return config
       }, 0)
     } else {
@@ -210,11 +203,12 @@
 
   /**
    * Set a specified point to be part of a ship
+   * @function setShip
    * @param matrix
    * @param point
    * @param view
    */
-  exportFunctions.setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, point.y, point.z) : setHiddenShip(matrix, point.x, point.y, point.z)
+  gameActions.setShip = (matrix, point, view) => view ? setViewShip(matrix, point.x, point.y, point.z) : setHiddenShip(matrix, point.x, point.y, point.z)
 
   /**
    *
@@ -230,11 +224,12 @@
 
   /**
    * Track player stats such as attacks and turns
+   * @function updatePlayer
    * @param player
    * @param playAgain
    * @param sunkShip
    */
-  const updatePlayer = (player, playAgain, sunkShip = 0) => {
+  gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
     if (player.attacker) {
       if (playAgain) {
         ++player.attacks.hit
@@ -248,10 +243,10 @@
     let result = {}
     if (!playAgain) {
       player.attacker = !player.attacker
-      attackFleet.isLocked = true
+      gameActions.attackFleet.isLocked = true
       if (player.attacker) {
         result = jDomCore.queueTimeout(() => {
-          attackFleet.isLocked = false
+          gameActions.attackFleet.isLocked = false
           return player.board.children.map(l => l.children.map(r => r.children.map(c => jDomCoreDom.updateElement(jDomCore.mergeObjects(c, {
             attributes: {
               style: {
@@ -264,7 +259,7 @@
         ++player.turnCnt
       } else {
         result = jDomCore.queueTimeout(() => {
-          attackFleet.isLocked = false
+          gameActions.attackFleet.isLocked = false
           return player.board.children.map(l => l.children.map(r => r.children.map(c => jDomCoreDom.updateElement(jDomCore.mergeObjects(c, {
             attributes: {
               style: {
@@ -279,7 +274,6 @@
     result = jDomCore.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
     return result.result || player
   }
-  exportFunctions.updatePlayer = updatePlayer
 
   /**
    * Final state once a game is won (only one player remains)
@@ -315,7 +309,7 @@
    * @param playAgain
    * @returns {*}
    */
-  const getNextAttacker = (attacker, players, playAgain) => playAgain ? attacker : updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), playAgain)
+  const getNextAttacker = (attacker, players, playAgain) => playAgain ? attacker : gameActions.updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), playAgain)
 
   /**
    * Update all game stats after each player round
@@ -328,28 +322,29 @@
   const updateScore = (player, hitShip, sunkShip, players) => {
     players = players.filter((p) => p.status > 0)
     let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
-    attacker = updatePlayer(attacker, hitShip, sunkShip)
+    attacker = gameActions.updatePlayer(attacker, hitShip, sunkShip)
     if (players.length < 2) {
       return jDomCore.queueTimeout(() => endGame(players[0]), 200)
     }
     let nextAttacker = getNextAttacker(attacker, players, hitShip)
     if (nextAttacker.isRobot) {
-      jDomCore.queueTimeout(computerAttack, 0, nextAttacker, players)
+      jDomCore.queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
     }
     return players
   }
 
   /**
    * Perform attack on an enemy board / cell
+   * @function attackFleet
    * @param target
    * @returns {*}
    */
-  const attackFleet = (target) => {
-    attackFleet.isLocked = attackFleet.isLocked || false
+  gameActions.attackFleet = (target) => {
+    gameActions.attackFleet.isLocked = gameActions.attackFleet.isLocked || false
     let player = jDomCoreDom.getParentsByClass('player', target)[0]
     let players = jDomCoreDom.getParentsByClass('boards', target)[0].children
     // Player cannot attack themselves (current attacker) or if they have bad status
-    if (player.status <= 0 || player.attacker || attackFleet.isLocked) {
+    if (player.status <= 0 || player.attacker || gameActions.attackFleet.isLocked) {
       return players
     }
     // Update cell to hit
@@ -383,17 +378,16 @@
     }
     return updateScore(player, hitCell.hasShip, sunkShip, players)
   }
-  exportFunctions.attackFleet = attackFleet
 
   /**
    *
+   * @function attackListener
    * @param e
    * @param target
    * @param args
    * @returns {*}
    */
-  const attackListener = (e, target, args = {}) => attackFleet(target)
-  exportFunctions.attackListener = attackListener
+  gameActions.attackListener = (e, target, args = {}) => gameActions.attackFleet(target)
 
   /**
    * Choose which player to attack.
@@ -484,23 +478,23 @@
 
   /**
    * Main AI logic for computer to attack, selects a target then performs attack function.
+   * @function computerAttack
    * @param player
    * @param players
    */
-  const computerAttack = (player, players) => {
+  gameActions.computerAttack = (player, players) => {
     let victim = selectTargetPlayer(players.filter(p => !p.attacker))
-    attackFleet.isLocked = false
-    return attackFleet(selectTargetCoord(victim))
+    gameActions.attackFleet.isLocked = false
+    return gameActions.attackFleet(selectTargetCoord(victim))
   }
-  exportFunctions.computerAttack = computerAttack
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = gameActions
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, gameActions)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

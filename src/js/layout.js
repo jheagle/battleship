@@ -26,6 +26,11 @@
    * @type {jDomLayout}
    */
   const exportFunctions = {
+    /**
+     * Return a reference to this library while preserving the original same-named library
+     * @function noConflict
+     * @returns {jDomLayout}
+     */
     noConflict: () => {
       root.jDomLayout = previousJDomLayout
       return exportFunctions

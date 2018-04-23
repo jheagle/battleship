@@ -68,6 +68,11 @@
    * @type {jDomCoreDom}
    */
   const exportFunctions = {
+    /**
+     * Return a reference to this library while preserving the original same-named library
+     * @function noConflict
+     * @returns {jDomCoreDom}
+     */
     noConflict: () => {
       root.jDomCoreDom = previousJDomCoreDom
       return exportFunctions

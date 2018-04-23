@@ -22,6 +22,11 @@
    * @type {gameMain}
    */
   const exportFunctions = {
+    /**
+     * Return a reference to this library while preserving the original same-named library
+     * @function noConflict
+     * @returns {gameMain}
+     */
     noConflict: () => {
       root.gameMain = previousGameMain
       return exportFunctions

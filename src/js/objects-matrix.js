@@ -28,6 +28,11 @@
    * @type {jDomObjectsMatrix}
    */
   const exportFunctions = {
+    /**
+     * Return a reference to this library while preserving the original same-named library
+     * @function noConflict
+     * @returns {jDomObjectsMatrix}
+     */
     noConflict: () => {
       root.jDomObjectsMatrix = previousJDomObjectsMatrix
       return exportFunctions

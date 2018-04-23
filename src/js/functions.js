@@ -33,6 +33,11 @@
    * @type {gameUtils}
    */
   const exportFunctions = {
+    /**
+     * Return a reference to this library while preserving the original same-named library
+     * @function noConflict
+     * @returns {gameUtils}
+     */
     noConflict: () => {
       root.gameUtils = previousGameUtils
       return exportFunctions
