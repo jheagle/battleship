@@ -13,32 +13,21 @@
   const previousJDomObjectsMatrix = root.jDomObjectsMatrix || {}
 
   /**
-   * All methods exported from this module are encapsulated within jDomObjectsMatrix.
-   * @typedef {Object} jDomObjectsMatrix
-   *  - cube
-   *  - matrix
-   *  - noConflict
-   *  - point
-   *  - square
-   *  - tile
+   * A reference to all functions to be used globally / exported
+   * @module jDomObjectsMatrix
    */
+  const jDomObjectsMatrix = {}
+  root.jDomObjectsMatrix = jDomObjectsMatrix
 
   /**
-   * A reference to all functions to be used globally / exported
-   * @type {jDomObjectsMatrix}
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {jDomObjectsMatrix}
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {jDomObjectsMatrix}
-     */
-    noConflict: () => {
-      root.jDomObjectsMatrix = previousJDomObjectsMatrix
-      return exportFunctions
-    }
+  jDomObjectsMatrix.noConflict = () => {
+    root.jDomObjectsMatrix = previousJDomObjectsMatrix
+    return jDomObjectsMatrix
   }
-  root.jDomObjectsMatrix = exportFunctions
 
   /**
    * Verify availability of jDomCore
@@ -94,17 +83,17 @@
 
   /**
    * Store the point data for an x, y, z {@link Matrix}.
+   * @function point
    * @param {coordinate} x - The numeric value for X-coordinate
    * @param {coordinate} y - The numeric value for Y-coordinate
    * @param {coordinate} [z=0] - The numeric value for Z-coordinate (default to 0 for 2D {@link Matrix})
    * @returns {Point}
    */
-  const point = (x, y, z = 0) => ({
+  jDomObjectsMatrix.point = (x, y, z = 0) => ({
     x: x,
     y: y,
     z: z
   })
-  exportFunctions.point = point
 
   /**
    * MatrixTile is an Object which stores a reference a {@link Point} and can be populated with additionally associated fields.
@@ -114,12 +103,12 @@
 
   /**
    * A default tile in the {@link Matrix}
+   * @function tile
    * @returns {MatrixTile}
    */
-  const tile = () => ({
+  jDomObjectsMatrix.tile = () => ({
     point: {}
   })
-  exportFunctions.tile = tile
 
   /**
    * Matrix is a multi-level {@link DOMItem} which is used to visually represent a mathematical grid / matrix.
@@ -136,6 +125,7 @@
   /**
    * Create a 3d matrix of i with x by y by z size,
    * add additional objects for each layer as well
+   * @function matrix
    * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
    * @param {coordinate} x - A number / coordinate defining the width of the matrix.
    * @param {coordinate} y - A number / coordinate defining the height of the matrix.
@@ -143,7 +133,7 @@
    * @param {...Object} [props] - Additional data may be merged into every level of the matrix.
    * @returns {Matrix}
    */
-  const matrix = (i, x, y, z = 1, ...props) => jDomObjects.DOMItem({
+  jDomObjectsMatrix.matrix = (i, x, y, z = 1, ...props) => jDomObjects.DOMItem({
     tagName: 'div',
     attributes: {
       className: 'matrix'
@@ -170,33 +160,32 @@
       }, ...props), y)
     }, ...props), z)
   })
-  exportFunctions.matrix = matrix
 
   /**
    * Return a single layer matrix where x and y are equal
+   * @function square
    * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
    * @param {number} size - Used to define height and width as equal values (depth is set to 1)
    * @returns {Matrix}
    */
-  const square = (i, size) => matrix(i, size, size)
-  exportFunctions.square = square
+  jDomObjectsMatrix.square = (i, size) => jDomObjectsMatrix.matrix(i, size, size)
 
   /**
    * Return a matrix where x, y, and z are equal
+   * @function cube
    * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
    * @param {number} size - Used to define height, width, and depth as equal values
    * @returns {Matrix}
    */
-  const cube = (i, size) => matrix(i, size, size, size)
-  exportFunctions.cube = cube
+  jDomObjectsMatrix.cube = (i, size) => jDomObjectsMatrix.matrix(i, size, size, size)
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = jDomObjectsMatrix
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, jDomObjectsMatrix)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

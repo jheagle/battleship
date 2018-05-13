@@ -13,37 +13,46 @@
   const previousJDomLayout = root.jDomLayout || {}
 
   /**
-   * All methods exported from this module are encapsulated within jDomLayout.
-   * @typedef {Object} jDomLayout
-   *  - boards
-   *  - finalScore
-   *  - mainMenu
-   *  - noConflict
+   * A reference to all functions to be used globally / exported
+   * @module jDomLayout
    */
+  const jDomLayout = {}
+  root.jDomLayout = jDomLayout
 
   /**
-   * A reference to all functions to be used globally / exported
-   * @type {jDomLayout}
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {jDomLayout}
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {jDomLayout}
-     */
-    noConflict: () => {
-      root.jDomLayout = previousJDomLayout
-      return exportFunctions
+  jDomLayout.noConflict = () => {
+    root.jDomLayout = previousJDomLayout
+    return jDomLayout
+  }
+
+  /**
+   * Verify availability of jDomCore
+   * @type {*|jDomObjects}
+   */
+  let jDomObjects = root.jDomObjects
+
+  /**
+   * If jDomObjects remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof jDomObjects === 'undefined') {
+    if (typeof require !== 'undefined') {
+      jDomObjects = require('./objects-dom.js')
+    } else {
+      console.error('layout.js requires jDomObjects')
     }
   }
-  root.jDomLayout = exportFunctions
 
   /**
    * This will be the main menu for the game.
+   * @function mainMenu
    * @param {Object} parent
-   * @returns {DOMIem}
+   * @returns {module:jDomObjects~DOMItem}
    */
-  const mainMenu = (parent = {}) => ({
+  jDomLayout.mainMenu = (parent = {}) => ({
     tagName: 'div',
     attributes: {
       className: 'main-menu'
@@ -151,29 +160,29 @@
       }
     ]
   })
-  exportFunctions.mainMenu = mainMenu
 
   /**
    * Wrapper div for player data / boards
+   * @function boards
    * @param {Array} [players=[]]
-   * @returns {DOMIem}
+   * @returns {module:jDomObjects~DOMItem}
    */
-  const boards = (players = []) => ({
+  jDomLayout.boards = (players = []) => ({
     tagName: 'div',
     attributes: {
       className: 'boards'
     },
     children: players
   })
-  exportFunctions.boards = boards
 
   /**
    * Display the final scores after a game has ended and have a button to restart.
+   * @function finalScore
    * @param {Array} players
    * @param {Object} [parent={}]
-   * @returns {DOMIem}
+   * @returns {module:jDomObjects~DOMItem}
    */
-  const finalScore = (players, parent = {}) => ({
+  jDomLayout.finalScore = (players, parent = {}) => ({
     tagName: 'div',
     attributes: {
       className: 'final-scores'
@@ -204,15 +213,14 @@
       }
     ]
   })
-  exportFunctions.finalScore = finalScore
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = jDomLayout
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, jDomLayout)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

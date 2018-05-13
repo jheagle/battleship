@@ -8,7 +8,7 @@
 
   /**
    * Store reference to any pre-existing module of the same name
-   * @type {gameActions|*}
+   * @type {module|*}
    */
   const previousGameActions = root.gameActions || {}
 
@@ -21,7 +21,8 @@
 
   /**
    * Return a reference to this library while preserving the original same-named library
-   * @returns {gameActions}
+   * @function noConflict
+   * @returns {module:gameActions}
    */
   gameActions.noConflict = () => {
     root.gameActions = previousGameActions
@@ -30,7 +31,7 @@
 
   /**
    * Verify availability of jDomCore
-   * @type {*|jDomCore}
+   * @type {*|module:jDomCore}
    */
   let jDomCore = root.jDomCore
 
@@ -47,7 +48,7 @@
 
   /**
    * Verify availability of jDomCoreDom
-   * @type {*|jDomCoreDom}
+   * @type {*|module:jDomCoreDom}
    */
   let jDomCoreDom = root.jDomCoreDom
 
@@ -64,7 +65,7 @@
 
   /**
    * Verify availability of jDomObjectsMatrix
-   * @type {*|jDomCoreMatrix}
+   * @type {*|module:jDomCoreMatrix}
    */
   let jDomObjectsMatrix = root.jDomObjectsMatrix
 
@@ -81,7 +82,7 @@
 
   /**
    * Verify availability of jDomCoreMatrix
-   * @type {*|jDomCoreMatrix}
+   * @type {*|module:jDomCoreMatrix}
    */
   let jDomCoreMatrix = root.jDomCoreMatrix
 
@@ -98,7 +99,7 @@
 
   /**
    * Verify availability of jDomLayout
-   * @type {*|jDomLayout}
+   * @type {*|module:jDomLayout}
    */
   let jDomLayout = root.jDomLayout
 
@@ -115,7 +116,7 @@
 
   /**
    * Verify availability of gamePieces
-   * @type {*|gamePieces}
+   * @type {*|module:gamePieces}
    */
   let gamePieces = root.gamePieces
 
@@ -132,7 +133,7 @@
 
   /**
    * Verify availability of gameUtils
-   * @type {*|gameUtils}
+   * @type {*|module:gameUtils}
    */
   let gameUtils = root.gameUtils
 
@@ -412,7 +413,7 @@
     let availTargets = []
     if (brokenShips.length) {
       // If there are broken ships, target those first, select the most broken ships (more than one damaged part)
-      let moreBrokenShips = brokenShips.filter(ship => gameUtils.numDamangedParts(ship.parts.length, ship.status) > 1)
+      let moreBrokenShips = brokenShips.filter(ship => gameUtils.numDamagedParts(ship.parts.length, ship.status) > 1)
       // Of the broken ships, attack the lowest status ship
       let targetShip = gameUtils.getALowStatusItem(moreBrokenShips.length ? moreBrokenShips : brokenShips)
       // Get all of the parts which have been hit

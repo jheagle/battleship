@@ -12,27 +12,21 @@
   const previousGameMain = root.gameMain || {}
 
   /**
-   * All methods exported from this module are encapsulated within gameMain.
-   * @typedef {Object} gameMain
-   *  - noConflict
+   * A reference to all functions to be used globally / exported
+   * @module gameMain
    */
+  const gameMain = {}
+  root.gameMain = gameMain
 
   /**
-   * A reference to all functions to be used globally / exported
-   * @type {gameMain}
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {gameMain}
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {gameMain}
-     */
-    noConflict: () => {
-      root.gameMain = previousGameMain
-      return exportFunctions
-    }
+  gameMain.noConflict = () => {
+    root.gameMain = previousGameMain
+    return gameMain
   }
-  root.gameMain = exportFunctions
 
   /**
    * Verify availability of jDomObjects
@@ -104,6 +98,7 @@
 
   /**
    * Create new private reference to the document
+   * @member documentItem
    */
   const documentItem = gameStart.main(jDomObjects.documentDOMItem({
     beginRound: gameStart.beginRound,
@@ -112,14 +107,12 @@
   }))
   console.log(documentItem)
 
-  // const div = jDomCoreDom.getChildrenByClass('main-menu', documentItem.body)
-  // console.log(div[0].element)
-  // const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)
-  // console.log(form[0].element)
-  // form[0].element.submit()
-  // const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])
-  // console.log(submitBtn[0].element)
-  // submitBtn[0].element.click()
+  if (typeof document === 'undefined' || typeof document === 'PseudoHTMLDocument') {
+    // Trigger game to start if running as node module
+    const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)
+    const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])
+    submitBtn[0].element.click()
+  }
 
   // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
   // let results = mergeObjects({
@@ -137,8 +130,8 @@
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = gameMain
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, gameMain)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

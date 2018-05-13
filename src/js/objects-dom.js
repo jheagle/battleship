@@ -32,30 +32,21 @@
   const previousJDomObjects = root.jDomObjects || {}
 
   /**
-   * All methods exported from this module are encapsulated within jDomObjects.
-   * @typedef {Object} jDomObjects
-   * @property {DOMItemRoot} documentItem
-   *  - DOMItem
-   *  - documentDOMItem
-   *  - noConflict
-   */
-
-  /**
    * A reference to all functions to be used globally / exported
-   * @type {jDomObjects}
+   * @module jDomObjects
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {jDomObjects}
-     */
-    noConflict: () => {
-      root.jDomObjects = previousJDomObjects
-      return exportFunctions
-    }
+  const jDomObjects = {}
+  root.jDomObjects = jDomObjects
+  
+  /**
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {jDomObjects}
+   */
+  jDomObjects.noConflict = () => {
+    root.jDomObjects = previousJDomObjects
+    return jDomObjects
   }
-  root.jDomObjects = exportFunctions
 
   /**
    * Verify availability of jDomCore
@@ -103,11 +94,11 @@
 
   /**
    * This is the basic Object for representing the DOM in a virtual perspective. All incoming attributes will be merged to the specified format.
+   * @function DOMItem
    * @param {...Object} attributes - DOMItem-like object(s) to be merged as a DOMItem
    * @returns {DOMItem}
-   * @constructor
    */
-  const DOMItem = (...attributes) => jDomCore.mergeObjectsMutable({
+  jDomObjects.DOMItem = (...attributes) => jDomCore.mergeObjectsMutable({
     tagName: 'div',
     attributes: {
       style: {}
@@ -117,7 +108,6 @@
     parentItem: {},
     children: []
   }, ...attributes)
-  exportFunctions.DOMItem = DOMItem
 
   /**
    * DOMItemHead defines the structure for a single element in the DOM
@@ -126,7 +116,6 @@
    * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
    * @property {HTMLHeadElement} element - A reference to the HTML head element
    * @property {Array.<DOMItem>} children - A reference to an array of child objects
-   * @augments DOMItem
    */
 
   /**
@@ -136,7 +125,6 @@
    * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
    * @property {HTMLElement} element - A reference to the HTML body element
    * @property {Array.<DOMItem>} children - A reference to an array of child objects
-   * @augments DOMItem
    */
 
   /**
@@ -144,13 +132,13 @@
    * @returns {Array.<DOMItemHead|DOMItemBody>}
    */
   const initChildren = () => [
-    DOMItem({
+    jDomObjects.DOMItem({
       tagName: 'head',
       attributes: {},
       element: document.head,
       children: []
     }),
-    DOMItem({
+    jDomObjects.DOMItem({
       tagName: 'body',
       attributes: {},
       element: document.body,
@@ -168,7 +156,6 @@
    * @property {Array.<DOMItemHead|DOMItemBody>} children - Two references: for head and body
    * @property {DOMItemHead} head - A specific reference to head item
    * @property {DOMItemBody} body - A specific reference to body item
-   * @augments DOMItem
    */
 
   /**
@@ -177,7 +164,7 @@
    * @param {Object.<string, listenerFunction>} listeners - An object of all event listeners to be registered in the DOM
    * @returns {DOMItemRoot}
    */
-  const initRoot = (children, listeners = {}) => DOMItem({
+  const initRoot = (children, listeners = {}) => jDomObjects.DOMItem({
     tagName: 'html',
     attributes: {},
     element: document,
@@ -190,31 +177,32 @@
   /**
    * Return a DOMItem style reference to the document. The rootItem argument is a
    * system function and not necessary to implement.
+   * @function documentDOMItem
    * @param {Object.<string, listenerFunction>} listeners - An object of all event listeners to be registered in the DOM
    * @param {Object} [rootItem=DOMItemRoot] - This is a reference to DOMItemRoot which will be defaulted with {@link initRoot}
    * @returns {DOMItemRoot}
    */
-  const documentDOMItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
-    rootItem.children = rootItem.children.map(child => DOMItem(child, {parentItem: rootItem}))
+  jDomObjects.documentDOMItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
+    rootItem.children = rootItem.children.map(child => jDomObjects.DOMItem(child, {parentItem: rootItem}))
     rootItem.head = rootItem.children[0]
     rootItem.body = rootItem.children[1]
-    return DOMItem(rootItem)
+    return jDomObjects.DOMItem(rootItem)
   }
-  exportFunctions.documentDOMItem = documentDOMItem
 
   /**
    * Create reference for storing document changes
+   * @member documentItem
    * @type {DOMItem}
    */
-  exportFunctions.documentItem = documentDOMItem()
+  jDomObjects.documentItem = jDomObjects.documentDOMItem()
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = jDomObjects
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, jDomObjects)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

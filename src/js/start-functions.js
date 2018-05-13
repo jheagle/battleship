@@ -13,30 +13,21 @@
   const previousGameStart = root.gameStart || {}
 
   /**
-   * All methods exported from this module are encapsulated within gameStart.
-   * @typedef {Object} gameStart
-   *  - beginRound
-   *  - main
-   *  - noConflict
-   *  - restart
+   * A reference to all functions to be used globally / exported
+   * @module gameStart
    */
+  const gameStart = {}
+  root.gameStart = gameStart
 
   /**
-   * A reference to all functions to be used globally / exported
-   * @type {gameUtils}
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {gameStart}
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {gameUtils}
-     */
-    noConflict: () => {
-      root.gameStart = previousGameStart
-      return exportFunctions
-    }
+  gameStart.noConflict = () => {
+    root.gameStart = previousGameStart
+    return gameStart
   }
-  root.gameStart = exportFunctions
 
   /**
    * Verify availability of jDomCore
@@ -147,7 +138,7 @@
   let gamePieces = root.gamePieces
 
   /**
-   * If gameUtils remains undefined, attempt to retrieve it as a module
+   * If gamePieces remains undefined, attempt to retrieve it as a module
    */
   if (typeof gamePieces === 'undefined') {
     if (typeof require !== 'undefined') {
@@ -282,11 +273,12 @@
   /**
    * Logic for setting up and starting a new round
    * (selects random start player and calls computer attack if it is AI starting)
+   * @function beginRound
    * @param e
    * @param mainForm
    * @returns {boolean}
    */
-  exportFunctions.beginRound = (e, mainForm) => {
+  gameStart.beginRound = (e, mainForm) => {
     e.preventDefault()
     let parent = jDomCoreDom.getTopParentItem(mainForm)
     let humans = parseInt(jDomCoreDom.getChildrenByName('human-players', mainForm)[0].element.value)
@@ -313,26 +305,31 @@
 
   /**
    * The entry function
+   * @function main
    * @param parent
    */
-  const main = (parent = jDomObjects.documentItem) => {
+  gameStart.main = (parent = jDomObjects.documentItem) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
       jDomCoreDom.removeChild(parent.body.children[i], parent.body)
     }
     jDomCoreDom.renderHTML(jDomLayout.mainMenu(), parent)
     return parent
   }
-  exportFunctions.main = main
 
-  exportFunctions.restart = (e, button) => main(jDomCoreDom.getTopParentItem(button))
+  /**
+   * @function restart
+   * @param e
+   * @param button
+   */
+  gameStart.restart = (e, button) => gameStart.main(jDomCoreDom.getTopParentItem(button))
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = gameStart
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, gameStart)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

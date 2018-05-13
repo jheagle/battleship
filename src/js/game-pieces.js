@@ -13,33 +13,21 @@
   const previousGamePieces = root.gamePieces || {}
 
   /**
-   * All methods exported from this module are encapsulated within gamePieces.
-   * @typedef {Object} gamePieces
-   *  - hitTile
-   *  - noConflict
-   *  - playerSet
-   *  - playerStats
-   *  - ship
-   *  - shipTile
-   *  - waterTile
+   * A reference to all functions to be used globally / exported
+   * @module gamePieces
    */
+  const gamePieces = {}
+  root.gamePieces = gamePieces
 
   /**
-   * A reference to all functions to be used globally / exported
-   * @type {gamePieces}
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {gamePieces}
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {gamePieces}
-     */
-    noConflict: () => {
-      root.gamePieces = previousGamePieces
-      return exportFunctions
-    }
+  gamePieces.noConflict = () => {
+    root.gamePieces = previousGamePieces
+    return gamePieces
   }
-  root.gamePieces = exportFunctions
 
   /**
    * Verify availability of jDomCore
@@ -91,50 +79,51 @@
 
   /**
    * Set the style for tiles representing water.
+   * @function waterTile
    * @param {Object} [player={}]
    * @param {Array} [players=[]]
    * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}, point: {}}}
    */
-  const waterTile = (player = {}, players = []) => jDomCore.mergeObjects(gameTile(player, players), jDomObjectsMatrix.tile())
-  exportFunctions.waterTile = waterTile
+  gamePieces.waterTile = (player = {}, players = []) => jDomCore.mergeObjects(gameTile(player, players), jDomObjectsMatrix.tile())
 
   /**
    * Set status and custom properties for tiles that have a ship
+   * @function shipTile
    * @returns {{hasShip: boolean}}
    */
-  const shipTile = () => ({
+  gamePieces.shipTile = () => ({
     hasShip: true
   })
-  exportFunctions.shipTile = shipTile
 
   /**
    * Store properties of a ship which includes an array of all associated ship tiles.
+   * @function ship
    * @param {string} name
    * @returns {{name: string, status: number, parts: Array}}
    */
-  const ship = (name = '') => ({
+  gamePieces.ship = (name = '') => ({
     name: name,
     status: 100,
     parts: []
   })
-  exportFunctions.ship = ship
 
   /**
    * Set the status of the tile to hit.
+   * @function hitTile
    * @returns {{isHit: boolean}}
    */
-  const hitTile = () => ({
+  gamePieces.hitTile = () => ({
     isHit: true
   })
-  exportFunctions.hitTile = hitTile
 
   /**
    * Store the player attributes.
+   * @function playerSet
    * @param {Object} board
    * @param {string} name
    * @returns {Object}
    */
-  const playerSet = (board = {}, name = '') => ({
+  gamePieces.playerSet = (board = {}, name = '') => ({
     name: name,
     isRobot: false,
     status: 100,
@@ -152,15 +141,15 @@
       board
     ]
   })
-  exportFunctions.playerSet = playerSet
 
   /**
    * The defined attributes for each player
+   * @function playerStats
    * @param {Object} [player={}]
    * @param {Object} [status=]
    * @returns {Object}
    */
-  const playerStats = (player = {}, status = '') => ({
+  gamePieces.playerStats = (player = {}, status = '') => ({
     tagName: 'div',
     attributes: {},
     children: [
@@ -182,15 +171,14 @@
       }
     ]
   })
-  exportFunctions.playerStats = playerStats
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = gamePieces
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, gamePieces)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

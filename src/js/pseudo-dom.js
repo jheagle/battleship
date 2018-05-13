@@ -13,34 +13,21 @@
   const previousJDomPseudoDom = root.jDomPseudoDom || {}
 
   /**
-   * All methods exported from this module are encapsulated within jDomPseudoDom.
-   * @typedef {Object} jDomPseudoDom
-   *  - generate
-   *  - noConflict
-   *  - PseudoElement
-   *  - PseudoEvent
-   *  - PseudoEventTarget
-   *  - PseudoHTMLDocument
-   *  - PseudoHTMLElement
-   *  - PseudoNode
-   */
-
-  /**
    * A reference to all functions to be used globally / exported
-   * @type {jDomObjects}
+   * @module jDomPseudoDom
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {jDomObjects}
-     */
-    noConflict: () => {
-      root.jDomPseudoDom = previousJDomPseudoDom
-      return exportFunctions
-    }
+  const jDomPseudoDom = {}
+  root.jDomPseudoDom = jDomPseudoDom
+  
+  /**
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {jDomPseudoDom}
+   */
+  jDomPseudoDom.noConflict = () => {
+    root.jDomPseudoDom = previousJDomPseudoDom
+    return jDomPseudoDom
   }
-  root.jDomPseudoDom = exportFunctions
 
   /**
    * @typedef {Object} PseudoEvent
@@ -199,7 +186,7 @@
     }
   }
 
-  exportFunctions.PseudoEventTarget = PseudoEventTarget
+  jDomPseudoDom.PseudoEventTarget = PseudoEventTarget
 
   /**
    * A selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
@@ -265,7 +252,7 @@
     }
   }
 
-  exportFunctions.PseudoNode = PseudoNode
+  jDomPseudoDom.PseudoNode = PseudoNode
 
   /**
    * @typedef {Object} PseudoElement
@@ -350,7 +337,7 @@
     }
   }
 
-  exportFunctions.PseudoElement = PseudoElement
+  jDomPseudoDom.PseudoElement = PseudoElement
 
   /**
    * Simulate a HTMLElement when the DOM is unavailable
@@ -393,7 +380,7 @@
     }
   }
 
-  exportFunctions.PseudoHTMLElement = PseudoHTMLElement
+  jDomPseudoDom.PseudoHTMLElement = PseudoHTMLElement
 
   /**
    * A representation of HTMLElement object when it is not available.
@@ -448,14 +435,14 @@
     }
   }
 
-  exportFunctions.PseudoHTMLDocument = PseudoHTMLDocument
+  jDomPseudoDom.PseudoHTMLDocument = PseudoHTMLDocument
 
   /**
    *
    * @param {Object} context
    * @returns {Window|PseudoEventTarget}
    */
-  exportFunctions.generate = (context = {}) => {
+  jDomPseudoDom.generate = (context = {}) => {
     /**
      *
      * @type {Window|PseudoEventTarget}
@@ -497,7 +484,7 @@
       window.document = document
     }
 
-    return context ? Object.assign(context, exportFunctions, window) : Object.assign(root, window)
+    return context ? Object.assign(context, jDomPseudoDom, window) : Object.assign(root, window)
   }
 
   /**
@@ -505,8 +492,8 @@
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = jDomPseudoDom
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, jDomPseudoDom)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

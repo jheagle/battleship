@@ -8,7 +8,7 @@
 
   /**
    * Verify availability of document
-   * @type {HTMLDocument|PseudoHTMLDocument}
+   * @type {HTMLDocument|module:jDomPseudoDom.PseudoHTMLDocument}
    */
   let document = root.document
 
@@ -27,62 +27,30 @@
 
   /**
    * Store reference to any pre-existing module of the same name
-   * @type {jDomCoreDom|*}
+   * @type {module|*}
    */
   const previousJDomCoreDom = root.jDomCoreDom || {}
 
   /**
-   * All methods exported from this module are encapsulated within jDomCoreDom.
-   * @typedef {Object} jDomCoreDom
-   *  - appendAllHTML
-   *  - appendHTML
-   *  - appendListeners
-   *  - assignListener
-   *  - bindAllElements
-   *  - bindAllListeners
-   *  - bindElement
-   *  - bindListeners
-   *  - buildHTML
-   *  - elementChanges
-   *  - elementHasAttribute
-   *  - generateElement
-   *  - getChildrenByClass
-   *  - getChildrenByName
-   *  - getChildrenFromAttribute
-   *  - getParentsByClass
-   *  - getParentsByName
-   *  - getParentsByTagName
-   *  - getTopParentItem
-   *  - noConflict
-   *  - registerListener
-   *  - registerListeners
-   *  - removeChild
-   *  - renderHTML
-   *  - retrieveListener
-   *  - updateElement
-   *  - updateElements
+   * A reference to all functions to be used globally / exported
+   * @module jDomCoreDom
    */
+  const jDomCoreDom = {}
+  root.jDomCoreDom = jDomCoreDom
 
   /**
-   * A reference to all functions to be used globally / exported
-   * @type {jDomCoreDom}
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {module:jDomCoreDom}
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {jDomCoreDom}
-     */
-    noConflict: () => {
-      root.jDomCoreDom = previousJDomCoreDom
-      return exportFunctions
-    }
+  jDomCoreDom.noConflict = () => {
+    root.jDomCoreDom = previousJDomCoreDom
+    return jDomCoreDom
   }
-  root.jDomCoreDom = exportFunctions
 
   /**
    * Verify availability of jDomCore
-   * @type {*|jDomCore}
+   * @type {*|module:jDomCore}
    */
   let jDomCore = root.jDomCore
 
@@ -99,7 +67,7 @@
 
   /**
    * Verify availability of jDomCore
-   * @type {*|jDomObjects}
+   * @type {*|module:jDomObjects}
    */
   let jDomObjects = root.jDomObjects
 
@@ -117,12 +85,13 @@
   /**
    * Check if the provided Element has the provided attributes.
    * Returns a boolean, or an array of 1 / 0 / -1 based on the comparison status.
-   * @param {HTMLElement|PseudoHTMLElement} element
+   * @function elementHasAttribute
+   * @param {HTMLElement|module:jDomPseudoDom.PseudoHTMLElement} element
    * @param {string} key
    * @param {string} attr
    * @returns {boolean|Object.<string, number>}
    */
-  const elementHasAttribute = (element, key, attr) => {
+  jDomCoreDom.elementHasAttribute = (element, key, attr) => {
     // if element is not a valid element then return false
     if (!element.style) {
       return false
@@ -140,31 +109,31 @@
     }
     return (element.hasAttribute(key) && element.getAttribute(key) === attr)
   }
-  exportFunctions.elementHasAttribute = elementHasAttribute
 
   /**
    * Given a jDomObjects.DOMItem as config, this function will return the changes to be applied
    * to the stored element property.
+   * @function elementChanges
    * @param {Object} config
    * @returns {Object}
    */
-  const elementChanges = config => {
+  jDomCoreDom.elementChanges = config => {
     if (config.element.tagName.toLowerCase() !== config.tagName.toLowerCase()) {
-      return generateElement(config)
+      return jDomCoreDom.generateElement(config)
     }
-    config.attributes = jDomCore.filterObject(config.attributes, (attr1, key1) => jDomCore.filterObject(jDomCore.mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'className') ? jDomCore.filterObject(elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 === 1) : !elementHasAttribute(config.element, key2, attr2)), (attr4) => !!attr4)[key1])
+    config.attributes = jDomCore.filterObject(config.attributes, (attr1, key1) => jDomCore.filterObject(jDomCore.mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'className') ? jDomCore.filterObject(jDomCoreDom.elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 === 1) : !jDomCoreDom.elementHasAttribute(config.element, key2, attr2)), (attr4) => !!attr4)[key1])
     return config
   }
-  exportFunctions.elementChanges = elementChanges
 
   /**
    * Update a single jDomObjects.DOMItem element with the provided attributes / style / elementProperties
+   * @function updateElement
    * @param config
    * @returns {*}
    */
-  const updateElement = (config) => {
+  jDomCoreDom.updateElement = (config) => {
     if (config.element.style) {
-      config.attributes = jDomCore.mapObject(elementChanges(config).attributes, (attr, key) => {
+      config.attributes = jDomCore.mapObject(jDomCoreDom.elementChanges(config).attributes, (attr, key) => {
         if (key in config.element) {
           if (jDomCore.notEmptyObjectOrArray(attr)) {
             return jDomCore.mapObject(jDomCore.filterObject(attr, (param, k) => /^\D+$/.test(k)), (p, i) => {
@@ -181,144 +150,143 @@
     }
     return config
   }
-  exportFunctions.updateElement = updateElement
 
   /**
    * Generate HTML element data for each object in the matrix
    * WARNING: This is a recursive function.
+   * @function updateElements
    * @param config
    * @returns {*}
    */
-  const updateElements = (config) => {
-    config = updateElement(config)
-    config.children.map(child => updateElements(child))
+  jDomCoreDom.updateElements = (config) => {
+    config = jDomCoreDom.updateElement(config)
+    config.children.map(child => jDomCoreDom.updateElements(child))
     return config
   }
-  exportFunctions.updateElements = updateElements
 
   /**
    * Create an HTML element based on the provided attributes and return the element as an Object.
+   * @function generateElement
    * @param config
    */
-  const generateElement = (config) => {
+  jDomCoreDom.generateElement = (config) => {
     config.element = document.createElement(config.tagName)
-    return updateElement(config)
+    return jDomCoreDom.updateElement(config)
   }
-  exportFunctions.generateElement = generateElement
 
   /**
    * Generate HTML element data for each object in the matrix
    * WARNING: This is a recursive function.
+   * @function bindAllElements
    * @param item
    * @param parent
    */
-  const bindAllElements = (item, parent = jDomObjects.documentItem) => {
+  jDomCoreDom.bindAllElements = (item, parent = jDomObjects.documentItem) => {
     jDomCore.mapObject(jDomObjects.DOMItem(item), (prop) => prop, item)
-    item.element = (item.element && item.element.style) ? item.element : bindElement(item).element
+    item.element = (item.element && item.element.style) ? item.element : jDomCoreDom.bindElement(item).element
     item.parentItem = parent.body || parent
-    item.children.map(child => bindAllElements(child, item))
+    item.children.map(child => jDomCoreDom.bindAllElements(child, item))
     return item
   }
-  exportFunctions.bindAllElements = bindAllElements
 
   /**
    * Generate HTML element data for each object in the matrix
    * WARNING: This is a recursive function.
+   * @function bindElement
    * @param item
    */
-  const bindElement = (item) => {
+  jDomCoreDom.bindElement = (item) => {
     if (!item.element || !item.element.style) {
-      item.element = generateElement(item).element
+      item.element = jDomCoreDom.generateElement(item).element
     }
     return item
   }
-  exportFunctions.bindElement = bindElement
 
   /**
    * Append each HTML element data in a combined HTML element
    * WARNING: This is a recursive function.
+   * @function buildHTML
    * @param item
    * @returns {*}
    */
-  const buildHTML = (item) => {
-    item.children.map(i => item.element.appendChild(buildHTML(i).element))
+  jDomCoreDom.buildHTML = (item) => {
+    item.children.map(i => item.element.appendChild(jDomCoreDom.buildHTML(i).element))
     return item
   }
-  exportFunctions.buildHTML = buildHTML
 
   /**
    * Select the parent HTML element for appending new elements
+   * @function appendAllHTML
    * @param item
    * @param parent
    * @returns {*}
    */
-  const appendAllHTML = (item, parent = jDomObjects.documentItem.body) => {
+  jDomCoreDom.appendAllHTML = (item, parent = jDomObjects.documentItem.body) => {
     let parentItem = parent.body ? parent.body : parent
     if (!jDomCore.inArray(parentItem.children, item)) {
       parentItem.children.push(item)
     }
-    return buildHTML(parentItem)
+    return jDomCoreDom.buildHTML(parentItem)
   }
-  exportFunctions.appendAllHTML = appendAllHTML
 
   /**
    * Select the parent HTML element for appending new elements
+   * @function appendHTML
    * @param item
    * @param parent
    * @returns {*}
    */
-  const appendHTML = (item, parent = jDomObjects.documentItem.body) => {
+  jDomCoreDom.appendHTML = (item, parent = jDomObjects.documentItem.body) => {
     let parentItem = parent.body ? parent.body : parent
     if (!jDomCore.inArray(parentItem.children, item)) {
       parentItem.children.push(item)
     }
     if (!item.element || !item.element.style) {
-      item = bindElement(item)
+      item = jDomCoreDom.bindElement(item)
     }
     parentItem.element.appendChild(item.element)
     return item
   }
-  exportFunctions.appendHTML = appendHTML
 
   /**
    * Reverse of appendHTML, remove an element
+   * @function removeChild
    * @param item
    * @param parent
    * @returns {Array.<HTMLElement|PseudoHTMLElement>}
    */
-  const removeChild = (item, parent = jDomObjects.documentItem.body) => {
+  jDomCoreDom.removeChild = (item, parent = jDomObjects.documentItem.body) => {
     parent.element.removeChild(item.element)
     return parent.children.splice(parent.children.indexOf(item), 1)
   }
-  exportFunctions.removeChild = removeChild
 
   /**
    * Register a single listener function as part of the root jDomObjects.DOMItem.
+   * @function registerListener
    * @param {function} listener
    * @param {string} [name]
    * @param {Object} [parent]
    * @returns {function}
    */
-  const registerListener = (listener, name = listener.name, parent = jDomObjects.documentItem) => Object.assign(parent.eventListeners, {name: listener})
-  exportFunctions.registerListener = registerListener
+  jDomCoreDom.registerListener = (listener, name = listener.name, parent = jDomObjects.documentItem) => Object.assign(parent.eventListeners, {name: listener})
 
   /**
    * Register multiple listeners from an array of functions.
+   * @function registerListeners
    * @param {Array.<function>} listeners
    * @param {Object} [parent]
    * @returns {Object}
    */
-  const registerListeners = (listeners, parent = jDomObjects.documentItem) => jDomCore.mergeObjects(parent, {eventListeners: listeners}, parent.eventListeners)
-  exportFunctions.registerListeners = registerListeners
+  jDomCoreDom.registerListeners = (listeners, parent = jDomObjects.documentItem) => jDomCore.mergeObjects(parent, {eventListeners: listeners}, parent.eventListeners)
 
   /**
    * Based on the provided function / listener name, retrieve the associated function from the root jDomObjects.DOMItem
+   * @function retrieveListener
    * @param listenerName
    * @param parent
    * @returns {{}}
    */
-  const retrieveListener = (listenerName, parent = jDomObjects.documentItem) => jDomCore.inArray(Object.keys(parent.eventListeners), listenerName) ? parent.eventListeners[listenerName] : {}
-  exportFunctions.retrieveListener = retrieveListener
+  jDomCoreDom.retrieveListener = (listenerName, parent = jDomObjects.documentItem) => jDomCore.inArray(Object.keys(parent.eventListeners), listenerName) ? parent.eventListeners[listenerName] : {}
 
   /**
    * Provide compatibility for using the options parameter of addEventListener
@@ -339,17 +307,17 @@
 
   /**
    * Provide compatibility for assigning listeners.
+   * @function assignListener
    * @param trigger
    * @param elem
    * @param fn
    * @param options
    * @returns {*}
    */
-  const assignListener = (trigger, elem, fn, options) => {
+  jDomCoreDom.assignListener = (trigger, elem, fn, options) => {
     elem.addEventListener ? elem.addEventListener(trigger, fn, listenerOptions(options)) : elem.attachEvent ? elem.attachEvent(`on${trigger}`, fn) : elem[`on${trigger}`] = fn
     return fn
   }
-  exportFunctions.assignListener = assignListener
 
   /**
    * When there may be extra data needed for the event listener function
@@ -357,6 +325,7 @@
    * Also, if it is desirable to add event listeners during run-time, this
    * function can be used to achieve this.
    * WARNING: This is a recursive function.
+   * @function appendListeners
    * @param item
    * @param event
    * @param listener
@@ -364,142 +333,147 @@
    * @param options
    * @returns {*}
    */
-  const appendListeners = (item, event, listener, args = {}, options = false) => {
+  jDomCoreDom.appendListeners = (item, event, listener, args = {}, options = false) => {
     item.children = item.children || []
     if (item.eventListeners && item.eventListeners[event]) {
       item.eventListeners[event] = {listenerFunc: listener, listenerArgs: args, listenerOptions: options}
     }
-    item.children.map(i => appendListeners(i, event, listener, args, options))
+    item.children.map(i => jDomCoreDom.appendListeners(i, event, listener, args, options))
     return item
   }
-  exportFunctions.appendListeners = appendListeners
 
   /**
    * Based on the eventListeners property of the provided item, bind the
    * listeners to the associated element property for each item in the jDomObjects.DOMItem structure.
    * WARNING: This is a recursive function.
+   * @function bindAllListeners
    * @param item
    * @returns {*}
    */
-  const bindAllListeners = (item) => {
+  jDomCoreDom.bindAllListeners = (item) => {
     if (item.eventListeners && Object.keys(item.eventListeners).length && item.element.style) {
-      jDomCore.mapObject(item.eventListeners, (attr, key) => assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
+      jDomCore.mapObject(item.eventListeners, (attr, key) => jDomCoreDom.assignListener(key, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
     }
-    item.children = item.children.map(i => bindAllListeners(i))
+    item.children = item.children.map(i => jDomCoreDom.bindAllListeners(i))
     return item
   }
-  exportFunctions.bindAllListeners = bindAllListeners
 
   /**
    * Based on the eventListeners property of the provided item, bind the
    * listeners to the associated element property for the provided jDomObjects.DOMItem.
+   * @function bindListeners
    * @param item
    * @returns {*}
    */
-  const bindListeners = (item) => {
+  jDomCoreDom.bindListeners = (item) => {
     if (item.eventListeners && Object.keys(item.eventListeners).length && item.element.style) {
-      jDomCore.mapObject(item.eventListeners, (attr, event) => assignListener(event, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
+      jDomCore.mapObject(item.eventListeners, (attr, event) => jDomCoreDom.assignListener(event, item.element, (e) => attr.listenerFunc(e, item, attr.listenerArgs), attr.listenerOptions))
     }
     return item
   }
-  exportFunctions.bindListeners = bindListeners
 
   /**
    * A selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
    * This function will check all the children starting from item, and scan the attributes
    * property for matches. The return array contains children matching from all levels.
    * WARNING: This is a recursive function.
+   * @function getChildrenFromAttribute
    * @param attr
    * @param value
    * @param item
    * @returns {Array}
    */
-  const getChildrenFromAttribute = (attr, value, item = jDomObjects.documentItem.body) =>
-    (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(getChildrenFromAttribute(attr, value, b)), [])
-  exportFunctions.getChildrenFromAttribute = getChildrenFromAttribute
+  jDomCoreDom.getChildrenFromAttribute = (attr, value, item = jDomObjects.documentItem.body) =>
+    (item.attributes[attr] && item.attributes[attr] === value) ? item.children.reduce((a, b) => a.concat(jDomCoreDom.getChildrenFromAttribute(attr, value, b)), []).concat([item]) : item.children.reduce((a, b) => a.concat(jDomCoreDom.getChildrenFromAttribute(attr, value, b)), [])
 
   /**
    * Helper for getting all jDomObjects.DOMItems starting at parent and having specified className attribute
+   * @function getChildrenByClass
+   * @returns {Array}
    */
-  const getChildrenByClass = jDomCore.curry(getChildrenFromAttribute)('className')
-  exportFunctions.getChildrenByClass = getChildrenByClass
+  jDomCoreDom.getChildrenByClass = jDomCore.curry(jDomCoreDom.getChildrenFromAttribute)('className')
 
   /**
    * Helper for getting all jDomObjects.DOMItems starting at parent and having specified name attribute
+   * @function getChildrenByName
+   * @returns {Array}
    */
-  const getChildrenByName = jDomCore.curry(getChildrenFromAttribute)('name')
-  exportFunctions.getChildrenByName = getChildrenByName
+  jDomCoreDom.getChildrenByName = jDomCore.curry(jDomCoreDom.getChildrenFromAttribute)('name')
 
   /**
    * A selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
    * This function will check all the children starting from item, and scan the attributes
    * property for matches. The return array contains children matching from all levels.
    * WARNING: This is a recursive function.
+   * @function getParentsFromAttribute
    * @param attr
    * @param value
    * @param item
    * @returns {Array}
    */
-  const getParentsFromAttribute = (attr, value, item = jDomObjects.documentItem.body) =>
-    !Object.keys(item.parentItem).length
-      ? []
-      : (item.attributes[attr] || item[attr] || false) === value
-      ? getParentsFromAttribute(attr, value, item.parentItem).concat([item])
-      : getParentsFromAttribute(attr, value, item.parentItem)
+  jDomCoreDom.getParentsFromAttribute = (attr, value, item = jDomObjects.documentItem.body) => Object.keys(item.parentItem).length
+    ? (item.attributes[attr] || item[attr] || false) === value
+      ? jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem).concat([item])
+      : jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem)
+    : []
 
   /**
    * Helper for getting all jDomObjects.DOMItems starting at child and having specified className attribute
+   * @function getParentsByClass
+   * @returns {Array}
    */
-  const getParentsByClass = jDomCore.curry(getParentsFromAttribute)('className')
-  exportFunctions.getParentsByClass = getParentsByClass
+  jDomCoreDom.getParentsByClass = jDomCore.curry(jDomCoreDom.getParentsFromAttribute)('className')
 
   /**
    * Helper for getting all jDomObjects.DOMItems starting at child and having specified name attribute
+   * @function getParentsByName
+   * @returns {Array}
    */
-  const getParentsByName = jDomCore.curry(getParentsFromAttribute)('name')
-  exportFunctions.getParentsByName = getParentsByName
+  jDomCoreDom.getParentsByName = jDomCore.curry(jDomCoreDom.getParentsFromAttribute)('name')
 
   /**
    * Helper for getting all jDomObjects.DOMItems starting at child and having specified tagName
+   * @function getParentsByTagName
+   * @returns {Array}
    */
-  const getParentsByTagName = jDomCore.curry(getParentsFromAttribute)('tagName')
-  exportFunctions.getParentsByTagName = getParentsByTagName
+  jDomCoreDom.getParentsByTagName = jDomCore.curry(jDomCoreDom.getParentsFromAttribute)('tagName')
 
   /**
    * Get the upper parentItem for the provided child. (usually this is a jDomObjects.documentItem reference)
    * WARNING: This is a recursive function.
+   * @function getTopParentItem
    * @param item
    */
-  const getTopParentItem = item =>
-    Object.keys(item.parentItem).length ? getTopParentItem(item.parentItem) : item
-  exportFunctions.getTopParentItem = getTopParentItem
+  jDomCoreDom.getTopParentItem = item => Object.keys(item.parentItem).length
+    ? jDomCoreDom.getTopParentItem(item.parentItem)
+    : item
 
   /**
    * This is a shortcut for building the specified HTML elements and appending them to the DOM
    * with associated listeners.
    * The final argument is specific for adding event listeners with options.
+   * @function renderHTML
    * @param item
    * @param parent
    * @returns {*}
    */
-  const renderHTML = (item, parent = jDomObjects.documentItem) => {
+  jDomCoreDom.renderHTML = (item, parent = jDomObjects.documentItem) => {
     jDomCore.mapObject(jDomObjects.DOMItem(item), (prop) => prop, item)
-    item.element = (item.element && item.element.style) ? item.element : bindElement(item).element
-    item.eventListeners = jDomCore.mapObject(item.eventListeners, prop => jDomCore.mergeObjects(prop, {listenerFunc: retrieveListener(prop.listenerFunc, getTopParentItem(parent))}))
+    item.element = (item.element && item.element.style) ? item.element : jDomCoreDom.bindElement(item).element
+    item.eventListeners = jDomCore.mapObject(item.eventListeners, prop => jDomCore.mergeObjects(prop, {listenerFunc: jDomCoreDom.retrieveListener(prop.listenerFunc, jDomCoreDom.getTopParentItem(parent))}))
     item.parentItem = parent.body || parent
-    item = bindListeners(appendHTML(item, parent))
-    item.children.map(child => renderHTML(child, item))
+    item = jDomCoreDom.bindListeners(jDomCoreDom.appendHTML(item, parent))
+    item.children.map(child => jDomCoreDom.renderHTML(child, item))
     return item
   }
-  exportFunctions.renderHTML = renderHTML
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = jDomCoreDom
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, jDomCoreDom)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

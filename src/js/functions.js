@@ -13,37 +13,21 @@
   const previousGameUtils = root.gameUtils || {}
 
   /**
-   * All methods exported from this module are encapsulated within gameUtils.
-   * @typedef {Object} gameUtils
-   *  - checkIfHitCell
-   *  - checkIfShipCell
-   *  - filterAdjacentPoints
-   *  - getALowStatusItem
-   *  - getAdjEdgeNonHitCells
-   *  - getAllNonHitCells
-   *  - getBrokenItems
-   *  - getBrokenShipsPlayers
-   *  - getLowStatusItems
-   *  - noConflict
-   *  - numDamangedParts
+   * A reference to all functions to be used globally / exported
+   * @module gameUtils
    */
+  const gameUtils = {}
+  root.gameUtils = gameUtils
 
   /**
-   * A reference to all functions to be used globally / exported
-   * @type {gameUtils}
+   * Return a reference to this library while preserving the original same-named library
+   * @function noConflict
+   * @returns {gameUtils}
    */
-  const exportFunctions = {
-    /**
-     * Return a reference to this library while preserving the original same-named library
-     * @function noConflict
-     * @returns {gameUtils}
-     */
-    noConflict: () => {
-      root.gameUtils = previousGameUtils
-      return exportFunctions
-    }
+  gameUtils.noConflict = () => {
+    root.gameUtils = previousGameUtils
+    return gameUtils
   }
-  root.gameUtils = exportFunctions
 
   /**
    * Verify availability of jDomCoreMatrix
@@ -64,95 +48,95 @@
 
   /**
    * Return the hasShip tile boolean at the specified point.
+   * @function checkIfShipCell
    * @param pnt
    * @param matrix
    * @returns {boolean}
    */
-  const checkIfShipCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].hasShip
-  exportFunctions.checkIfShipCell = checkIfShipCell
+  gameUtils.checkIfShipCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].hasShip
 
   /**
    * Return the isHit tile boolean at the specified point.
+   * @function checkIfHitCell
    * @param pnt
    * @param matrix
    * @returns {boolean}
    */
-  const checkIfHitCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].isHit
-  exportFunctions.checkIfHitCell = checkIfHitCell
+  gameUtils.checkIfHitCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].isHit
 
   /**
    * Get all points which were not yet hit in the matrix.
+   * @function getAllNonHitCells
    * @param matrix
    * @returns {Array}
    */
-  const getAllNonHitCells = matrix => jDomCoreMatrix.getAllPoints(matrix).filter(p => !checkIfHitCell(p, matrix))
-  exportFunctions.getAllNonHitCells = getAllNonHitCells
+  gameUtils.getAllNonHitCells = matrix => jDomCoreMatrix.getAllPoints(matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
 
   /**
    * Get the points which have same edges with the provided point and are not hit.
+   * @function getAdjEdgeNonHitCells
    * @param pnt
    * @param matrix
    * @returns {Array}
    */
-  const getAdjEdgeNonHitCells = (pnt, matrix) => jDomCoreMatrix.adjacentEdgePoints(pnt, matrix).filter(p => !checkIfHitCell(p, matrix))
-  exportFunctions.getAdjEdgeNonHitCells = getAdjEdgeNonHitCells
+  gameUtils.getAdjEdgeNonHitCells = (pnt, matrix) => jDomCoreMatrix.adjacentEdgePoints(pnt, matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
 
   /**
    * Given an array of items, return the item with the lowest status property (at the end of the array)
+   * @function getALowStatusItem
    * @param items
    * @returns {Array}
    */
-  const getALowStatusItem = items => items.reduce((a, b) => b.status <= a.status ? b : a)
-  exportFunctions.getALowStatusItem = getALowStatusItem
+  gameUtils.getALowStatusItem = items => items.reduce((a, b) => b.status <= a.status ? b : a)
 
   /**
    * Given an array of items, return all items which have the lowest status property
+   * @function getLowStatusItems
    * @param items
    * @returns {Array}
    */
-  const getLowStatusItems = items => items.filter(i => i.status <= getALowStatusItem(items).status)
-  exportFunctions.getLowStatusItems = getLowStatusItems
+  gameUtils.getLowStatusItems = items => items.filter(i => i.status <= gameUtils.getALowStatusItem(items).status)
 
   /**
    * Given an array of items, return all of the items which have a status less than 100, but more than 0
+   * @function getBrokenItems
    * @param items
    * @returns {Array}
    */
-  const getBrokenItems = items => items.filter(i => i.status < 100 && i.status > 0)
-  exportFunctions.getBrokenItems = getBrokenItems
+  gameUtils.getBrokenItems = items => items.filter(i => i.status < 100 && i.status > 0)
 
   /**
    * Return all of the players which have broken ships.
+   * @function getBrokenShipsPlayers
    * @param players
    * @returns {Array}
    */
-  const getBrokenShipsPlayers = players => players.filter(p => getBrokenItems(p.shipFleet).length)
-  exportFunctions.getBrokenShipsPlayers = getBrokenShipsPlayers
+  gameUtils.getBrokenShipsPlayers = players => players.filter(p => gameUtils.getBrokenItems(p.shipFleet).length)
 
   /**
    * Return the number of damaged ship parts. Performs math on the number of parts vs the damaged status.
+   * @function numDamagedParts
    * @param total
    * @param status
    * @returns {number}
    */
-  const numDamangedParts = (total, status) => total - Math.ceil(((status / 100) * total))
-  exportFunctions.numDamangedParts = numDamangedParts
+  gameUtils.numDamagedParts = (total, status) => total - Math.ceil(((status / 100) * total))
 
   /**
    * Used to generate 'checkerboard' style attack by only attacking every non-edge-touching cell
+   * @function filterAdjacentPoints
    * @param pnt
    * @returns {boolean}
    */
-  const filterAdjacentPoints = pnt => ((pnt.z % 2 === 0 && ((pnt.x % 2 === 0 && pnt.y % 2 === 0) || (pnt.x % 2 !== 0 && pnt.y % 2 !== 0))) || (pnt.z % 2 !== 0 && ((pnt.x % 2 !== 0 && pnt.y % 2 === 0) || (pnt.x % 2 === 0 && pnt.y % 2 !== 0))))
-  exportFunctions.filterAdjacentPoints = filterAdjacentPoints
+  gameUtils.filterAdjacentPoints = pnt => ((pnt.z % 2 === 0 && ((pnt.x % 2 === 0 && pnt.y % 2 === 0) || (pnt.x % 2 !== 0 && pnt.y % 2 !== 0))) || (pnt.z % 2 !== 0 && ((pnt.x % 2 !== 0 && pnt.y % 2 === 0) || (pnt.x % 2 === 0 && pnt.y % 2 !== 0))))
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = exportFunctions
+      exports = module.exports = gameUtils
     }
-    exports = Object.assign(exports, exportFunctions)
+    exports = Object.assign(exports, gameUtils)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
