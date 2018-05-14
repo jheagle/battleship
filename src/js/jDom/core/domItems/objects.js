@@ -17,11 +17,11 @@
    */
   if (!Object.keys(root).length) {
     if (typeof require !== 'undefined') {
-      const jDomPseudoDom = require('./pseudo-dom.js')
+      const jDomPseudoDom = require('../../pseudoDom/objects.js')
       root = jDomPseudoDom.generate()
       document = root.document
     } else {
-      console.error('objects-dom.js requires jDomPseudoDom')
+      console.error('objects.js requires jDomPseudoDom')
     }
   }
 
@@ -33,7 +33,8 @@
 
   /**
    * A reference to all functions to be used globally / exported
-   * @module jDomObjects
+   * @typedef {Object} jDomObjects
+   * @module jDom/core/domItems/objects
    */
   const jDomObjects = {}
   root.jDomObjects = jDomObjects
@@ -50,7 +51,7 @@
 
   /**
    * Verify availability of jDomCore
-   * @type {*|jDomCore}
+   * @type {*|module:jDom/core/core}
    */
   let jDomCore = root.jDomCore
 
@@ -59,9 +60,9 @@
    */
   if (typeof jDomCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('./core.js')
+      jDomCore = require('../core.js')
     } else {
-      console.error('objects-dom.js requires jDomCore')
+      console.error('objects.js requires jDomCore')
     }
   }
 

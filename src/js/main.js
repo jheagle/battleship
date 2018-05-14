@@ -39,7 +39,7 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('./objects-dom.js')
+      jDomObjects = require('./jDom/core/domItems/objects.js')
     } else {
       console.error('main.js requires jDomObjects')
     }
@@ -56,7 +56,7 @@
    */
   if (typeof jDomCoreDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreDom = require('./core-dom.js')
+      jDomCoreDom = require('./jDom/core/domItems/core.js')
     } else {
       console.error('main.js requires jDomCoreDom')
     }
@@ -73,7 +73,7 @@
    */
   if (typeof gameActions === 'undefined') {
     if (typeof require !== 'undefined') {
-      gameActions = require('./actions.js')
+      gameActions = require('./game/actions.js')
     } else {
       console.error('main.js requires gameActions')
     }
@@ -90,7 +90,7 @@
    */
   if (typeof gameStart === 'undefined') {
     if (typeof require !== 'undefined') {
-      gameStart = require('./start-functions.js')
+      gameStart = require('./game/start-functions.js')
     } else {
       console.error('main.js requires gameStart')
     }

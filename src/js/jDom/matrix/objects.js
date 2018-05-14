@@ -14,7 +14,8 @@
 
   /**
    * A reference to all functions to be used globally / exported
-   * @module jDomObjectsMatrix
+   * @typedef {Object} jDomObjectsMatrix
+   * @module jDom/matrix/objects
    */
   const jDomObjectsMatrix = {}
   root.jDomObjectsMatrix = jDomObjectsMatrix
@@ -31,7 +32,7 @@
 
   /**
    * Verify availability of jDomCore
-   * @type {*|jDomCore}
+   * @typedef {*|module:jDom/core/core} jDomCore
    */
   let jDomCore = root.jDomCore
 
@@ -40,15 +41,15 @@
    */
   if (typeof jDomCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('./core.js')
+      jDomCore = require('../core/core.js')
     } else {
-      console.error('objects-dom.js requires jDomCore')
+      console.error('objects.js requires jDomCore')
     }
   }
 
   /**
    * Verify availability of jDomObjects
-   * @type {*|jDomObjects}
+   * @typedef {*|module:jDom/core/domItems/objects} jDomObjects
    */
   let jDomObjects = root.jDomObjects
 
@@ -57,9 +58,9 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('./objects-dom.js')
+      jDomObjects = require('../core/domItems/objects.js')
     } else {
-      console.error('core-dom.js requires jDomObjects')
+      console.error('core.js requires jDomObjects')
     }
   }
 

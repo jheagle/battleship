@@ -40,7 +40,7 @@
    */
   if (typeof jDomCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('./core.js')
+      jDomCore = require('../jDom/core/core.js')
     } else {
       console.error('game-pieces.js requires jDomCore')
     }
@@ -57,7 +57,7 @@
    */
   if (typeof jDomObjectsMatrix === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjectsMatrix = require('./objects-matrix.js')
+      jDomObjectsMatrix = require('../jDom/matrix/objects.js')
     } else {
       console.error('game-pieces.js requires jDomObjectsMatrix')
     }

@@ -15,7 +15,8 @@ const base = this || window || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomCore.
-   * @module jDomCore
+   * @typedef {Object} jDomCore
+   * @module jDom/core/core
    */
   const jDomCore = {}
   root.jDomCore = jDomCore
@@ -23,7 +24,7 @@ const base = this || window || {}
   /**
    * Return a reference to this library while preserving the original same-named library
    * @function noConflict
-   * @returns {module:jDomCore}
+   * @returns {jDomCore}
    */
   jDomCore.noConflict = () => {
     root.jDomCore = previousJDomCore

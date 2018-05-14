@@ -1,4 +1,4 @@
-const jDomCore = require('../src/js/core.js')
+const jDomCore = require('../src/js/jDom/core/core.js')
 
 // buildArray
 // buildArrayOfReferences

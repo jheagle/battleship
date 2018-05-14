@@ -40,7 +40,7 @@
    */
   if (typeof jDomCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('./core.js')
+      jDomCore = require('../jDom/core/core.js')
     } else {
       console.error('actions.js requires jDomCore')
     }
@@ -57,7 +57,7 @@
    */
   if (typeof jDomCoreDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreDom = require('./core-dom.js')
+      jDomCoreDom = require('../jDom/core/domItems/core.js')
     } else {
       console.error('actions.js requires jDomCoreDom')
     }
@@ -74,7 +74,7 @@
    */
   if (typeof jDomObjectsMatrix === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjectsMatrix = require('./objects-matrix.js')
+      jDomObjectsMatrix = require('../jDom/matrix/objects.js')
     } else {
       console.error('actions.js requires jDomObjectsMatrix')
     }
@@ -91,7 +91,7 @@
    */
   if (typeof jDomCoreMatrix === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreMatrix = require('./core-matrix.js')
+      jDomCoreMatrix = require('../jDom/matrix/core.js')
     } else {
       console.error('actions.js requires jDomCoreMatrix')
     }
@@ -108,7 +108,7 @@
    */
   if (typeof jDomLayout === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomLayout = require('./layout.js')
+      jDomLayout = require('../jDom/layouts/battleship.js')
     } else {
       console.error('actions.js requires jDomLayout')
     }

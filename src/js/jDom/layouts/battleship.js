@@ -40,9 +40,9 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('./objects-dom.js')
+      jDomObjects = require('../core/domItems/objects.js')
     } else {
-      console.error('layout.js requires jDomObjects')
+      console.error('battleship.js requires jDomObjects')
     }
   }
 

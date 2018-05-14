@@ -40,7 +40,7 @@
    */
   if (typeof jDomCoreMatrix === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreMatrix = require('./core-matrix.js')
+      jDomCoreMatrix = require('../jDom/matrix/core.js')
     } else {
       console.error('functions.js requires jDomCoreMatrix')
     }

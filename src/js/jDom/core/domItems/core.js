@@ -7,25 +7,6 @@
   let root = this || {}
 
   /**
-   * Verify availability of document
-   * @type {HTMLDocument|module:jDomPseudoDom.PseudoHTMLDocument}
-   */
-  let document = root.document
-
-  /**
-   * If document remains undefined, attempt to retrieve it as a module
-   */
-  if (!Object.keys(root).length) {
-    if (typeof require !== 'undefined') {
-      const jDomPseudoDom = require('./pseudo-dom.js')
-      root = jDomPseudoDom.generate()
-      document = root.document
-    } else {
-      console.error('objects-dom.js requires jDomPseudoDom')
-    }
-  }
-
-  /**
    * Store reference to any pre-existing module of the same name
    * @type {module|*}
    */
@@ -33,7 +14,8 @@
 
   /**
    * A reference to all functions to be used globally / exported
-   * @module jDomCoreDom
+   * @typedef {Object} jDomCoreDom
+   * @module jDom/core/domItems/core
    */
   const jDomCoreDom = {}
   root.jDomCoreDom = jDomCoreDom
@@ -41,7 +23,7 @@
   /**
    * Return a reference to this library while preserving the original same-named library
    * @function noConflict
-   * @returns {module:jDomCoreDom}
+   * @returns {jDomCoreDom}
    */
   jDomCoreDom.noConflict = () => {
     root.jDomCoreDom = previousJDomCoreDom
@@ -49,8 +31,31 @@
   }
 
   /**
+   * Verify availability of document
+   * @typedef {HTMLDocument|module:jDom/pseudoDom/objects.PseudoHTMLDocument} document
+   */
+  let document = root.document
+
+  /**
+   * If document remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof document === 'undefined') {
+    if (typeof require !== 'undefined') {
+      // noinspection JSUnresolvedFunction
+      /**
+       * @see module:jDom/pseudoDom/objects.generate
+       * @typedef {Window|module:jDom/pseudoDom/objects.PseudoEventTarget} root
+       */
+      root = require('../../pseudoDom/objects.js').generate(root)
+      document = root.document
+    } else {
+      console.error('objects.js requires jDomPseudoDom')
+    }
+  }
+
+  /**
    * Verify availability of jDomCore
-   * @type {*|module:jDomCore}
+   * @typedef {*|module:jDom/core/core} jDomCore
    */
   let jDomCore = root.jDomCore
 
@@ -59,15 +64,15 @@
    */
   if (typeof jDomCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('./core.js')
+      jDomCore = require('../core.js')
     } else {
-      console.error('core-dom.js requires jDomCore')
+      console.error('core.js requires jDomCore')
     }
   }
 
   /**
    * Verify availability of jDomCore
-   * @type {*|module:jDomObjects}
+   * @typedef {*|module:jDom/core/domItems/objects} jDomObjects
    */
   let jDomObjects = root.jDomObjects
 
@@ -76,9 +81,9 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('./objects-dom.js')
+      jDomObjects = require('./objects.js')
     } else {
-      console.error('core-dom.js requires jDomObjects')
+      console.error('core.js requires jDomObjects')
     }
   }
 
@@ -86,7 +91,7 @@
    * Check if the provided Element has the provided attributes.
    * Returns a boolean, or an array of 1 / 0 / -1 based on the comparison status.
    * @function elementHasAttribute
-   * @param {HTMLElement|module:jDomPseudoDom.PseudoHTMLElement} element
+   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element
    * @param {string} key
    * @param {string} attr
    * @returns {boolean|Object.<string, number>}
@@ -309,13 +314,15 @@
    * Provide compatibility for assigning listeners.
    * @function assignListener
    * @param trigger
-   * @param elem
+   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement}elem
    * @param fn
    * @param options
    * @returns {*}
    */
   jDomCoreDom.assignListener = (trigger, elem, fn, options) => {
-    elem.addEventListener ? elem.addEventListener(trigger, fn, listenerOptions(options)) : elem.attachEvent ? elem.attachEvent(`on${trigger}`, fn) : elem[`on${trigger}`] = fn
+    elem.addEventListener
+      ? elem.addEventListener(trigger, fn, listenerOptions(options))
+      : elem.attachEvent ? elem.attachEvent(`on${trigger}`, fn) : elem[`on${trigger}`] = fn
     return fn
   }
 

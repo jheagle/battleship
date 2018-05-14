@@ -14,11 +14,12 @@
 
   /**
    * A reference to all functions to be used globally / exported
-   * @module jDomPseudoDom
+   * @typedef {Object} jDomPseudoDom
+   * @module jDom/pseudoDom/objects
    */
   const jDomPseudoDom = {}
   root.jDomPseudoDom = jDomPseudoDom
-  
+
   /**
    * Return a reference to this library while preserving the original same-named library
    * @function noConflict
@@ -30,15 +31,15 @@
   }
 
   /**
-   * @typedef {Object} PseudoEvent
+   * @class
    * @property {boolean} bubbles - A Boolean indicating whether the event bubbles up through the DOM or not.
    * @property {boolean} cancelable - A Boolean indicating whether the event is cancelable.
    * @property {boolean} composed - A Boolean value indicating whether or not the event can bubble across the boundary
    * between the shadow DOM and the regular DOM.
    * @property {function|composed} currentTarget - A reference to the currently registered target for the event. This
    * is the object to which the event is currently slated to be sent; it's possible this has been changed along the way
-   * through retargeting.
-   * @property {boolean} defaultPrevent - Indicates whether or not event.preventDefault() has been called on the event.
+   * through re-targeting.
+   * @property {boolean} defaultPrevented - Indicates whether or not event.preventDefault() has been called on the event.
    * @property {string} eventPhase - Indicates which phase of the event flow is being processed.
    * @property {EventTarget|PseudoEventTarget} target - A reference to the target to which the event was originally
    * dispatched.
@@ -107,8 +108,10 @@
     }
   }
 
+  jDomPseudoDom.PseudoEvent = PseudoEvent
+
   /**
-   * @typedef {Object} PseudoEventTarget
+   * @class
    * @property {Object} listeners
    * @property {function} addEventListener
    * @property {function} removeEventListener
@@ -206,7 +209,7 @@
       : getParentNodesFromAttribute(attr, value, node.parent)
 
   /**
-   * @typedef {Object} PseudoNode
+   * @class
    * @augments PseudoEventTarget
    * @property {string} name
    * @property {Object} parent
@@ -255,7 +258,7 @@
   jDomPseudoDom.PseudoNode = PseudoNode
 
   /**
-   * @typedef {Object} PseudoElement
+   * @class
    * @augments PseudoNode
    * @property {string} tagName
    * @property {Array} attributes
@@ -341,7 +344,7 @@
 
   /**
    * Simulate a HTMLElement when the DOM is unavailable
-   * @typedef {Object} PseudoHTMLElement
+   * @class
    * @augments PseudoElement
    * @property {boolean} hidden - State of whether element is visible
    * @property {number} offsetHeight - The height of the element as offset by the parent element
@@ -384,22 +387,17 @@
 
   /**
    * A representation of HTMLElement object when it is not available.
-   * @typedef {PseudoHTMLElement} PseudoHTMLDocument
+   * @class
    * @augments PseudoHTMLElement
    * @property {PseudoHTMLElement} head - A reference to the Head child element
    * @property {PseudoHTMLElement} body - A reference to the Body child element
    * @property {function} createElement - Generate a new PseudoHTMLElement with parent of document
    */
-
-  /**
-   * The root HTML element is acts as the parent to all HTML elements in the document.
-   * @returns {PseudoHTMLDocument}
-   * @constructor
-   */
   class PseudoHTMLDocument extends PseudoHTMLElement {
     /**
-     * Define the Object to be returned
-     * @type {PseudoHTMLDocument}
+     * The root HTML element is acts as the parent to all HTML elements in the document.
+     * @returns {PseudoHTMLDocument}
+     * @constructor
      */
     constructor () {
       super()
@@ -438,7 +436,8 @@
   jDomPseudoDom.PseudoHTMLDocument = PseudoHTMLDocument
 
   /**
-   *
+   * @exports jDom/pseudoDom/objects.generate
+   * @function generate
    * @param {Object} context
    * @returns {Window|PseudoEventTarget}
    */
