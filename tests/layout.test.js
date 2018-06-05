@@ -1,5 +1,5 @@
-const jDomCoreDom = require('../src/js/jDom/core/domItems/core.js')
-const jDomLayout = require('../src/js/jDom/layouts/battleship.js')
+const jDomCoreDom = require('../src/js/jDom/core/dom/core.js')
+const jDomLayout = require('../src/js/game/layout.js')
 
 // boards
 // finalScore

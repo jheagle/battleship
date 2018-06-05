@@ -13,7 +13,8 @@
 
   /**
    * A reference to all functions to be used globally / exported
-   * @module gameMain
+   * @typedef (Object) gameMain
+   * @module game/main
    */
   const gameMain = {}
   root.gameMain = gameMain
@@ -30,7 +31,7 @@
 
   /**
    * Verify availability of jDomObjects
-   * @type {*|jDomObjects}
+   * @typedef {*|module:jDom/core/dom/objects} jDomObjects
    */
   let jDomObjects = root.jDomObjects
 
@@ -39,15 +40,15 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('./jDom/core/domItems/objects.js')
+      jDomObjects = require('../jDom/core/dom/objects.js')
     } else {
-      console.error('main.js requires jDomObjects')
+      console.error('main.js requires jDom/core/dom/objects')
     }
   }
 
   /**
    * Verify availability of jDomCoreDom
-   * @type {*|jDomCoreDom}
+   * @typedef {*|module:jDom/core/dom/core} jDomCoreDom
    */
   let jDomCoreDom = root.jDomCoreDom
 
@@ -56,15 +57,15 @@
    */
   if (typeof jDomCoreDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreDom = require('./jDom/core/domItems/core.js')
+      jDomCoreDom = require('../jDom/core/dom/core.js')
     } else {
-      console.error('main.js requires jDomCoreDom')
+      console.error('main.js requires jDom/core/dom/core')
     }
   }
 
   /**
    * Verify availability of gameActions
-   * @type {*|gameActions}
+   * @typedef {*|module:game/actions} gameActions
    */
   let gameActions = root.gameActions
 
@@ -73,15 +74,15 @@
    */
   if (typeof gameActions === 'undefined') {
     if (typeof require !== 'undefined') {
-      gameActions = require('./game/actions.js')
+      gameActions = require('./actions.js')
     } else {
-      console.error('main.js requires gameActions')
+      console.error('main.js requires game/actions')
     }
   }
 
   /**
    * Verify availability of gameStart
-   * @type {*|gameStart}
+   * @typedef {*|module:game/setup} gameStart
    */
   let gameStart = root.gameStart
 
@@ -90,15 +91,15 @@
    */
   if (typeof gameStart === 'undefined') {
     if (typeof require !== 'undefined') {
-      gameStart = require('./game/start-functions.js')
+      gameStart = require('./setup.js')
     } else {
-      console.error('main.js requires gameStart')
+      console.error('main.js requires game/setup')
     }
   }
 
   /**
    * Create new private reference to the document
-   * @member documentItem
+   * @typedef {module:jDom/core/dom/objects.documentItem} documentItem
    */
   const documentItem = gameStart.main(jDomObjects.documentDOMItem({
     beginRound: gameStart.beginRound,
@@ -107,7 +108,7 @@
   }))
   console.log(documentItem)
 
-  if (typeof document === 'undefined' || typeof document === 'PseudoHTMLDocument') {
+  if (typeof document === 'undefined' || document instanceof 'PseudoHTMLDocument') {
     // Trigger game to start if running as node module
     const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)
     const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])

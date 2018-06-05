@@ -17,8 +17,8 @@
    */
   if (!Object.keys(root).length) {
     if (typeof require !== 'undefined') {
-      const jDomPseudoDom = require('../../pseudoDom/objects.js')
-      root = jDomPseudoDom.generate()
+      // noinspection JSUnresolvedFunction
+      root = require('../../pseudoDom/objects.js').generate(root)
       document = root.document
     } else {
       console.error('objects.js requires jDomPseudoDom')
@@ -34,11 +34,11 @@
   /**
    * A reference to all functions to be used globally / exported
    * @typedef {Object} jDomObjects
-   * @module jDom/core/domItems/objects
+   * @module jDom/core/dom/objects
    */
   const jDomObjects = {}
   root.jDomObjects = jDomObjects
-  
+
   /**
    * Return a reference to this library while preserving the original same-named library
    * @function noConflict
@@ -51,7 +51,7 @@
 
   /**
    * Verify availability of jDomCore
-   * @type {*|module:jDom/core/core}
+   * @typedef {*|module:jDom/core/core} jDomCore
    */
   let jDomCore = root.jDomCore
 
@@ -149,6 +149,7 @@
 
   /**
    * DOMItemRoot defines the structure for a single element in the DOM
+   * @member DOMItemRoot
    * @typedef {DOMItem} DOMItemRoot
    * @property {string} [tagName=html] - This is set to the string html referring to the HTML element of the same name
    * @property {Object} attributes - Empty object as attributes placeholder
@@ -193,7 +194,7 @@
   /**
    * Create reference for storing document changes
    * @member documentItem
-   * @type {DOMItem}
+   * @type {DOMItemRoot}
    */
   jDomObjects.documentItem = jDomObjects.documentDOMItem()
 

@@ -14,7 +14,8 @@
 
   /**
    * A reference to all functions to be used globally / exported
-   * @module gamePieces
+   * @typedef (Object) gamePieces
+   * @module game/pieces
    */
   const gamePieces = {}
   root.gamePieces = gamePieces
@@ -31,7 +32,7 @@
 
   /**
    * Verify availability of jDomCore
-   * @type {*|jDomCore}
+   * @typedef {*|module:jDom/core/core} jDomCore
    */
   let jDomCore = root.jDomCore
 
@@ -42,34 +43,49 @@
     if (typeof require !== 'undefined') {
       jDomCore = require('../jDom/core/core.js')
     } else {
-      console.error('game-pieces.js requires jDomCore')
+      console.error('pieces.js requires jDom/core/core')
     }
   }
 
   /**
-   * Verify availability of jDomObjectsMatrix
-   * @type {*|jDomObjectsMatrix}
+   * Verify availability of jDomObjects
+   * @typedef {*|module:jDom/core/dom/objects} jDomObjects
    */
-  let jDomObjectsMatrix = root.jDomObjectsMatrix
+  let jDomObjects = root.jDomObjects
 
   /**
-   * If jDomObjectsMatrix remains undefined, attempt to retrieve it as a module
+   * If jDomObjects remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomObjectsMatrix === 'undefined') {
+  if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjectsMatrix = require('../jDom/matrix/objects.js')
+      jDomObjects = require('../jDom/core/dom/objects.js')
     } else {
-      console.error('game-pieces.js requires jDomObjectsMatrix')
+      console.error('setup.js requires jDom/core/dom/objects')
+    }
+  }
+
+  /**
+   * Verify availability of jDomMatrixObjects
+   * @typedef {*|module:jDom/matrix/objects} jDomMatrixObjects
+   */
+  let jDomMatrixObjects = root.jDomMatrixObjects
+
+  /**
+   * If jDomMatrixObjects remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof jDomMatrixObjects === 'undefined') {
+    if (typeof require !== 'undefined') {
+      jDomMatrixObjects = require('../jDom/matrix/objects.js')
+    } else {
+      console.error('pieces.js requires jDom/matrix/objects')
     }
   }
 
   /**
    * Default properties for a tile in the battleship game.
-   * @param {Object} [player={}]
-   * @param {Array} [players=[]]
-   * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}}}
+   * @returns {module:jDom/core/dom/objects.DOMItem}
    */
-  const gameTile = (player = {}, players = []) => ({
+  const gameTile = () => jDomObjects.DOMItem({
     hasShip: false,
     isHit: false,
     eventListeners: {
@@ -80,11 +96,9 @@
   /**
    * Set the style for tiles representing water.
    * @function waterTile
-   * @param {Object} [player={}]
-   * @param {Array} [players=[]]
    * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}, point: {}}}
    */
-  gamePieces.waterTile = (player = {}, players = []) => jDomCore.mergeObjects(gameTile(player, players), jDomObjectsMatrix.tile())
+  gamePieces.waterTile = () => jDomCore.mergeObjects(gameTile(), jDomMatrixObjects.tile())
 
   /**
    * Set status and custom properties for tiles that have a ship

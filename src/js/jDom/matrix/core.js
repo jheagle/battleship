@@ -8,31 +8,31 @@
 
   /**
    * Store reference to any pre-existing module of the same name
-   * @type {jDomCoreMatrix|*}
+   * @type {jDomMatrixCore|*}
    */
-  const previousJDomCoreMatrix = root.jDomCoreMatrix || {}
+  const previousJDomMatrixCore = root.jDomMatrixCore || {}
 
   /**
    * A reference to all functions to be used globally / exported
-   * @typedef {Object} jDomCoreMatrix
+   * @typedef {Object} jDomMatrixCore
    * @module jDom/matrix/core
    */
-  const jDomCoreMatrix = {}
-  root.jDomCoreMatrix = jDomCoreMatrix
+  const jDomMatrixCore = {}
+  root.jDomMatrixCore = jDomMatrixCore
   
   /**
    * Return a reference to this library while preserving the original same-named library
    * @function noConflict
-   * @returns {jDomCoreMatrix}
+   * @returns {jDomMatrixCore}
    */
-  jDomCoreMatrix.noConflict = () => {
-    root.jDomCoreMatrix = previousJDomCoreMatrix
-    return jDomCoreMatrix
+  jDomMatrixCore.noConflict = () => {
+    root.jDomMatrixCore = previousJDomMatrixCore
+    return jDomMatrixCore
   }
 
   /**
-   * Verify availability of jDomObjectsMatrix
-   * @type {*|module:jDom/core/core}
+   * Verify availability of jDomMatrixObjects
+   * @typedef {*|module:jDom/core/core} jDomCore
    */
   let jDomCore = root.jDomCore
 
@@ -48,19 +48,19 @@
   }
 
   /**
-   * Verify availability of jDomObjectsMatrix
-   * @type {*|jDomObjectsMatrix}
+   * Verify availability of jDomMatrixObjects
+   * @typedef {*|module:jDom/matrix/objects} jDomMatrixObjects
    */
-  let jDomObjectsMatrix = root.jDomObjectsMatrix
+  let jDomMatrixObjects = root.jDomMatrixObjects
 
   /**
    * If jDomCoreDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomObjectsMatrix === 'undefined') {
+  if (typeof jDomMatrixObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjectsMatrix = require('./objects.js')
+      jDomMatrixObjects = require('./objects.js')
     } else {
-      console.error('core.js requires jDomObjectsMatrix')
+      console.error('core.js requires jDomMatrixObjects')
     }
   }
 
@@ -72,7 +72,7 @@
    * @param pnt
    * @returns {*}
    */
-  jDomCoreMatrix.bindPointData = (item, pnt = jDomObjectsMatrix.point(0, 0, 0)) => jDomCore.mergeObjects(item, (item.point ? {point: jDomCore.cloneObject(pnt)} : {children: item.children.map((el, i) => jDomCoreMatrix.bindPointData(el, jDomCore.mergeObjects(pnt, {[el.axis]: i})))}))
+  jDomMatrixCore.bindPointData = (item, pnt = jDomMatrixObjects.point(0, 0, 0)) => jDomCore.mergeObjects(item, (item.point ? {point: jDomCore.cloneObject(pnt)} : {children: item.children.map((el, i) => jDomMatrixCore.bindPointData(el, jDomCore.mergeObjects(pnt, {[el.axis]: i})))}))
 
   /**
    * Based on provided point and point direction generate next point.
@@ -81,7 +81,7 @@
    * @param dir
    * @returns {Object.<string, number>}
    */
-  jDomCoreMatrix.nextCell = (pnt, dir) => jDomObjectsMatrix.point(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z)
+  jDomMatrixCore.nextCell = (pnt, dir) => jDomMatrixObjects.point(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z)
 
   /**
    * Based on provided point and point direction generate next point.
@@ -90,7 +90,7 @@
    * @param end
    * @returns {Object.<string, number>}
    */
-  jDomCoreMatrix.pointDifference = (start, end) => jDomObjectsMatrix.point(end.x - start.x, end.y - start.y, end.z - start.z)
+  jDomMatrixCore.pointDifference = (start, end) => jDomMatrixObjects.point(end.x - start.x, end.y - start.y, end.z - start.z)
 
   /**
    * Given two points, compare the x, y, and z of each to see if they are the same
@@ -99,7 +99,7 @@
    * @param p2
    * @returns {boolean}
    */
-  jDomCoreMatrix.checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
+  jDomMatrixCore.checkEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
 
   /**
    * Check if there is a negative coordinate value within the point provided
@@ -107,7 +107,7 @@
    * @param pnt
    * @returns {boolean}
    */
-  jDomCoreMatrix.pointHasNegative = pnt => !!Object.keys(jDomCore.filterObject(pnt, (attr) => attr < 0)).length
+  jDomMatrixCore.pointHasNegative = pnt => !!Object.keys(jDomCore.filterObject(pnt, (attr) => attr < 0)).length
 
   /**
    * Return the first coordinate number with the highest absolute value.
@@ -115,7 +115,7 @@
    * @param pnt
    * @returns {Array.<T>|*}
    */
-  jDomCoreMatrix.getHighAbsoluteCoord = pnt => jDomCore.reduceObject(pnt, jDomCore.curry(jDomCore.getMaxOrMin)(!jDomCoreMatrix.pointHasNegative(pnt)), 0)
+  jDomMatrixCore.getHighAbsoluteCoord = pnt => jDomCore.reduceObject(pnt, jDomCore.curry(jDomCore.getMaxOrMin)(!jDomMatrixCore.pointHasNegative(pnt)), 0)
 
   /**
    * Having provided a coordinate number, find all corresponding axis.
@@ -124,7 +124,7 @@
    * @param coord
    * @returns {*}
    */
-  jDomCoreMatrix.getAxisOfCoord = (pnt, coord) => Object.keys(pnt).filter((key) => pnt[key] === coord)
+  jDomMatrixCore.getAxisOfCoord = (pnt, coord) => Object.keys(pnt).filter((key) => pnt[key] === coord)
 
   /**
    * Find all axis of the highest absolute value coordinate
@@ -132,7 +132,7 @@
    * @param pnt
    * @returns {*}
    */
-  jDomCoreMatrix.getHighAbsoluteCoordAxis = pnt => jDomCoreMatrix.getAxisOfCoord(pnt, jDomCoreMatrix.getHighAbsoluteCoord(pnt))
+  jDomMatrixCore.getHighAbsoluteCoordAxis = pnt => jDomMatrixCore.getAxisOfCoord(pnt, jDomMatrixCore.getHighAbsoluteCoord(pnt))
 
   /**
    * Retrieve a directional coordinate value based on two provided points
@@ -142,7 +142,7 @@
    * @param end
    * @returns {*}
    */
-  jDomCoreMatrix.pointDirection = (start, end) => jDomCore.mergeObjects(jDomObjectsMatrix.point(0, 0, 0), {[`${jDomCoreMatrix.getHighAbsoluteCoordAxis(jDomCoreMatrix.pointDifference(start, end))[0]}`]: jDomCoreMatrix.pointHasNegative(jDomCoreMatrix.pointDifference(start, end)) ? -1 : 1})
+  jDomMatrixCore.pointDirection = (start, end) => jDomCore.mergeObjects(jDomMatrixObjects.point(0, 0, 0), {[`${jDomMatrixCore.getHighAbsoluteCoordAxis(jDomMatrixCore.pointDifference(start, end))[0]}`]: jDomMatrixCore.pointHasNegative(jDomMatrixCore.pointDifference(start, end)) ? -1 : 1})
 
   /**
    * Generate a random starting point for a line with the provided length and direction.
@@ -152,7 +152,7 @@
    * @param lengthLimits
    * @returns {{x: number, y: number, z: number}}
    */
-  jDomCoreMatrix.randomStart = (length, dir, lengthLimits = jDomObjectsMatrix.point(10, 10, 10)) => jDomObjectsMatrix.point(jDomCore.randomInteger(lengthLimits.x - ((length - 1) * dir.x)), jDomCore.randomInteger(lengthLimits.y - ((length - 1) * dir.y)), jDomCore.randomInteger(lengthLimits.z - ((length - 1) * dir.z)))
+  jDomMatrixCore.randomStart = (length, dir, lengthLimits = jDomMatrixObjects.point(10, 10, 10)) => jDomMatrixObjects.point(jDomCore.randomInteger(lengthLimits.x - ((length - 1) * dir.x)), jDomCore.randomInteger(lengthLimits.y - ((length - 1) * dir.y)), jDomCore.randomInteger(lengthLimits.z - ((length - 1) * dir.z)))
 
   /**
    * Given a start point, line length, and a direction, generate the end point of the line.
@@ -162,7 +162,7 @@
    * @param dir
    * @returns {Object.<string, number>}
    */
-  jDomCoreMatrix.lineEndPoint = (start, length, dir) => jDomObjectsMatrix.point(start.x + dir.x * (length - 1), start.y + dir.y * (length - 1), start.z + dir.z * (length - 1))
+  jDomMatrixCore.lineEndPoint = (start, length, dir) => jDomMatrixObjects.point(start.x + dir.x * (length - 1), start.y + dir.y * (length - 1), start.z + dir.z * (length - 1))
 
   /**
    * Having provided two points, return an array of transition points
@@ -174,7 +174,7 @@
    * @param line
    * @returns {Array.<*>}
    */
-  jDomCoreMatrix.getPointsLine = (start, end, line = []) => jDomCoreMatrix.checkEqualPoints(start, end) ? line.concat([start]) : jDomCoreMatrix.getPointsLine(jDomCoreMatrix.nextCell(start, jDomCoreMatrix.pointDirection(start, end)), end, line.concat([start]))
+  jDomMatrixCore.getPointsLine = (start, end, line = []) => jDomMatrixCore.checkEqualPoints(start, end) ? line.concat([start]) : jDomMatrixCore.getPointsLine(jDomMatrixCore.nextCell(start, jDomMatrixCore.pointDirection(start, end)), end, line.concat([start]))
 
   /**
    * Takes an array of arrays containing two points each. Calls getPointsLine for each array of points.
@@ -183,7 +183,7 @@
    * @param lines
    * @returns {Array.<*>}
    */
-  jDomCoreMatrix.getPointsLines = lines => lines.reduce((first, next) => first.concat(jDomCoreMatrix.getPointsLine(...next)), [])
+  jDomMatrixCore.getPointsLines = lines => lines.reduce((first, next) => first.concat(jDomMatrixCore.getPointsLine(...next)), [])
 
   /**
    * Given a start and end point, test the points between with the provided function.
@@ -196,7 +196,7 @@
    * @param inclusive
    * @returns {{true: Array, false: Array}}
    */
-  jDomCoreMatrix.testPointsBetween = (start, end, matrix, func, inclusive = true) => jDomCoreMatrix.getPointsLine(start, end).filter((prop, i, line) => ((i !== 0 && i !== line.length - 1) || inclusive)).reduce((newPoints, next) => jDomCore.mergeObjects(newPoints, {[`${!!func(next, matrix)}`]: [next]}), {
+  jDomMatrixCore.testPointsBetween = (start, end, matrix, func, inclusive = true) => jDomMatrixCore.getPointsLine(start, end).filter((prop, i, line) => ((i !== 0 && i !== line.length - 1) || inclusive)).reduce((newPoints, next) => jDomCore.mergeObjects(newPoints, {[`${!!func(next, matrix)}`]: [next]}), {
     true: [],
     false: []
   })
@@ -212,10 +212,10 @@
    * @param inclusive
    * @returns {{true: Array, false: Array}}
    */
-  jDomCoreMatrix.getInBetween = (start, end, matrix, func, inclusive = true) => jDomCore.mergeObjects({
+  jDomMatrixCore.getInBetween = (start, end, matrix, func, inclusive = true) => jDomCore.mergeObjects({
     true: [],
     false: []
-  }, jDomCoreMatrix.testPointsBetween(start, end, matrix, func, inclusive))
+  }, jDomMatrixCore.testPointsBetween(start, end, matrix, func, inclusive))
 
   /**
    * Given two points, check the cells between using specified function.
@@ -228,21 +228,21 @@
    * @param inclusive
    * @returns {boolean}
    */
-  jDomCoreMatrix.checkInBetween = (start, end, matrix, func, inclusive = true) => (inclusive && (func(start, matrix) || func(end, matrix))) ? true : !!jDomCoreMatrix.testPointsBetween(start, end, matrix, func).true.length
+  jDomMatrixCore.checkInBetween = (start, end, matrix, func, inclusive = true) => (inclusive && (func(start, matrix) || func(end, matrix))) ? true : !!jDomMatrixCore.testPointsBetween(start, end, matrix, func).true.length
 
   /**
    * Return point-like object with all of the axis lengths.
    * @function getAxisLengths
    * @param matrix
    */
-  jDomCoreMatrix.getAxisLengths = (matrix) => jDomObjectsMatrix.point(matrix.children[0].children[0].children.length, matrix.children[0].children.length, matrix.children.length)
+  jDomMatrixCore.getAxisLengths = (matrix) => jDomMatrixObjects.point(matrix.children[0].children[0].children.length, matrix.children[0].children.length, matrix.children.length)
 
   /**
    * Get random direction point
    * @function randDirection
    * @param useCoords
    */
-  jDomCoreMatrix.randDirection = (useCoords = []) => useCoords.length ? useCoords[jDomCore.randomInteger(useCoords.length)] : jDomObjectsMatrix.point(0, 0, 0)
+  jDomMatrixCore.randDirection = (useCoords = []) => useCoords.length ? useCoords[jDomCore.randomInteger(useCoords.length)] : jDomMatrixObjects.point(0, 0, 0)
 
   /**
    * Test if the provided point exists in the matrix.
@@ -250,7 +250,7 @@
    * @param pnt
    * @param matrix
    */
-  jDomCoreMatrix.checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
+  jDomMatrixCore.checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
 
   /**
    * Test if the provided point exists in the matrix.
@@ -258,7 +258,7 @@
    * @param pnt
    * @param matrix
    */
-  jDomCoreMatrix.getDOMItemFromPoint = (pnt, matrix) => jDomCoreMatrix.checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false
+  jDomMatrixCore.getDOMItemFromPoint = (pnt, matrix) => jDomMatrixCore.checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false
 
   /**
    * Return an array of all the points in the matrix
@@ -267,7 +267,7 @@
    * @param allPoints
    * @returns {Array}
    */
-  jDomCoreMatrix.getAllPoints = (matrix, allPoints = []) => (matrix.point) ? allPoints.concat([matrix.point]) : matrix.children.reduce((allPoints, child) => allPoints.concat(jDomCoreMatrix.getAllPoints(child, [])), [])
+  jDomMatrixCore.getAllPoints = (matrix, allPoints = []) => (matrix.point) ? allPoints.concat([matrix.point]) : matrix.children.reduce((allPoints, child) => allPoints.concat(jDomMatrixCore.getAllPoints(child, [])), [])
 
   /**
    * Return all valid points surrounding a provided point
@@ -276,8 +276,8 @@
    * @param matrix
    * @returns {Array}
    */
-  jDomCoreMatrix.adjacentPoints = (pnt, matrix) => jDomCoreMatrix.getPointsLines([[jDomObjectsMatrix.point(-1, 1, 1), jDomObjectsMatrix.point(1, -1, -1)], [jDomObjectsMatrix.point(1, 1, 1), jDomObjectsMatrix.point(-1, 1, -1)], [jDomObjectsMatrix.point(-1, -1, 1), jDomObjectsMatrix.point(1, -1, 1)], [jDomObjectsMatrix.point(1, 0, 0), jDomObjectsMatrix.point(1, 1, -1)], [jDomObjectsMatrix.point(-1, 1, 0), jDomObjectsMatrix.point(1, 1, 0)]]).concat([jDomObjectsMatrix.point(0, 0, 1), jDomObjectsMatrix.point(1, 0, 0), jDomObjectsMatrix.point(-1, 0, -1), jDomObjectsMatrix.point(0, 0, -1)])
-    .map(p => jDomCoreMatrix.nextCell(pnt, p)).filter(p => jDomCoreMatrix.checkValidPoint(jDomCoreMatrix.nextCell(pnt, p), matrix))
+  jDomMatrixCore.adjacentPoints = (pnt, matrix) => jDomMatrixCore.getPointsLines([[jDomMatrixObjects.point(-1, 1, 1), jDomMatrixObjects.point(1, -1, -1)], [jDomMatrixObjects.point(1, 1, 1), jDomMatrixObjects.point(-1, 1, -1)], [jDomMatrixObjects.point(-1, -1, 1), jDomMatrixObjects.point(1, -1, 1)], [jDomMatrixObjects.point(1, 0, 0), jDomMatrixObjects.point(1, 1, -1)], [jDomMatrixObjects.point(-1, 1, 0), jDomMatrixObjects.point(1, 1, 0)]]).concat([jDomMatrixObjects.point(0, 0, 1), jDomMatrixObjects.point(1, 0, 0), jDomMatrixObjects.point(-1, 0, -1), jDomMatrixObjects.point(0, 0, -1)])
+    .map(p => jDomMatrixCore.nextCell(pnt, p)).filter(p => jDomMatrixCore.checkValidPoint(jDomMatrixCore.nextCell(pnt, p), matrix))
 
   /**
    * Return all points which touch on edges (not diagonal)
@@ -285,15 +285,15 @@
    * @param pnt
    * @param matrix
    */
-  jDomCoreMatrix.adjacentEdgePoints = (pnt, matrix) => [jDomObjectsMatrix.point(-1, 0, 0), jDomObjectsMatrix.point(1, 0, 0), jDomObjectsMatrix.point(0, -1, 0), jDomObjectsMatrix.point(0, 1, 0), jDomObjectsMatrix.point(0, 0, -1), jDomObjectsMatrix.point(0, 0, 1)].map(p => jDomCoreMatrix.nextCell(pnt, p)).filter(p => jDomCoreMatrix.checkValidPoint(p, matrix))
+  jDomMatrixCore.adjacentEdgePoints = (pnt, matrix) => [jDomMatrixObjects.point(-1, 0, 0), jDomMatrixObjects.point(1, 0, 0), jDomMatrixObjects.point(0, -1, 0), jDomMatrixObjects.point(0, 1, 0), jDomMatrixObjects.point(0, 0, -1), jDomMatrixObjects.point(0, 0, 1)].map(p => jDomMatrixCore.nextCell(pnt, p)).filter(p => jDomMatrixCore.checkValidPoint(p, matrix))
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = jDomCoreMatrix
+      exports = module.exports = jDomMatrixCore
     }
-    exports = Object.assign(exports, jDomCoreMatrix)
+    exports = Object.assign(exports, jDomMatrixCore)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

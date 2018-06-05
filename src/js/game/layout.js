@@ -8,30 +8,31 @@
 
   /**
    * Store reference to any pre-existing module of the same name
-   * @type {jDomLayout|*}
+   * @type {gameLayout|*}
    */
-  const previousJDomLayout = root.jDomLayout || {}
+  const previousGameLayout = root.gameLayout || {}
 
   /**
    * A reference to all functions to be used globally / exported
-   * @module jDomLayout
+   * @typedef {Object} gameLayout
+   * @module game/layout
    */
-  const jDomLayout = {}
-  root.jDomLayout = jDomLayout
+  const gameLayout = {}
+  root.gameLayout = gameLayout
 
   /**
    * Return a reference to this library while preserving the original same-named library
    * @function noConflict
-   * @returns {jDomLayout}
+   * @returns {gameLayout}
    */
-  jDomLayout.noConflict = () => {
-    root.jDomLayout = previousJDomLayout
-    return jDomLayout
+  gameLayout.noConflict = () => {
+    root.gameLayout = previousGameLayout
+    return gameLayout
   }
 
   /**
    * Verify availability of jDomCore
-   * @type {*|jDomObjects}
+   * @typedef {*|module:jDom/core/dom/objects} jDomObjects
    */
   let jDomObjects = root.jDomObjects
 
@@ -40,19 +41,18 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('../core/domItems/objects.js')
+      jDomObjects = require('../jDom/core/dom/objects.js')
     } else {
-      console.error('battleship.js requires jDomObjects')
+      console.error('layout.js requires jDomObjects')
     }
   }
 
   /**
    * This will be the main menu for the game.
    * @function mainMenu
-   * @param {Object} parent
-   * @returns {module:jDomObjects~DOMItem}
+   * @returns {module:jDom/core/dom/objects.DOMItem}
    */
-  jDomLayout.mainMenu = (parent = {}) => ({
+  gameLayout.mainMenu = () => jDomObjects.DOMItem({
     tagName: 'div',
     attributes: {
       className: 'main-menu'
@@ -165,9 +165,9 @@
    * Wrapper div for player data / boards
    * @function boards
    * @param {Array} [players=[]]
-   * @returns {module:jDomObjects~DOMItem}
+   * @returns {module:jDom/core/dom/objects.DOMItem}
    */
-  jDomLayout.boards = (players = []) => ({
+  gameLayout.boards = (players = []) => jDomObjects.DOMItem({
     tagName: 'div',
     attributes: {
       className: 'boards'
@@ -179,10 +179,9 @@
    * Display the final scores after a game has ended and have a button to restart.
    * @function finalScore
    * @param {Array} players
-   * @param {Object} [parent={}]
-   * @returns {module:jDomObjects~DOMItem}
+   * @returns {module:jDom/core/dom/objects.DOMItem}
    */
-  jDomLayout.finalScore = (players, parent = {}) => ({
+  gameLayout.finalScore = (players) => jDomObjects.DOMItem({
     tagName: 'div',
     attributes: {
       className: 'final-scores'
@@ -219,8 +218,8 @@
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = jDomLayout
+      exports = module.exports = gameLayout
     }
-    exports = Object.assign(exports, jDomLayout)
+    exports = Object.assign(exports, gameLayout)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

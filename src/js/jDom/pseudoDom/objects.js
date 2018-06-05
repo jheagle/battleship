@@ -31,12 +31,53 @@
   }
 
   /**
+   * Verify availability of jDomCore
+   * @typedef {*|module:jDom/core/core} jDomCore
+   */
+  let jDomCore = root.jDomCore
+
+  /**
+   * If gameUtils remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof jDomCore === 'undefined') {
+    if (typeof require !== 'undefined') {
+      jDomCore = require('../core/core.js')
+    } else {
+      console.error('pseudoDom/objects.js requires jDom/core/core')
+    }
+  }
+
+  /**
+   * A selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
+   * This function will check all the children starting from item, and scan the attributes
+   * property for matches. The return array contains children matching from all levels.
+   * WARNING: This is a recursive function.
+   * @param attr
+   * @param value
+   * @param node
+   * @returns {Array}
+   */
+  const getParentNodesFromAttribute = (attr, value, node) =>
+    !Object.keys(node.parent).length
+      ? []
+      : (node[attr] || false) === value
+      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
+      : getParentNodesFromAttribute(attr, value, node.parent)
+
+  /**
+   * A helper selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
+   * @param node
+   * @returns {Array}
+   */
+  const getParentNodes = jDomCore.curry(getParentNodesFromAttribute)('', false)
+
+  /**
    * @class
    * @property {boolean} bubbles - A Boolean indicating whether the event bubbles up through the DOM or not.
    * @property {boolean} cancelable - A Boolean indicating whether the event is cancelable.
    * @property {boolean} composed - A Boolean value indicating whether or not the event can bubble across the boundary
    * between the shadow DOM and the regular DOM.
-   * @property {function|composed} currentTarget - A reference to the currently registered target for the event. This
+   * @property {function|PseudoEventTarget} currentTarget - A reference to the currently registered target for the event. This
    * is the object to which the event is currently slated to be sent; it's possible this has been changed along the way
    * through re-targeting.
    * @property {boolean} defaultPrevented - Indicates whether or not event.preventDefault() has been called on the event.
@@ -73,19 +114,21 @@
       this.bubbles = bubbles
       this.cancelable = cancelable
       this.composed = composed
-      this.currentTarget = {}
+      this.currentTarget = () => undefined
       this.defaultPrevented = false
       this.eventPhase = ''
-      this.target = {}
+      this.target = new PseudoEventTarget
       this.timeStamp = Math.floor(Date.now() / 1000)
       this.type = typeArg
       this.isTrusted = true
     }
 
+    // noinspection JSUnusedGlobalSymbols
     createEvent (type = '') {
       return new this(type)
     }
 
+    // noinspection JSUnusedGlobalSymbols
     initEvent (type, bubbles, cancelable) {
       this.type = type
       this.bubbles = bubbles
@@ -99,13 +142,31 @@
       return null
     }
 
+    // noinspection JSUnusedGlobalSymbols
     stopImmediatePropagation () {
+      this.bubbles = false
+      this.defaultPrevented = true
       return null
     }
 
+    // noinspection JSUnusedGlobalSymbols
     stopPropagation () {
+      this.bubbles = false
       return null
     }
+
+    dispatch (options) {
+      const bubbleGroup = getParentNodes(this.target)
+      jDomCore.trace('target parents')(bubbleGroup.map((elem) => elem.tagName))
+      if (options.capture) {
+        this.eventPhase = 'capture'
+        const captureGroup = bubbleGroup.slice().reverse()
+        captureGroup.forEach((target) => this.currentTarget = target)
+      }
+      this.eventPhase = 'bubble'
+      this.target.dispatchEvent(this)
+    }
+
   }
 
   jDomPseudoDom.PseudoEvent = PseudoEvent
@@ -146,7 +207,7 @@
           const event = new PseudoEvent(type)
           event.target = this
           event.currentTarget = this
-          return this.dispatchEvent(event)
+          return event.dispatch(options)
         }
         this.listeners[type] = []
       }
@@ -192,23 +253,6 @@
   jDomPseudoDom.PseudoEventTarget = PseudoEventTarget
 
   /**
-   * A selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
-   * This function will check all the children starting from item, and scan the attributes
-   * property for matches. The return array contains children matching from all levels.
-   * WARNING: This is a recursive function.
-   * @param attr
-   * @param value
-   * @param node
-   * @returns {Array}
-   */
-  const getParentNodesFromAttribute = (attr, value, node) =>
-    !Object.keys(node.parent).length
-      ? []
-      : (node[attr] || false) === value
-      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
-      : getParentNodesFromAttribute(attr, value, node.parent)
-
-  /**
    * @class
    * @augments PseudoEventTarget
    * @property {string} name
@@ -220,7 +264,7 @@
   class PseudoNode extends PseudoEventTarget {
     /**
      *
-     * @param {PseudoNode} [parent={}]
+     * @param {PseudoNode|Object} [parent={}]
      * @param {Array} [children=[]]
      * @constructor
      */
@@ -232,7 +276,7 @@
 
     /**
      *
-     * @param {PseudoNode} childElement
+     * @param {PseudoNode|PseudoElement|PseudoEvent} childElement
      * @returns {PseudoNode}
      */
     appendChild (childElement) {
@@ -272,7 +316,7 @@
      * Simulate the Element object when the DOM is not available
      * @param {string} [tagName=''] - The
      * @param {array} [attributes=[]]
-     * @param {PseudoNode} [parent={}]
+     * @param {PseudoNode|Object} [parent={}]
      * @param {Array} [children=[]]
      * @constructor
      */
@@ -326,6 +370,7 @@
       return this.attributes.find(attribute => attribute.name === attributeName)
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Remove an assigned attribute from the Element
      * @param {string} attributeName - The string name of the attribute to be removed
@@ -359,7 +404,7 @@
     /**
      * Simulate the HTMLELement object when the DOM is not available
      * @param {string} [tagName=''] - The
-     * @param {PseudoNode} [parent={}]
+     * @param {PseudoNode|Object} [parent={}]
      * @param {Array} [children=[]]
      * @returns {PseudoHTMLElement}
      * @constructor
@@ -401,22 +446,25 @@
      */
     constructor () {
       super()
+
+      const html = new PseudoHTMLElement({tagName: 'html', parent: this})
       /**
        * Create document head element
        * @type {PseudoHTMLElement}
        */
-      this.head = new PseudoHTMLElement({tagName: 'head'})
+      this.head = new PseudoHTMLElement({tagName: 'head', parent: html})
 
       /**
        * Create document body element
        * @type {PseudoHTMLElement}
        */
-      this.body = new PseudoHTMLElement({tagName: 'body'})
+      this.body = new PseudoHTMLElement({tagName: 'body', parent: html})
 
-      const html = new PseudoHTMLElement({tagName: 'html', parent: this, children: [this.head, this.body]})
+      html.children = [this.head, this.body]
+
       /**
        * Create document child element
-       * @type {PseudoHTMLElement}
+       * @type {PseudoHTMLElement[]}
        */
       this.children = [html]
     }
@@ -436,7 +484,8 @@
   jDomPseudoDom.PseudoHTMLDocument = PseudoHTMLDocument
 
   /**
-   * @exports jDom/pseudoDom/objects.generate
+   * Construct the Pseudo DOM to provide access to DOM objects which are otherwise not available outside of the browser
+   * context.
    * @function generate
    * @param {Object} context
    * @returns {Window|PseudoEventTarget}
@@ -451,18 +500,18 @@
     /**
      * @type {Node|PseudoNode}
      */
-    const Node = root.Node ? root.Node : new PseudoNode()
+    const Node = root.Node || new PseudoNode()
     if (typeof window.Node === 'undefined') {
-      window.Node = Node
+      window['Node'] = Node
     }
 
     /**
      *
      * @type {Element|PseudoElement}
      */
-    const Element = root.Element = root.Element || new PseudoElement()
+    const Element = root.Element || new PseudoElement()
     if (typeof window.Element === 'undefined') {
-      window.Element = Element
+      window['Element'] = Element
     }
 
     /**
@@ -471,7 +520,7 @@
      */
     const HTMLElement = root.HTMLElement || new PseudoHTMLElement()
     if (typeof window.HTMLElement === 'undefined') {
-      window.HTMLElement = HTMLElement
+      window['HTMLElement'] = HTMLElement
     }
 
     /**

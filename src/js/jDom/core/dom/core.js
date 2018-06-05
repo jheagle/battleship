@@ -15,7 +15,7 @@
   /**
    * A reference to all functions to be used globally / exported
    * @typedef {Object} jDomCoreDom
-   * @module jDom/core/domItems/core
+   * @module jDom/core/dom/core
    */
   const jDomCoreDom = {}
   root.jDomCoreDom = jDomCoreDom
@@ -72,7 +72,7 @@
 
   /**
    * Verify availability of jDomCore
-   * @typedef {*|module:jDom/core/domItems/objects} jDomObjects
+   * @typedef {*|module:jDom/core/dom/objects} jDomObjects
    */
   let jDomObjects = root.jDomObjects
 
@@ -93,7 +93,7 @@
    * @function elementHasAttribute
    * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element
    * @param {string} key
-   * @param {string} attr
+   * @param {string|Object} attr
    * @returns {boolean|Object.<string, number>}
    */
   jDomCoreDom.elementHasAttribute = (element, key, attr) => {
@@ -273,7 +273,7 @@
    * @param {Object} [parent]
    * @returns {function}
    */
-  jDomCoreDom.registerListener = (listener, name = listener.name, parent = jDomObjects.documentItem) => Object.assign(parent.eventListeners, {name: listener})
+  jDomCoreDom.registerListener = (listener, name = listener.name, parent = jDomObjects.documentItem) => Object.assign(parent.eventListeners, {[name]: listener})
 
   /**
    * Register multiple listeners from an array of functions.
@@ -314,7 +314,7 @@
    * Provide compatibility for assigning listeners.
    * @function assignListener
    * @param trigger
-   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement}elem
+   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} elem
    * @param fn
    * @param options
    * @returns {*}
@@ -322,7 +322,7 @@
   jDomCoreDom.assignListener = (trigger, elem, fn, options) => {
     elem.addEventListener
       ? elem.addEventListener(trigger, fn, listenerOptions(options))
-      : elem.attachEvent ? elem.attachEvent(`on${trigger}`, fn) : elem[`on${trigger}`] = fn
+      : elem['attachEvent'] ? elem['attachEvent'](`on${trigger}`, fn) : elem[`on${trigger}`] = fn
     return fn
   }
 

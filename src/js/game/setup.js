@@ -14,7 +14,8 @@
 
   /**
    * A reference to all functions to be used globally / exported
-   * @module gameStart
+   * @typedef (Object) gameStart
+   * @module game/setup
    */
   const gameStart = {}
   root.gameStart = gameStart
@@ -31,7 +32,7 @@
 
   /**
    * Verify availability of jDomCore
-   * @type {*|jDomCore}
+   * @typedef {*|module:jDom/core/core} jDomCore
    */
   let jDomCore = root.jDomCore
 
@@ -42,30 +43,13 @@
     if (typeof require !== 'undefined') {
       jDomCore = require('../jDom/core/core.js')
     } else {
-      console.error('start-functions.js requires jDomCore')
-    }
-  }
-
-  /**
-   * Verify availability of jDomObjects
-   * @type {*|jDomObjects}
-   */
-  let jDomObjects = root.jDomObjects
-
-  /**
-   * If jDomObjects remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomObjects === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomObjects = require('../jDom/core/domItems/objects.js')
-    } else {
-      console.error('start-functions.js requires jDomObjects')
+      console.error('setup.js requires jDom/core/core')
     }
   }
 
   /**
    * Verify availability of jDomCoreDom
-   * @type {*|jDomCoreDom}
+   * @typedef {*|module:jDom/core/dom/core} jDomCoreDom
    */
   let jDomCoreDom = root.jDomCoreDom
 
@@ -74,66 +58,66 @@
    */
   if (typeof jDomCoreDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreDom = require('../jDom/core/domItems/core.js')
+      jDomCoreDom = require('../jDom/core/dom/core.js')
     } else {
-      console.error('start-functions.js requires jDomCoreDom')
+      console.error('setup.js requires jDom/core/dom/core')
     }
   }
 
   /**
-   * Verify availability of jDomCoreMatrix
-   * @type {*|jDomCoreMatrix}
+   * Verify availability of jDomMatrixCore
+   * @typedef {*|module:jDom/matrix/core} jDomMatrixCore
    */
-  let jDomCoreMatrix = root.jDomCoreMatrix
+  let jDomMatrixCore = root.jDomMatrixCore
 
   /**
-   * If jDomCoreMatrix remains undefined, attempt to retrieve it as a module
+   * If jDomMatrixCore remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomCoreMatrix === 'undefined') {
+  if (typeof jDomMatrixCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreMatrix = require('../jDom/matrix/core.js')
+      jDomMatrixCore = require('../jDom/matrix/core.js')
     } else {
-      console.error('start-functions.js requires jDomCoreMatrix')
+      console.error('setup.js requires jDom/matrix/core')
     }
   }
 
   /**
-   * Verify availability of jDomObjectsMatrix
-   * @type {*|jDomCoreMatrix}
+   * Verify availability of jDomMatrixObjects
+   * @typedef {*|module:jDom/matrix/objects} jDomMatrixObjects
    */
-  let jDomObjectsMatrix = root.jDomObjectsMatrix
+  let jDomMatrixObjects = root.jDomMatrixObjects
 
   /**
-   * If jDomObjectsMatrix remains undefined, attempt to retrieve it as a module
+   * If jDomMatrixObjects remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomObjectsMatrix === 'undefined') {
+  if (typeof jDomMatrixObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjectsMatrix = require('../jDom/matrix/objects.js')
+      jDomMatrixObjects = require('../jDom/matrix/objects.js')
     } else {
-      console.error('start-functions.js requires jDomObjectsMatrix')
+      console.error('setup.js requires jDom/matrix/objects')
     }
   }
 
   /**
-   * Verify availability of jDomLayout
-   * @type {*|jDomLayout}
+   * Verify availability of gameLayout
+   * @typedef {*|module:game/layout} gameLayout
    */
-  let jDomLayout = root.jDomLayout
+  let gameLayout = root.gameLayout
 
   /**
-   * If jDomLayout remains undefined, attempt to retrieve it as a module
+   * If gameLayout remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomLayout === 'undefined') {
+  if (typeof gameLayout === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomLayout = require('../jDom/layouts/battleship.js')
+      gameLayout = require('./layout.js')
     } else {
-      console.error('start-functions.js requires jDomLayout')
+      console.error('setup.js requires game/layout')
     }
   }
 
   /**
    * Verify availability of gamePieces
-   * @type {*|gamePieces}
+   * @typedef {*|module:game/pieces} gamePieces
    */
   let gamePieces = root.gamePieces
 
@@ -142,15 +126,15 @@
    */
   if (typeof gamePieces === 'undefined') {
     if (typeof require !== 'undefined') {
-      gamePieces = require('./game-pieces.js')
+      gamePieces = require('./pieces.js')
     } else {
-      console.error('start-functions.js requires gamePieces')
+      console.error('setup.js requires game/pieces')
     }
   }
 
   /**
    * Verify availability of gameUtils
-   * @type {*|gameUtils}
+   * @typedef {*|module:game/functions} gameUtils
    */
   let gameUtils = root.gameUtils
 
@@ -161,13 +145,13 @@
     if (typeof require !== 'undefined') {
       gameUtils = require('./functions.js')
     } else {
-      console.error('start-functions.js requires gameUtils')
+      console.error('setup.js requires game/functions')
     }
   }
 
   /**
    * Verify availability of gameActions
-   * @type {*|gameActions}
+   * @typedef {*|module:game/actions} gameActions
    */
   let gameActions = root.gameActions
 
@@ -178,7 +162,7 @@
     if (typeof require !== 'undefined') {
       gameActions = require('./actions.js')
     } else {
-      console.error('start-functions.js requires gameActions')
+      console.error('setup.js requires game/actions')
     }
   }
 
@@ -198,7 +182,7 @@
    * @param lengths
    * @param shipLength
    */
-  const selectShipDirection = (lengths, shipLength) => jDomCoreMatrix.randDirection([jDomObjectsMatrix.point(1, 0, 0), jDomObjectsMatrix.point(0, 1, 0), jDomObjectsMatrix.point(0, 0, 1)].filter(p => lengths[jDomCoreMatrix.getAxisOfCoord(p, 1)] > shipLength))
+  const selectShipDirection = (lengths, shipLength) => jDomMatrixCore.randDirection([jDomMatrixObjects.point(1, 0, 0), jDomMatrixObjects.point(0, 1, 0), jDomMatrixObjects.point(0, 0, 1)].filter(p => lengths[jDomMatrixCore.getAxisOfCoord(p, 1)] > shipLength))
 
   /**
    *
@@ -208,7 +192,7 @@
    * @returns {{start: {x: number, y: number, z: number}, dir}}
    */
   const randomStartDir = (lengths, shipLength, dir = selectShipDirection(lengths, shipLength)) => ({
-    start: jDomCoreMatrix.randomStart(shipLength, dir, lengths),
+    start: jDomMatrixCore.randomStart(shipLength, dir, lengths),
     dir: dir
   })
 
@@ -222,7 +206,7 @@
    * @returns {Array}
    */
   const generateStartEnd = (matrix, shipLength, lengths, startDir = randomStartDir(lengths, shipLength)) =>
-    jDomCoreMatrix.getHighAbsoluteCoord(startDir.dir) === 0 ? [jDomObjectsMatrix.point(0, 0, 0), jDomObjectsMatrix.point(0, 0, 0)] : jDomCoreMatrix.checkInBetween(...[startDir.start, jDomCoreMatrix.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jDomCoreMatrix.lineEndPoint(startDir.start, shipLength, startDir.dir)]
+    jDomMatrixCore.getHighAbsoluteCoord(startDir.dir) === 0 ? [jDomMatrixObjects.point(0, 0, 0), jDomMatrixObjects.point(0, 0, 0)] : jDomMatrixCore.checkInBetween(...[startDir.start, jDomMatrixCore.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jDomMatrixCore.lineEndPoint(startDir.start, shipLength, startDir.dir)]
 
   /**
    * Create a series of randomly placed ships based on the provided shipLengths.
@@ -232,11 +216,13 @@
    * @param {boolean} [view=false]
    * @returns {Array}
    */
-  const generateRandomFleet = (ships, matrix, view = false) => ships.map(ship => buildShip(ship, jDomCoreMatrix.getPointsLine(...generateStartEnd(matrix, ship.size, jDomCoreMatrix.getAxisLengths(matrix))), matrix, view))
+  const generateRandomFleet = (ships, matrix, view = false) => ships.map(ship => buildShip(ship, jDomMatrixCore.getPointsLine(...generateStartEnd(matrix, ship.size, jDomMatrixCore.getAxisLengths(matrix))), matrix, view))
 
   /**
    * Create a default fleet using the standard battleship lengths.
-   * @type {Array}
+   * @param {Object} matrix
+   * @param {boolean} [view=false]
+   * @returns {Array}
    */
   const defaultFleet = jDomCore.curry(generateRandomFleet)([
     {name: 'Aircraft Carrier', size: 5},
@@ -262,7 +248,7 @@
     }
     let player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans <= 0
-    player.board = jDomCoreMatrix.bindPointData(jDomObjectsMatrix.square(gamePieces.waterTile(player, players), 10))
+    player.board = jDomMatrixCore.bindPointData(jDomMatrixObjects.square(gamePieces.waterTile(player, players), 10))
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
     player.playerStats = gamePieces.playerStats(player, `${Math.round(player.status * 100) / 100}%`)
     player.children = [player.board, player.playerStats]
@@ -295,7 +281,7 @@
       robots = robots < 1 ? 1 : robots
     }
     jDomCoreDom.removeChild(jDomCoreDom.getChildrenByClass('main-menu', parent.body)[0], parent.body)
-    let players = jDomCoreDom.renderHTML(jDomLayout.boards(buildPlayers(humans, robots)), parent).children
+    let players = jDomCoreDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
     let firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[jDomCore.randomInteger(players.length)])
     if (firstAttacker.isRobot) {
       gameActions.computerAttack(firstAttacker, players)
@@ -307,12 +293,13 @@
    * The entry function
    * @function main
    * @param parent
+   * @returns {module:jDom/core/dom/objects.documentItem}
    */
-  gameStart.main = (parent = jDomObjects.documentItem) => {
+  gameStart.main = (parent) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
       jDomCoreDom.removeChild(parent.body.children[i], parent.body)
     }
-    jDomCoreDom.renderHTML(jDomLayout.mainMenu(), parent)
+    jDomCoreDom.renderHTML(gameLayout.mainMenu(), parent)
     return parent
   }
 

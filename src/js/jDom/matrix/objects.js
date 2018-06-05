@@ -8,26 +8,26 @@
 
   /**
    * Store reference to any pre-existing module of the same name
-   * @type {jDomObjectsMatrix|*}
+   * @type {jDomMatrixObjects|*}
    */
-  const previousJDomObjectsMatrix = root.jDomObjectsMatrix || {}
+  const previousJDomMatrixObjects = root.jDomMatrixObjects || {}
 
   /**
    * A reference to all functions to be used globally / exported
-   * @typedef {Object} jDomObjectsMatrix
+   * @typedef {Object} jDomMatrixObjects
    * @module jDom/matrix/objects
    */
-  const jDomObjectsMatrix = {}
-  root.jDomObjectsMatrix = jDomObjectsMatrix
+  const jDomMatrixObjects = {}
+  root.jDomMatrixObjects = jDomMatrixObjects
 
   /**
    * Return a reference to this library while preserving the original same-named library
    * @function noConflict
-   * @returns {jDomObjectsMatrix}
+   * @returns {jDomMatrixObjects}
    */
-  jDomObjectsMatrix.noConflict = () => {
-    root.jDomObjectsMatrix = previousJDomObjectsMatrix
-    return jDomObjectsMatrix
+  jDomMatrixObjects.noConflict = () => {
+    root.jDomMatrixObjects = previousJDomMatrixObjects
+    return jDomMatrixObjects
   }
 
   /**
@@ -49,7 +49,7 @@
 
   /**
    * Verify availability of jDomObjects
-   * @typedef {*|module:jDom/core/domItems/objects} jDomObjects
+   * @typedef {*|module:jDom/core/dom/objects} jDomObjects
    */
   let jDomObjects = root.jDomObjects
 
@@ -58,7 +58,7 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('../core/domItems/objects.js')
+      jDomObjects = require('../core/dom/objects.js')
     } else {
       console.error('core.js requires jDomObjects')
     }
@@ -90,7 +90,7 @@
    * @param {coordinate} [z=0] - The numeric value for Z-coordinate (default to 0 for 2D {@link Matrix})
    * @returns {Point}
    */
-  jDomObjectsMatrix.point = (x, y, z = 0) => ({
+  jDomMatrixObjects.point = (x, y, z = 0) => ({
     x: x,
     y: y,
     z: z
@@ -107,7 +107,7 @@
    * @function tile
    * @returns {MatrixTile}
    */
-  jDomObjectsMatrix.tile = () => ({
+  jDomMatrixObjects.tile = () => ({
     point: {}
   })
 
@@ -134,7 +134,7 @@
    * @param {...Object} [props] - Additional data may be merged into every level of the matrix.
    * @returns {Matrix}
    */
-  jDomObjectsMatrix.matrix = (i, x, y, z = 1, ...props) => jDomObjects.DOMItem({
+  jDomMatrixObjects.matrix = (i, x, y, z = 1, ...props) => jDomObjects.DOMItem({
     tagName: 'div',
     attributes: {
       className: 'matrix'
@@ -169,7 +169,7 @@
    * @param {number} size - Used to define height and width as equal values (depth is set to 1)
    * @returns {Matrix}
    */
-  jDomObjectsMatrix.square = (i, size) => jDomObjectsMatrix.matrix(i, size, size)
+  jDomMatrixObjects.square = (i, size) => jDomMatrixObjects.matrix(i, size, size)
 
   /**
    * Return a matrix where x, y, and z are equal
@@ -178,15 +178,15 @@
    * @param {number} size - Used to define height, width, and depth as equal values
    * @returns {Matrix}
    */
-  jDomObjectsMatrix.cube = (i, size) => jDomObjectsMatrix.matrix(i, size, size, size)
+  jDomMatrixObjects.cube = (i, size) => jDomMatrixObjects.matrix(i, size, size, size)
 
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
   if (typeof exports !== 'undefined') {
     if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = jDomObjectsMatrix
+      exports = module.exports = jDomMatrixObjects
     }
-    exports = Object.assign(exports, jDomObjectsMatrix)
+    exports = Object.assign(exports, jDomMatrixObjects)
   }
 }).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser

@@ -53,7 +53,7 @@ const base = this || window || {}
 
   /**
    * Function that produces a property of the new Object, taking three arguments
-   * @callback module:jDomCore.mapCallback
+   * @callback mapCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
    * @param {Object|Array} [object] - The object map was called upon.
@@ -66,7 +66,7 @@ const base = this || window || {}
    * always use the standard map() function when it is known that the object is actually an array.
    * @function mapObject
    * @param {Object|Array} obj - The Object (or Array) to be mapped
-   * @param {module:jDomCore.mapCallback} fn - The function to be processed for each mapped property
+   * @param {mapCallback|function} fn - The function to be processed for each mapped property
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
@@ -77,7 +77,7 @@ const base = this || window || {}
 
   /**
    * Function is a predicate, to test each property value of the object. Return true to keep the element, false otherwise, taking three arguments:
-   * @callback module:jDomCore.filterCallback
+   * @callback filterCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
    * @param {Object|Array} [object] - The object filter was called upon.
@@ -90,7 +90,7 @@ const base = this || window || {}
    * always use the standard filter() function when it is known that the object is actually an array.
    * @function filterObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
-   * @param {module:jDomCore.filterCallback} fn - The function to be processed for each filtered property
+   * @param {filterCallback} fn - The function to be processed for each filtered property
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
@@ -105,7 +105,7 @@ const base = this || window || {}
 
   /**
    * Function to execute on each property in the object, taking four arguments:
-   * @callback module:jDomCore.reduceCallback
+   * @callback reduceCallback
    * @param {*} [accumulator={}] - The accumulator accumulates the callback's return values; it is the accumulated value previously returned in the last invocation of the callback, or initialValue, if supplied (see below).
    * @param {*} [currentProperty={}] - The current property being processed in the object.
    * @param {string} [currentIndex=0] - The index of the current element being processed in the array. Starts at index 0, if an initialValue is provided, and at index 1 otherwise.
@@ -119,7 +119,7 @@ const base = this || window || {}
    * always use the standard reduce() function when it is known that the object is actually an array.
    * @function reduceObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
-   * @param {module:jDomCore.reduceCallback} fn - The function to be processed for each filtered property
+   * @param {reduceCallback} fn - The function to be processed for each filtered property
    * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty array without an initial value is an error.
    * @returns {Object|Array}
    */
