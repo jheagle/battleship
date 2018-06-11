@@ -2,7 +2,7 @@
   "name": "battleship",
   "version": "1.0.0",
   "description": "This is just a fun project creating a game of battleship. Experimenting with functional programming and ES6 features.",
-  "main": "index.js",
+  "main": "src/js/game/main.js",
   "author": "Joshua Heagle",
   "license": "ISC",
   "babel": {
