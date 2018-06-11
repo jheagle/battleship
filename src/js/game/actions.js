@@ -245,7 +245,7 @@
     if (!playAgain) {
       player.attacker = !player.attacker
       gameActions.attackFleet.isLocked = true
-      if (player.attacker) {
+      if (player.attacker && !player.isRobot) {
         jDomCore.queueTimeout(() => {
           gameActions.attackFleet.isLocked = false
           return player.board.children.map(l => l.children.map(r => r.children.map(c => jDomCoreDom.updateElement(jDomCore.mergeObjects(c, {
