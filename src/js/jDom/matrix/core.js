@@ -19,7 +19,7 @@
    */
   const jDomMatrixCore = {}
   root.jDomMatrixCore = jDomMatrixCore
-  
+
   /**
    * Return a reference to this library while preserving the original same-named library
    * @function noConflict
@@ -253,7 +253,7 @@
   jDomMatrixCore.checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
 
   /**
-   * Test if the provided point exists in the matrix.
+   * Retrieve the DOMItem associated with the provided point
    * @function getDOMItemFromPoint
    * @param pnt
    * @param matrix
@@ -286,6 +286,27 @@
    * @param matrix
    */
   jDomMatrixCore.adjacentEdgePoints = (pnt, matrix) => [jDomMatrixObjects.point(-1, 0, 0), jDomMatrixObjects.point(1, 0, 0), jDomMatrixObjects.point(0, -1, 0), jDomMatrixObjects.point(0, 1, 0), jDomMatrixObjects.point(0, 0, -1), jDomMatrixObjects.point(0, 0, 1)].map(p => jDomMatrixCore.nextCell(pnt, p)).filter(p => jDomMatrixCore.checkValidPoint(p, matrix))
+
+  /**
+   * Retrieve the point associated with the provided element
+   * @function getPointFromElement
+   * @param elem
+   * @returns module:jDomMatrixCore.point
+   */
+  jDomMatrixCore.getPointFromElement = (elem) => jDomMatrixObjects.point(
+    Array.from(elem.parentNode.childNodes).indexOf(elem),
+    Array.from(elem.parentNode.parentNode.childNodes).indexOf(elem.parentNode),
+    Array.from(elem.parentNode.parentNode.parentNode.childNodes).indexOf(elem.parentNode.parentNode)
+  )
+
+  /**
+   * Retrieve the DOMItem associated with the provided element in the matrix
+   * @function getDOMItemFromElement
+   * @param elem
+   * @param matrix
+   * @returns module:jDomObjects.DOMItem
+   */
+  jDomMatrixCore.getDOMItemFromElement = (elem, matrix) => jDomMatrixCore.getDOMItemFromPoint(jDomMatrixCore.getPointFromElement(elem), matrix)
 
   /**
    * Either export all functions to be exported, or assign to the Window context

@@ -87,10 +87,7 @@
    */
   const gameTile = () => jDomObjects.DOMItem({
     hasShip: false,
-    isHit: false,
-    eventListeners: {
-      click: {listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false}
-    }
+    isHit: false
   })
 
   /**

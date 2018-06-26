@@ -248,7 +248,18 @@
     }
     let player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans <= 0
-    player.board = jDomMatrixCore.bindPointData(jDomMatrixObjects.square(gamePieces.waterTile(player, players), 10))
+    player.board = jDomMatrixCore.bindPointData(jDomMatrixObjects.square({
+      x: [
+        gamePieces.waterTile(player, players)
+      ],
+      matrixProps: [
+        {
+          eventListeners: {
+            click: {listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false}
+          }
+        }
+      ]
+    }, 10))
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
     player.playerStats = gamePieces.playerStats(player, `${Math.round(player.status * 100) / 100}%`)
     player.children = [player.board, player.playerStats]

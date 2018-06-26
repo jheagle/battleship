@@ -157,13 +157,13 @@
 
     dispatch (options) {
       const bubbleGroup = getParentNodes(this.target)
-      jDomCore.trace('target parents')(bubbleGroup.map((elem) => elem.tagName))
-      if (options.capture) {
-        this.eventPhase = 'capture'
-        const captureGroup = bubbleGroup.slice().reverse()
-        captureGroup.forEach((target) => this.currentTarget = target)
+      this.eventPhase = 'capture'
+      const captureGroup = bubbleGroup.slice().reverse()
+      captureGroup.forEach((target) => this.currentTarget = target)
+      if (!options.capture) {
+        this.eventPhase = 'bubble'
+        bubbleGroup.forEach((target) => this.currentTarget = target)
       }
-      this.eventPhase = 'bubble'
       this.target.dispatchEvent(this)
     }
 

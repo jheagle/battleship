@@ -108,7 +108,7 @@
   }))
   console.log(documentItem)
 
-  if (typeof document === 'undefined' || document instanceof 'PseudoHTMLDocument') {
+  if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module
     const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)
     const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])

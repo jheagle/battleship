@@ -100,6 +100,7 @@
    * MatrixTile is an Object which stores a reference a {@link Point} and can be populated with additionally associated fields.
    * @typedef {Object.<string, Point>} MatrixTile
    * @property {Point} point - a reference to its location in a {@link Matrix}
+   * @property {axis} axis - The axis will be 'x'
    */
 
   /**
@@ -110,6 +111,20 @@
   jDomMatrixObjects.tile = () => ({
     point: {}
   })
+
+  /**
+   * MatrixRow is the parent of a group of {@link MatrixTile}
+   * @typedef {DOMItem} MatrixRow
+   * @property {axis} axis - The axis will be 'y'
+   * @property {Array.<MatrixTile>} children - all of the MatrixTile items as part of this MatrixRow
+   */
+
+  /**
+   * MatrixLayer is the parent of a group of {@link MatrixTile}
+   * @typedef {DOMItem} MatrixLayer
+   * @property {axis} axis - The axis will be 'y'
+   * @property {Array.<MatrixRow>} children - all of the MatrixRow items as part of this MatrixLayer
+   */
 
   /**
    * Matrix is a multi-level {@link DOMItem} which is used to visually represent a mathematical grid / matrix.
@@ -124,17 +139,20 @@
    */
 
   /**
-   * Create a 3d matrix of i with x by y by z size,
-   * add additional objects for each layer as well
+   * Create a 3d matrix of i with x by y by z size, add additional objects for each layer as well
    * @function matrix
-   * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
-   * @param {coordinate} x - A number / coordinate defining the width of the matrix.
-   * @param {coordinate} y - A number / coordinate defining the height of the matrix.
-   * @param {coordinate} [z=1] - A number / coordinate defining the depth of the matrix.
-   * @param {...Object} [props] - Additional data may be merged into every level of the matrix.
+   * @param {{coord: coordinate, props: Array.<MatrixTile>}} x - Properties and a coordinate defining the width of the matrix.
+   * @param {{coord: coordinate, props: Array.<MatrixRow>}} y - Properties and a coordinate defining the height of the matrix.
+   * @param {{coord: coordinate, props: Array.<MatrixLayer>}} z - Properties and a coordinate defining the depth of the matrix.
+   * @param {Array.<Matrix>} matrixProps - Properties to be added to the matrix
    * @returns {Matrix}
    */
-  jDomMatrixObjects.matrix = (i, x, y, z = 1, ...props) => jDomObjects.DOMItem({
+  jDomMatrixObjects.matrix = (
+    x = {coord: 0, props: []},
+    y = {coord: 0, props: []},
+    z = {coord: 1, props: []},
+    matrixProps = []
+  ) => jDomObjects.DOMItem({
     tagName: 'div',
     attributes: {
       className: 'matrix'
@@ -157,28 +175,44 @@
           attributes: {
             className: 'column'
           }
-        }, ...props, i), x)
-      }, ...props), y)
-    }, ...props), z)
-  })
+        }, ...x.props), x.coord)
+      }, ...y.props), y.coord)
+    }, ...z.props), z.coord)
+  }, ...matrixProps)
 
   /**
    * Return a single layer matrix where x and y are equal
    * @function square
-   * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
+   * @param {Array.<MatrixTile>} [x=[]] - All the data to be presented as part of the specified point, requires MatrixTile base
+   * @param {Array.<MatrixRow>} [y=[]] - Additional data to append to the MatrixRow
+   * @param {Array.<MatrixLayer>} [z=[]] - Additional data to append to the MatrixLayer
+   * @param {Array.<Matrix>} [matrixProps=[]] - Additional data to append to the Matrix
    * @param {number} size - Used to define height and width as equal values (depth is set to 1)
    * @returns {Matrix}
    */
-  jDomMatrixObjects.square = (i, size) => jDomMatrixObjects.matrix(i, size, size)
+  jDomMatrixObjects.square = ({x = [], y = [], z = [], matrixProps = []} = {}, size) => jDomMatrixObjects.matrix(
+    {coord: size, props: x},
+    {coord: size, props: y},
+    {coord: 1, props: z},
+    matrixProps
+  )
 
   /**
    * Return a matrix where x, y, and z are equal
    * @function cube
-   * @param {MatrixTile} i - All the data to be presented as part of the specified point, requires MatrixTile base
+   * @param {Array.<MatrixTile>} [x=[]] - All the data to be presented as part of the specified point, requires MatrixTile base
+   * @param {Array.<MatrixRow>} [y=[]] - Additional data to append to the MatrixRow
+   * @param {Array.<MatrixLayer>} [z=[]] - Additional data to append to the MatrixLayer
+   * @param {Array.<Matrix>} [matrixProps=[]] - Additional data to append to the Matrix
    * @param {number} size - Used to define height, width, and depth as equal values
    * @returns {Matrix}
    */
-  jDomMatrixObjects.cube = (i, size) => jDomMatrixObjects.matrix(i, size, size, size)
+  jDomMatrixObjects.cube = ({x = [], y = [], z = [], matrixProps = []} = {}, size) => jDomMatrixObjects.matrix(
+    {coord: size, props: x},
+    {coord: size, props: y},
+    {coord: size, props: z},
+    matrixProps
+  )
 
   /**
    * Either export all functions to be exported, or assign to the Window context

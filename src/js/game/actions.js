@@ -387,7 +387,7 @@
    * @param target
    * @returns {*}
    */
-  gameActions.attackListener = (e, target) => gameActions.attackFleet(target)
+  gameActions.attackListener = (e, target) => gameActions.attackFleet(jDomMatrixCore.getDOMItemFromElement(e.target, target))
 
   /**
    * Choose which player to attack.
