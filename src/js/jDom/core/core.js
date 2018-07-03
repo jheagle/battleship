@@ -39,7 +39,9 @@ const base = this || window || {}
    * @param {function} fn - Receives a function to be curried
    * @returns {function(...[*]): function(...[*])}
    */
-  jDomCore.curry = (fn) => (...args) => args.length >= fn.length ? fn(...args) : (...a) => jDomCore.curry(fn)(...[...args, ...a])
+  jDomCore.curry = (fn) => (...args) => args.length >= fn.length
+    ? fn(...args)
+    : (...a) => jDomCore.curry(fn)(...[...args, ...a])
 
   /**
    * This was copied from a blog post on Composing Software written by Eric Elliott. The idea is to begin to make this
@@ -163,10 +165,10 @@ const base = this || window || {}
    * The passed function should accept a minimum of two objects to be merged.
    * If the desire is to mutate the input objects, then the function name should
    * have the word 'mutable' in the name (case-insensitive).
-   * @param {function} fn
-   * @param {Object} obj1
-   * @param {Object} obj2
-   * @param {boolean} [isMutable=false]
+   * @param {mergeObjects|mergeObjectsMutable|Function} fn - Pass one of the mergeObjects functions to be used
+   * @param {Object} obj1 - The receiving object; this is the object which will have it's properties overridden
+   * @param {Object} obj2 - The contributing object; this is the object which will contribute new properties and override existing ones
+   * @param {boolean} [isMutable=false] - An optional flag which indicates whether we will clone objects or directly modify them
    * @returns {Object}
    */
   const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => jDomCore.notEmptyObjectOrArray(obj2)
@@ -179,10 +181,14 @@ const base = this || window || {}
    * list and bubbling up to return a merged version of the first object.
    * WARNING: This is a recursive function.
    * @function mergeObjects
-   * @param {...Object} args
+   * @param {...Object} args - Provide a list of objects which will be merged starting from the end up into the first object
    * @returns {Object}
    */
-  jDomCore.mergeObjects = (...args) => args.length === 2 ? mergeObjectsBase(jDomCore.mergeObjects, args[0], args[1]) : args.length === 1 ? jDomCore.cloneObject(args[0]) : args.reduce(jDomCore.curry(mergeObjectsBase)(jDomCore.mergeObjects), {})
+  jDomCore.mergeObjects = (...args) => args.length === 2
+    ? mergeObjectsBase(jDomCore.mergeObjects, args[0], args[1])
+    : args.length === 1
+      ? jDomCore.cloneObject(args[0])
+      : args.reduce(jDomCore.curry(mergeObjectsBase)(jDomCore.mergeObjects), {})
 
   /**
    * Perform a deep merge of objects. This will combine all objects and sub-objects,
@@ -191,10 +197,14 @@ const base = this || window || {}
    * WARNING: This is a recursive function.
    * WARNING: This will mutate the first object passed in as input
    * @function mergeObjectsMutable
-   * @param {...Object} args
+   * @param {...Object} args - Provide a list of objects which will be merged starting from the end up into the first object
    * @returns {Object}
    */
-  jDomCore.mergeObjectsMutable = (...args) => args.length === 2 ? mergeObjectsBase(jDomCore.mergeObjectsMutable, args[0], args[1], true) : args.length === 1 ? args[0] : args.reduce(jDomCore.curry(mergeObjectsBase)(jDomCore.mergeObjectsMutable), {})
+  jDomCore.mergeObjectsMutable = (...args) => args.length === 2
+    ? mergeObjectsBase(jDomCore.mergeObjectsMutable, args[0], args[1], true)
+    : args.length === 1
+      ? args[0]
+      : args.reduce(jDomCore.curry(mergeObjectsBase)(jDomCore.mergeObjectsMutable), {})
 
   /**
    * Generate an array filled with a copy of the provided item or references to the provided item.
