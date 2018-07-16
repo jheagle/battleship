@@ -1,5 +1,9 @@
+/**
+ * @file Core DOM management functions
+ * @author Joshua Heagle <contact@joshuaheagle.com>
+ * @version 1.0.0
+ */
 'use strict'
-// Core DOM management functions
 ;(function () {
   /**
    * Store a reference to this scope which will be Window if rendered via browser
@@ -14,6 +18,7 @@
 
   /**
    * A reference to all functions to be used globally / exported
+   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @typedef {Object} jDomCoreDom
    * @module jDom/core/dom/core
    */
@@ -108,7 +113,7 @@
       // For attributes which are objects or multi-part strings
       // -1 = remove attribute, 0 = no change, 1 = add attribute
       if (/^(style|className)$/.test(key)) {
-        return jDomCore.compareArrays(typeof attr === 'string' ? element[key].split(' ') : Object.keys(element[key]), typeof attr === 'string' ? attr.split(' ') : Object.keys(attr))
+        return jDomCore.compareArrays(typeof attr === 'string' ? attr.split(' ') : Object.keys(attr), typeof attr === 'string' ? element[key].split(' ') : Object.keys(element[key]))
       }
       return element[key] === attr
     }
@@ -187,7 +192,7 @@
    * @param parent
    */
   jDomCoreDom.bindAllElements = (item, parent = jDomObjects.documentItem) => {
-    jDomCore.mapObject(jDomObjects.DOMItem(item), (prop) => prop, item)
+    jDomCore.mapObject(jDomObjects.createDOMItem(item), (prop) => prop, item)
     item.element = (item.element && item.element.style) ? item.element : jDomCoreDom.bindElement(item).element
     item.parentItem = parent.body || parent
     item.children.map(child => jDomCoreDom.bindAllElements(child, item))
@@ -465,7 +470,7 @@
    * @returns {*}
    */
   jDomCoreDom.renderHTML = (item, parent = jDomObjects.documentItem) => {
-    jDomCore.mapObject(jDomObjects.DOMItem(item), (prop) => prop, item)
+    jDomCore.mapObject(jDomObjects.createDOMItem(item), (prop) => prop, item)
     item.element = (item.element && item.element.style) ? item.element : jDomCoreDom.bindElement(item).element
     item.eventListeners = jDomCore.mapObject(item.eventListeners, prop => jDomCore.mergeObjects(prop, {listenerFunc: jDomCoreDom.retrieveListener(prop.listenerFunc, jDomCoreDom.getTopParentItem(parent))}))
     item.parentItem = parent.body || parent

@@ -152,24 +152,24 @@
     y = {coord: 0, props: []},
     z = {coord: 1, props: []},
     matrixProps = []
-  ) => jDomObjects.DOMItem({
+  ) => jDomObjects.createDOMItem({
     tagName: 'div',
     attributes: {
       className: 'matrix'
     },
-    children: jDomCore.buildArray(jDomObjects.DOMItem({
+    children: jDomCore.buildArray(jDomObjects.createDOMItem({
       axis: 'z',
       tagName: 'div',
       attributes: {
         className: 'layer'
       },
-      children: jDomCore.buildArray(jDomObjects.DOMItem({
+      children: jDomCore.buildArray(jDomObjects.createDOMItem({
         axis: 'y',
         tagName: 'div',
         attributes: {
           className: 'row'
         },
-        children: jDomCore.buildArray(jDomObjects.DOMItem({
+        children: jDomCore.buildArray(jDomObjects.createDOMItem({
           axis: 'x',
           tagName: 'div',
           attributes: {

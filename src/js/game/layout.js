@@ -52,7 +52,7 @@
    * @function mainMenu
    * @returns {module:jDom/core/dom/objects.DOMItem}
    */
-  gameLayout.mainMenu = () => jDomObjects.DOMItem({
+  gameLayout.mainMenu = () => jDomObjects.createDOMItem({
     tagName: 'div',
     attributes: {
       className: 'main-menu'
@@ -167,7 +167,7 @@
    * @param {Array} [players=[]]
    * @returns {module:jDom/core/dom/objects.DOMItem}
    */
-  gameLayout.boards = (players = []) => jDomObjects.DOMItem({
+  gameLayout.boards = (players = []) => jDomObjects.createDOMItem({
     tagName: 'div',
     attributes: {
       className: 'boards'
@@ -181,7 +181,7 @@
    * @param {Array} players
    * @returns {module:jDom/core/dom/objects.DOMItem}
    */
-  gameLayout.finalScore = (players) => jDomObjects.DOMItem({
+  gameLayout.finalScore = (players) => jDomObjects.createDOMItem({
     tagName: 'div',
     attributes: {
       className: 'final-scores'

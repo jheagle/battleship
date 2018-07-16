@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">A reference to all functions to be used globally / exported</div>
+            <div class="description">All methods exported from this module are encapsulated within jDomObjects</div>
         
 
         
@@ -77,6 +77,13 @@
     
 
     
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
+        </ul>
+    </dd>
+    
 
     
 
@@ -87,7 +94,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line34">line 34</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line38">line 38</a>
     </li></ul></dd>
     
 
@@ -136,7 +143,7 @@
 
         
             
-<h4 class="name" id="~documentItem"><span class="type-signature">(inner) </span>documentItem<span class="type-signature"> :DOMItemRoot</span></h4>
+<h4 class="name" id="~documentItem"><span class="type-signature">(inner) </span>documentItem<span class="type-signature"> :<a href="module-jDom_core_dom_objects.html#~DOMItemRoot">module:jDom/core/dom/objects~DOMItemRoot</a></span></h4>
 
 
 
@@ -151,7 +158,7 @@
     <ul>
         <li>
             
-<span class="param-type">DOMItemRoot</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#~DOMItemRoot">module:jDom/core/dom/objects~DOMItemRoot</a></span>
 
 
         </li>
@@ -190,7 +197,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line194">line 194</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line198">line 198</a>
     </li></ul></dd>
     
 
@@ -218,216 +225,7 @@
     
 
     
-    <h4 class="name" id="~documentDOMItem"><span class="type-signature">(inner) </span>documentDOMItem<span class="signature">(listeners, rootItem<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {DOMItemRoot}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Return a DOMItem style reference to the document. The rootItem argument is a
-system function and not necessary to implement.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>listeners</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object.&lt;string, listenerFunction></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">An object of all event listeners to be registered in the DOM</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>rootItem</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    DOMItemRoot
-                
-                </td>
-            
-
-            <td class="description last">This is a reference to DOMItemRoot which will be defaulted with initRoot</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line179">line 179</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">DOMItemRoot</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~DOMItem"><span class="type-signature">(inner) </span>DOMItem<span class="signature">(&hellip;attributes)</span><span class="type-signature"> &rarr; {DOMItem}</span></h4>
+    <h4 class="name" id="~createDOMItem"><span class="type-signature">(inner) </span>createDOMItem<span class="signature">(&hellip;attributes)</span><span class="type-signature"> &rarr; {<a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a>}</span></h4>
     
 
     
@@ -540,7 +338,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line96">line 96</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line101">line 101</a>
     </li></ul></dd>
     
 
@@ -574,7 +372,204 @@ system function and not necessary to implement.
     </dt>
     <dd>
         
-<span class="param-type">DOMItem</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~documentDOMItem"><span class="type-signature">(inner) </span>documentDOMItem<span class="signature">(listeners, rootItem<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="module-jDom_core_dom_objects.html#~DOMItemRoot">module:jDom/core/dom/objects~DOMItemRoot</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Return a DOMItem reference to the document. The rootItem argument is a system variable and not necessary to
+implement.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>listeners</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object.&lt;string, <a href="module-jDom_core_dom_objects.html#~listenerFunction">module:jDom/core/dom/objects~listenerFunction</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">An object of all event listeners to be registered in the DOM</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rootItem</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#~DOMItemRoot">module:jDom/core/dom/objects~DOMItemRoot</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">This is a reference to DOMItemRoot which will be defaulted with initRoot</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line183">line 183</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#~DOMItemRoot">module:jDom/core/dom/objects~DOMItemRoot</a></span>
 
 
     </dd>
@@ -644,7 +639,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line42">line 42</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line47">line 47</a>
     </li></ul></dd>
     
 
@@ -698,7 +693,7 @@ system function and not necessary to implement.
 
         
                 
-<h4 class="name" id="~DOMItem">DOMItem</h4>
+<h4 class="name" id=".DOMItem">DOMItem</h4>
 
 
 
@@ -827,7 +822,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">Object.&lt;Event, EventListener></span>
+<span class="param-type">Object.&lt;Event, <a href="module-jDom_core_dom_objects.html#~EventListener">module:jDom/core/dom/objects~EventListener</a>></span>
 
 
             
@@ -850,7 +845,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">DOMItem</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a></span>
 
 
             
@@ -873,7 +868,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;DOMItem></span>
+<span class="param-type">Array.&lt;<a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a>></span>
 
 
             
@@ -922,7 +917,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line85">line 85</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line90">line 90</a>
     </li></ul></dd>
     
 
@@ -955,7 +950,7 @@ system function and not necessary to implement.
     <ul>
         <li>
             
-<span class="param-type">DOMItem</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a></span>
 
 
         </li>
@@ -1104,7 +1099,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;DOMItem></span>
+<span class="param-type">Array.&lt;<a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a>></span>
 
 
             
@@ -1163,7 +1158,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line122">line 122</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -1196,7 +1191,7 @@ system function and not necessary to implement.
     <ul>
         <li>
             
-<span class="param-type">DOMItem</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a></span>
 
 
         </li>
@@ -1345,7 +1340,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;DOMItem></span>
+<span class="param-type">Array.&lt;<a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a>></span>
 
 
             
@@ -1404,7 +1399,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line113">line 113</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line118">line 118</a>
     </li></ul></dd>
     
 
@@ -1437,7 +1432,7 @@ system function and not necessary to implement.
     <ul>
         <li>
             
-<span class="param-type">DOMItem</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a></span>
 
 
         </li>
@@ -1619,7 +1614,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;(DOMItemHead|DOMItemBody)></span>
+<span class="param-type">Array.&lt;(<a href="module-jDom_core_dom_objects.html#~DOMItemHead">module:jDom/core/dom/objects~DOMItemHead</a>|<a href="module-jDom_core_dom_objects.html#~DOMItemBody">module:jDom/core/dom/objects~DOMItemBody</a>)></span>
 
 
             
@@ -1652,7 +1647,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">DOMItemHead</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#~DOMItemHead">module:jDom/core/dom/objects~DOMItemHead</a></span>
 
 
             
@@ -1685,7 +1680,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">DOMItemBody</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#~DOMItemBody">module:jDom/core/dom/objects~DOMItemBody</a></span>
 
 
             
@@ -1744,7 +1739,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line150">line 150</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line155">line 155</a>
     </li></ul></dd>
     
 
@@ -1829,7 +1824,7 @@ system function and not necessary to implement.
 
             
 
-            <td class="description last">A string function name matching an existing listenerFunction.</td>
+            <td class="description last">A string function name matching an existing <a href="module-jDom_core_dom_objects.html#~listenerFunction">module:jDom/core/dom/objects~listenerFunction</a>.</td>
         </tr>
 
     
@@ -1917,7 +1912,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line77">line 77</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line82">line 82</a>
     </li></ul></dd>
     
 
@@ -1992,7 +1987,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line52">line 52</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -2097,7 +2092,7 @@ system function and not necessary to implement.
             <td class="type">
             
                 
-<span class="param-type">DOMItem</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.DOMItem">module:jDom/core/dom/objects.DOMItem</a></span>
 
 
             
@@ -2191,7 +2186,7 @@ system function and not necessary to implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line69">line 69</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line74">line 74</a>
     </li></ul></dd>
     
 
@@ -2239,7 +2234,7 @@ system function and not necessary to implement.
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jul 10 2018 09:20:27 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 16 2018 08:19:35 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

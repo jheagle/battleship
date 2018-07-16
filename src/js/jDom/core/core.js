@@ -19,6 +19,7 @@ const base = this || window || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomCore.
+   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @typedef {Object} jDomCore
    * @module jDom/core/core
    */
@@ -27,7 +28,6 @@ const base = this || window || {}
 
   /**
    * Return a reference to this library while preserving the original same-named library
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function noConflict
    * @returns {jDomCore}
    */
@@ -40,7 +40,6 @@ const base = this || window || {}
    * Return a curried version of the passed function.
    * The returned function expects the same number of arguments minus the ones provided.
    * fn is the name of the function being curried.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function curry
    * @param {function} fn - Receives a function to be curried
    * @returns {function(...[*]): function(...[*])}
@@ -54,14 +53,13 @@ const base = this || window || {}
    * code base somewhat easier to parse and introduce point-free notation.
    * @author Eric Elliott
    * @function pipe
-   * @param {...function} fns - Takes a series of functions have the same parameter, which parameter is also returned.
+   * @param {...function} fns - Takes a series of functions having the same parameter, which parameter is also returned.
    * @returns {function(*=): (*|any)}
    */
   jDomCore.pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
 
   /**
    * Function that produces a property of the new Object, taking three arguments
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @callback mapCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
@@ -73,7 +71,6 @@ const base = this || window || {}
    * This function is intended to replicate behaviour of the Array.map() function but for Objects.
    * If an array is passed in instead then it will perform standard map(). It is recommended to
    * always use the standard map() function when it is known that the object is actually an array.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function mapObject
    * @param {Object|Array} obj - The Object (or Array) to be mapped
    * @param {mapCallback|function} fn - The function to be processed for each mapped property
@@ -87,7 +84,6 @@ const base = this || window || {}
 
   /**
    * Function is a predicate, to test each property value of the object. Return true to keep the element, false otherwise, taking three arguments
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @callback filterCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
@@ -99,7 +95,6 @@ const base = this || window || {}
    * This function is intended to replicate behaviour of the Array.filter() function but for Objects.
    * If an array is passed in instead then it will perform standard filter(). It is recommended to
    * always use the standard filter() function when it is known that the object is actually an array.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function filterObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
    * @param {filterCallback} fn - The function to be processed for each filtered property
@@ -117,7 +112,6 @@ const base = this || window || {}
 
   /**
    * Function to execute on each property in the object, taking four arguments
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @callback reduceCallback
    * @param {*} [accumulator={}] - The accumulator accumulates the callback's return values; it is the accumulated value previously returned in the last invocation of the callback, or initialValue, if supplied (see below).
    * @param {*} [currentProperty={}] - The current property being processed in the object.
@@ -130,7 +124,6 @@ const base = this || window || {}
    * This function is intended to replicate behaviour of the Array.reduce() function but for Objects.
    * If an array is passed in instead then it will perform standard reduce(). It is recommended to
    * always use the standard reduce() function when it is known that the object is actually an array.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function reduceObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
    * @param {reduceCallback} fn - The function to be processed for each filtered property
@@ -141,7 +134,6 @@ const base = this || window || {}
 
   /**
    * Helper function for testing if the item is an Object or Array that contains properties or elements
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function notEmptyObjectOrArray
    * @param {Object|Array} item - Object or Array to test
    * @returns {boolean}
@@ -151,7 +143,6 @@ const base = this || window || {}
   /**
    * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
    * WARNING: This is a recursive function.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @param {Object} cloned - A value-only copy of the original object
    * @param {Object} object - The original object that is being cloned
    * @returns {Object|Array}
@@ -168,7 +159,6 @@ const base = this || window || {}
 
   /**
    * Clone objects for manipulation without data corruption, returns a copy of the provided object.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function cloneObject
    * @param {Object} object - The original object that is being cloned
    * @returns {Object}
@@ -180,7 +170,6 @@ const base = this || window || {}
    * The passed function should accept a minimum of two objects to be merged.
    * If the desire is to mutate the input objects, then the function name should
    * have the word 'mutable' in the name (case-insensitive).
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @param {mergeObjects|mergeObjectsMutable|Function} fn - Pass one of the mergeObjects functions to be used
    * @param {Object} obj1 - The receiving object; this is the object which will have it's properties overridden
    * @param {Object} obj2 - The contributing object; this is the object which will contribute new properties and override existing ones
@@ -196,7 +185,6 @@ const base = this || window || {}
    * objects having the same attributes will overwrite starting from the end of the argument
    * list and bubbling up to return a merged version of the first object.
    * WARNING: This is a recursive function.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function mergeObjects
    * @param {...Object} args - Provide a list of objects which will be merged starting from the end up into the first object
    * @returns {Object}
@@ -213,7 +201,6 @@ const base = this || window || {}
    * list and bubbling up to return the overwritten first object.
    * WARNING: This is a recursive function.
    * WARNING: This will mutate the first object passed in as input
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function mergeObjectsMutable
    * @param {...Object} args - Provide a list of objects which will be merged starting from the end up into the first object
    * @returns {Object}
@@ -228,7 +215,6 @@ const base = this || window || {}
    * Generate an array filled with a copy of the provided item or references to the provided item.
    * The length defines how long the array should be.
    * WARNING: This is a recursive function.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @param {boolean} useReference - Choose to multiply by clone or reference, true is by reference
    * @param {*} item - The item to be used for each array element
    * @param {number} length - The desired length of the array
@@ -240,7 +226,6 @@ const base = this || window || {}
   /**
    * Leverage buildArrayBase to generate an array filled with a copy of the provided item.
    * The length defines how long the array should be.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function buildArray
    * @param {*} item - The item to be used for each array element
    * @param {number} length - The desired length of the array
@@ -252,7 +237,6 @@ const base = this || window || {}
   /**
    * Leverage buildArrayBase to generate an array filled with references to the provided item.
    * The length defines how long the array should be.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function buildArrayOfReferences
    * @param {*} item - The item to be used for each array element
    * @param {number} length - The desired length of the array
@@ -263,7 +247,6 @@ const base = this || window || {}
 
   /**
    * A simple function to check if an item is in an array
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function inArray
    * @param {Array} arr - Haystack which may contain the specified property
    * @param {*} prop - Needle to be found within the haystack
@@ -273,7 +256,6 @@ const base = this || window || {}
 
   /**
    * A simple function usable with reduce to get the max or min value
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function getMaxOrMin
    * @param {boolean} getMax - Choose whether to find the max or min, true is Max
    * @param {number} num1 - A number to compare
@@ -284,7 +266,6 @@ const base = this || window || {}
 
   /**
    * Helper for returning max value
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function getMax
    * @param {number} num1 - A number to compare
    * @param {number} num2 - Another number to be compared against
@@ -294,7 +275,6 @@ const base = this || window || {}
 
   /**
    * Helper for returning min value
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function getMin
    * @param {number} num1 - A number to compare
    * @param {number} num2 - Another number to be compared against
@@ -305,7 +285,6 @@ const base = this || window || {}
   /**
    * Create a single random number within provided range. And with optional offset,
    * The distance between the result numbers can be adjusted with interval.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function randomNumber
    * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
    * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
@@ -317,7 +296,6 @@ const base = this || window || {}
   /**
    * Create a single random integer within provide range. And with optional offset,
    * The distance between the result numbers can be adjusted with interval.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function randomInteger
    * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
    * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
@@ -331,7 +309,6 @@ const base = this || window || {}
    * -1 to indicate val1 is less than val2
    * 0 to indicate both values are the equal
    * 1 to indicate val1 is greater than val2
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function compare
    * @param {number} val1 - The first number to compare
    * @param {number} val2 - The second number to compare
@@ -339,6 +316,19 @@ const base = this || window || {}
    */
   jDomCore.compare = (val1, val2) => val1 === val2 ? 0 : val1 > val2 ? 1 : -1
 
+  /**
+   * This was adapted from a blog post on Composing Software written by Eric Elliott. Trace provides a way to traces
+   * steps through code via the console, while maintaining the functional-style return value.
+   * Returns a function which can then receive a value to output, the value will then be returned.
+   * @author Eric Elliott
+   * @function trace
+   * @param {string} label - Pass an identifying label of the value being output.
+   * @returns {function(*=)}
+   */
+  jDomCore.trace = label => value => {
+    console.info(`${label}: `, value)
+    return value
+  }
   /**
    * Compare two Arrays and return the Object where the value for each property is as follows:
    * -1 to indicate val1 is less than val2
@@ -350,20 +340,26 @@ const base = this || window || {}
    * Use the lengths of these filtered arrays to compare. So if the first array has the value and the second one doesn't
    * the first length will be one or more and the second will be zero, if the both have the value then both will be one
    * or more.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
+   * @example
+   * // example of input and resulting output
+   * jDomCore.compareArrays(['match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1'], ['match1', 'match2', 'secondMismatch1', 'badMatch1', 'badMatch1'])
+   * // unique array
+   * ['secondMismatch1', 'match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1']
+   * // result object
+   * {secondMismatch1: -1, match1: 0, firstMismatch1: 1, match2: 0, firstMismatch2: 1, badMatch1: -1}
    * @function compareArrays
    * @param {Array} arr1 - The first array to compare
    * @param {Array} arr2 - The second array to compare
    * @returns {Object.<string, number>}
    */
   jDomCore.compareArrays = (arr1, arr2) =>
-    arr2.filter((attr, key) => !jDomCore.inArray(arr1, attr) || arr1[key] !== attr)
+    arr2.filter((attr) => !jDomCore.inArray(arr1, attr))
       .concat(arr1)
       .reduce(
         (returnObj, attr) => {
           returnObj[
-            JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)
-            ] = jDomCore.compare(arr2.filter(val => val === attr).length, arr1.filter(val => val === attr).length)
+            (typeof attr === 'string') ? attr : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)
+            ] = jDomCore.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length)
           return returnObj
         },
         {}
@@ -388,7 +384,6 @@ const base = this || window || {}
    * applied to the rest of this file where this is not a Pure function, and it does not reliably return a result. This
    * implementation should likely be used with Promise instead.
    * WARNING: This is a recursive function.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
    * @function queueTimeout
    * @param {function|object} fn - A callback function to be performed at some time in the future.
    * @param {number} time - The time in milliseconds to delay.

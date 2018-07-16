@@ -77,6 +77,13 @@
     
 
     
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
+        </ul>
+    </dd>
+    
 
     
 
@@ -324,13 +331,6 @@ The length defines how long the array should be.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -341,7 +341,7 @@ The length defines how long the array should be.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line240">line 240</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line226">line 226</a>
     </li></ul></dd>
     
 
@@ -575,13 +575,6 @@ The length defines how long the array should be.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -592,7 +585,7 @@ The length defines how long the array should be.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line252">line 252</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line237">line 237</a>
     </li></ul></dd>
     
 
@@ -735,13 +728,6 @@ The length defines how long the array should be.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -752,7 +738,7 @@ The length defines how long the array should be.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line169">line 169</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line160">line 160</a>
     </li></ul></dd>
     
 
@@ -921,13 +907,6 @@ The length defines how long the array should be.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -938,7 +917,7 @@ The length defines how long the array should be.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line329">line 329</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line307">line 307</a>
     </li></ul></dd>
     
 
@@ -1113,13 +1092,6 @@ or more.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -1130,7 +1102,7 @@ or more.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line342">line 342</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line332">line 332</a>
     </li></ul></dd>
     
 
@@ -1173,6 +1145,16 @@ or more.
     
 
 
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// example of input and resulting output
+jDomCore.compareArrays(['match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1'], ['match1', 'match2', 'secondMismatch1', 'badMatch1', 'badMatch1'])
+// unique array
+['secondMismatch1', 'match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1']
+// result object
+{secondMismatch1: -1, match1: 0, firstMismatch1: 1, match2: 0, firstMismatch2: 1, badMatch1: -1}</code></pre>
 
 
 
@@ -1274,13 +1256,6 @@ fn is the name of the function being curried.
 
     
 
-    
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
     
 
     
@@ -1517,13 +1492,6 @@ always use the standard filter() function when it is known that the object is ac
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -1534,7 +1502,7 @@ always use the standard filter() function when it is known that the object is ac
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line98">line 98</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line94">line 94</a>
     </li></ul></dd>
     
 
@@ -1703,13 +1671,6 @@ always use the standard filter() function when it is known that the object is ac
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -1720,7 +1681,7 @@ always use the standard filter() function when it is known that the object is ac
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line285">line 285</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line267">line 267</a>
     </li></ul></dd>
     
 
@@ -1909,13 +1870,6 @@ always use the standard filter() function when it is known that the object is ac
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -1926,7 +1880,7 @@ always use the standard filter() function when it is known that the object is ac
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line274">line 274</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line257">line 257</a>
     </li></ul></dd>
     
 
@@ -2092,13 +2046,6 @@ always use the standard filter() function when it is known that the object is ac
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -2109,7 +2056,7 @@ always use the standard filter() function when it is known that the object is ac
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line295">line 295</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line276">line 276</a>
     </li></ul></dd>
     
 
@@ -2275,13 +2222,6 @@ always use the standard filter() function when it is known that the object is ac
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -2292,7 +2232,7 @@ always use the standard filter() function when it is known that the object is ac
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line264">line 264</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line248">line 248</a>
     </li></ul></dd>
     
 
@@ -2520,13 +2460,6 @@ always use the standard map() function when it is known that the object is actua
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -2537,7 +2470,7 @@ always use the standard map() function when it is known that the object is actua
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line72">line 72</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line70">line 70</a>
     </li></ul></dd>
     
 
@@ -2698,13 +2631,6 @@ WARNING: This is a recursive function.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -2715,7 +2641,7 @@ WARNING: This is a recursive function.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line194">line 194</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line183">line 183</a>
     </li></ul></dd>
     
 
@@ -2874,13 +2800,6 @@ WARNING: This will mutate the first object passed in as input
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -2891,7 +2810,7 @@ WARNING: This will mutate the first object passed in as input
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line210">line 210</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line198">line 198</a>
     </li></ul></dd>
     
 
@@ -2985,13 +2904,6 @@ WARNING: This will mutate the first object passed in as input
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -3002,7 +2914,7 @@ WARNING: This will mutate the first object passed in as input
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line28">line 28</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line29">line 29</a>
     </li></ul></dd>
     
 
@@ -3148,13 +3060,6 @@ WARNING: This will mutate the first object passed in as input
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -3165,7 +3070,7 @@ WARNING: This will mutate the first object passed in as input
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line142">line 142</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line135">line 135</a>
     </li></ul></dd>
     
 
@@ -3290,7 +3195,7 @@ code base somewhat easier to parse and introduce point-free notation.
 
             
 
-            <td class="description last">Takes a series of functions have the same parameter, which parameter is also returned.</td>
+            <td class="description last">Takes a series of functions having the same parameter, which parameter is also returned.</td>
         </tr>
 
     
@@ -3338,7 +3243,7 @@ code base somewhat easier to parse and introduce point-free notation.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line52">line 52</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line51">line 51</a>
     </li></ul></dd>
     
 
@@ -3561,13 +3466,6 @@ WARNING: This is a recursive function.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -3578,7 +3476,7 @@ WARNING: This is a recursive function.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line386">line 386</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line382">line 382</a>
     </li></ul></dd>
     
 
@@ -3816,13 +3714,6 @@ The distance between the result numbers can be adjusted with interval.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -3833,7 +3724,7 @@ The distance between the result numbers can be adjusted with interval.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line317">line 317</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line296">line 296</a>
     </li></ul></dd>
     
 
@@ -4071,13 +3962,6 @@ The distance between the result numbers can be adjusted with interval.
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -4088,7 +3972,7 @@ The distance between the result numbers can be adjusted with interval.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line305">line 305</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line285">line 285</a>
     </li></ul></dd>
     
 
@@ -4313,13 +4197,6 @@ always use the standard reduce() function when it is known that the object is ac
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -4330,7 +4207,7 @@ always use the standard reduce() function when it is known that the object is ac
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line129">line 129</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line123">line 123</a>
     </li></ul></dd>
     
 
@@ -4495,7 +4372,169 @@ Returns a function which can then receive a value to output, the value will then
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line372">line 372</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line368">line 368</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~trace"><span class="type-signature">(inner) </span>trace<span class="signature">(label)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    This was adapted from a blog post on Composing Software written by Eric Elliott. Trace provides a way to traces
+steps through code via the console, while maintaining the functional-style return value.
+Returns a function which can then receive a value to output, the value will then be returned.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Pass an identifying label of the value being output.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Eric Elliott</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line319">line 319</a>
     </li></ul></dd>
     
 
@@ -4723,13 +4762,6 @@ Returns a function which can then receive a value to output, the value will then
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -4740,7 +4772,7 @@ Returns a function which can then receive a value to output, the value will then
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line88">line 88</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line85">line 85</a>
     </li></ul></dd>
     
 
@@ -4962,13 +4994,6 @@ Returns a function which can then receive a value to output, the value will then
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -4979,7 +5004,7 @@ Returns a function which can then receive a value to output, the value will then
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line62">line 62</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -5262,13 +5287,6 @@ Returns a function which can then receive a value to output, the value will then
     
 
     
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:contact@joshuaheagle.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
 
     
 
@@ -5279,7 +5297,7 @@ Returns a function which can then receive a value to output, the value will then
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line118">line 118</a>
+        <a href="jDom_core_core.js.html">jDom/core/core.js</a>, <a href="jDom_core_core.js.html#line113">line 113</a>
     </li></ul></dd>
     
 
@@ -5345,7 +5363,7 @@ Returns a function which can then receive a value to output, the value will then
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jul 10 2018 09:20:27 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 16 2018 08:19:35 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
