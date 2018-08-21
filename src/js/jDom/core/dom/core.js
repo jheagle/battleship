@@ -96,9 +96,9 @@
    * Check if the provided Element has the provided attributes.
    * Returns a boolean, or an array of 1 / 0 / -1 based on the comparison status.
    * @function elementHasAttribute
-   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element
-   * @param {string} key
-   * @param {string|Object} attr
+   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element - Receive the element to be assessed
+   * @param {string} key - The attribute name to search for
+   * @param {string|Object} attr - The expected value of the attribute to compare against
    * @returns {boolean|Object.<string, number>}
    */
   jDomCoreDom.elementHasAttribute = (element, key, attr) => {
@@ -106,14 +106,16 @@
     if (!element.style) {
       return false
     }
-
-    // check the key is a property of the element
-    // compare current to new one
     if (key in element) {
-      // For attributes which are objects or multi-part strings
-      // -1 = remove attribute, 0 = no change, 1 = add attribute
+      // Check that the key is a property of the element
+      // Compare current to new one
       if (/^(style|className)$/.test(key)) {
-        return jDomCore.compareArrays(typeof attr === 'string' ? attr.split(' ') : Object.keys(attr), typeof attr === 'string' ? element[key].split(' ') : Object.keys(element[key]))
+        // For attributes which are objects or multi-part strings
+        // -1 = remove attribute, 0 = no change, 1 = add attribute
+        return jDomCore.compareArrays(
+          typeof attr === 'string' ? attr.split(' ') : Object.keys(attr),
+          typeof attr === 'string' ? element[key].split(' ') : Object.keys(element[key])
+        )
       }
       return element[key] === attr
     }
@@ -121,17 +123,39 @@
   }
 
   /**
+   *
+   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element
+   * @param {string} classes
+   * @returns {Object<string, number>|*}
+   */
+  jDomCoreDom.elementCompareClassList = (element, classes) => {
+    return jDomCore.compareArrays(classes.split(' '), [].from(element.classList))
+  }
+
+  /**
    * Given a jDomObjects.DOMItem as config, this function will return the changes to be applied
    * to the stored element property.
    * @function elementChanges
-   * @param {Object} config
+   * @param {module:jDom/core/dom/objects.DOMItem} config - The DOMItem having config changes to be applied to its element
    * @returns {Object}
    */
   jDomCoreDom.elementChanges = config => {
     if (config.element.tagName.toLowerCase() !== config.tagName.toLowerCase()) {
+      // When the tagName is different, recreate the element entirely
       return jDomCoreDom.generateElement(config)
     }
-    config.attributes = jDomCore.filterObject(config.attributes, (attr1, key1) => jDomCore.filterObject(jDomCore.mapObject(config.attributes, (attr2, key2) => (typeof attr2 === 'object' || key2 === 'className') ? jDomCore.filterObject(jDomCoreDom.elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 === 1) : !jDomCoreDom.elementHasAttribute(config.element, key2, attr2)), (attr4) => !!attr4)[key1])
+    // Remove all the similarities
+    config.attributes = jDomCore.filterObject(
+      config.attributes,
+      (attr1, key1) => jDomCore.filterObject(
+        jDomCore.mapObject(
+          config.attributes,
+          (attr2, key2) => (typeof attr2 === 'object' || key2 === 'className')
+            ? jDomCore.filterObject(jDomCoreDom.elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 === 1)
+            : !jDomCoreDom.elementHasAttribute(config.element, key2, attr2)
+        ), (attr4) => !!attr4
+      )[key1]
+    )
     return config
   }
 

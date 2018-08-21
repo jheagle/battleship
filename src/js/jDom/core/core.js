@@ -60,7 +60,7 @@ const base = this || window || {}
 
   /**
    * Function that produces a property of the new Object, taking three arguments
-   * @callback mapCallback
+   * @callback module:jDom/core/core~mapCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
    * @param {Object|Array} [object] - The object map was called upon.
@@ -73,7 +73,7 @@ const base = this || window || {}
    * always use the standard map() function when it is known that the object is actually an array.
    * @function mapObject
    * @param {Object|Array} obj - The Object (or Array) to be mapped
-   * @param {mapCallback|function} fn - The function to be processed for each mapped property
+   * @param {module:jDom/core/core~mapCallback|function} fn - The function to be processed for each mapped property
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
@@ -84,7 +84,7 @@ const base = this || window || {}
 
   /**
    * Function is a predicate, to test each property value of the object. Return true to keep the element, false otherwise, taking three arguments
-   * @callback filterCallback
+   * @callback module:jDom/core/core~filterCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
    * @param {Object|Array} [object] - The object filter was called upon.
@@ -97,7 +97,7 @@ const base = this || window || {}
    * always use the standard filter() function when it is known that the object is actually an array.
    * @function filterObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
-   * @param {filterCallback} fn - The function to be processed for each filtered property
+   * @param {module:jDom/core/core~filterCallback|function} fn - The function to be processed for each filtered property
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
@@ -112,7 +112,7 @@ const base = this || window || {}
 
   /**
    * Function to execute on each property in the object, taking four arguments
-   * @callback reduceCallback
+   * @callback module:jDom/core/core~reduceCallback
    * @param {*} [accumulator={}] - The accumulator accumulates the callback's return values; it is the accumulated value previously returned in the last invocation of the callback, or initialValue, if supplied (see below).
    * @param {*} [currentProperty={}] - The current property being processed in the object.
    * @param {string} [currentIndex=0] - The index of the current element being processed in the array. Starts at index 0, if an initialValue is provided, and at index 1 otherwise.
@@ -126,7 +126,7 @@ const base = this || window || {}
    * always use the standard reduce() function when it is known that the object is actually an array.
    * @function reduceObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
-   * @param {reduceCallback} fn - The function to be processed for each filtered property
+   * @param {module:jDom/core/core~reduceCallback|function} fn - The function to be processed for each filtered property
    * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty array without an initial value is an error.
    * @returns {Object|Array}
    */
@@ -170,7 +170,7 @@ const base = this || window || {}
    * The passed function should accept a minimum of two objects to be merged.
    * If the desire is to mutate the input objects, then the function name should
    * have the word 'mutable' in the name (case-insensitive).
-   * @param {mergeObjects|mergeObjectsMutable|Function} fn - Pass one of the mergeObjects functions to be used
+   * @param {module:jDom/core/core.mergeObjects|module:jDom/core/core.mergeObjectsMutable|Function} fn - Pass one of the mergeObjects functions to be used
    * @param {Object} obj1 - The receiving object; this is the object which will have it's properties overridden
    * @param {Object} obj2 - The contributing object; this is the object which will contribute new properties and override existing ones
    * @param {boolean} [isMutable=false] - An optional flag which indicates whether we will clone objects or directly modify them
@@ -317,19 +317,6 @@ const base = this || window || {}
   jDomCore.compare = (val1, val2) => val1 === val2 ? 0 : val1 > val2 ? 1 : -1
 
   /**
-   * This was adapted from a blog post on Composing Software written by Eric Elliott. Trace provides a way to traces
-   * steps through code via the console, while maintaining the functional-style return value.
-   * Returns a function which can then receive a value to output, the value will then be returned.
-   * @author Eric Elliott
-   * @function trace
-   * @param {string} label - Pass an identifying label of the value being output.
-   * @returns {function(*=)}
-   */
-  jDomCore.trace = label => value => {
-    console.info(`${label}: `, value)
-    return value
-  }
-  /**
    * Compare two Arrays and return the Object where the value for each property is as follows:
    * -1 to indicate val1 is less than val2
    * 0 to indicate both values are the equal
@@ -385,29 +372,77 @@ const base = this || window || {}
    * implementation should likely be used with Promise instead.
    * WARNING: This is a recursive function.
    * @function queueTimeout
-   * @param {function|object} fn - A callback function to be performed at some time in the future.
+   * @param {function|object|boolean} fn - A callback function to be performed at some time in the future.
    * @param {number} time - The time in milliseconds to delay.
    * @param {...*} args - Arguments to be passed to the callback once it is implemented.
    * @returns {{id: number, func: function, timeout: number, args: {Array}, result: *}}
    */
   jDomCore.queueTimeout = (fn = {}, time = 0, ...args) => {
+    // Track the queue to be processed in FIFO
     jDomCore.queueTimeout.queue = jDomCore.queueTimeout.queue || []
+    // Do not run more than one queued item at a time
     jDomCore.queueTimeout.isRunning = jDomCore.queueTimeout.isRunning || false
+    // Construct an object which will store the queued function data
     const queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
     if (fn) {
+      // When the function is valid, append it to the end of the queue
       jDomCore.queueTimeout.queue.push(queueItem)
     }
-
     if (jDomCore.queueTimeout.queue.length && !jDomCore.queueTimeout.isRunning) {
+      // Check that the queue is not empty, and it is not running a queued item
+      // Set isRunning flag to begin processing the next queued item
       jDomCore.queueTimeout.isRunning = true
+      // Pick an item off the front of the queue, and thereby reduce the queue size
       const toRun = jDomCore.queueTimeout.queue.shift()
+      // Get the timeout ID when it has begun
       toRun.id = setTimeout(() => {
+        // Run the function after the provided timeout
         toRun.result = toRun.func(...toRun.args)
+        // Reset isRunning flag
         jDomCore.queueTimeout.isRunning = false
+        // Re-run the queue which will get the next queued item if there is one
         return jDomCore.queueTimeout(false)
       }, toRun.timeout)
+      // Return whatever object we have for the current queued item being processed, likely incomplete because the
+      // function will complete in the future
       return toRun
     }
+    // Return newly created queuedItem
+    return queueItem
+  }
+
+  jDomCore.queueTimeoutOld = (fn = {}, time = 0, ...args) => {
+    // Track the queue to be processed in FIFO
+    jDomCore.queueTimeout.queue = jDomCore.queueTimeout.queue || []
+    // Do not run more than one queued item at a time
+    jDomCore.queueTimeout.isRunning = jDomCore.queueTimeout.isRunning || false
+    // Construct an object which will store the queued function data
+    const queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
+    if (fn) {
+      // When the function is valid, append it to the end of the queue
+      jDomCore.queueTimeout.queue.push(queueItem)
+    }
+    if (jDomCore.queueTimeout.queue.length && !jDomCore.queueTimeout.isRunning) {
+      // Check that the queue is not empty, and it is not running a queued item
+      // Set isRunning flag to begin processing the next queued item
+      jDomCore.queueTimeout.isRunning = true
+      // Pick an item off the front of the queue, and thereby reduce the queue size
+      const toRun = jDomCore.queueTimeout.queue.shift()
+      // Get the timeout ID when it has begun
+      toRun.id = setTimeout(() => {
+        // Run the function after the provided timeout
+        toRun.result = toRun.func(...toRun.args)
+        // Reset isRunning flag
+        jDomCore.queueTimeout.isRunning = false
+        console.log(toRun)
+        // Re-run the queue which will get the next queued item if there is one
+        return jDomCore.queueTimeout(false)
+      }, toRun.timeout)
+      // Return whatever object we have for the current queued item being processed, likely incomplete because the
+      // function will complete in the future
+      return toRun
+    }
+    // Return newly created queuedItem
     return queueItem
   }
 

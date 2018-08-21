@@ -245,18 +245,20 @@
     if (!playAgain) {
       player.attacker = !player.attacker
       gameActions.attackFleet.isLocked = true
-      if (player.attacker && !player.isRobot) {
-        jDomCore.queueTimeout(() => {
-          gameActions.attackFleet.isLocked = false
-          return player.board.children.map(l => l.children.map(r => r.children.map(c => jDomCoreDom.updateElement(jDomCore.mergeObjects(c, {
-            attributes: {
-              style: {
-                width: '17px',
-                height: '17px'
+      if (player.attacker) {
+        if (!player.isRobot) {
+          jDomCore.queueTimeout(() => {
+            gameActions.attackFleet.isLocked = false
+            return player.board.children.map(l => l.children.map(r => r.children.map(c => jDomCoreDom.updateElement(jDomCore.mergeObjects(c, {
+              attributes: {
+                style: {
+                  width: '17px',
+                  height: '17px'
+                }
               }
-            }
-          })))))
-        }, 400)
+            })))))
+          }, 400)
+        }
         ++player.turnCnt
       } else {
         jDomCore.queueTimeout(() => {

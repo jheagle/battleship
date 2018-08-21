@@ -73,6 +73,7 @@
 
   /**
    * This is the standard definition of a listenerFunction to be used
+   * @callback jDomObjects.listenerFunction
    * @callback listenerFunction
    * @param {Event} e - The event object passed to the listener
    * @param {module:jDom/core/dom/objects.DOMItem} target - The element which triggered the event
@@ -81,6 +82,7 @@
 
   /**
    * An EventListener Object to be appended to the element within the DOMItem
+   * @typedef {Object} jDomObjects.EventListener
    * @typedef {Object} EventListener
    * @property {string} listenerFunc - A string function name matching an existing {@link module:jDom/core/dom/objects~listenerFunction}.
    * @property {Object} listenerArgs - Additional args required for the listener function
@@ -117,6 +119,7 @@
 
   /**
    * DOMItemHead defines the structure for a single element in the DOM
+   * @typedef {module:jDom/core/dom/objects.DOMItem} jDomObjects.DOMItemHead
    * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemHead
    * @property {string} [tagName=head] - This is set to the string head referring to the HTML element of the same name
    * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
@@ -126,6 +129,7 @@
 
   /**
    * DOMItemBody defines the structure for a single element in the DOM
+   * @typedef {module:jDom/core/dom/objects.DOMItem} jDomObjects.DOMItemBody
    * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemBody
    * @property {string} [tagName=body] - This is set to the string body referring to the HTML element of the same name
    * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
@@ -154,6 +158,7 @@
 
   /**
    * DOMItemRoot defines the structure for a single element in the DOM
+   * @typedef {module:jDom/core/dom/objects.DOMItem} jDomObjects.DOMItemRoot
    * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemRoot
    * @property {string} [tagName=html] - This is set to the string html referring to the HTML element of the same name
    * @property {Object} attributes - Empty object as attributes placeholder
@@ -168,7 +173,7 @@
    * Initiate the Root for DocumentItem. This is primary a helper for {@link documentDOMItem}.
    * @param {Array.<module:jDom/core/dom/objects~DOMItemHead|module:jDom/core/dom/objects~DOMItemBody>} children - Provide an array of Head and Body (usually via {@link initChildren})
    * @param {Object.<string, module:jDom/core/dom/objects~listenerFunction>} listeners - An object of all event listeners to be registered in the DOM
-   * @returns {module:jDom/core/dom/objects~DOMItemRoot}
+   * @returns {module:jDom/core/dom/objects~DOMItemRoot|module:jDom/core/dom/objects.DOMItem}
    */
   const initRoot = (children, listeners = {}) => jDomObjects.createDOMItem({
     tagName: 'html',
@@ -185,12 +190,14 @@
    * implement.
    * @function documentDOMItem
    * @param {Object.<string, module:jDom/core/dom/objects~listenerFunction>} listeners - An object of all event listeners to be registered in the DOM
-   * @param {module:jDom/core/dom/objects~DOMItemRoot} [rootItem] - This is a reference to DOMItemRoot which will be defaulted with {@link initRoot}
-   * @returns {module:jDom/core/dom/objects~DOMItemRoot}
+   * @param {module:jDom/core/dom/objects~DOMItemRoot|module:jDom/core/dom/objects.DOMItem} [rootItem] - This is a reference to DOMItemRoot which will be defaulted with {@link initRoot}
+   * @returns {module:jDom/core/dom/objects~DOMItemRoot|module:jDom/core/dom/objects.DOMItem}
    */
   jDomObjects.documentDOMItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
     rootItem.children = rootItem.children.map(child => jDomObjects.createDOMItem(child, {parentItem: rootItem}))
+    // noinspection JSUndefinedPropertyAssignment
     rootItem.head = rootItem.children[0]
+    // noinspection JSUndefinedPropertyAssignment
     rootItem.body = rootItem.children[1]
     return jDomObjects.createDOMItem(rootItem)
   }

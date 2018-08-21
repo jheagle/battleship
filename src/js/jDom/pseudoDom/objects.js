@@ -71,6 +71,15 @@
    */
   const getParentNodes = jDomCore.curry(getParentNodesFromAttribute)('', false)
 
+  class IterableList {
+    constructor (values = []){
+      this.innerArray = values
+    }
+    [Symbol.iterator](){
+      return this.innerArray.values()
+    }
+  }
+
   /**
    * @class
    * @property {boolean} bubbles - A Boolean indicating whether the event bubbles up through the DOM or not.
@@ -305,6 +314,9 @@
    * @class
    * @augments PseudoNode
    * @property {string} tagName
+   * @property {string} className
+   * @property {string} id
+   * @property {string} innerHtml
    * @property {Array} attributes
    * @property {function} hasAttribute
    * @property {function} setAttribute
@@ -336,6 +348,8 @@
         this[name] = value
         return {name, value}
       })
+
+      this.classList = new DOMSettableTokenList(this.className)
     }
 
     /**
