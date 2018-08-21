@@ -411,41 +411,6 @@ const base = this || window || {}
     return queueItem
   }
 
-  jDomCore.queueTimeoutOld = (fn = {}, time = 0, ...args) => {
-    // Track the queue to be processed in FIFO
-    jDomCore.queueTimeout.queue = jDomCore.queueTimeout.queue || []
-    // Do not run more than one queued item at a time
-    jDomCore.queueTimeout.isRunning = jDomCore.queueTimeout.isRunning || false
-    // Construct an object which will store the queued function data
-    const queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
-    if (fn) {
-      // When the function is valid, append it to the end of the queue
-      jDomCore.queueTimeout.queue.push(queueItem)
-    }
-    if (jDomCore.queueTimeout.queue.length && !jDomCore.queueTimeout.isRunning) {
-      // Check that the queue is not empty, and it is not running a queued item
-      // Set isRunning flag to begin processing the next queued item
-      jDomCore.queueTimeout.isRunning = true
-      // Pick an item off the front of the queue, and thereby reduce the queue size
-      const toRun = jDomCore.queueTimeout.queue.shift()
-      // Get the timeout ID when it has begun
-      toRun.id = setTimeout(() => {
-        // Run the function after the provided timeout
-        toRun.result = toRun.func(...toRun.args)
-        // Reset isRunning flag
-        jDomCore.queueTimeout.isRunning = false
-        console.log(toRun)
-        // Re-run the queue which will get the next queued item if there is one
-        return jDomCore.queueTimeout(false)
-      }, toRun.timeout)
-      // Return whatever object we have for the current queued item being processed, likely incomplete because the
-      // function will complete in the future
-      return toRun
-    }
-    // Return newly created queuedItem
-    return queueItem
-  }
-
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
