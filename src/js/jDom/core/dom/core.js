@@ -123,9 +123,9 @@
   }
 
   /**
-   *
-   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element
-   * @param {string} classes
+   * Check if a class exists on the element, return object with keys for each class and a -1, 0, 1 difference indicator.
+   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element Provide an element to check classes on.
+   * @param {string} classes A string of classes (like the content of the 'class' attribute) to be compared
    * @returns {Object<string, number>|*}
    */
   jDomCoreDom.elementCompareClassList = (element, classes) => {
@@ -137,7 +137,7 @@
    * to the stored element property.
    * @function elementChanges
    * @param {module:jDom/core/dom/objects.DOMItem} config - The DOMItem having config changes to be applied to its element
-   * @returns {Object}
+   * @returns {module:jDom/core/dom/objects.DOMItem}
    */
   jDomCoreDom.elementChanges = config => {
     if (config.element.tagName.toLowerCase() !== config.tagName.toLowerCase()) {
@@ -147,14 +147,21 @@
     // Remove all the similarities
     config.attributes = jDomCore.filterObject(
       config.attributes,
-      (attr1, key1) => jDomCore.filterObject(
-        jDomCore.mapObject(
-          config.attributes,
-          (attr2, key2) => (typeof attr2 === 'object' || key2 === 'className')
-            ? jDomCore.filterObject(jDomCoreDom.elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 === 1)
-            : !jDomCoreDom.elementHasAttribute(config.element, key2, attr2)
-        ), (attr4) => !!attr4
-      )[key1]
+      // For each attribute, check if the it becomes true / false based on the comparison results
+      (attr1, key1) =>
+        jDomCore.filterObject(
+          // Get attributes as object of truthy and falsey values
+          jDomCore.mapObject(
+            config.attributes,
+            (attr2, key2) => (typeof attr2 === 'object' || key2 === 'className')
+              // Apply custom logic for class and styles, only keep the updates
+              ? jDomCore.filterObject(jDomCoreDom.elementHasAttribute(config.element, key2, attr2), (attr3) => attr3 === 1)
+              // True when the element does not already have the attribute
+              : !jDomCoreDom.elementHasAttribute(config.element, key2, attr2)
+          ),
+          // Remove when the attr4 value is 0 or false, or not empty object
+          (attr4) => !!attr4
+        )[key1]
     )
     return config
   }
@@ -162,8 +169,8 @@
   /**
    * Update a single jDomObjects.DOMItem element with the provided attributes / style / elementProperties
    * @function updateElement
-   * @param config
-   * @returns {*}
+   * @param {module:jDom/core/dom/objects.DOMItem} config
+   * @returns {module:jDom/core/dom/objects.DOMItem}
    */
   jDomCoreDom.updateElement = (config) => {
     if (config.element.style) {
@@ -189,8 +196,8 @@
    * Generate HTML element data for each object in the matrix
    * WARNING: This is a recursive function.
    * @function updateElements
-   * @param config
-   * @returns {*}
+   * @param {module:jDom/core/dom/objects.DOMItem} config
+   * @returns {module:jDom/core/dom/objects.DOMItem}
    */
   jDomCoreDom.updateElements = (config) => {
     config = jDomCoreDom.updateElement(config)
@@ -201,7 +208,8 @@
   /**
    * Create an HTML element based on the provided attributes and return the element as an Object.
    * @function generateElement
-   * @param config
+   * @param {module:jDom/core/dom/objects.DOMItem} config
+   * @return {module:jDom/core/dom/objects.DOMItem}
    */
   jDomCoreDom.generateElement = (config) => {
     config.element = document.createElement(config.tagName)
