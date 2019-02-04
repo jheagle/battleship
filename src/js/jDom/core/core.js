@@ -59,6 +59,32 @@ const base = this || window || {}
   jDomCore.pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
 
   /**
+   * Set a value on an item, then return the item
+   * @function setValue
+   * @param {Object|Array} item - An object or array to be updated
+   * @param {string|number} key - The key on the item which will have its value set
+   * @param {*} value - Any value to be applied to the key
+   * @returns {Object|Array}
+   */
+  jDomCore.setValue = (item, key, value) => {
+    item[key] = value
+    return item
+  }
+
+  /**
+   * Set a value on an item, then return the value
+   * @function setAndReturnValue
+   * @param {Object|Array} item - An object or array to be updated
+   * @param {string|number} key - The key on the item which will have its value set
+   * @param {*} value - Any value to be applied to the key
+   * @returns {*}
+   */
+  jDomCore.setAndReturnValue = (item, key, value) => {
+    item[key] = value
+    return value
+  }
+
+  /**
    * Function that produces a property of the new Object, taking three arguments
    * @callback module:jDom/core/core~mapCallback
    * @param {*} currentProperty - The current property being processed in the object.
@@ -77,10 +103,23 @@ const base = this || window || {}
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
-  jDomCore.mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
-    newObj[curr] = fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))
-    return newObj
-  }, thisArg || {})
+  jDomCore.mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce(
+    (newObj, curr) => jDomCore.setValue(newObj, curr, fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))),
+    thisArg || {}
+  )
+
+  /**
+   * Perform map on an array property of an object, then return the object
+   * @function mapArrayProperty
+   * @param {Object|Array} obj - An object having an array property
+   * @param {string} property - The string key for the array property to be mapped
+   * @param {module:jDom/core/core~mapCallback|function} mapFunction - A function suitable to be passed to map
+   * @returns {object}
+   */
+  jDomCore.mapProperty = (obj, property, mapFunction) => {
+    obj[property] = jDomCore.mapObject(obj[property], mapFunction)
+    return obj
+  }
 
   /**
    * Function is a predicate, to test each property value of the object. Return true to keep the element, false otherwise, taking three arguments
@@ -163,7 +202,7 @@ const base = this || window || {}
    * @param {Object} object - The original object that is being cloned
    * @returns {Object}
    */
-  jDomCore.cloneObject = (object) => cloneCopy(object, JSON.parse(JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)))
+  jDomCore.cloneObject = object => cloneCopy(object, JSON.parse(JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)))
 
   /**
    * Merge two objects and provide clone or original on the provided function.
@@ -340,15 +379,13 @@ const base = this || window || {}
    * @returns {Object.<string, number>}
    */
   jDomCore.compareArrays = (arr1, arr2) =>
-    arr2.filter((attr) => !jDomCore.inArray(arr1, attr))
+    arr2.filter(attr => !jDomCore.inArray(arr1, attr))
       .concat(arr1)
       .reduce(
-        (returnObj, attr) => {
-          returnObj[
-            (typeof attr === 'string') ? attr : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)
-            ] = jDomCore.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length)
-          return returnObj
-        },
+        (returnObj, attr) => jDomCore.setValue(
+          returnObj,
+          (typeof attr === 'string') ? attr : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined),
+          jDomCore.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length)),
         {}
       )
 

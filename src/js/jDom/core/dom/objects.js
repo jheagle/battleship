@@ -81,12 +81,30 @@
    */
 
   /**
+   * A Boolean indicating whether events of this type will be dispatched to the registered listerFunction before being dispatched to any EventTarget beneath it in the DOM tree.
+   * @typedef {boolean} module:jDom/core/dom/objects.UseCapture
+   */
+
+  /**
+   * OptionsObject defines the structure for the options to be passed to addEventListener
+   * @typedef {Object} module:jDom/core/dom/objects.OptionsObject
+   * @property {boolean} capture - Indicate that events of this type will be dispatched to the registered listenerFunction before being dispatched to any EventTarget beneath it in the DOM tree.
+   * @property {boolean} once - Indicate that the listenerFunction should be invoked at most once after being added. If 'true', the listenerFunction would be automatically removed when invoked.
+   * @property {boolean} passive - Indicate that, if 'true', indicates that the listenerFunction will never call preventDefault(). If preventDefault() is called, the user agent will do nothing with it.
+   */
+
+  /**
+   * EventListenerOptions is either a boolean as UseCapture or an Object as OptionsObject
+   * @typedef {module:jDom/core/dom/objects.OptionsObject|module:jDom/core/dom/objects.UseCapture} module:jDom/core/dom/objects.EventListenerOptions
+   */
+
+  /**
    * An EventListener Object to be appended to the element within the DOMItem
    * @typedef {Object} jDomObjects.EventListener
    * @typedef {Object} EventListener
    * @property {string} listenerFunc - A string function name matching an existing {@link module:jDom/core/dom/objects~listenerFunction}.
    * @property {Object} listenerArgs - Additional args required for the listener function
-   * @property {(boolean|Object)} listenerOptions - Provides support for options parameter of addEventListener, or false for default
+   * @property {module:jDom/core/dom/objects.EventListenerOptions} listenerOptions - Provides support for options parameter of addEventListener, or false for default
    */
 
   /**
@@ -163,7 +181,7 @@
    * @property {string} [tagName=html] - This is set to the string html referring to the HTML element of the same name
    * @property {Object} attributes - Empty object as attributes placeholder
    * @property {HTMLDocument} element - A reference to the entire Document
-   * @property {Object.<string, listenerFunction>} EventListeners - all registered listeners stored as listener name and function pairs
+   * @property {Object.<string, module:jDom/core/dom/objects~listenerFunction>} eventListeners - all registered listeners stored as listener name and function pairs
    * @property {Array.<module:jDom/core/dom/objects~DOMItemHead|module:jDom/core/dom/objects~DOMItemBody>} children - Two references: for head and body
    * @property {module:jDom/core/dom/objects~DOMItemHead} head - A specific reference to head item
    * @property {module:jDom/core/dom/objects~DOMItemBody} body - A specific reference to body item

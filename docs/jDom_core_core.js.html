@@ -87,6 +87,32 @@ const base = this || window || {}
   jDomCore.pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
 
   /**
+   * Set a value on an item, then return the item
+   * @function setValue
+   * @param {Object|Array} item - An object or array to be updated
+   * @param {string|number} key - The key on the item which will have its value set
+   * @param {*} value - Any value to be applied to the key
+   * @returns {Object|Array}
+   */
+  jDomCore.setValue = (item, key, value) => {
+    item[key] = value
+    return item
+  }
+
+  /**
+   * Set a value on an item, then return the value
+   * @function setAndReturnValue
+   * @param {Object|Array} item - An object or array to be updated
+   * @param {string|number} key - The key on the item which will have its value set
+   * @param {*} value - Any value to be applied to the key
+   * @returns {*}
+   */
+  jDomCore.setAndReturnValue = (item, key, value) => {
+    item[key] = value
+    return value
+  }
+
+  /**
    * Function that produces a property of the new Object, taking three arguments
    * @callback module:jDom/core/core~mapCallback
    * @param {*} currentProperty - The current property being processed in the object.
@@ -105,10 +131,23 @@ const base = this || window || {}
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
-  jDomCore.mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
-    newObj[curr] = fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))
-    return newObj
-  }, thisArg || {})
+  jDomCore.mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce(
+    (newObj, curr) => jDomCore.setValue(newObj, curr, fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))),
+    thisArg || {}
+  )
+
+  /**
+   * Perform map on an array property of an object, then return the object
+   * @function mapArrayProperty
+   * @param {Object|Array} obj - An object having an array property
+   * @param {string} property - The string key for the array property to be mapped
+   * @param {module:jDom/core/core~mapCallback|function} mapFunction - A function suitable to be passed to map
+   * @returns {object}
+   */
+  jDomCore.mapProperty = (obj, property, mapFunction) => {
+    obj[property] = jDomCore.mapObject(obj[property], mapFunction)
+    return obj
+  }
 
   /**
    * Function is a predicate, to test each property value of the object. Return true to keep the element, false otherwise, taking three arguments
@@ -191,7 +230,7 @@ const base = this || window || {}
    * @param {Object} object - The original object that is being cloned
    * @returns {Object}
    */
-  jDomCore.cloneObject = (object) => cloneCopy(object, JSON.parse(JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)))
+  jDomCore.cloneObject = object => cloneCopy(object, JSON.parse(JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)))
 
   /**
    * Merge two objects and provide clone or original on the provided function.
@@ -368,15 +407,13 @@ const base = this || window || {}
    * @returns {Object.&lt;string, number>}
    */
   jDomCore.compareArrays = (arr1, arr2) =>
-    arr2.filter((attr) => !jDomCore.inArray(arr1, attr))
+    arr2.filter(attr => !jDomCore.inArray(arr1, attr))
       .concat(arr1)
       .reduce(
-        (returnObj, attr) => {
-          returnObj[
-            (typeof attr === 'string') ? attr : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)
-            ] = jDomCore.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length)
-          return returnObj
-        },
+        (returnObj, attr) => jDomCore.setValue(
+          returnObj,
+          (typeof attr === 'string') ? attr : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined),
+          jDomCore.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length)),
         {}
       )
 
@@ -439,41 +476,6 @@ const base = this || window || {}
     return queueItem
   }
 
-  jDomCore.queueTimeoutOld = (fn = {}, time = 0, ...args) => {
-    // Track the queue to be processed in FIFO
-    jDomCore.queueTimeout.queue = jDomCore.queueTimeout.queue || []
-    // Do not run more than one queued item at a time
-    jDomCore.queueTimeout.isRunning = jDomCore.queueTimeout.isRunning || false
-    // Construct an object which will store the queued function data
-    const queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
-    if (fn) {
-      // When the function is valid, append it to the end of the queue
-      jDomCore.queueTimeout.queue.push(queueItem)
-    }
-    if (jDomCore.queueTimeout.queue.length &amp;&amp; !jDomCore.queueTimeout.isRunning) {
-      // Check that the queue is not empty, and it is not running a queued item
-      // Set isRunning flag to begin processing the next queued item
-      jDomCore.queueTimeout.isRunning = true
-      // Pick an item off the front of the queue, and thereby reduce the queue size
-      const toRun = jDomCore.queueTimeout.queue.shift()
-      // Get the timeout ID when it has begun
-      toRun.id = setTimeout(() => {
-        // Run the function after the provided timeout
-        toRun.result = toRun.func(...toRun.args)
-        // Reset isRunning flag
-        jDomCore.queueTimeout.isRunning = false
-        console.log(toRun)
-        // Re-run the queue which will get the next queued item if there is one
-        return jDomCore.queueTimeout(false)
-      }, toRun.timeout)
-      // Return whatever object we have for the current queued item being processed, likely incomplete because the
-      // function will complete in the future
-      return toRun
-    }
-    // Return newly created queuedItem
-    return queueItem
-  }
-
   /**
    * Either export all functions to be exported, or assign to the Window context
    */
@@ -500,7 +502,7 @@ const base = this || window || {}
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Aug 21 2018 08:26:36 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Feb 02 2019 20:47:52 GMT-0500 (Eastern Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

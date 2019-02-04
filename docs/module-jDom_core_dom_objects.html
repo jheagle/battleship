@@ -197,7 +197,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line205">line 205</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line223">line 223</a>
     </li></ul></dd>
     
 
@@ -338,7 +338,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line103">line 103</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line121">line 121</a>
     </li></ul></dd>
     
 
@@ -538,7 +538,7 @@ implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line188">line 188</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line206">line 206</a>
     </li></ul></dd>
     
 
@@ -923,7 +923,324 @@ implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line92">line 92</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line110">line 110</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id=".EventListenerOptions">EventListenerOptions</h4>
+
+
+
+
+<div class="description">
+    EventListenerOptions is either a boolean as UseCapture or an Object as OptionsObject
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.OptionsObject">module:jDom/core/dom/objects.OptionsObject</a></span>
+|
+
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.UseCapture">module:jDom/core/dom/objects.UseCapture</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line96">line 96</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id=".OptionsObject">OptionsObject</h4>
+
+
+
+
+<div class="description">
+    OptionsObject defines the structure for the options to be passed to addEventListener
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>capture</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Indicate that events of this type will be dispatched to the registered listenerFunction before being dispatched to any EventTarget beneath it in the DOM tree.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>once</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Indicate that the listenerFunction should be invoked at most once after being added. If 'true', the listenerFunction would be automatically removed when invoked.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>passive</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Indicate that, if 'true', indicates that the listenerFunction will never call preventDefault(). If preventDefault() is called, the user agent will do nothing with it.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line88">line 88</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id=".UseCapture">UseCapture</h4>
+
+
+
+
+<div class="description">
+    A Boolean indicating whether events of this type will be dispatched to the registered listerFunction before being dispatched to any EventTarget beneath it in the DOM tree.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line83">line 83</a>
     </li></ul></dd>
     
 
@@ -1164,7 +1481,7 @@ implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line130">line 130</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line148">line 148</a>
     </li></ul></dd>
     
 
@@ -1405,7 +1722,7 @@ implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line120">line 120</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line138">line 138</a>
     </li></ul></dd>
     
 
@@ -1581,13 +1898,13 @@ implement.
 
         <tr>
             
-                <td class="name"><code>EventListeners</code></td>
+                <td class="name"><code>eventListeners</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object.&lt;string, listenerFunction></span>
+<span class="param-type">Object.&lt;string, <a href="module-jDom_core_dom_objects.html#~listenerFunction">module:jDom/core/dom/objects~listenerFunction</a>></span>
 
 
             
@@ -1745,7 +2062,7 @@ implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line159">line 159</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -1866,10 +2183,7 @@ implement.
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
-|
-
-<span class="param-type">Object</span>
+<span class="param-type"><a href="module-jDom_core_dom_objects.html#.EventListenerOptions">module:jDom/core/dom/objects.EventListenerOptions</a></span>
 
 
             
@@ -1918,7 +2232,7 @@ implement.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line83">line 83</a>
+        <a href="jDom_core_dom_objects.js.html">jDom/core/dom/objects.js</a>, <a href="jDom_core_dom_objects.js.html#line101">line 101</a>
     </li></ul></dd>
     
 
@@ -2240,7 +2554,7 @@ implement.
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Aug 21 2018 08:26:36 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Feb 02 2019 20:47:52 GMT-0500 (Eastern Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
