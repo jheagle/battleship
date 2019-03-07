@@ -61,12 +61,12 @@ const base = this || window || {}
   /**
    * Set a value on an item, then return the item
    * @function setValue
-   * @param {Object|Array} item - An object or array to be updated
    * @param {string|number} key - The key on the item which will have its value set
    * @param {*} value - Any value to be applied to the key
+   * @param {Object|Array} item - An object or array to be updated
    * @returns {Object|Array}
    */
-  jDomCore.setValue = (item, key, value) => {
+  jDomCore.setValue = (key, value, item) => {
     item[key] = value
     return item
   }
@@ -104,20 +104,20 @@ const base = this || window || {}
    * @returns {Object|Array}
    */
   jDomCore.mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce(
-    (newObj, curr) => jDomCore.setValue(newObj, curr, fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))),
+    (newObj, curr) => jDomCore.setValue(curr, fn(...[obj[curr], curr, obj].slice(0, fn.length || 2)), newObj),
     thisArg || {}
   )
 
   /**
    * Perform map on an array property of an object, then return the object
    * @function mapArrayProperty
-   * @param {Object|Array} obj - An object having an array property
    * @param {string} property - The string key for the array property to be mapped
    * @param {module:jDom/core/core~mapCallback|function} mapFunction - A function suitable to be passed to map
+   * @param {Object|Array} obj - An object having an array property
    * @returns {object}
    */
-  jDomCore.mapProperty = (obj, property, mapFunction) => {
-    obj[property] = jDomCore.mapObject(obj[property], mapFunction)
+  jDomCore.mapProperty = (property, mapFunction, obj) => {
+    obj[property] = jDomCore.mapObject(obj[property] || [], mapFunction)
     return obj
   }
 
@@ -383,9 +383,10 @@ const base = this || window || {}
       .concat(arr1)
       .reduce(
         (returnObj, attr) => jDomCore.setValue(
-          returnObj,
           (typeof attr === 'string') ? attr : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined),
-          jDomCore.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length)),
+          jDomCore.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length),
+          returnObj
+        ),
         {}
       )
 

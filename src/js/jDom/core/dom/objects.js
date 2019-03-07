@@ -137,7 +137,7 @@
 
   /**
    * DOMItemHead defines the structure for a single element in the DOM
-   * @typedef {module:jDom/core/dom/objects.DOMItem} jDomObjects.DOMItemHead
+   * @typedef {module:jDom/core/dom/objects.DOMItem} module:jDom/core/dom/objects.DOMItemHead
    * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemHead
    * @property {string} [tagName=head] - This is set to the string head referring to the HTML element of the same name
    * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
@@ -147,7 +147,7 @@
 
   /**
    * DOMItemBody defines the structure for a single element in the DOM
-   * @typedef {module:jDom/core/dom/objects.DOMItem} jDomObjects.DOMItemBody
+   * @typedef {module:jDom/core/dom/objects.DOMItem} module:jDom/core/dom/objects.DOMItemBody
    * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemBody
    * @property {string} [tagName=body] - This is set to the string body referring to the HTML element of the same name
    * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
@@ -176,7 +176,7 @@
 
   /**
    * DOMItemRoot defines the structure for a single element in the DOM
-   * @typedef {module:jDom/core/dom/objects.DOMItem} jDomObjects.DOMItemRoot
+   * @typedef {module:jDom/core/dom/objects.DOMItem} module:jDom/core/dom/objects.DOMItemRoot
    * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemRoot
    * @property {string} [tagName=html] - This is set to the string html referring to the HTML element of the same name
    * @property {Object} attributes - Empty object as attributes placeholder
