@@ -389,7 +389,7 @@
    * @param target
    * @returns {*}
    */
-  gameActions.attackListener = (e, target) => gameActions.attackFleet(jDomMatrixCore.getDOMItemFromElement(e.target, target))
+  gameActions.attackListener = (e, target) => gameActions.attackFleet(jDomMatrixCore.getDomItemFromElement(e.target, target))
 
   /**
    * Choose which player to attack.
@@ -425,7 +425,7 @@
           let targetPoints = jDomMatrixCore.getInBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
           if (targetPoints.false.length) {
             displayTargets(targetPoints.false, targetPoints.false[0], victim)
-            return jDomMatrixCore.getDOMItemFromPoint(targetPoints.false[0], victim.board)
+            return jDomMatrixCore.getDomItemFromPoint(targetPoints.false[0], victim.board)
           }
         }
         // If there are no points between, attack the outer points first.
@@ -435,7 +435,7 @@
         let target = dirPnts.reduce((a, b) => gameUtils.checkIfHitCell(a, victim.board) ? b : a)
         if (target) {
           displayTargets(dirPnts, target, victim)
-          return jDomMatrixCore.getDOMItemFromPoint(target, victim.board)
+          return jDomMatrixCore.getDomItemFromPoint(target, victim.board)
         }
       }
       // If there is only one hit part, then set that as the lastTarget for detecting adjacent parts.
@@ -446,7 +446,7 @@
     displayTargets(finalTargets, target, victim)
 
     // If there are available targets then hit one at random
-    return jDomMatrixCore.getDOMItemFromPoint(target, victim.board)
+    return jDomMatrixCore.getDomItemFromPoint(target, victim.board)
   }
 
   /**
@@ -470,10 +470,10 @@
    */
   const resetTargets = data => {
     data.victim.board.children.map(l => jDomCoreDom.updateElement(jDomCore.mergeObjects(l, {attributes: {style: {borderColor: '#333'}}})))
-    data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDOMItemFromPoint(t, data.victim.board), {attributes: {style: {borderColor: '#333'}}})))
+    data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), {attributes: {style: {borderColor: '#333'}}})))
     if (!data.target) {
       data.victim.board.children.map(l => jDomCoreDom.updateElement(jDomCore.mergeObjects(l, {attributes: {style: {borderColor: 'yellow'}}})))
-      data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDOMItemFromPoint(t, data.victim.board), {attributes: {style: {borderColor: 'yellow'}}})))
+      data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), {attributes: {style: {borderColor: 'yellow'}}})))
     }
     return data
   }

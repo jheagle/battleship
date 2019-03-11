@@ -1,6 +1,6 @@
 /**
  * @file Core objects for representing the DOM in JSON.
- * @author Joshua Heagle <contact@joshuaheagle.com>
+ * @author Joshua Heagle <joshuaheagle@gmail.com>
  * @version 1.0.0
  */
 'use strict'
@@ -12,7 +12,7 @@
 
   /**
    * Verify availability of document
-   * @type {HTMLDocument|PseudoHTMLDocument}
+   * @typedef {HTMLDocument|module:jDom/pseudoDom/objects.PseudoHTMLDocument} document
    */
   let document = root.document
 
@@ -22,22 +22,26 @@
   if (!Object.keys(root).length) {
     if (typeof require !== 'undefined') {
       // noinspection JSUnresolvedFunction
+      /**
+       * @see module:jDom/pseudoDom/objects.generate
+       * @typedef {Window|module:jDom/pseudoDom/objects.PseudoEventTarget} root
+       */
       root = require('../../pseudoDom/objects.js').generate(root)
       document = root.document
     } else {
-      console.error('objects.js requires jDomPseudoDom')
+      console.error('objects.js requires jDom/pseudoDom/objects')
     }
   }
 
   /**
    * Store reference to any pre-existing module of the same name
-   * @type {jDomObjects|*}
+   * @type {module|*}
    */
   const previousJDomObjects = root.jDomObjects || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomObjects
-   * @author Joshua Heagle <contact@joshuaheagle.com>
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
    * @typedef {Object} jDomObjects
    * @module jDom/core/dom/objects
    */
@@ -67,7 +71,7 @@
     if (typeof require !== 'undefined') {
       jDomCore = require('../core.js')
     } else {
-      console.error('objects.js requires jDomCore')
+      console.error('jDom/core/dom/objects requires jDom/core/core')
     }
   }
 
@@ -75,56 +79,68 @@
    * This is the standard definition of a listenerFunction to be used
    * @callback jDomObjects.listenerFunction
    * @callback listenerFunction
-   * @param {Event} e - The event object passed to the listener
-   * @param {module:jDom/core/dom/objects.DOMItem} target - The element which triggered the event
+   * @param {Event|module:jDom/pseudoDom/objects.PseudoEvent} e - The event object passed to the listener
+   * @param {module:jDom/core/dom/objects.DomItem} target - The element which triggered the event
    * @param {...*} [args] - Optional args as required by the listener
    */
 
   /**
-   * A Boolean indicating whether events of this type will be dispatched to the registered listerFunction before being dispatched to any EventTarget beneath it in the DOM tree.
+   * A Boolean indicating whether events of this type will be dispatched to the registered listerFunction before being
+   * dispatched to any EventTarget beneath it in the Dom tree.
    * @typedef {boolean} module:jDom/core/dom/objects.UseCapture
    */
 
   /**
    * OptionsObject defines the structure for the options to be passed to addEventListener
    * @typedef {Object} module:jDom/core/dom/objects.OptionsObject
-   * @property {boolean} capture - Indicate that events of this type will be dispatched to the registered listenerFunction before being dispatched to any EventTarget beneath it in the DOM tree.
-   * @property {boolean} once - Indicate that the listenerFunction should be invoked at most once after being added. If 'true', the listenerFunction would be automatically removed when invoked.
-   * @property {boolean} passive - Indicate that, if 'true', indicates that the listenerFunction will never call preventDefault(). If preventDefault() is called, the user agent will do nothing with it.
+   * @property {boolean} capture - Indicate that events of this type will be dispatched to the registered
+   * listenerFunction before being dispatched to any EventTarget beneath it in the Dom tree.
+   * @property {boolean} once - Indicate that the listenerFunction should be invoked at most once after being added. If
+   * 'true', the listenerFunction would be automatically removed when invoked.
+   * @property {boolean} passive - Indicate that, if 'true', indicates that the listenerFunction will never call
+   * preventDefault(). If preventDefault() is called, the user agent will do nothing with it.
    */
 
   /**
    * EventListenerOptions is either a boolean as UseCapture or an Object as OptionsObject
-   * @typedef {module:jDom/core/dom/objects.OptionsObject|module:jDom/core/dom/objects.UseCapture} module:jDom/core/dom/objects.EventListenerOptions
+   * @typedef {
+   * module:jDom/core/dom/objects.OptionsObject|module:jDom/core/dom/objects.UseCapture
+   * } module:jDom/core/dom/objects.EventListenerOptions
    */
 
   /**
-   * An EventListener Object to be appended to the element within the DOMItem
+   * An EventListener Object to be appended to the element within the DomItem
    * @typedef {Object} jDomObjects.EventListener
    * @typedef {Object} EventListener
-   * @property {string} listenerFunc - A string function name matching an existing {@link module:jDom/core/dom/objects~listenerFunction}.
+   * @property {string} listenerFunc - A string function name matching an existing
+   * {@link module:jDom/core/dom/objects~listenerFunction}.
    * @property {Object} listenerArgs - Additional args required for the listener function
-   * @property {module:jDom/core/dom/objects.EventListenerOptions} listenerOptions - Provides support for options parameter of addEventListener, or false for default
+   * @property {module:jDom/core/dom/objects.EventListenerOptions} listenerOptions - Provides support for options
+   * parameter of addEventListener, or false for default
    */
 
   /**
-   * DOMItem defines the structure for a single element in the DOM
-   * @typedef {Object} module:jDom/core/dom/objects.DOMItem
+   * DomItem defines the structure for a single element in the Dom
+   * @typedef {Object} module:jDom/core/dom/objects.DomItem
    * @property {string} tagName - This is any valid HTMLElement tagName
-   * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here (including the defaulted style object)
-   * @property {(Object|HTMLElement)} element - A reference to an existing HTML element will be stored here (default empty object)
-   * @property {Object.<Event, module:jDom/core/dom/objects~EventListener>} eventListeners - An object holding all events to be registered for the associated element
-   * @property {module:jDom/core/dom/objects.DOMItem} parentItem - A reference to the parent of this object
-   * @property {Array.<module:jDom/core/dom/objects.DOMItem>} children - A reference to an array of child objects
+   * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
+   * (including the defaulted style object)
+   * @property {(Object|HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement)} element - A reference to an existing HTML element will be stored here (default
+   * empty object)
+   * @property {Object.<Event, module:jDom/core/dom/objects~EventListener>} eventListeners - An object holding all
+   * events to be registered for the associated element
+   * @property {module:jDom/core/dom/objects.DomItem} parentItem - A reference to the parent of this object
+   * @property {Array.<module:jDom/core/dom/objects.DomItem>} children - A reference to an array of child objects
    */
 
   /**
-   * This is the basic Object for representing the DOM in a virtual perspective. All incoming attributes will be merged to the specified format.
-   * @function createDOMItem
-   * @param {...Object} attributes - DOMItem-like object(s) to be merged as a DOMItem
-   * @returns {module:jDom/core/dom/objects.DOMItem}
+   * This is the basic Object for representing the Dom in a virtual perspective. All incoming attributes will be merged
+   * to the specified format.
+   * @function createDomItem
+   * @param {...Object} attributes - DomItem-like object(s) to be merged as a DomItem
+   * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  jDomObjects.createDOMItem = (...attributes) => jDomCore.mergeObjectsMutable({
+  jDomObjects.createDomItem = (...attributes) => jDomCore.mergeObjectsMutable({
     tagName: 'div',
     attributes: {
       style: {}
@@ -136,37 +152,37 @@
   }, ...attributes)
 
   /**
-   * DOMItemHead defines the structure for a single element in the DOM
-   * @typedef {module:jDom/core/dom/objects.DOMItem} module:jDom/core/dom/objects.DOMItemHead
-   * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemHead
+   * DomItemHead defines the structure for a single element in the Dom
+   * @typedef {module:jDom/core/dom/objects.DomItem} module:jDom/core/dom/objects.DomItemHead
+   * @typedef {module:jDom/core/dom/objects.DomItem} DomItemHead
    * @property {string} [tagName=head] - This is set to the string head referring to the HTML element of the same name
    * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
-   * @property {HTMLHeadElement} element - A reference to the HTML head element
-   * @property {Array.<module:jDom/core/dom/objects.DOMItem>} children - A reference to an array of child objects
+   * @property {HTMLHeadElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element - A reference to the HTML head element
+   * @property {Array.<module:jDom/core/dom/objects.DomItem>} children - A reference to an array of child objects
    */
 
   /**
-   * DOMItemBody defines the structure for a single element in the DOM
-   * @typedef {module:jDom/core/dom/objects.DOMItem} module:jDom/core/dom/objects.DOMItemBody
-   * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemBody
+   * DomItemBody defines the structure for a single element in the Dom
+   * @typedef {module:jDom/core/dom/objects.DomItem} module:jDom/core/dom/objects.DomItemBody
+   * @typedef {module:jDom/core/dom/objects.DomItem} DomItemBody
    * @property {string} [tagName=body] - This is set to the string body referring to the HTML element of the same name
    * @property {Object.<string, string|Object>} attributes - All potential HTML element attributes can be defined here
-   * @property {HTMLElement} element - A reference to the HTML body element
-   * @property {Array.<module:jDom/core/dom/objects.DOMItem>} children - A reference to an array of child objects
+   * @property {HTMLBodyElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} element - A reference to the HTML body element
+   * @property {Array.<module:jDom/core/dom/objects.DomItem>} children - A reference to an array of child objects
    */
 
   /**
-   * Initiate the children of Root / DocumentItem. This is a helper for {@link documentDOMItem}.
-   * @returns {Array.<module:jDom/core/dom/objects~DOMItemHead|module:jDom/core/dom/objects~DOMItemBody>}
+   * Initiate the children of Root / DocumentItem. This is a helper for {@link documentDomItem}.
+   * @returns {Array.<module:jDom/core/dom/objects~DomItemHead|module:jDom/core/dom/objects~DomItemBody>}
    */
   const initChildren = () => [
-    jDomObjects.createDOMItem({
+    jDomObjects.createDomItem({
       tagName: 'head',
       attributes: {},
       element: document.head,
       children: []
     }),
-    jDomObjects.createDOMItem({
+    jDomObjects.createDomItem({
       tagName: 'body',
       attributes: {},
       element: document.body,
@@ -175,25 +191,30 @@
   ]
 
   /**
-   * DOMItemRoot defines the structure for a single element in the DOM
-   * @typedef {module:jDom/core/dom/objects.DOMItem} module:jDom/core/dom/objects.DOMItemRoot
-   * @typedef {module:jDom/core/dom/objects.DOMItem} DOMItemRoot
+   * DomItemRoot defines the structure for a single element in the Dom
+   * @typedef {module:jDom/core/dom/objects.DomItem} module:jDom/core/dom/objects.DomItemRoot
    * @property {string} [tagName=html] - This is set to the string html referring to the HTML element of the same name
    * @property {Object} attributes - Empty object as attributes placeholder
-   * @property {HTMLDocument} element - A reference to the entire Document
-   * @property {Object.<string, module:jDom/core/dom/objects~listenerFunction>} eventListeners - all registered listeners stored as listener name and function pairs
-   * @property {Array.<module:jDom/core/dom/objects~DOMItemHead|module:jDom/core/dom/objects~DOMItemBody>} children - Two references: for head and body
-   * @property {module:jDom/core/dom/objects~DOMItemHead} head - A specific reference to head item
-   * @property {module:jDom/core/dom/objects~DOMItemBody} body - A specific reference to body item
+   * @property {HTMLDocument|module:jDom/pseudoDom/objects.PseudoHTMLDocument} element - A reference to the entire Document
+   * @property {Object.<string, module:jDom/core/dom/objects~listenerFunction>} eventListeners - all registered
+   * listeners stored as listener name and function pairs
+   * @property {
+   * Array.<module:jDom/core/dom/objects~DomItemHead|module:jDom/core/dom/objects~DomItemBody>
+   *   } children - Two references: for head and body
+   * @property {module:jDom/core/dom/objects~DomItemHead} head - A specific reference to head item
+   * @property {module:jDom/core/dom/objects~DomItemBody} body - A specific reference to body item
    */
 
   /**
-   * Initiate the Root for DocumentItem. This is primary a helper for {@link documentDOMItem}.
-   * @param {Array.<module:jDom/core/dom/objects~DOMItemHead|module:jDom/core/dom/objects~DOMItemBody>} children - Provide an array of Head and Body (usually via {@link initChildren})
-   * @param {Object.<string, module:jDom/core/dom/objects~listenerFunction>} listeners - An object of all event listeners to be registered in the DOM
-   * @returns {module:jDom/core/dom/objects~DOMItemRoot|module:jDom/core/dom/objects.DOMItem}
+   * Initiate the Root for DocumentItem. This is primary a helper for {@link documentDomItem}.
+   * @param {
+   * Array.<module:jDom/core/dom/objects~DomItemHead|module:jDom/core/dom/objects~DomItemBody>
+   *   } children - Provide an array of Head and Body (usually via {@link initChildren})
+   * @param {Object.<string, module:jDom/core/dom/objects~listenerFunction>} listeners - An object of all event
+   * listeners to be registered in the Dom
+   * @returns {module:jDom/core/dom/objects.DomItemRoot|module:jDom/core/dom/objects.DomItem}
    */
-  const initRoot = (children, listeners = {}) => jDomObjects.createDOMItem({
+  const initRoot = (children, listeners = {}) => jDomObjects.createDomItem({
     tagName: 'html',
     attributes: {},
     element: document,
@@ -204,28 +225,30 @@
   })
 
   /**
-   * Return a DOMItem reference to the document. The rootItem argument is a system variable and not necessary to
+   * Return a DomItem reference to the document. The rootItem argument is a system variable and not necessary to
    * implement.
-   * @function documentDOMItem
-   * @param {Object.<string, module:jDom/core/dom/objects~listenerFunction>} listeners - An object of all event listeners to be registered in the DOM
-   * @param {module:jDom/core/dom/objects~DOMItemRoot|module:jDom/core/dom/objects.DOMItem} [rootItem] - This is a reference to DOMItemRoot which will be defaulted with {@link initRoot}
-   * @returns {module:jDom/core/dom/objects~DOMItemRoot|module:jDom/core/dom/objects.DOMItem}
+   * @function documentDomItem
+   * @param {Object.<string, module:jDom/core/dom/objects~listenerFunction>} listeners - An object of all event
+   * listeners to be registered in the Dom
+   * @param {module:jDom/core/dom/objects.DomItemRoot|module:jDom/core/dom/objects.DomItem} [rootItem] - This is a
+   * reference to DomItemRoot which will be defaulted with {@link initRoot}
+   * @returns {module:jDom/core/dom/objects.DomItemRoot|module:jDom/core/dom/objects.DomItem}
    */
-  jDomObjects.documentDOMItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
-    rootItem.children = rootItem.children.map(child => jDomObjects.createDOMItem(child, {parentItem: rootItem}))
+  jDomObjects.documentDomItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
+    rootItem.children = rootItem.children.map(child => jDomObjects.createDomItem(child, {parentItem: rootItem}))
     // noinspection JSUndefinedPropertyAssignment
     rootItem.head = rootItem.children[0]
     // noinspection JSUndefinedPropertyAssignment
     rootItem.body = rootItem.children[1]
-    return jDomObjects.createDOMItem(rootItem)
+    return jDomObjects.createDomItem(rootItem)
   }
 
   /**
    * Create reference for storing document changes
    * @member documentItem
-   * @type {module:jDom/core/dom/objects~DOMItemRoot}
+   * @type {module:jDom/core/dom/objects.DomItemRoot}
    */
-  jDomObjects.documentItem = jDomObjects.documentDOMItem()
+  jDomObjects.documentItem = jDomObjects.documentDomItem()
 
   /**
    * Either export all functions to be exported, or assign to the Window context
@@ -236,4 +259,5 @@
     }
     exports = Object.assign(exports, jDomObjects)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || base || {})
+// Use the external context to assign this, which will be Window if rendered via browser

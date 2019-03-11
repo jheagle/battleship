@@ -83,9 +83,9 @@
 
   /**
    * Default properties for a tile in the battleship game.
-   * @returns {module:jDom/core/dom/objects.DOMItem}
+   * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  const gameTile = () => jDomObjects.createDOMItem({
+  const gameTile = () => jDomObjects.createDomItem({
     hasShip: false,
     isHit: false
   })

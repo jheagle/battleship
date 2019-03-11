@@ -1,5 +1,5 @@
 'use strict'
-// Pseudo DOM Helper Objects
+// Pseudo Dom Helper Objects
 ;(function () {
   /**
    * Store a reference to this scope which will be Window if rendered via browser
@@ -48,7 +48,7 @@
   }
 
   /**
-   * A selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
+   * A selector function for retrieving existing child jDomObjects.DomItems from the given parent item.
    * This function will check all the children starting from item, and scan the attributes
    * property for matches. The return array contains children matching from all levels.
    * WARNING: This is a recursive function.
@@ -65,7 +65,7 @@
       : getParentNodesFromAttribute(attr, value, node.parent)
 
   /**
-   * A helper selector function for retrieving existing child jDomObjects.DOMItems from the given parent item.
+   * A helper selector function for retrieving existing child jDomObjects.DomItems from the given parent item.
    * @param node
    * @returns {Array}
    */
@@ -82,10 +82,10 @@
 
   /**
    * @class
-   * @property {boolean} bubbles - A Boolean indicating whether the event bubbles up through the DOM or not.
+   * @property {boolean} bubbles - A Boolean indicating whether the event bubbles up through the Dom or not.
    * @property {boolean} cancelable - A Boolean indicating whether the event is cancelable.
    * @property {boolean} composed - A Boolean value indicating whether or not the event can bubble across the boundary
-   * between the shadow DOM and the regular DOM.
+   * between the shadow Dom and the regular Dom.
    * @property {function|PseudoEventTarget} currentTarget - A reference to the currently registered target for the event. This
    * is the object to which the event is currently slated to be sent; it's possible this has been changed along the way
    * through re-targeting.
@@ -95,7 +95,7 @@
    * dispatched.
    * @property {int} timeStamp - The time at which the event was created (in milliseconds). By specification, this
    * value is time since epoch, but in reality browsers' definitions vary; in addition, work is underway to change this
-   * to be a DOMHighResTimeStamp instead.
+   * to be a DomHighResTimeStamp instead.
    * @property {string} type - The name of the event (case-insensitive).
    * @property {boolean} isTrusted - Indicates whether or not the event was initiated by the browser (after a user
    * click for instance) or by a script (using an event creation method, like event.initEvent)
@@ -107,7 +107,7 @@
    * @property {function} stopImmediatePropagation - For this particular event, no other listener will be called.
    * Neither those attached on the same element, nor those attached on elements which will be traversed later (in
    * capture phase, for instance)
-   * @property {function} stopPropagation - Stops the propagation of events further along in the DOM.
+   * @property {function} stopPropagation - Stops the propagation of events further along in the Dom.
    */
   class PseudoEvent {
     /**
@@ -325,7 +325,7 @@
    */
   class PseudoElement extends PseudoNode {
     /**
-     * Simulate the Element object when the DOM is not available
+     * Simulate the Element object when the Dom is not available
      * @param {string} [tagName=''] - The
      * @param {array} [attributes=[]]
      * @param {PseudoNode|Object} [parent={}]
@@ -349,7 +349,7 @@
         return {name, value}
       })
 
-      this.classList = new DOMSettableTokenList(this.className)
+      this.classList = new DomSettableTokenList(this.className)
     }
 
     /**
@@ -402,7 +402,7 @@
   jDomPseudoDom.PseudoElement = PseudoElement
 
   /**
-   * Simulate a HTMLElement when the DOM is unavailable
+   * Simulate a HTMLElement when the Dom is unavailable
    * @class
    * @augments PseudoElement
    * @property {boolean} hidden - State of whether element is visible
@@ -416,7 +416,7 @@
    */
   class PseudoHTMLElement extends PseudoElement {
     /**
-     * Simulate the HTMLELement object when the DOM is not available
+     * Simulate the HTMLELement object when the Dom is not available
      * @param {string} [tagName=''] - The
      * @param {PseudoNode|Object} [parent={}]
      * @param {Array} [children=[]]
@@ -485,7 +485,7 @@
 
     /**
      * Create and return a PseudoHTMLElement
-     * @param {string} tagName - Tag Name is a string representing the type of DOM element this represents
+     * @param {string} tagName - Tag Name is a string representing the type of Dom element this represents
      * @returns {PseudoHTMLElement}
      */
     createElement (tagName = 'div') {
@@ -498,7 +498,7 @@
   jDomPseudoDom.PseudoHTMLDocument = PseudoHTMLDocument
 
   /**
-   * Construct the Pseudo DOM to provide access to DOM objects which are otherwise not available outside of the browser
+   * Construct the Pseudo Dom to provide access to Dom objects which are otherwise not available outside of the browser
    * context.
    * @function generate
    * @param {Object} context

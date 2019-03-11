@@ -101,7 +101,7 @@
    * Create new private reference to the document
    * @typedef {module:jDom/core/dom/objects.documentItem} documentItem
    */
-  const documentItem = gameStart.main(jDomObjects.documentDOMItem({
+  const documentItem = gameStart.main(jDomObjects.documentDomItem({
     beginRound: gameStart.beginRound,
     attackListener: gameActions.attackListener,
     restart: gameStart.restart

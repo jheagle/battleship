@@ -253,12 +253,12 @@
   jDomMatrixCore.checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
 
   /**
-   * Retrieve the DOMItem associated with the provided point
-   * @function getDOMItemFromPoint
+   * Retrieve the DomItem associated with the provided point
+   * @function getDomItemFromPoint
    * @param pnt
    * @param matrix
    */
-  jDomMatrixCore.getDOMItemFromPoint = (pnt, matrix) => jDomMatrixCore.checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false
+  jDomMatrixCore.getDomItemFromPoint = (pnt, matrix) => jDomMatrixCore.checkValidPoint(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false
 
   /**
    * Return an array of all the points in the matrix
@@ -300,13 +300,13 @@
   )
 
   /**
-   * Retrieve the DOMItem associated with the provided element in the matrix
-   * @function getDOMItemFromElement
+   * Retrieve the DomItem associated with the provided element in the matrix
+   * @function getDomItemFromElement
    * @param elem
    * @param matrix
-   * @returns module:jDomObjects.DOMItem
+   * @returns module:jDomObjects.DomItem
    */
-  jDomMatrixCore.getDOMItemFromElement = (elem, matrix) => jDomMatrixCore.getDOMItemFromPoint(jDomMatrixCore.getPointFromElement(elem), matrix)
+  jDomMatrixCore.getDomItemFromElement = (elem, matrix) => jDomMatrixCore.getDomItemFromPoint(jDomMatrixCore.getPointFromElement(elem), matrix)
 
   /**
    * Either export all functions to be exported, or assign to the Window context

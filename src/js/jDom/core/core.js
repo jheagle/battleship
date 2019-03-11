@@ -1,6 +1,6 @@
 /**
  * @file All of the core system functions for stringing together functions and simplifying logic.
- * @author Joshua Heagle <contact@joshuaheagle.com>
+ * @author Joshua Heagle <joshuaheagle@gmail.com>
  * @version 1.0.0
  */
 'use strict'
@@ -19,7 +19,7 @@ const base = this || window || {}
 
   /**
    * All methods exported from this module are encapsulated within jDomCore.
-   * @author Joshua Heagle <contact@joshuaheagle.com>
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
    * @typedef {Object} jDomCore
    * @module jDom/core/core
    */
@@ -103,10 +103,12 @@ const base = this || window || {}
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
-  jDomCore.mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce(
-    (newObj, curr) => jDomCore.setValue(curr, fn(...[obj[curr], curr, obj].slice(0, fn.length || 2)), newObj),
-    thisArg || {}
-  )
+  jDomCore.mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj)
+    ? obj.map(fn, thisArg)
+    : Object.keys(obj).reduce(
+      (newObj, curr) => jDomCore.setValue(curr, fn(...[obj[curr], curr, obj].slice(0, fn.length || 2)), newObj),
+      thisArg || {}
+    )
 
   /**
    * Perform map on an array property of an object, then return the object
@@ -122,7 +124,8 @@ const base = this || window || {}
   }
 
   /**
-   * Function is a predicate, to test each property value of the object. Return true to keep the element, false otherwise, taking three arguments
+   * Function is a predicate, to test each property value of the object. Return true to keep the element, false
+   * otherwise, taking three arguments
    * @callback module:jDom/core/core~filterCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
@@ -140,21 +143,25 @@ const base = this || window || {}
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
-  jDomCore.filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce((newObj, curr) => {
-    if (fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))) {
-      newObj[curr] = obj[curr]
-    } else {
-      delete newObj[curr]
-    }
-    return newObj
-  }, thisArg || {})
+  jDomCore.filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj)
+    ? obj.filter(fn, thisArg)
+    : Object.keys(obj).reduce((newObj, curr) => {
+      if (fn(...[obj[curr], curr, obj].slice(0, fn.length || 2))) {
+        newObj[curr] = obj[curr]
+      } else {
+        delete newObj[curr]
+      }
+      return newObj
+    }, thisArg || {})
 
   /**
    * Function to execute on each property in the object, taking four arguments
    * @callback module:jDom/core/core~reduceCallback
-   * @param {*} [accumulator={}] - The accumulator accumulates the callback's return values; it is the accumulated value previously returned in the last invocation of the callback, or initialValue, if supplied (see below).
+   * @param {*} [accumulator={}] - The accumulator accumulates the callback's return values; it is the accumulated
+   * value previously returned in the last invocation of the callback, or initialValue, if supplied (see below).
    * @param {*} [currentProperty={}] - The current property being processed in the object.
-   * @param {string} [currentIndex=0] - The index of the current element being processed in the array. Starts at index 0, if an initialValue is provided, and at index 1 otherwise.
+   * @param {string} [currentIndex=0] - The index of the current element being processed in the array. Starts at index
+   * 0, if an initialValue is provided, and at index 1 otherwise.
    * @param {Object|Array} [object={}] - The object reduce was called upon.
    * @returns {*}
    */
@@ -166,10 +173,17 @@ const base = this || window || {}
    * @function reduceObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
    * @param {module:jDom/core/core~reduceCallback|function} fn - The function to be processed for each filtered property
-   * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty array without an initial value is an error.
+   * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the
+   * callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty
+   * array without an initial value is an error.
    * @returns {Object|Array}
    */
-  jDomCore.reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]) => Array.isArray(obj) ? obj.reduce(fn, initialValue) : Object.keys(obj).reduce((newObj, curr) => fn(...[newObj, obj[curr], curr, obj].slice(0, fn.length || 2)), initialValue)
+  jDomCore.reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]) => Array.isArray(obj)
+    ? obj.reduce(fn, initialValue)
+    : Object.keys(obj).reduce(
+      (newObj, curr) => fn(...[newObj, obj[curr], curr, obj].slice(0, fn.length || 2)),
+      initialValue
+    )
 
   /**
    * Helper function for testing if the item is an Object or Array that contains properties or elements
@@ -177,7 +191,9 @@ const base = this || window || {}
    * @param {Object|Array} item - Object or Array to test
    * @returns {boolean}
    */
-  jDomCore.notEmptyObjectOrArray = item => !!((typeof item === 'object' && Object.keys(item).length) || (Array.isArray(item) && item.length))
+  jDomCore.notEmptyObjectOrArray = item => !!(
+    (typeof item === 'object' && Object.keys(item).length) || (Array.isArray(item) && item.length)
+  )
 
   /**
    * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
@@ -202,21 +218,34 @@ const base = this || window || {}
    * @param {Object} object - The original object that is being cloned
    * @returns {Object}
    */
-  jDomCore.cloneObject = object => cloneCopy(object, JSON.parse(JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined)))
+  jDomCore.cloneObject = object => cloneCopy(object, JSON.parse(
+    JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key)
+      ? val
+      : undefined)
+  ))
 
   /**
    * Merge two objects and provide clone or original on the provided function.
    * The passed function should accept a minimum of two objects to be merged.
    * If the desire is to mutate the input objects, then the function name should
    * have the word 'mutable' in the name (case-insensitive).
-   * @param {module:jDom/core/core.mergeObjects|module:jDom/core/core.mergeObjectsMutable|Function} fn - Pass one of the mergeObjects functions to be used
+   * @param {module:jDom/core/core.mergeObjects|module:jDom/core/core.mergeObjectsMutable|Function} fn - Pass one of
+   * the mergeObjects functions to be used
    * @param {Object} obj1 - The receiving object; this is the object which will have it's properties overridden
-   * @param {Object} obj2 - The contributing object; this is the object which will contribute new properties and override existing ones
-   * @param {boolean} [isMutable=false] - An optional flag which indicates whether we will clone objects or directly modify them
+   * @param {Object} obj2 - The contributing object; this is the object which will contribute new properties and
+   * override existing ones
+   * @param {boolean} [isMutable=false] - An optional flag which indicates whether we will clone objects or directly
+   * modify them
    * @returns {Object}
    */
   const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => jDomCore.notEmptyObjectOrArray(obj2)
-    ? jDomCore.mapObject(obj2, (prop, key) => (obj1[key] && !/^(parentItem|listenerArgs|element)$/.test(key)) ? fn(obj1[key], prop) : prop, isMutable ? obj1 : jDomCore.cloneObject(obj1))
+    ? jDomCore.mapObject(
+      obj2,
+      (prop, key) => (obj1[key] && !/^(parentItem|listenerArgs|element)$/.test(key))
+        ? fn(obj1[key], prop)
+        : prop,
+      isMutable ? obj1 : jDomCore.cloneObject(obj1)
+    )
     : obj2
 
   /**
@@ -225,7 +254,8 @@ const base = this || window || {}
    * list and bubbling up to return a merged version of the first object.
    * WARNING: This is a recursive function.
    * @function mergeObjects
-   * @param {...Object} args - Provide a list of objects which will be merged starting from the end up into the first object
+   * @param {...Object} args - Provide a list of objects which will be merged starting from the end up into the first
+   * object
    * @returns {Object}
    */
   jDomCore.mergeObjects = (...args) => args.length === 2
@@ -241,7 +271,8 @@ const base = this || window || {}
    * WARNING: This is a recursive function.
    * WARNING: This will mutate the first object passed in as input
    * @function mergeObjectsMutable
-   * @param {...Object} args - Provide a list of objects which will be merged starting from the end up into the first object
+   * @param {...Object} args - Provide a list of objects which will be merged starting from the end up into the first
+   * object
    * @returns {Object}
    */
   jDomCore.mergeObjectsMutable = (...args) => args.length === 2
@@ -260,7 +291,9 @@ const base = this || window || {}
    * @param {Array} [arr=[]] - The in-progress array of elements to be built and returned, will be used internally
    * @returns {Array.<*>}
    */
-  const buildArrayBase = (useReference, item, length, arr = []) => --length > 0 ? buildArrayBase(useReference, (useReference ? item : jDomCore.cloneObject(item)), length, arr.concat([item])) : arr.concat([item])
+  const buildArrayBase = (useReference, item, length, arr = []) => --length > 0
+    ? buildArrayBase(useReference, (useReference ? item : jDomCore.cloneObject(item)), length, arr.concat([item]))
+    : arr.concat([item])
 
   /**
    * Leverage buildArrayBase to generate an array filled with a copy of the provided item.
@@ -327,7 +360,8 @@ const base = this || window || {}
    * @function randomNumber
    * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
    * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
-   * @param {number} [interval=1] - Choose the distance between numbers (~5, ~10, ~15 would be 5 for interval, 1 for offset, 2 for range)
+   * @param {number} [interval=1] - Choose the distance between numbers (~5, ~10, ~15 would be 5 for interval, 1 for
+   * offset, 2 for range)
    * @returns {number}
    */
   jDomCore.randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range + offset) * interval
@@ -338,7 +372,8 @@ const base = this || window || {}
    * @function randomInteger
    * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
    * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
-   * @param {number} [interval=1] - Choose the distance between numbers (5, 10, 15 would be 5 for interval, 1 for offset, 2 for range)
+   * @param {number} [interval=1] - Choose the distance between numbers (5, 10, 15 would be 5 for interval, 1 for
+   * offset, 2 for range)
    * @returns {number}
    */
   jDomCore.randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.random() * range) + offset) * interval
@@ -368,7 +403,10 @@ const base = this || window || {}
    * or more.
    * @example
    * // example of input and resulting output
-   * jDomCore.compareArrays(['match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1'], ['match1', 'match2', 'secondMismatch1', 'badMatch1', 'badMatch1'])
+   * jDomCore.compareArrays(
+   *   ['match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1'],
+   *   ['match1', 'match2', 'secondMismatch1', 'badMatch1', 'badMatch1']
+   * )
    * // unique array
    * ['secondMismatch1', 'match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1']
    * // result object
@@ -383,7 +421,9 @@ const base = this || window || {}
       .concat(arr1)
       .reduce(
         (returnObj, attr) => jDomCore.setValue(
-          (typeof attr === 'string') ? attr : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined),
+          (typeof attr === 'string')
+            ? attr
+            : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined),
           jDomCore.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length),
           returnObj
         ),
@@ -458,4 +498,5 @@ const base = this || window || {}
     }
     exports = Object.assign(exports, jDomCore)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || base || {})
+// Use the external context to assign this, which will be Window if rendered via browser

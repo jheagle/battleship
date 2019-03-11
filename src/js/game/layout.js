@@ -1,5 +1,5 @@
 'use strict'
-// Custom layout objects leveraging the DOMItem object
+// Custom layout objects leveraging the DomItem object
 ;(function () {
   /**
    * Store a reference to this scope which will be Window if rendered via browser
@@ -50,9 +50,9 @@
   /**
    * This will be the main menu for the game.
    * @function mainMenu
-   * @returns {module:jDom/core/dom/objects.DOMItem}
+   * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.mainMenu = () => jDomObjects.createDOMItem({
+  gameLayout.mainMenu = () => jDomObjects.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'main-menu'
@@ -165,9 +165,9 @@
    * Wrapper div for player data / boards
    * @function boards
    * @param {Array} [players=[]]
-   * @returns {module:jDom/core/dom/objects.DOMItem}
+   * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.boards = (players = []) => jDomObjects.createDOMItem({
+  gameLayout.boards = (players = []) => jDomObjects.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'boards'
@@ -179,9 +179,9 @@
    * Display the final scores after a game has ended and have a button to restart.
    * @function finalScore
    * @param {Array} players
-   * @returns {module:jDom/core/dom/objects.DOMItem}
+   * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.finalScore = (players) => jDomObjects.createDOMItem({
+  gameLayout.finalScore = (players) => jDomObjects.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'final-scores'
