@@ -150,7 +150,7 @@
         // For each attribute, check if it becomes true / false based on the comparison results
         (attr1, key1) =>
           jDomCore.filterObject(
-            // Get attributes as object of truthy and falsey values
+            // Get attributes as object of truthy and falsy values
             jDomCore.mapObject(
               config.attributes,
               (attr2, key2) => (typeof attr2 === 'object' || key2 === 'className')
@@ -268,7 +268,9 @@
 
   /**
    * Simplify detecting the parent item which can be appended to, whether root, or just a parent at any part of the tree
-   * @param {module:jDom/core/dom/objects.DomItem} parent - A parent DomItem which may or may not have a body
+   * @param {
+   * module:jDom/core/dom/objects.DomItemRoot|module:jDom/core/dom/objects.DomItem
+   * } parent - A parent DomItem which may or may not have a body
    * @returns {module:jDom/core/dom/objects.DomItemBody|module:jDom/core/dom/objects.DomItem}
    */
   const retrieveParentItem = parent => parent.body ? parent.body : parent
@@ -486,10 +488,11 @@
   /**
    * To be used with jDomCoreDom.gatherChildItems which will start at item and recurse over all child items, this test
    * will then choose which child items will be returned as the result of the test.
-   * @callback testChildItem
-   * @param {module:jDom/core/dom/objects.DomItem} item - The DomItem is the child being tested
-   * @param {module:jDom/core/dom/objects.DomItem[]} gatheredResults - All of the child items gathered based on the test
-   * @returns {module:jDom/core/dom/objects.DomItem[]}
+   * @callback module:jDom/core/dom/core~testChildItem
+   * @param {module:jDom/core/dom/objects.DomItem|Object} item - The DomItem is the child being tested
+   * @param {Array.<module:jDom/core/dom/objects.DomItem>} gatheredResults - All of the child items gathered based on
+   * the test
+   * @returns {Array.<module:jDom/core/dom/objects.DomItem>}
    */
 
   /**
@@ -500,13 +503,23 @@
    * @function gatherChildItems
    * @param {module:jDom/core/dom/objects.DomItem} item - The DomItem which may have child items matching the attribute
    * criteria
-   * @param {testChildItem} test - Assess each child, and return the ones which qualify
-   * @returns {module:jDom/core/dom/objects.DomItem[]}
+   * @param {module:jDom/core/dom/core~testChildItem} test - Assess each child, and return the ones which qualify
+   * @returns {Array.<module:jDom/core/dom/objects.DomItem>}
    */
   jDomCoreDom.gatherChildItems = (item, test) => test(
     item,
     item.children.reduce((a, b) => a.concat(jDomCoreDom.gatherChildItems(b, test)), [])
   )
+
+  /**
+   * Retrieve the {@link module:jDom/core/dom/core~testChildItem} function by providing an attribute and value to check.
+   * @param {string} attr - Provide the attribute name to be searched
+   * @param {*} value - The attribute value to be compared
+   * @returns {module:jDom/core/dom/core~testChildItem}
+   */
+  const getChildTest = (attr, value) => (item, gatheredResults) => (item.attributes[attr] && item.attributes[attr] === value)
+    ? gatheredResults.concat([item])
+    : gatheredResults
 
   /**
    * A selector function for retrieving existing child jDomObjects.DomItems from the given parent item.
@@ -518,14 +531,12 @@
    * @param {*} value - The attribute value to be compared
    * @param {module:jDom/core/dom/objects.DomItem} item - The DomItem which may have child items matching the attribute
    * criteria
-   * @returns {module:jDom/core/dom/objects.DomItem[]}
+   * @returns {Array.<module:jDom/core/dom/objects.DomItem>}
    */
   jDomCoreDom.getChildrenFromAttribute = (attr, value, item = jDomObjects.documentItem.body) =>
     jDomCoreDom.gatherChildItems(
       item,
-      (testItem, gatheredResults) => (testItem.attributes[attr] && testItem.attributes[attr] === value)
-        ? gatheredResults.concat([testItem])
-        : gatheredResults
+      getChildTest(attr, value)
     )
 
   /**

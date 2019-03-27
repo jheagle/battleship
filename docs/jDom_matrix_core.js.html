@@ -122,12 +122,12 @@
 
   /**
    * Given two points, compare the x, y, and z of each to see if they are the same
-   * @function checkEqualPoints
+   * @function areEqualPoints
    * @param p1
    * @param p2
    * @returns {boolean}
    */
-  jDomMatrixCore.checkEqualPoints = (p1, p2) => p1.x === p2.x &amp;&amp; p1.y === p2.y &amp;&amp; p1.z === p2.z
+  jDomMatrixCore.areEqualPoints = (p1, p2) => p1.x === p2.x &amp;&amp; p1.y === p2.y &amp;&amp; p1.z === p2.z
 
   /**
    * Check if there is a negative coordinate value within the point provided
@@ -165,12 +165,12 @@
   /**
    * Retrieve a directional coordinate value based on two provided points
    * (directions consist of two zero points and a single point of 1 / -1)
-   * @function pointDirection
+   * @function pointsToDirection
    * @param start
    * @param end
    * @returns {*}
    */
-  jDomMatrixCore.pointDirection = (start, end) => jDomCore.mergeObjects(jDomMatrixObjects.point(0, 0, 0), {[`${jDomMatrixCore.getHighAbsoluteCoordAxis(jDomMatrixCore.pointDifference(start, end))[0]}`]: jDomMatrixCore.pointHasNegative(jDomMatrixCore.pointDifference(start, end)) ? -1 : 1})
+  jDomMatrixCore.pointsToDirection = (start, end) => jDomCore.mergeObjects(jDomMatrixObjects.point(0, 0, 0), {[`${jDomMatrixCore.getHighAbsoluteCoordAxis(jDomMatrixCore.pointDifference(start, end))[0]}`]: jDomMatrixCore.pointHasNegative(jDomMatrixCore.pointDifference(start, end)) ? -1 : 1})
 
   /**
    * Generate a random starting point for a line with the provided length and direction.
@@ -202,7 +202,7 @@
    * @param line
    * @returns {Array.&lt;*>}
    */
-  jDomMatrixCore.getPointsLine = (start, end, line = []) => jDomMatrixCore.checkEqualPoints(start, end) ? line.concat([start]) : jDomMatrixCore.getPointsLine(jDomMatrixCore.nextCell(start, jDomMatrixCore.pointDirection(start, end)), end, line.concat([start]))
+  jDomMatrixCore.getPointsLine = (start, end, line = []) => jDomMatrixCore.areEqualPoints(start, end) ? line.concat([start]) : jDomMatrixCore.getPointsLine(jDomMatrixCore.nextCell(start, jDomMatrixCore.pointsToDirection(start, end)), end, line.concat([start]))
 
   /**
    * Takes an array of arrays containing two points each. Calls getPointsLine for each array of points.

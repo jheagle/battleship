@@ -360,7 +360,7 @@
       player.shipFleet.map((ship) => {
         // Get all healthy ships
         let healthy = ship.parts.filter((part) => {
-          if (jDomMatrixCore.checkEqualPoints(part.point, target.point)) {
+          if (jDomMatrixCore.areEqualPoints(part.point, target.point)) {
             hitShip = ship
           }
           return !part.isHit
@@ -408,7 +408,7 @@
    * @param victim
    * @returns {*}
    */
-  const selectTargetCoord = (victim) => {
+  const selectTargetCoordinate = (victim) => {
     // Try to get broken ships
     let brokenShips = gameUtils.getBrokenItems(victim.shipFleet)
     let availTargets = []
@@ -422,7 +422,7 @@
       if (moreBrokenShips.length) {
         // If there are more broken ships, attack the parts between hit points first.
         for (let i = 0; i < hitParts.length; ++i) {
-          let targetPoints = jDomMatrixCore.getInBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
+          let targetPoints = jDomMatrixCore.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
           if (targetPoints.false.length) {
             displayTargets(targetPoints.false, targetPoints.false[0], victim)
             return jDomMatrixCore.getDomItemFromPoint(targetPoints.false[0], victim.board)
@@ -487,7 +487,7 @@
   gameActions.computerAttack = (player, players) => {
     let victim = selectTargetPlayer(players.filter(p => !p.attacker))
     gameActions.attackFleet.isLocked = false
-    return gameActions.attackFleet(selectTargetCoord(victim))
+    return gameActions.attackFleet(selectTargetCoordinate(victim))
   }
 
   /**

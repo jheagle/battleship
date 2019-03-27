@@ -1,31 +1,29 @@
 const jDomCore = require('../src/js/jDom/core/core.js')
 
-// buildArray
-// buildArrayOfReferences
-// cloneObject
-// compare
-// compareArrays
+// noConflict
 // curry
-// filterObject
-// getMax
-it('2 is greater than 1', () => {
-  expect(jDomCore.getMax(1, 2)).toBe(2)
-})
-
-// getMaxOrMin
-// getMin
-it('1 is less than 2', () => {
-  expect(jDomCore.getMin(1, 2)).toBe(1)
-})
-
-// inArray
+// pipe
+// setValue
+// setAndReturnValue
 // mapObject
+// mapProperty
+// filterObject
+// reduceObject
+// notEmptyObjectOrArray
+// cloneObject
 // mergeObjects
 // mergeObjectsMutable
-// notEmptyObjectOrArray
-// pipe
-// queueTimeout
-// randomInteger
+// buildArray
+// buildArrayOfReferences
+// inArray
+it('inArray returns true', () => {
+  expect(jDomCore.inArray([1, 2, 3, 4, 5], 4)).toBe(true)
+})
+// getAbsoluteMax
+// getAbsoluteMin
 // randomNumber
-// reduceObject
+// randomInteger
+// compare
+// compareArrays
 // trace
+// queueTimeout

@@ -327,32 +327,22 @@ const base = this || window || {}
   jDomCore.inArray = (arr, prop) => arr.indexOf(prop) >= 0
 
   /**
-   * A simple function usable with reduce to get the max or min value
-   * @function getMaxOrMin
-   * @param {boolean} getMax - Choose whether to find the max or min, true is Max
+   * Helper for returning the absolute max value
+   * @function getAbsoluteMax
    * @param {number} num1 - A number to compare
    * @param {number} num2 - Another number to be compared against
    * @returns {number}
    */
-  jDomCore.getMaxOrMin = (getMax, num1, num2) => ((getMax && num2 > num1) || (!getMax && num2 < num1)) ? num2 : num1
+  jDomCore.getAbsoluteMax = (num1, num2) => Math.abs(num1) > Math.abs(num2) ? num1 : num2
 
   /**
-   * Helper for returning max value
-   * @function getMax
+   * Helper for returning the absolute min value
+   * @function getAbsoluteMin
    * @param {number} num1 - A number to compare
    * @param {number} num2 - Another number to be compared against
    * @returns {number}
    */
-  jDomCore.getMax = jDomCore.curry(jDomCore.getMaxOrMin)(true)
-
-  /**
-   * Helper for returning min value
-   * @function getMin
-   * @param {number} num1 - A number to compare
-   * @param {number} num2 - Another number to be compared against
-   * @returns {number}
-   */
-  jDomCore.getMin = jDomCore.curry(jDomCore.getMaxOrMin)(false)
+  jDomCore.getAbsoluteMin = (num1, num2) => Math.abs(num1) < Math.abs(num2) ? num1 : num2
 
   /**
    * Create a single random number within provided range. And with optional offset,

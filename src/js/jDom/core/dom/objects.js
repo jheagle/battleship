@@ -236,10 +236,8 @@
    */
   jDomObjects.documentDomItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
     rootItem.children = rootItem.children.map(child => jDomObjects.createDomItem(child, {parentItem: rootItem}))
-    // noinspection JSUndefinedPropertyAssignment
-    rootItem.head = rootItem.children[0]
-    // noinspection JSUndefinedPropertyAssignment
-    rootItem.body = rootItem.children[1]
+    Object.assign(rootItem.head, rootItem.children[0])
+    Object.assign(rootItem.body, rootItem.children[1])
     return jDomObjects.createDomItem(rootItem)
   }
 

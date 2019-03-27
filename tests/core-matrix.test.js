@@ -7,7 +7,7 @@ const p2 = jDomObjectsMatrix.point(2, 3, 4)
 // adjacentEdgePoints
 // adjacentPoints
 // bindPointData
-// checkEqualPoints
+// areEqualPoints
 // checkInBetween
 // checkValidPoint
 // getAllPoints
@@ -27,7 +27,7 @@ it('returns four points', () => {
 // nextCell
 // noConflict
 // pointDifference
-// pointDirection
+// pointsToDirection
 // pointHasNegative
 // randDirection
 // randomStart

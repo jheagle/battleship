@@ -90,6 +90,14 @@
    */
 
   /**
+   * Point stores a location in a {@link module:jDom/matrix/objects.Matrix} defined by three key-value pairs
+   * @typedef {module:jDom/matrix/objects.Point} module:jDom/matrix/objects.Direction
+   * @property {module:jDom/matrix/objects.coordinate} x - The X-coordinate must be either -1, 0, or 1
+   * @property {module:jDom/matrix/objects.coordinate} y - The Y-coordinate must be either -1, 0, or 1
+   * @property {module:jDom/matrix/objects.coordinate} z - The Z-coordinate must be either -1, 0, or 1
+   */
+
+  /**
    * Store the point data for an x, y, z {@link module:jDom/matrix/objects.Matrix}.
    * @function point
    * @param {module:jDom/matrix/objects.coordinate} x - The numeric value for X-coordinate
@@ -124,10 +132,17 @@
   })
 
   /**
+   * MatrixColumn is a DomItem which represents the x axis and also stores {@link module:jDom/matrix/objects.MatrixTile}
+   * @typedef {
+   * module:jDom/core/dom/objects.DomItem|module:jDom/matrix/objects.MatrixTile
+   * } module:jDom/matrix/objects.MatrixColumn
+   */
+
+  /**
    * MatrixRow is the parent of a group of {@link module:jDom/matrix/objects.MatrixTile}
    * @typedef {module:jDom/core/dom/objects.DomItem} module:jDom/matrix/objects.MatrixRow
    * @property {module:jDom/matrix/objects.axis} axis - The axis will be 'y'
-   * @property {Array.<module:jDom/matrix/objects.MatrixTile>} children - all of the MatrixTile items as part of this
+   * @property {Array.<module:jDom/matrix/objects.MatrixColumn>} children - all of the MatrixTile items as part of this
    * MatrixRow
    */
 
@@ -157,21 +172,21 @@
    * Create a 3d matrix of i with x by y by z size, add additional objects for each layer as well
    * @function matrix
    * @param {
-   * {coord: module:jDom/matrix/objects.coordinate, props: Array.<module:jDom/matrix/objects.MatrixTile>}
+   * {coordinate: module:jDom/matrix/objects.coordinate, props: Array.<module:jDom/matrix/objects.MatrixTile>}
    * } x - Properties and a coordinate defining the width of the matrix.
    * @param {
-   * {coord: module:jDom/matrix/objects.coordinate, props: Array.<module:jDom/matrix/objects.MatrixRow>}
+   * {coordinate: module:jDom/matrix/objects.coordinate, props: Array.<module:jDom/matrix/objects.MatrixRow>}
    * } y - Properties and a coordinate defining the height of the matrix.
    * @param {
-   * {coord: module:jDom/matrix/objects.coordinate, props: Array.<module:jDom/matrix/objects.MatrixLayer>}
+   * {coordinate: module:jDom/matrix/objects.coordinate, props: Array.<module:jDom/matrix/objects.MatrixLayer>}
    * } z - Properties and a coordinate defining the depth of the matrix.
    * @param {Array.<module:jDom/matrix/objects.Matrix>} matrixProps - Properties to be added to the matrix
    * @returns {module:jDom/matrix/objects.Matrix}
    */
   jDomMatrixObjects.matrix = (
-    x = {coord: 0, props: []},
-    y = {coord: 0, props: []},
-    z = {coord: 1, props: []},
+    x = {coordinate: 0, props: []},
+    y = {coordinate: 0, props: []},
+    z = {coordinate: 1, props: []},
     matrixProps = []
   ) => jDomObjects.createDomItem({
     tagName: 'div',
@@ -196,9 +211,9 @@
           attributes: {
             className: 'column'
           }
-        }, ...x.props), x.coord)
-      }, ...y.props), y.coord)
-    }, ...z.props), z.coord)
+        }, ...x.props), x.coordinate)
+      }, ...y.props), y.coordinate)
+    }, ...z.props), z.coordinate)
   }, ...matrixProps)
 
   /**
@@ -213,9 +228,9 @@
    * @returns {module:jDom/matrix/objects.Matrix}
    */
   jDomMatrixObjects.square = ({x = [], y = [], z = [], matrixProps = []} = {}, size) => jDomMatrixObjects.matrix(
-    {coord: size, props: x},
-    {coord: size, props: y},
-    {coord: 1, props: z},
+    {coordinate: size, props: x},
+    {coordinate: size, props: y},
+    {coordinate: 1, props: z},
     matrixProps
   )
 
@@ -231,9 +246,9 @@
    * @returns {module:jDom/matrix/objects.Matrix}
    */
   jDomMatrixObjects.cube = ({x = [], y = [], z = [], matrixProps = []} = {}, size) => jDomMatrixObjects.matrix(
-    {coord: size, props: x},
-    {coord: size, props: y},
-    {coord: size, props: z},
+    {coordinate: size, props: x},
+    {coordinate: size, props: y},
+    {coordinate: size, props: z},
     matrixProps
   )
 

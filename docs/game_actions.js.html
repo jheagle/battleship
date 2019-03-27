@@ -388,7 +388,7 @@
       player.shipFleet.map((ship) => {
         // Get all healthy ships
         let healthy = ship.parts.filter((part) => {
-          if (jDomMatrixCore.checkEqualPoints(part.point, target.point)) {
+          if (jDomMatrixCore.areEqualPoints(part.point, target.point)) {
             hitShip = ship
           }
           return !part.isHit

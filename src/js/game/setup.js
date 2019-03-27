@@ -182,7 +182,7 @@
    * @param lengths
    * @param shipLength
    */
-  const selectShipDirection = (lengths, shipLength) => jDomMatrixCore.randDirection([jDomMatrixObjects.point(1, 0, 0), jDomMatrixObjects.point(0, 1, 0), jDomMatrixObjects.point(0, 0, 1)].filter(p => lengths[jDomMatrixCore.getAxisOfCoord(p, 1)] > shipLength))
+  const selectShipDirection = (lengths, shipLength) => jDomMatrixCore.randDirection([jDomMatrixObjects.point(1, 0, 0), jDomMatrixObjects.point(0, 1, 0), jDomMatrixObjects.point(0, 0, 1)].filter(p => lengths[jDomMatrixCore.getFirstAxisOfCoordinate(p, 1)] > shipLength))
 
   /**
    *
@@ -206,7 +206,7 @@
    * @returns {Array}
    */
   const generateStartEnd = (matrix, shipLength, lengths, startDir = randomStartDir(lengths, shipLength)) =>
-    jDomMatrixCore.getHighAbsoluteCoord(startDir.dir) === 0 ? [jDomMatrixObjects.point(0, 0, 0), jDomMatrixObjects.point(0, 0, 0)] : jDomMatrixCore.checkInBetween(...[startDir.start, jDomMatrixCore.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jDomMatrixCore.lineEndPoint(startDir.start, shipLength, startDir.dir)]
+    jDomMatrixCore.getHighestAbsoluteCoordinate(startDir.dir) === 0 ? [jDomMatrixObjects.point(0, 0, 0), jDomMatrixObjects.point(0, 0, 0)] : jDomMatrixCore.checkInBetween(...[startDir.start, jDomMatrixCore.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jDomMatrixCore.lineEndPoint(startDir.start, shipLength, startDir.dir)]
 
   /**
    * Create a series of randomly placed ships based on the provided shipLengths.

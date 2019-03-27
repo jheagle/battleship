@@ -72,10 +72,11 @@
   const getParentNodes = jDomCore.curry(getParentNodesFromAttribute)('', false)
 
   class IterableList {
-    constructor (values = []){
+    constructor (values = []) {
       this.innerArray = values
     }
-    [Symbol.iterator](){
+
+    [Symbol.iterator] () {
       return this.innerArray.values()
     }
   }
@@ -349,7 +350,8 @@
         return {name, value}
       })
 
-      this.classList = new DomSettableTokenList(this.className)
+      // this.classList = new DOMSettableTokenList(this.className)
+      this.classList = this.className
     }
 
     /**
