@@ -200,9 +200,8 @@
   )
 
   /**
-   * Having provided two points, return an array of transition points
-   * connecting 'start' and 'end'. return array includes 'start' (line[0])
-   * and 'end' (line[line.length-1])
+   * Having provided two points, return an array of transition points connecting 'start' and 'end'. Return array
+   * includes 'start' (line[0]) and 'end' (line[line.length-1])
    * @function getPointsLine
    * @param {module:jDom/matrix/objects.Point} start - The starting location of the line.
    * @param {module:jDom/matrix/objects.Point} end - The final line destination.
@@ -240,12 +239,12 @@
   /**
    * Given a start and end point, test the points between with the provided function. Return the points as part of true
    * and / or false properties based on the test.
-   * @function testPointsBetween
+   * @function module:jDom/matrix/core~testPointsBetween
    * @param {module:jDom/matrix/objects.Point} start - The beginning point to check.
    * @param {module:jDom/matrix/objects.Point} end - The terminating point to check between.
    * @param {module:jDom/matrix/objects.Matrix} matrix - The grid of points all the points can exist on.
    * @param {module:jDom/matrix/core~testPointStatus} func - The test function which will return true or false.
-   * @param {boolean} inclusive
+   * @param {boolean} [inclusive=true] - Choose whether to include or exclude the start and end points in the results.
    * @returns {Object.<string, Array.<module:jDom/matrix/objects.Point>>}
    */
   jDomMatrixCore.testPointsBetween = (start, end, matrix, func, inclusive = true) =>
@@ -262,23 +261,16 @@
    * Given two points, check the cells between using specified function.
    * When inclusive is set to true the provided start and end points will also be tested
    * @function checkInBetween
-   * @param {module:jDom/matrix/objects.Point} start
-   * @param {module:jDom/matrix/objects.Point} end
-   * @param {module:jDom/matrix/objects.Matrix} matrix
-   * @param {module:jDom/matrix/core~testPointStatus} func
-   * @param {boolean} inclusive
+   * @param {...*} args - These args match the parameter list for {@link module:jDom/matrix/core~testPointsBetween}
    * @returns {boolean}
    */
-  jDomMatrixCore.checkInBetween = (start, end, matrix, func, inclusive = true) => (
-    inclusive && (func(start, matrix) || func(end, matrix))
-  )
-    ? true
-    : !!jDomMatrixCore.testPointsBetween(start, end, matrix, func).true.length
+  jDomMatrixCore.checkInBetween = (...args) => !!jDomMatrixCore.testPointsBetween(...args).true.length
 
   /**
    * Return point-like object with all of the axis lengths.
    * @function getAxisLengths
-   * @param {module:jDom/matrix/objects.Matrix} matrix
+   * @param {module:jDom/matrix/objects.Matrix} matrix - The matrix to get the dimensions of.
+   * @returns {module:jDom/matrix/objects.Point}
    */
   jDomMatrixCore.getAxisLengths = (matrix) => jDomMatrixObjects.point(
     matrix.children[0].children[0].children.length,
@@ -289,7 +281,8 @@
   /**
    * Get random direction point
    * @function randDirection
-   * @param {Array.<module:jDom/matrix/objects.Point>} useCoordinates
+   * @param {Array.<module:jDom/matrix/objects.Point>} [useCoordinates=[]] - An array of possible directions.
+   * @returns {module:jDom/matrix/objects.Direction}
    */
   jDomMatrixCore.randDirection = (useCoordinates = []) => useCoordinates.length
     ? useCoordinates[jDomCore.randomInteger(useCoordinates.length)]
@@ -298,8 +291,9 @@
   /**
    * Test if the provided point exists in the matrix.
    * @function checkValidPoint
-   * @param {module:jDom/matrix/objects.Point} pnt
-   * @param {module:jDom/matrix/objects.Matrix} matrix
+   * @param {module:jDom/matrix/objects.Point} pnt - Provide a point to validate.
+   * @param {module:jDom/matrix/objects.Matrix} matrix - The matrix that contains valid points.
+   * @returns {boolean}
    */
   jDomMatrixCore.checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z]
     && !!matrix.children[pnt.z].children[pnt.y]
@@ -309,8 +303,9 @@
   /**
    * Retrieve the DomItem associated with the provided point
    * @function getDomItemFromPoint
-   * @param {module:jDom/matrix/objects.Point} pnt
-   * @param {module:jDom/matrix/objects.Matrix} matrix
+   * @param {module:jDom/matrix/objects.Point} pnt - A point corresponding to a DomItem.
+   * @param {module:jDom/matrix/objects.Matrix} matrix - The matrix containing the point.
+   * @returns {false|module:jDom/core/dom/objects.DomItem}
    */
   jDomMatrixCore.getDomItemFromPoint = (pnt, matrix) => jDomMatrixCore.checkValidPoint(pnt, matrix)
     ? matrix.children[pnt.z].children[pnt.y].children[pnt.x]
@@ -319,9 +314,10 @@
   /**
    * Return an array of all the points in the matrix
    * @function getAllPoints
-   * @param {module:jDom/matrix/objects.Matrix|module:jDom/matrix/objects.MatrixColumn} matrix
-   * @param {Array.<module:jDom/matrix/objects.Point>} allPoints
-   * @returns {Array}
+   * @param {module:jDom/matrix/objects.Matrix|module:jDom/matrix/objects.MatrixColumn} matrix - The matrix to retrieve
+   * points from.
+   * @param {Array.<module:jDom/matrix/objects.Point>} [allPoints=[]] - The array of points to be returned
+   * @returns {Array.<module:jDom/matrix/objects.Point>}
    */
   jDomMatrixCore.getAllPoints = (matrix, allPoints = []) => (matrix.point)
     ? allPoints.concat([matrix.point])
@@ -330,9 +326,9 @@
   /**
    * Return all valid points surrounding a provided point
    * @function adjacentPoints
-   * @param {module:jDom/matrix/objects.Point} pnt
-   * @param {module:jDom/matrix/objects.Matrix} matrix
-   * @returns {Array}
+   * @param {module:jDom/matrix/objects.Point} pnt - The point we want to find adjacent points for.
+   * @param {module:jDom/matrix/objects.Matrix} matrix - The matrix having the point.
+   * @returns {Array.<module:jDom/matrix/objects.Point>}
    */
   jDomMatrixCore.adjacentPoints = (pnt, matrix) => jDomMatrixCore.getPointsLines([
     [jDomMatrixObjects.point(-1, 1, 1), jDomMatrixObjects.point(1, -1, -1)],
@@ -345,15 +341,15 @@
     jDomMatrixObjects.point(1, 0, 0),
     jDomMatrixObjects.point(-1, 0, -1),
     jDomMatrixObjects.point(0, 0, -1)
-  ])
-    .map(p => jDomMatrixCore.nextCell(pnt, p))
+  ]).map(p => jDomMatrixCore.nextCell(pnt, p))
     .filter(p => jDomMatrixCore.checkValidPoint(jDomMatrixCore.nextCell(pnt, p), matrix))
 
   /**
    * Return all points which touch on edges (not diagonal)
    * @function adjacentEdgePoints
-   * @param {module:jDom/matrix/objects.Point} pnt
-   * @param {module:jDom/matrix/objects.Matrix} matrix
+   * @param {module:jDom/matrix/objects.Point} pnt - The point we want to find adjacent points for.
+   * @param {module:jDom/matrix/objects.Matrix} matrix - The matrix having the point.
+   * @returns {Array.<module:jDom/matrix/objects.Point>}
    */
   jDomMatrixCore.adjacentEdgePoints = (pnt, matrix) => [
     jDomMatrixObjects.point(-1, 0, 0),
@@ -365,10 +361,11 @@
   ].map(p => jDomMatrixCore.nextCell(pnt, p)).filter(p => jDomMatrixCore.checkValidPoint(p, matrix))
 
   /**
-   * Retrieve the point associated with the provided element
+   * Retrieve the point associated with the provided element.
    * @function getPointFromElement
-   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} elem
-   * @returns module:jDomMatrixCore.point
+   * @param {Node|HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} elem - Provide an element associated with
+   * a point.
+   * @returns {module:jDom/matrix/objects.Point}
    */
   jDomMatrixCore.getPointFromElement = elem => jDomMatrixObjects.point(
     Array.from(elem.parentNode.childNodes).indexOf(elem),
@@ -379,9 +376,10 @@
   /**
    * Retrieve the DomItem associated with the provided element in the matrix
    * @function getDomItemFromElement
-   * @param {HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} elem
-   * @param {module:jDom/matrix/objects.Matrix} matrix
-   * @returns module:jDomObjects.DomItem
+   * @param {Node|HTMLElement|module:jDom/pseudoDom/objects.PseudoHTMLElement} elem - Provide an element having an
+   * associated DomItem.
+   * @param {module:jDom/matrix/objects.Matrix} matrix - The matrix potentially containing the DomItem with Point.
+   * @returns {module:jDom/core/dom/objects.DomItem}
    */
   jDomMatrixCore.getDomItemFromElement = (elem, matrix) => jDomMatrixCore.getDomItemFromPoint(
     jDomMatrixCore.getPointFromElement(elem),

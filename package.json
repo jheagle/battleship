@@ -6,7 +6,8 @@
   "author": "Joshua Heagle",
   "license": "ISC",
   "scripts": {
-    "test": "jest "
+    "start": "node src/js/game/main.js",
+    "test": "jest"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",

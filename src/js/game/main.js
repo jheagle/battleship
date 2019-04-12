@@ -106,7 +106,7 @@
     attackListener: gameActions.attackListener,
     restart: gameStart.restart
   }))
-  console.log(documentItem)
+  console.log('Document Item: ', documentItem)
 
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module

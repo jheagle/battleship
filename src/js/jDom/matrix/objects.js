@@ -103,8 +103,7 @@
    * @param {module:jDom/matrix/objects.coordinate} x - The numeric value for X-coordinate
    * @param {module:jDom/matrix/objects.coordinate} y - The numeric value for Y-coordinate
    * @param {module:jDom/matrix/objects.coordinate} [z=0] - The numeric value for Z-coordinate (default to 0 for 2D
-   * {@link module:jDom/matrix/objects.Matrix}
-   * )
+   * {@link module:jDom/matrix/objects.Matrix})
    * @returns {module:jDom/matrix/objects.Point}
    */
   jDomMatrixObjects.point = (x, y, z = 0) => ({

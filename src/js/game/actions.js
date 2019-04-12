@@ -290,7 +290,7 @@
     winner = updatePlayerStats(winner, 'WINNER')
     const finalScore = jDomCoreDom.renderHTML(gameLayout.finalScore(players), parent)
     finalScore.children[0].children.map(child => child.attributes.innerHTML)
-    return [winner]
+    return [jDomCore.trace('Winner')(winner)]
   }
 
   /**
