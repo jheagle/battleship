@@ -17,7 +17,7 @@
   const previousJDomCoreDom = root.jDomCoreDom || {}
 
   /**
-   * A reference to all functions to be used globally / exported
+   * All methods exported from this module are encapsulated within jDomCoreDom.
    * @author Joshua Heagle <joshuaheagle@gmail.com>
    * @typedef {Object} jDomCoreDom
    * @module jDom/core/dom/core

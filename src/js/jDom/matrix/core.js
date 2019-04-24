@@ -17,7 +17,7 @@
   const previousJDomMatrixCore = root.jDomMatrixCore || {}
 
   /**
-   * A reference to all functions to be used globally / exported
+   * All methods exported from this module are encapsulated within jDomMatrixCore.
    * @author Joshua Heagle <joshuaheagle@gmail.com>
    * @typedef {Object} jDomMatrixCore
    * @module jDom/matrix/core

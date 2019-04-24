@@ -14,7 +14,7 @@ const babel = require('gulp-babel')
 gulp.task('browser-sync', (done) => {
   browserSync.init({
     server: {
-      baseDir: 'dist'
+      baseDir: 'src'
     }
   })
   gulp.watch('src/sass/**/*.+(scss|sass)', gulp.series('sass'))

@@ -94,7 +94,675 @@
     
 
     
+        <h3 class="subsection-title">Members</h3>
 
+        
+            
+<h4 class="name" id="getParentNodes"><span class="type-signature">(constant) </span>getParentNodes<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    A helper selector function for retrieving all parent PseudoNode for the given child node.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoEvent.js.html">jDom/pseudoDom/class/PseudoEvent.js</a>, <a href="jDom_pseudoDom_class_PseudoEvent.js.html#line30">line 30</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="getParentNodes"><span class="type-signature">(constant) </span>getParentNodes<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    A helper selector function for retrieving all parent PseudoNode for the given child node.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line30">line 30</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="phaseConstants"><span class="type-signature">(constant) </span>phaseConstants<span class="type-signature"></span></h4>
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoEvent.js.html">jDom/pseudoDom/class/PseudoEvent.js</a>, <a href="jDom_pseudoDom_class_PseudoEvent.js.html#line172">line 172</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="PseudoHTMLElement"><span class="type-signature">(constant) </span>PseudoHTMLElement<span class="type-signature"> :<a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></span></h4>
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoHTMLDocument.js.html">jDom/pseudoDom/class/PseudoHTMLDocument.js</a>, <a href="jDom_pseudoDom_class_PseudoHTMLDocument.js.html#line11">line 11</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getParentNodesFromAttribute"><span class="type-signature"></span>getParentNodesFromAttribute<span class="signature">(attr, value, node)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="PseudoNode.html">PseudoNode</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    A selector function for retrieving existing parent PseudoNode from the given child item.
+This function will check all the parents starting from node, and scan the attributes
+property for matches. The return array contains all matching parent ancestors.
+WARNING: This is a recursive function.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attr</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>node</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="PseudoNode.html">PseudoNode</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line18">line 18</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="PseudoNode.html">PseudoNode</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getParentNodesFromAttribute"><span class="type-signature"></span>getParentNodesFromAttribute<span class="signature">(attr, value, node)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="PseudoNode.html">PseudoNode</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    A selector function for retrieving existing parent PseudoNode from the given child item.
+This function will check all the parents starting from node, and scan the attributes
+property for matches. The return array contains all matching parent ancestors.
+WARNING: This is a recursive function.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>attr</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>node</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="PseudoNode.html">PseudoNode</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoEvent.js.html">jDom/pseudoDom/class/PseudoEvent.js</a>, <a href="jDom_pseudoDom_class_PseudoEvent.js.html#line18">line 18</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="PseudoNode.html">PseudoNode</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
     
 
     
@@ -267,13 +935,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="module-jDom_pseudoDom_objects-PseudoElement.html">PseudoElement</a></li><li><a href="module-jDom_pseudoDom_objects-PseudoEvent.html">PseudoEvent</a></li><li><a href="module-jDom_pseudoDom_objects-PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="module-jDom_pseudoDom_objects-PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="module-jDom_pseudoDom_objects-PseudoHTMLElement.html">PseudoHTMLElement</a></li><li><a href="module-jDom_pseudoDom_objects-PseudoNode.html">PseudoNode</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getParentNodes">getParentNodes</a></li><li><a href="global.html#getParentNodesFromAttribute">getParentNodesFromAttribute</a></li><li><a href="global.html#phaseConstants">phaseConstants</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Apr 12 2019 09:29:29 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 24 2019 17:06:16 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

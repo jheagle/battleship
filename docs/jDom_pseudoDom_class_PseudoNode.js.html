@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: jDom/pseudoDom/class/PseudoNode.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: jDom/pseudoDom/class/PseudoNode.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file Substitute for the DOM Node Class.
+ * @author Joshua Heagle &lt;joshuaheagle@gmail.com>
+ * @version 1.0.0
+ */
+'use strict'
+
+/**
+ * Simulate the behaviour of the Node Class when there is no DOM available.
+ * @author Joshua Heagle &lt;joshuaheagle@gmail.com>
+ * @class
+ * @augments PseudoEventTarget
+ * @property {string} name
+ * @property {Object} parent
+ * @property {Array} children
+ * @property {function} appendChild
+ * @property {function} removeChild
+ */
+class PseudoNode extends require('./PseudoEventTarget') {
+  /**
+   *
+   * @param {PseudoNode|Object} [parent={}]
+   * @param {Array} [children=[]]
+   * @constructor
+   */
+  constructor ({parent = {}, children = []} = {}) {
+    super()
+    this.parent = parent
+    this.children = children
+    this.nodeValue = ''
+    this.textContext = ''
+  }
+
+  get baseURI () {
+    return '/'
+  }
+
+  get childNodes () {
+    return this.children || [] // NodeList
+  }
+
+  get firstChild () {
+    return this.children[0] || null
+  }
+
+  get isConnected () {
+    return Object.keys(this.parent).length > 0
+  }
+
+  get lastChild () {
+    return this.children[this.children.length - 1] || null
+  }
+
+  get nextSibling () {
+    const siblings = this.parent.children
+    return siblings[siblings.indexOf(this)] || null
+  }
+
+  get nextSibling () {
+    const siblings = this.parent.children
+    return siblings[siblings.indexOf(this) + 1] || null
+  }
+
+  get nodeName () {
+    return this.name || ''
+  }
+
+  get nodeType () {
+    let typeName = 'DEFAULT_NODE'
+    const nodeTypes = [
+      'DEFAULT_NODE',
+      'ELEMENT_NODE',
+      'ATTRIBUTE_NODE',
+      'TEXT_NODE',
+      'CDATA_SECTION_NODE',
+      'ENTITY_REFERENCE_NODE',
+      'ENTITY_NODE',
+      'PROCESSING_INSTRUCTION_NODE',
+      'COMMENT_NODE',
+      'DOCUMENT_NODE',
+      'DOCUMENT_TYPE_NODE',
+      'DOCUMENT_FRAGMENT_NODE',
+      'NOTATION_NODE'
+    ]
+    return nodeTypes.indexOf(typeName)
+  }
+
+  get ownerDocument () {
+    const allParents = getParentNodes(this) || []
+    return allParents[allParents.length - 1]
+  }
+
+  get parentNode () {
+    return this.parent
+  }
+
+  get parentElement () {
+    return this.parent.nodeType === 1 ? this.parent : null
+  }
+
+  get previousSibling () {
+    const siblings = this.parent.children
+    return siblings[siblings.indexOf(this) - 1] || null
+  }
+
+  /**
+   *
+   * @param {PseudoNode} childNode
+   * @returns {PseudoNode}
+   */
+  appendChild (childNode) {
+    childNode.parent = this
+    this.children = this.children.concat([childNode])
+    return childNode
+  }
+
+  cloneNode () {}
+
+  compareDocumentPosition () {}
+
+  contains () {}
+
+  getRootNode () {}
+
+  hasChildNodes () {}
+
+  insertBefore () {}
+
+  isDefaultNamespace () {}
+
+  isEqualNode () {}
+
+  isSameNode () {}
+
+  lookupPrefix () {}
+
+  lookupNamespaceURI () {}
+
+  normalize () {}
+
+  /**
+   *
+   * @param {PseudoNode} childElement
+   * @returns {PseudoNode}
+   */
+  removeChild (childElement) {
+    return this.children.splice(this.children.indexOf(childElement), 1)[0]
+  }
+
+  replaceChild () {}
+}
+
+module.exports = PseudoNode
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getParentNodes">getParentNodes</a></li><li><a href="global.html#getParentNodesFromAttribute">getParentNodesFromAttribute</a></li><li><a href="global.html#phaseConstants">phaseConstants</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 24 2019 17:06:16 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

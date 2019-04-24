@@ -12,12 +12,13 @@
 
   /**
    * Store reference to any pre-existing module of the same name
-   * @type {jDomMatrixObjects|*}
+   * @type {module|*}
    */
   const previousJDomMatrixObjects = root.jDomMatrixObjects || {}
 
   /**
-   * A reference to all functions to be used globally / exported
+   * All methods exported from this module are encapsulated within jDomMatrixObjects.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
    * @typedef {Object} jDomMatrixObjects
    * @module jDom/matrix/objects
    */
