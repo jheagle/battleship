@@ -1,4 +1,4 @@
-const jDomObjects = require('../src/js/jDom/core/dom/objects.js')
+const jDomObjects = require('../../../src/js/jDom/core/dom/objects.js')
 
 // documentItem
 it('documentItem has valid head', () => {

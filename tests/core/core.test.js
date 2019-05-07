@@ -1,4 +1,4 @@
-const jDomCore = require('../src/js/jDom/core/core.js')
+const jDomCore = require('../../src/js/jDom/core/core.js')
 
 // noConflict
 // curry

@@ -71,7 +71,6 @@ class PseudoEvent {
    * @param bubbles
    * @param cancelable
    * @param composed
-   * @param capture
    * @returns {PseudoEvent}
    * @constructor
    */
@@ -85,7 +84,7 @@ class PseudoEvent {
       immediatePropagationStopped: false,
       propagationStopped: false,
       eventPhase: '',
-      target: {},
+      target: () => undefined,
       timeStamp: Math.floor(Date.now() / 1000),
       type: typeArg,
       isTrusted: true
@@ -105,10 +104,6 @@ class PseudoEvent {
     )
   }
 
-  createEvent (type = '') {
-    return new this(type)
-  }
-
   /**
    *
    * @returns {*}
@@ -124,18 +119,6 @@ class PseudoEvent {
       default:
         return []
     }
-  }
-
-  /**
-   *
-   * @param type
-   * @param bubbles
-   * @param cancelable
-   * @returns {PseudoEvent}
-   */
-  initEvent (type, bubbles, cancelable) {
-    this.setReadOnlyProperties({type, bubbles, cancelable, isTrusted: false})
-    return this
   }
 
   /**
@@ -169,7 +152,7 @@ class PseudoEvent {
 /**
  *
  */
-const phaseConstants = [
+[
   'NONE',
   'CAPTURING_PHASE',
   'AT_TARGET',
