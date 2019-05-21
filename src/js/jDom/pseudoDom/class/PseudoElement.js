@@ -6,30 +6,6 @@
 'use strict'
 
 /**
- * A selector function for retrieving existing parent PseudoNode from the given child item.
- * This function will check all the parents starting from node, and scan the attributes
- * property for matches. The return array contains all matching parent ancestors.
- * WARNING: This is a recursive function.
- * @param {string} attr
- * @param {number|string} value
- * @param {PseudoNode} node
- * @returns {Array.<PseudoNode>}
- */
-const getParentNodesFromAttribute = (attr, value, node) =>
-  !Object.keys(node.parent).length ? [] : (
-    (node[attr] || false) === value
-      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
-      : getParentNodesFromAttribute(attr, value, node.parent)
-  )
-
-/**
- * A helper selector function for retrieving all parent PseudoNode for the given child node.
- * @param {PseudoNode} node
- * @returns {Array.<PseudoNode>}
- */
-const getParentNodes = require('../../core/core.js').curry(getParentNodesFromAttribute)('', false)
-
-/**
  * Simulate the behaviour of the Element Class when there is no DOM available.
  * @author Joshua Heagle <joshuaheagle@gmail.com>
  * @class
@@ -82,7 +58,7 @@ class PseudoElement extends require('./PseudoNode') {
   appendChild (childElement) {
     super.appendChild(childElement)
     if (/^(button|input)$/i.test(childElement.tagName) && (childElement.type || '').toLowerCase() === 'submit') {
-      const forms = getParentNodesFromAttribute('tagName', 'form', childElement)
+      const forms = require('./PseudoEvent').getParentNodesFromAttribute('tagName', 'form', childElement)
       childElement.addEventListener('click', () => forms[0].submit())
     }
     return childElement

@@ -6,30 +6,6 @@
 'use strict'
 
 /**
- * A selector function for retrieving existing parent PseudoNode from the given child item.
- * This function will check all the parents starting from node, and scan the attributes
- * property for matches. The return array contains all matching parent ancestors.
- * WARNING: This is a recursive function.
- * @param {string} attr
- * @param {number|string} value
- * @param {PseudoNode} node
- * @returns {Array.<PseudoNode>}
- */
-const getParentNodesFromAttribute = (attr, value, node) =>
-  !Object.keys(node.parent).length ? [] : (
-    (node[attr] || false) === value
-      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
-      : getParentNodesFromAttribute(attr, value, node.parent)
-  )
-
-/**
- * A helper selector function for retrieving all parent PseudoNode for the given child node.
- * @param {PseudoNode} node
- * @returns {Array.<PseudoNode>}
- */
-const getParentNodes = require('../../core/core.js').curry(getParentNodesFromAttribute)('', false)
-
-/**
  * Simulate the behaviour of the Event Class when there is no DOM available.
  * @author Joshua Heagle <joshuaheagle@gmail.com>
  * @class
@@ -45,7 +21,10 @@ const getParentNodes = require('../../core/core.js').curry(getParentNodesFromAtt
  * is the object to which the event is currently slated to be sent; it's possible this has been changed along the way
  * through re-targeting.
  * @property {boolean} defaultPrevented - Indicates whether or not event.preventDefault() has been called on the event.
- * @property {string} eventPhase - Indicates which phase of the event flow is being processed.
+ * @property {boolean} immediatePropagationStopped - Flag that no further propagation should occur, including on current
+ * target.
+ * @property {boolean} propagationStopped - Flag that no further propagation should occur.
+ * @property {int} eventPhase - Indicates which phase of the event flow is being processed. Uses PseudoEvent constants.
  * @property {EventTarget|PseudoEventTarget} target - A reference to the target to which the event was originally
  * dispatched.
  * @property {int} timeStamp - The time at which the event was created (in milliseconds). By specification, this
@@ -54,17 +33,8 @@ const getParentNodes = require('../../core/core.js').curry(getParentNodesFromAtt
  * @property {string} type - The name of the event (case-insensitive).
  * @property {boolean} isTrusted - Indicates whether or not the event was initiated by the browser (after a user
  * click for instance) or by a script (using an event creation method, like event.initEvent)
- * @property {function} createEvent - Creates a new event, which must then be initialized by calling its initEvent()
- * method.
- * @property {function} initEvent - Initializes the value of an Event created. If the event has already being
- * dispatched, this method does nothing.
- * @property {function} preventDefault - Cancels the event (if it is cancelable).
- * @property {function} stopImmediatePropagation - For this particular event, no other listener will be called.
- * Neither those attached on the same element, nor those attached on elements which will be traversed later (in
- * capture phase, for instance)
- * @property {function} stopPropagation - Stops the propagation of events further along in the Dom.
  */
-class PseudoEvent {
+module.exports = class PseudoEvent {
   /**
    *
    * @param typeArg
@@ -75,6 +45,21 @@ class PseudoEvent {
    * @constructor
    */
   constructor (typeArg = '', {bubbles = true, cancelable = true, composed = true} = {}) {
+    // Set up the class constants
+    [
+      'NONE',
+      'CAPTURING_PHASE',
+      'AT_TARGET',
+      'BUBBLING_PHASE'
+    ].reduce((phases, phase, key) => {
+      Object.defineProperty(PseudoEvent, phase, {
+        value: key,
+        writable: false,
+        static: {get: () => key}
+      })
+      return Object.assign({}, phases, {[`${phase}`]: key})
+    }, {})
+
     let properties = {
       bubbles,
       cancelable,
@@ -105,15 +90,41 @@ class PseudoEvent {
   }
 
   /**
-   *
-   * @returns {*}
+   * A selector function for retrieving existing parent PseudoNode from the given child item.
+   * This function will check all the parents starting from node, and scan the attributes
+   * property for matches. The return array contains all matching parent ancestors.
+   * WARNING: This is a recursive function.
+   * @param {string} attr
+   * @param {number|string} value
+   * @param {PseudoNode} node
+   * @returns {Array.<PseudoNode>}
+   */
+  static getParentNodesFromAttribute (attr, value, node) {
+    return Object.keys(node.parent).length
+      ? (node.parent[attr] || false) === value
+        ? PseudoEvent.getParentNodesFromAttribute(attr, value, node.parent).concat([node.parent])
+        : PseudoEvent.getParentNodesFromAttribute(attr, value, node.parent)
+      : []
+  }
+
+  /**
+   * A helper selector function for retrieving all parent PseudoNode for the given child node.
+   * @param {PseudoNode} node
+   * @returns {Array.<PseudoNode>}
+   */
+  static getParentNodes = require('../../core/core.js').curry(PseudoEvent.getParentNodesFromAttribute)('', false)
+
+  /**
+   * Return an array of targets that will have the event executed open them. The order is based on the eventPhase
+   * @method
+   * @returns {Array.<PseudoEventTarget>}
    */
   composedPath () {
     switch (this.eventPhase) {
       case PseudoEvent.CAPTURING_PHASE:
-        return getParentNodes(this.target)
+        return PseudoEvent.getParentNodes(this.target)
       case PseudoEvent.BUBBLING_PHASE:
-        return getParentNodes(this.target).slice().reverse()
+        return PseudoEvent.getParentNodes(this.target).slice().reverse()
       case PseudoEvent.AT_TARGET:
         return [this.target]
       default:
@@ -122,7 +133,8 @@ class PseudoEvent {
   }
 
   /**
-   *
+   * Cancels the event (if it is cancelable).
+   * @method
    * @returns {null}
    */
   preventDefault () {
@@ -131,7 +143,10 @@ class PseudoEvent {
   }
 
   /**
-   *
+   * For this particular event, no other listener will be called.
+   * Neither those attached on the same element, nor those attached on elements which will be traversed later (in
+   * capture phase, for instance)
+   * @method
    * @returns {null}
    */
   stopImmediatePropagation () {
@@ -140,7 +155,8 @@ class PseudoEvent {
   }
 
   /**
-   *
+   * Stops the propagation of events further along in the Dom.
+   * @method
    * @returns {null}
    */
   stopPropagation () {
@@ -148,22 +164,3 @@ class PseudoEvent {
     return null
   }
 }
-
-/**
- *
- */
-[
-  'NONE',
-  'CAPTURING_PHASE',
-  'AT_TARGET',
-  'BUBBLING_PHASE'
-].reduce((phases, phase, key) => {
-  Object.defineProperty(PseudoEvent, phase, {
-    value: key,
-    writable: false,
-    static: {get: () => key}
-  })
-  return Object.assign({}, phases, {[`${phase}`]: key})
-}, {})
-
-module.exports = PseudoEvent

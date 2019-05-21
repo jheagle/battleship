@@ -565,13 +565,12 @@
    * attribute criteria
    * @returns {Array}
    */
-  jDomCoreDom.getParentsFromAttribute = (attr, value, item = jDomObjects.documentItem.body) => Object.keys(
-    item.parentItem
-  ).length
-    ? (item.attributes[attr] || item[attr] || false) === value
-      ? jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem).concat([item])
+  jDomCoreDom.getParentsFromAttribute = (attr, value, item = jDomObjects.documentItem.body) =>
+    Object.keys(item.parentItem).length
+      ? (item.parentItem.attributes[attr] || item[attr] || false) === value
+      ? jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem).concat([item.parentItem])
       : jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem)
-    : []
+      : []
 
   /**
    * Helper for getting all jDomObjects.DomItems starting at child and having specified className attribute

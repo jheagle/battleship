@@ -5,7 +5,7 @@
  */
 'use strict'
 
-const PseudoEvent = require('./PseudoEventTarget')
+const PseudoEvent = require('./PseudoEvent')
 
 /**
  * Handle events as they are stored and implemented.
@@ -171,7 +171,10 @@ class PseudoEventTarget {
    * @returns {boolean}
    */
   startEvents (eventType) {
-    const event = new (require('./PseudoEvent'))(eventType)
+    /**
+     * type PseudoEvent
+     */
+    const event = new PseudoEvent(eventType)
     event.setReadOnlyProperties({target: this})
     // console.log('startEvents', event.type, event.target)
     ;[
