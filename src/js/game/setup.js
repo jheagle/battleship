@@ -276,6 +276,7 @@
    * @returns {boolean}
    */
   gameStart.beginRound = (e, mainForm) => {
+    console.log('beginRound', e.eventPhase, e.type)
     e.preventDefault()
     let parent = jDomCoreDom.getTopParentItem(mainForm)
     let humans = parseInt(jDomCoreDom.getChildrenByName('human-players', mainForm)[0].element.value)

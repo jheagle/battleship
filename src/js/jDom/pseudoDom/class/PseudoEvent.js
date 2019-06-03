@@ -4,6 +4,7 @@
  * @version 1.0.0
  */
 'use strict'
+const {curry} = require('../../core/core.js')
 
 /**
  * Simulate the behaviour of the Event Class when there is no DOM available.
@@ -34,7 +35,7 @@
  * @property {boolean} isTrusted - Indicates whether or not the event was initiated by the browser (after a user
  * click for instance) or by a script (using an event creation method, like event.initEvent)
  */
-module.exports = class PseudoEvent {
+class PseudoEvent {
   /**
    *
    * @param typeArg
@@ -45,21 +46,6 @@ module.exports = class PseudoEvent {
    * @constructor
    */
   constructor (typeArg = '', {bubbles = true, cancelable = true, composed = true} = {}) {
-    // Set up the class constants
-    [
-      'NONE',
-      'CAPTURING_PHASE',
-      'AT_TARGET',
-      'BUBBLING_PHASE'
-    ].reduce((phases, phase, key) => {
-      Object.defineProperty(PseudoEvent, phase, {
-        value: key,
-        writable: false,
-        static: {get: () => key}
-      })
-      return Object.assign({}, phases, {[`${phase}`]: key})
-    }, {})
-
     let properties = {
       bubbles,
       cancelable,
@@ -112,7 +98,7 @@ module.exports = class PseudoEvent {
    * @param {PseudoNode} node
    * @returns {Array.<PseudoNode>}
    */
-  static getParentNodes = require('../../core/core.js').curry(PseudoEvent.getParentNodesFromAttribute)('', false)
+  static getParentNodes = curry(PseudoEvent.getParentNodesFromAttribute)('', false)
 
   /**
    * Return an array of targets that will have the event executed open them. The order is based on the eventPhase
@@ -164,3 +150,20 @@ module.exports = class PseudoEvent {
     return null
   }
 }
+
+// Set up the class constants
+[
+  'NONE',
+  'CAPTURING_PHASE',
+  'AT_TARGET',
+  'BUBBLING_PHASE'
+].reduce((phases, phase, key) => {
+  Object.defineProperty(PseudoEvent, phase, {
+    value: key,
+    writable: false,
+    static: {get: () => key}
+  })
+  return Object.assign({}, phases, {[`${phase}`]: key})
+}, {})
+
+module.exports = PseudoEvent

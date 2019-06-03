@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>PseudoHTMLElement<span class="signature">(tagName<span class="signature-attributes">opt</span>, parent<span class="signature-attributes">opt</span>, children<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>PseudoHTMLElement<span class="signature">(tagName<span class="signature-attributes">opt</span>, parent<span class="signature-attributes">opt</span>, children<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a>}</span></h2>
         
             <div class="class-description">Simulate the behaviour of the HTMLElement Class when there is no DOM available.</div>
         
@@ -45,7 +45,7 @@
     
 
     
-    <h4 class="name" id="PseudoHTMLElement"><span class="type-signature"></span>new PseudoHTMLElement<span class="signature">(tagName<span class="signature-attributes">opt</span>, parent<span class="signature-attributes">opt</span>, children<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="PseudoHTMLElement"><span class="type-signature"></span>new PseudoHTMLElement<span class="signature">(tagName<span class="signature-attributes">opt</span>, parent<span class="signature-attributes">opt</span>, children<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a>}</span></h4>
     
 
     
@@ -467,7 +467,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_class_PseudoHTMLElement.js.html">jDom/pseudoDom/class/PseudoHTMLElement.js</a>, <a href="jDom_pseudoDom_class_PseudoHTMLElement.js.html#line22">line 22</a>
+        <a href="jDom_pseudoDom_class_PseudoHTMLElement.js.html">jDom/pseudoDom/class/PseudoHTMLElement.js</a>, <a href="jDom_pseudoDom_class_PseudoHTMLElement.js.html#line31">line 31</a>
     </li></ul></dd>
     
 
@@ -490,6 +490,26 @@
 
 
 
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -525,6 +545,240 @@
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="addEventListener"><span class="type-signature"></span>addEventListener<span class="signature">(type, callback, useCapture<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+|
+
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>useCapture</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="PseudoElement.html#addEventListener">PseudoElement#addEventListener</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html">jDom/pseudoDom/class/PseudoEventTarget.js</a>, <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html#line202">line 202</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
             
@@ -610,8 +864,10 @@
     
 
     
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="PseudoElement.html#appendChild">PseudoElement#appendChild</a>
     </li></ul></dd>
     
@@ -633,11 +889,9 @@
     
 
     
-
-    
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line82">line 82</a>
+        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line58">line 58</a>
     </li></ul></dd>
     
 
@@ -647,6 +901,8 @@
 
     
 </dl>
+
+
 
 
 
@@ -672,6 +928,191 @@
     <dd>
         
 <span class="param-type"><a href="PseudoNode.html">PseudoNode</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="dispatchEvent"><span class="type-signature"></span>dispatchEvent<span class="signature">(event, target)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Event</span>
+|
+
+<span class="param-type"><a href="PseudoEvent.html">PseudoEvent</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>target</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">EventTarget</span>
+|
+
+<span class="param-type"><a href="PseudoEventTarget.html">PseudoEventTarget</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="PseudoElement.html#dispatchEvent">PseudoElement#dispatchEvent</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html">jDom/pseudoDom/class/PseudoEventTarget.js</a>, <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html#line260">line 260</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -768,8 +1209,10 @@
     
 
     
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="PseudoElement.html#getAttribute">PseudoElement#getAttribute</a>
     </li></ul></dd>
     
@@ -791,11 +1234,9 @@
     
 
     
-
-    
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line119">line 119</a>
+        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line95">line 95</a>
     </li></ul></dd>
     
 
@@ -805,6 +1246,8 @@
 
     
 </dl>
+
+
 
 
 
@@ -929,8 +1372,10 @@
     
 
     
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="PseudoElement.html#hasAttribute">PseudoElement#hasAttribute</a>
     </li></ul></dd>
     
@@ -952,11 +1397,9 @@
     
 
     
-
-    
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line96">line 96</a>
+        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line72">line 72</a>
     </li></ul></dd>
     
 
@@ -966,6 +1409,8 @@
 
     
 </dl>
+
+
 
 
 
@@ -1087,8 +1532,10 @@
     
 
     
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="PseudoElement.html#removeAttribute">PseudoElement#removeAttribute</a>
     </li></ul></dd>
     
@@ -1110,11 +1557,9 @@
     
 
     
-
-    
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line129">line 129</a>
+        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line105">line 105</a>
     </li></ul></dd>
     
 
@@ -1124,6 +1569,8 @@
 
     
 </dl>
+
+
 
 
 
@@ -1241,12 +1688,12 @@
     
 
     
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="PseudoNode.html#removeChild">PseudoNode#removeChild</a>
-    </li></ul></dd>
-    
 
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="PseudoElement.html#removeChild">PseudoElement#removeChild</a>
+    </li></ul></dd>
     
 
     
@@ -1268,7 +1715,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_class_PseudoNode.js.html">jDom/pseudoDom/class/PseudoNode.js</a>, <a href="jDom_pseudoDom_class_PseudoNode.js.html#line146">line 146</a>
+        <a href="jDom_pseudoDom_class_PseudoNode.js.html">jDom/pseudoDom/class/PseudoNode.js</a>, <a href="jDom_pseudoDom_class_PseudoNode.js.html#line167">line 167</a>
     </li></ul></dd>
     
 
@@ -1278,6 +1725,8 @@
 
     
 </dl>
+
+
 
 
 
@@ -1303,6 +1752,318 @@
     <dd>
         
 <span class="param-type"><a href="PseudoNode.html">PseudoNode</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="removeEventListener"><span class="type-signature"></span>removeEventListener<span class="signature">(type, callback)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="PseudoElement.html#removeEventListener">PseudoElement#removeEventListener</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html">jDom/pseudoDom/class/PseudoEventTarget.js</a>, <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html#line241">line 241</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="runEvents"><span class="type-signature"></span>runEvents<span class="signature">(event)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="PseudoElement.html#runEvents">PseudoElement#runEvents</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html">jDom/pseudoDom/class/PseudoEventTarget.js</a>, <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html#line145">line 145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -1425,8 +2186,10 @@
     
 
     
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
         <a href="PseudoElement.html#setAttribute">PseudoElement#setAttribute</a>
     </li></ul></dd>
     
@@ -1448,11 +2211,9 @@
     
 
     
-
-    
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line106">line 106</a>
+        <a href="jDom_pseudoDom_class_PseudoElement.js.html">jDom/pseudoDom/class/PseudoElement.js</a>, <a href="jDom_pseudoDom_class_PseudoElement.js.html#line82">line 82</a>
     </li></ul></dd>
     
 
@@ -1462,6 +2223,8 @@
 
     
 </dl>
+
+
 
 
 
@@ -1499,6 +2262,157 @@
 
 
         
+            
+
+    
+
+    
+    <h4 class="name" id="startEvents"><span class="type-signature"></span>startEvents<span class="signature">(eventType)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>eventType</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-overrides">Overrides:</dt>
+    <dd class="tag-overrides"><ul class="dummy"><li>
+        <a href="PseudoElement.html#startEvents">PseudoElement#startEvents</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html">jDom/pseudoDom/class/PseudoEventTarget.js</a>, <a href="jDom_pseudoDom_class_PseudoEventTarget.js.html#line173">line 173</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
     
 
     
@@ -1514,13 +2428,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getParentNodes">getParentNodes</a></li><li><a href="global.html#getParentNodesFromAttribute">getParentNodesFromAttribute</a></li><li><a href="global.html#phaseConstants">phaseConstants</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 24 2019 17:06:17 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sun Jun 02 2019 22:29:15 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

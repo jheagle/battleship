@@ -34,30 +34,6 @@
 'use strict'
 
 /**
- * A selector function for retrieving existing parent PseudoNode from the given child item.
- * This function will check all the parents starting from node, and scan the attributes
- * property for matches. The return array contains all matching parent ancestors.
- * WARNING: This is a recursive function.
- * @param {string} attr
- * @param {number|string} value
- * @param {PseudoNode} node
- * @returns {Array.&lt;PseudoNode>}
- */
-const getParentNodesFromAttribute = (attr, value, node) =>
-  !Object.keys(node.parent).length ? [] : (
-    (node[attr] || false) === value
-      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
-      : getParentNodesFromAttribute(attr, value, node.parent)
-  )
-
-/**
- * A helper selector function for retrieving all parent PseudoNode for the given child node.
- * @param {PseudoNode} node
- * @returns {Array.&lt;PseudoNode>}
- */
-const getParentNodes = require('../../core/core.js').curry(getParentNodesFromAttribute)('', false)
-
-/**
  * Simulate the behaviour of the Element Class when there is no DOM available.
  * @author Joshua Heagle &lt;joshuaheagle@gmail.com>
  * @class
@@ -109,10 +85,10 @@ class PseudoElement extends require('./PseudoNode') {
    */
   appendChild (childElement) {
     super.appendChild(childElement)
-    if (/^(button|input)$/i.test(childElement.tagName) &amp;&amp; (childElement.type || '').toLowerCase() === 'submit') {
-      const forms = getParentNodesFromAttribute('tagName', 'form', childElement)
-      childElement.addEventListener('click', () => forms[0].submit())
-    }
+    // if (/^(button|input)$/i.test(childElement.tagName) &amp;&amp; (childElement.type || '').toLowerCase() === 'submit') {
+    //   const forms = require('./PseudoEvent').getParentNodesFromAttribute('tagName', 'form', childElement)
+    //   childElement.addEventListener('click', () => forms[0].submit())
+    // }
     return childElement
   }
 
@@ -174,13 +150,13 @@ module.exports = PseudoElement
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getParentNodes">getParentNodes</a></li><li><a href="global.html#getParentNodesFromAttribute">getParentNodesFromAttribute</a></li><li><a href="global.html#phaseConstants">phaseConstants</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 24 2019 17:06:16 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sun Jun 02 2019 22:29:15 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

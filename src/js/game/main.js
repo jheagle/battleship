@@ -110,9 +110,11 @@
 
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module
-    const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)
-    const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])
-    submitBtn[0].element.click()
+    const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
+    console.log(form)
+    form.submit()
+    // const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])
+    // submitBtn[0].element.click()
   }
 
   // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer

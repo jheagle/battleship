@@ -32,30 +32,7 @@
  * @version 1.0.0
  */
 'use strict'
-
-/**
- * A selector function for retrieving existing parent PseudoNode from the given child item.
- * This function will check all the parents starting from node, and scan the attributes
- * property for matches. The return array contains all matching parent ancestors.
- * WARNING: This is a recursive function.
- * @param {string} attr
- * @param {number|string} value
- * @param {PseudoNode} node
- * @returns {Array.&lt;PseudoNode>}
- */
-const getParentNodesFromAttribute = (attr, value, node) =>
-  !Object.keys(node.parent).length ? [] : (
-    (node[attr] || false) === value
-      ? getParentNodesFromAttribute(attr, value, node.parent).concat([node])
-      : getParentNodesFromAttribute(attr, value, node.parent)
-  )
-
-/**
- * A helper selector function for retrieving all parent PseudoNode for the given child node.
- * @param {PseudoNode} node
- * @returns {Array.&lt;PseudoNode>}
- */
-const getParentNodes = require('../../core/core.js').curry(getParentNodesFromAttribute)('', false)
+const {curry} = require('../../core/core.js')
 
 /**
  * Simulate the behaviour of the Event Class when there is no DOM available.
@@ -73,7 +50,10 @@ const getParentNodes = require('../../core/core.js').curry(getParentNodesFromAtt
  * is the object to which the event is currently slated to be sent; it's possible this has been changed along the way
  * through re-targeting.
  * @property {boolean} defaultPrevented - Indicates whether or not event.preventDefault() has been called on the event.
- * @property {string} eventPhase - Indicates which phase of the event flow is being processed.
+ * @property {boolean} immediatePropagationStopped - Flag that no further propagation should occur, including on current
+ * target.
+ * @property {boolean} propagationStopped - Flag that no further propagation should occur.
+ * @property {int} eventPhase - Indicates which phase of the event flow is being processed. Uses PseudoEvent constants.
  * @property {EventTarget|PseudoEventTarget} target - A reference to the target to which the event was originally
  * dispatched.
  * @property {int} timeStamp - The time at which the event was created (in milliseconds). By specification, this
@@ -82,15 +62,6 @@ const getParentNodes = require('../../core/core.js').curry(getParentNodesFromAtt
  * @property {string} type - The name of the event (case-insensitive).
  * @property {boolean} isTrusted - Indicates whether or not the event was initiated by the browser (after a user
  * click for instance) or by a script (using an event creation method, like event.initEvent)
- * @property {function} createEvent - Creates a new event, which must then be initialized by calling its initEvent()
- * method.
- * @property {function} initEvent - Initializes the value of an Event created. If the event has already being
- * dispatched, this method does nothing.
- * @property {function} preventDefault - Cancels the event (if it is cancelable).
- * @property {function} stopImmediatePropagation - For this particular event, no other listener will be called.
- * Neither those attached on the same element, nor those attached on elements which will be traversed later (in
- * capture phase, for instance)
- * @property {function} stopPropagation - Stops the propagation of events further along in the Dom.
  */
 class PseudoEvent {
   /**
@@ -99,7 +70,6 @@ class PseudoEvent {
    * @param bubbles
    * @param cancelable
    * @param composed
-   * @param capture
    * @returns {PseudoEvent}
    * @constructor
    */
@@ -113,7 +83,7 @@ class PseudoEvent {
       immediatePropagationStopped: false,
       propagationStopped: false,
       eventPhase: '',
-      target: {},
+      target: () => undefined,
       timeStamp: Math.floor(Date.now() / 1000),
       type: typeArg,
       isTrusted: true
@@ -133,20 +103,42 @@ class PseudoEvent {
     )
   }
 
-  createEvent (type = '') {
-    return new this(type)
+  /**
+   * A selector function for retrieving existing parent PseudoNode from the given child item.
+   * This function will check all the parents starting from node, and scan the attributes
+   * property for matches. The return array contains all matching parent ancestors.
+   * WARNING: This is a recursive function.
+   * @param {string} attr
+   * @param {number|string} value
+   * @param {PseudoNode} node
+   * @returns {Array.&lt;PseudoNode>}
+   */
+  static getParentNodesFromAttribute (attr, value, node) {
+    return Object.keys(node.parent).length
+      ? (node.parent[attr] || false) === value
+        ? PseudoEvent.getParentNodesFromAttribute(attr, value, node.parent).concat([node.parent])
+        : PseudoEvent.getParentNodesFromAttribute(attr, value, node.parent)
+      : []
   }
 
   /**
-   *
-   * @returns {*}
+   * A helper selector function for retrieving all parent PseudoNode for the given child node.
+   * @param {PseudoNode} node
+   * @returns {Array.&lt;PseudoNode>}
+   */
+  static getParentNodes = curry(PseudoEvent.getParentNodesFromAttribute)('', false)
+
+  /**
+   * Return an array of targets that will have the event executed open them. The order is based on the eventPhase
+   * @method
+   * @returns {Array.&lt;PseudoEventTarget>}
    */
   composedPath () {
     switch (this.eventPhase) {
       case PseudoEvent.CAPTURING_PHASE:
-        return getParentNodes(this.target)
+        return PseudoEvent.getParentNodes(this.target)
       case PseudoEvent.BUBBLING_PHASE:
-        return getParentNodes(this.target).slice().reverse()
+        return PseudoEvent.getParentNodes(this.target).slice().reverse()
       case PseudoEvent.AT_TARGET:
         return [this.target]
       default:
@@ -155,19 +147,8 @@ class PseudoEvent {
   }
 
   /**
-   *
-   * @param type
-   * @param bubbles
-   * @param cancelable
-   * @returns {PseudoEvent}
-   */
-  initEvent (type, bubbles, cancelable) {
-    this.setReadOnlyProperties({type, bubbles, cancelable, isTrusted: false})
-    return this
-  }
-
-  /**
-   *
+   * Cancels the event (if it is cancelable).
+   * @method
    * @returns {null}
    */
   preventDefault () {
@@ -176,7 +157,10 @@ class PseudoEvent {
   }
 
   /**
-   *
+   * For this particular event, no other listener will be called.
+   * Neither those attached on the same element, nor those attached on elements which will be traversed later (in
+   * capture phase, for instance)
+   * @method
    * @returns {null}
    */
   stopImmediatePropagation () {
@@ -185,7 +169,8 @@ class PseudoEvent {
   }
 
   /**
-   *
+   * Stops the propagation of events further along in the Dom.
+   * @method
    * @returns {null}
    */
   stopPropagation () {
@@ -194,10 +179,8 @@ class PseudoEvent {
   }
 }
 
-/**
- *
- */
-const phaseConstants = [
+// Set up the class constants
+[
   'NONE',
   'CAPTURING_PHASE',
   'AT_TARGET',
@@ -222,13 +205,13 @@ module.exports = PseudoEvent
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getParentNodes">getParentNodes</a></li><li><a href="global.html#getParentNodesFromAttribute">getParentNodesFromAttribute</a></li><li><a href="global.html#phaseConstants">phaseConstants</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 24 2019 17:06:16 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Sun Jun 02 2019 22:29:15 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

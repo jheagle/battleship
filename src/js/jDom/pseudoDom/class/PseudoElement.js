@@ -57,10 +57,10 @@ class PseudoElement extends require('./PseudoNode') {
    */
   appendChild (childElement) {
     super.appendChild(childElement)
-    if (/^(button|input)$/i.test(childElement.tagName) && (childElement.type || '').toLowerCase() === 'submit') {
-      const forms = require('./PseudoEvent').getParentNodesFromAttribute('tagName', 'form', childElement)
-      childElement.addEventListener('click', () => forms[0].submit())
-    }
+    // if (/^(button|input)$/i.test(childElement.tagName) && (childElement.type || '').toLowerCase() === 'submit') {
+    //   const forms = require('./PseudoEvent').getParentNodesFromAttribute('tagName', 'form', childElement)
+    //   childElement.addEventListener('click', () => forms[0].submit())
+    // }
     return childElement
   }
 
