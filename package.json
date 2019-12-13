@@ -31,7 +31,7 @@
     "jest": "^24.9.0"
   },
   "dependencies": {
-    "npm": "^6.11.2"
+    "npm": "^6.13.4"
   },
   "directories": {
     "test": "tests"
