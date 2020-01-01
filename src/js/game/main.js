@@ -111,22 +111,8 @@
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module
     const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
-    console.log(form)
-    form.submit()
-    // const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form[0])
-    // submitBtn[0].element.click()
+    form.element.submit()
   }
-
-  // samples expanded from https://stackoverflow.com/questions/27936772/how-to-deep-merge-instead-of-shallow-merge#new-answer
-  // let results = mergeObjects({
-  //     a: { a: 1},
-  // },{
-  //     a: { b: 1},
-  // },{
-  //     a: { b: 2, c: 1},
-  //     b: 2,
-  // })
-  // console.log(results)
 
   /**
    * Either export all functions to be exported, or assign to the Window context
