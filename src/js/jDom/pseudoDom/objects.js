@@ -35,43 +35,6 @@
     return jDomPseudoDom
   }
 
-  class IterableList {
-    constructor (values = []) {
-      this.innerArray = values
-    }
-
-    get length () {
-      return this.innerArray.length
-    }
-
-    forEach (callback) {
-      for (let item of this.innerArray) {
-        callback(item)
-      }
-      // return this.innerArray.forEach(callback)
-    }
-
-    [Symbol.iterator] () {
-      let index = -1
-      let inner = this.innerArray
-
-      return {
-        next: () => ({value: inner[++index], done: !(index in inner)})
-      }
-    }
-  }
-
-  let someList = new IterableList(['one', 'two', 'three', 'four'])
-  console.log(someList)
-  for (let item of someList) {
-    console.log('iterating items', item)
-  }
-  someList.forEach(item => {
-    console.log('iterating items', item)
-  })
-  console.log(someList.length)
-  console.log(Array.from(someList))
-
   /**
    * @type {PseudoEvent}
    */
