@@ -111,7 +111,8 @@
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module
     const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
-    form.element.submit()
+    const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form)
+    submitBtn[0].element.click()
   }
 
   /**
@@ -123,4 +124,5 @@
     }
     exports = Object.assign(exports, gameMain)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via
+                                      // browser

@@ -7,118 +7,7 @@
 
 const PseudoEvent = require('./PseudoEvent')
 
-/**
- * Handle events as they are stored and implemented.
- * @author Joshua Heagle <joshuaheagle@gmail.com>
- * @class
- * @property {string} eventType
- * @property {Object} eventOptions
- * @property {boolean} isDefault
- */
-const PseudoEventListener = {
-  eventType: '',
-  eventOptions: {capture: false, once: false, passive: false},
-  isDefault: false,
-  /**
-   * @method
-   * @name PseudoEventListener#handleEvent
-   * @param event
-   * @returns {undefined}
-   */
-  handleEvent: event => undefined,
-  /**
-   * @method
-   * @name PseudoEventListener#doCapturePhase
-   * @param event
-   * @returns {boolean}
-   */
-  doCapturePhase (event) {
-    return event.eventPhase === PseudoEvent.CAPTURING_PHASE && this.eventOptions.capture
-  },
-  /**
-   * @method
-   * @name PseudoEventListener#doTargetPhase
-   * @param event
-   * @returns {boolean}
-   */
-  doTargetPhase (event) {
-    return event.eventPhase === PseudoEvent.AT_TARGET
-  },
-  /**
-   * @method
-   * @name PseudoEventListener#doBubblePhase
-   * @param event
-   * @returns {boolean|*}
-   */
-  doBubblePhase (event) {
-    return event.eventPhase === PseudoEvent.BUBBLING_PHASE && (event.bubbles || !this.eventOptions.capture)
-  },
-  /**
-   * @method
-   * @name PseudoEventListener#skipPhase
-   * @param event
-   * @returns {boolean}
-   */
-  skipPhase (event) {
-    return !this.doCapturePhase(event) && !this.doTargetPhase(event) && !this.doBubblePhase(event)
-  },
-  /**
-   * @method
-   * @name PseudoEventListener#skipDefault
-   * @param event
-   * @returns {boolean|*}
-   */
-  skipDefault (event) {
-    return this.isDefault && event.defaultPrevented
-  },
-  /**
-   * @method
-   * @name PseudoEventListener#stopPropagation
-   * @param event
-   * @returns {boolean}
-   */
-  stopPropagation (event) {
-    return !this.doTargetPhase(event) && event.propagationStopped
-  },
-  /**
-   * @method
-   * @name PseudoEventListener#nonPassiveHalt
-   * @param event
-   * @returns {boolean|*}
-   */
-  nonPassiveHalt (event) {
-    return !this.eventOptions.passive && (this.skipDefault(event)
-      || event.immediatePropagationStopped
-      || this.stopPropagation(event)
-    )
-  },
-  /**
-   * @method
-   * @name PseudoEventListener#rejectEvent
-   * @param event
-   * @returns {*|boolean}
-   */
-  rejectEvent (event) {
-    return this.nonPassiveHalt(event) || this.skipPhase(event)
-  },
-  /**
-   * @method
-   * @name PseudoEventListener#runEvent
-   * @param event
-   * @returns {Array.<PseudoEventListener>|Array}
-   */
-  runEvent (event) {
-    if (this.rejectEvent(event)) {
-      return [this]
-    }
-    this.handleEvent(event)
-    if (this.eventOptions.once) {
-      event.currentTarget.removeEventListener(this.eventType, this.handleEvent)
-      return []
-    }
-    return [this]
-  }
-}
+const PseudoEventListener = require('./PseudoEventListener')
 
 /**
  * Simulate the behaviour of the EventTarget Class when there is no DOM available.
@@ -135,11 +24,12 @@ class PseudoEventTarget {
    */
   constructor () {
     this.listeners = []
+    this.defaultEvent = []
   }
 
   /**
    *
-   * @param event
+   * @param {PseudoEvent} event
    * @returns {boolean}
    */
   runEvents (event) {
@@ -151,6 +41,7 @@ class PseudoEventTarget {
      * @type {Array<PseudoEventListener>}
      */
     const stack = this.listeners[event.type]
+    let eventReturn = null
     this.listeners[event.type] = stack.reduce(
       /**
        *
@@ -158,16 +49,50 @@ class PseudoEventTarget {
        * @param {PseudoEventListener} listener
        * @returns {Array<PseudoEventListener>}
        */
-      (listeners, listener) => event.immediatePropagationStopped
-        ? listeners.concat([listener])
-        : listeners.concat(listener.runEvent(event)),
+      (listeners, listener) => {
+        if (event.immediatePropagationStopped || listener.rejectEvent(event)) {
+          return listeners.concat(listener)
+        }
+        eventReturn = listener.handleEvent(event)
+        if (listener.eventOptions.once) {
+          event.currentTarget.removeEventListener(event.eventType, event.handleEvent)
+          return listeners
+        }
+        return listeners.concat(listener)
+      },
       []
     )
+    return eventReturn
   }
 
   /**
    *
-   * @param eventType
+   * @param {string} type
+   * @param {Function} callback
+   */
+  setDefaultEvent (type, callback) {
+    if (!(type in this.listeners)) {
+      this[type] = () => this.startEvents(type)
+      this.listeners[type] = []
+    }
+    this.defaultEvent[type] = callback
+  }
+
+  /**
+   *
+   * @param {PseudoEvent} event
+   * @returns {boolean}
+   */
+  runDefaultEvent (event) {
+    if (event.defaultPrevented) {
+      return false
+    }
+    this.defaultEvent[event.type](event)
+  }
+
+  /**
+   *
+   * @param {PseudoEvent} eventType
    * @returns {boolean}
    */
   startEvents (eventType) {
@@ -176,21 +101,25 @@ class PseudoEventTarget {
      */
     const event = new PseudoEvent(eventType)
     event.setReadOnlyProperties({target: this})
-    // console.log('startEvents', event.type, event.target)
+    console.log('startEvents', event.type, event.target)
     ;[
       PseudoEvent.CAPTURING_PHASE,
       PseudoEvent.AT_TARGET,
       PseudoEvent.BUBBLING_PHASE
     ].forEach(phase => {
+      let continueEvents = null
       if (phase === PseudoEvent.AT_TARGET || !event.propagationStopped) {
         event.setReadOnlyProperties({eventPhase: phase})
-        event.composedPath().forEach((target) => {
+        event.composedPath().forEach(target => {
           event.setReadOnlyProperties({currentTarget: target})
-          event.currentTarget.runEvents(event)
+          continueEvents = event.currentTarget.runEvents(event)
         })
       }
+      if (event.eventPhase === PseudoEvent.AT_TARGET && typeof continueEvents !== 'boolean' && this.defaultEvent[eventType]) {
+        this.runDefaultEvent(event)
+      }
     })
-    return this.runEvents(event)
+    return true
   }
 
   /**

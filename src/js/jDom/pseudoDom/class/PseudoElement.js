@@ -52,15 +52,37 @@ class PseudoElement extends require('./PseudoNode') {
 
   /**
    *
+   * @returns {Function}
+   */
+  applyDefaultEvent () {
+    let callback = event => undefined
+    switch (this.tagName) {
+      case 'form':
+        this.addEventListener('submit', callback)
+        break
+      case 'button':
+      case 'input':
+        if (/^(submit|image)$/i.test(this.type || '')) {
+          callback = event => {
+            const forms = require('./PseudoEvent').getParentNodesFromAttribute('tagName', 'form', this)
+            if (forms) {
+              forms[0].submit()
+            }
+          }
+          super.setDefaultEvent('click', callback)
+        }
+    }
+    return callback
+  }
+
+  /**
+   *
    * @param {PseudoNode|PseudoElement} childElement
    * @returns {PseudoNode}
    */
   appendChild (childElement) {
     super.appendChild(childElement)
-    // if (/^(button|input)$/i.test(childElement.tagName) && (childElement.type || '').toLowerCase() === 'submit') {
-    //   const forms = require('./PseudoEvent').getParentNodesFromAttribute('tagName', 'form', childElement)
-    //   childElement.addEventListener('click', () => forms[0].submit())
-    // }
+    childElement.applyDefaultEvent()
     return childElement
   }
 
