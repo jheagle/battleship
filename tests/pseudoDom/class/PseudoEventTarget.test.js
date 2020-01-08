@@ -2,6 +2,6 @@ const PseudoEventTarget = require('../../../src/js/jDom/pseudoDom/class/PseudoEv
 
 let testEventTarget = new PseudoEventTarget()
 
-it('event target has listeners', () => {
+test('event target has listeners', () => {
   expect(testEventTarget.listeners).toStrictEqual([])
 })

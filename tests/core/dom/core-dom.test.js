@@ -22,7 +22,7 @@ const coolFunc = () => 'hello'
 // getTopParentItem
 // noConflict
 // registerListener
-it('can register a listener', () => {
+test('can register a listener', () => {
   expect(jDomCoreDom.registerListener(coolFunc).coolFunc).toBe(coolFunc)
 })
 

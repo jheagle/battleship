@@ -5,32 +5,6 @@
  */
 'use strict'
 
-class NodeList {
-  constructor (values = []) {
-    this.innerArray = values
-  }
-
-  get length () {
-    return this.innerArray.length
-  }
-
-  forEach (callback) {
-    for (let item of this.innerArray) {
-      callback(item)
-    }
-    // return this.innerArray.forEach(callback)
-  }
-
-  [Symbol.iterator] () {
-    let index = -1
-    let inner = this.innerArray
-
-    return {
-      next: () => ({value: inner[++index], done: !(index in inner)})
-    }
-  }
-}
-
 /**
  * Simulate the behaviour of the Node Class when there is no DOM available.
  * @author Joshua Heagle <joshuaheagle@gmail.com>

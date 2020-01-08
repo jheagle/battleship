@@ -4,7 +4,7 @@ const jDomLayout = require('../../src/js/game/layout.js')
 // boards
 // finalScore
 // mainMenu
-it('successfully rendered with parent of body', () => {
+test('successfully rendered with parent of body', () => {
   expect(jDomCoreDom.renderHTML(jDomLayout.mainMenu()).parentItem.tagName).toBe('body')
 })
 

@@ -18,7 +18,7 @@ const p2 = jDomObjectsMatrix.point(2, 3, 4)
 // getHighAbsoluteCoordAxis
 // getInBetween
 // getPointsLine
-it('returns four points', () => {
+test('returns four points', () => {
   expect(jDomCoreMatrix.getPointsLine(p1, p2).length).toBe(4)
 })
 
