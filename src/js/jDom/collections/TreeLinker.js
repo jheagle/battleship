@@ -8,11 +8,28 @@
 const Linker = require('./Linker')
 
 class TreeLinker extends Linker {
-  constructor (LinkerParams = {}, {children = null, parent = null} = {}) {
-    super(LinkerParams)
+  /**
+   *
+   * @param data
+   * @param prev
+   * @param next
+   * @param children
+   * @param parent
+   * @param linkerClass
+   */
+  constructor ({data = null, prev = null, next = null, children = null, parent = null} = {}, linkerClass = TreeLinker) {
+    super({data, prev, next}, linkerClass)
     this.parent = parent
-    this.children = children
-      ? children.map(child => new TreeLinker(Object.assign({}, child, {parent: this})))
+    this.children = this.childrenFromArray(children, linkerClass)
+  }
+
+  childrenFromArray (children = null, linkerClass = TreeLinker) {
+    return children !== null
+      ? Linker.fromArray.apply(this, [
+          children.map(child => Object.assign({}, child, {parent: this})),
+          linkerClass
+        ]
+      )
       : null
   }
 }

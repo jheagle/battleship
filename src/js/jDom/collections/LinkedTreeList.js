@@ -9,8 +9,8 @@ const LinkedList = require('./LinkedList')
 const TreeLinker = require('./TreeLinker')
 
 class LinkedTreeList extends LinkedList {
-  constructor (values = [[]], linkerClass = TreeLinker) {
-    super(values, linkerClass)
+  constructor (linkerClass = TreeLinker, listClass = LinkedTreeList) {
+    super(linkerClass, listClass)
   }
 }
 

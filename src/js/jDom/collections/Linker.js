@@ -14,8 +14,10 @@ class Linker {
    * @param data
    * @param prev
    * @param next
+   * @param linkerClass
    */
-  constructor ({data = null, prev = null, next = null} = {}) {
+  constructor ({data = null, prev = null, next = null} = {}, linkerClass = Linker) {
+    this.linkerClass = linkerClass
     this.data = data
     this.prev = prev
     this.next = next
@@ -27,13 +29,16 @@ class Linker {
    * @returns {Linker}
    */
   after (node) {
-    if (typeof node !== 'object') {
-      node = new Linker({data: node})
+    if (!node.linkerClass) {
+      if (typeof node !== 'object') {
+        node = {data: node}
+      }
+      node = new this.linkerClass(node)
     }
     node.next = this.next
     node.prev = this
     this.next = node
-    if (node.next){
+    if (node.next) {
       node.next.prev = node
     }
     return node
@@ -45,13 +50,16 @@ class Linker {
    * @returns {Linker}
    */
   before (node) {
-    if (typeof node !== 'object') {
-      node = new Linker({data: node})
+    if (!node.linkerClass) {
+      if (typeof node !== 'object') {
+        node = {data: node}
+      }
+      node = new this.linkerClass(node)
     }
     node.prev = this.prev
     node.next = this
     this.prev = node
-    if (node.prev){
+    if (node.prev) {
       node.prev.next = node
     }
     return node
@@ -61,17 +69,18 @@ class Linker {
 /**
  *
  * @param values
+ * @param linkerClass
  * @returns {Linker}
  */
-Linker.fromArray = (values = []) => values.reduce(
+Linker.fromArray = (values = [], linkerClass = Linker) => values.reduce(
   (list, element) => {
     if (list === null) {
       if (typeof element !== 'object') {
         element = {data: element}
       }
-      return new Linker(Object.assign({}, element, {prev: list}))
+      return new linkerClass(Object.assign({}, element, {prev: list}))
     }
-    return list.after(element)
+    return Linker.prototype.after.apply(list, [element])
   },
   null
 )

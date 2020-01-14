@@ -14,9 +14,11 @@ class LinkedList {
   /**
    *
    * @param linkerClass
+   * @param listClass
    */
-  constructor (linkerClass = Linker) {
+  constructor (linkerClass = Linker, listClass = LinkedList) {
     this.linkerClass = linkerClass
+    this.listClass = listClass
     this.innerList = new this.linkerClass()
   }
 
@@ -142,11 +144,12 @@ class LinkedList {
  *
  * @param values
  * @param linkerClass
+ * @param listClass
  * @returns {LinkedList}
  */
-LinkedList.fromArray = (values = [], linkerClass = Linker) => {
-  const list = new LinkedList(linkerClass)
-  list.innerList = list.linkerClass.fromArray(values)
+LinkedList.fromArray = (values = [], linkerClass = Linker, listClass = LinkedList) => {
+  const list = new listClass(linkerClass)
+  list.innerList = list.linkerClass.fromArray(values, linkerClass)
   return list
 }
 
