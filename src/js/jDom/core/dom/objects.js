@@ -235,7 +235,7 @@
    * @returns {module:jDom/core/dom/objects.DomItemRoot|module:jDom/core/dom/objects.DomItem}
    */
   jDomObjects.documentDomItem = (listeners = [], rootItem = initRoot(initChildren(), listeners)) => {
-    rootItem.children = rootItem.children.map(child => jDomObjects.createDomItem(child, {parentItem: rootItem}))
+    rootItem.children = rootItem.children.map(child => jDomObjects.createDomItem(child, { parentItem: rootItem }))
     Object.assign(rootItem.head, rootItem.children[0])
     Object.assign(rootItem.body, rootItem.children[1])
     return jDomObjects.createDomItem(rootItem)
@@ -257,5 +257,5 @@
     }
     exports = Object.assign(exports, jDomObjects)
   }
-}).call(this || window || base || {})
+}).call(this || window || {})
 // Use the external context to assign this, which will be Window if rendered via browser

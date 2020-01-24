@@ -4,7 +4,7 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -175,7 +175,7 @@
    * @param view
    * @returns {{name: string, status: number, parts: Array}}
    */
-  const buildShip = (shipInfo, line, matrix, view = false) => jDomCore.mergeObjects(gamePieces.ship(shipInfo.name), {parts: line.map(p => gameActions.setShip(matrix, p, view))})
+  const buildShip = (shipInfo, line, matrix, view = false) => jDomCore.mergeObjects(gamePieces.ship(shipInfo.name), { parts: line.map(p => gameActions.setShip(matrix, p, view)) })
 
   /**
    *
@@ -225,11 +225,11 @@
    * @returns {Array}
    */
   const defaultFleet = jDomCore.curry(generateRandomFleet)([
-    {name: 'Aircraft Carrier', size: 5},
-    {name: 'Battleship', size: 4},
-    {name: 'Submarine', size: 3},
-    {name: 'Cruiser', size: 3},
-    {name: 'Destroyer', size: 2}
+    { name: 'Aircraft Carrier', size: 5 },
+    { name: 'Battleship', size: 4 },
+    { name: 'Submarine', size: 3 },
+    { name: 'Cruiser', size: 3 },
+    { name: 'Destroyer', size: 2 }
   ])
 
   /**
@@ -246,7 +246,7 @@
     if (humans < 1 && robots < 1) {
       return players
     }
-    let player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
+    const player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans <= 0
     player.board = jDomMatrixCore.bindPointData(jDomMatrixObjects.square({
       x: [
@@ -255,7 +255,7 @@
       matrixProps: [
         {
           eventListeners: {
-            click: {listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false}
+            click: { listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }
           }
         }
       ]
@@ -276,18 +276,18 @@
    * @returns {boolean}
    */
   gameStart.beginRound = (e, mainForm) => {
-    if (e.eventPhase !== 2){
+    if (e.eventPhase !== 2) {
       return false
     }
     console.log('beginRound', e.eventPhase, e.type)
     e.preventDefault()
-    let parent = jDomCoreDom.getTopParentItem(mainForm)
+    const parent = jDomCoreDom.getTopParentItem(mainForm)
     let humans = parseInt(jDomCoreDom.getChildrenByName('human-players', mainForm)[0].element.value)
     let robots = parseInt(jDomCoreDom.getChildrenByName('robot-players', mainForm)[0].element.value)
     if (humans < 0 || humans > 100 || robots < 0 || robots > 100) {
       return false
     }
-    let firstGoesFirst = jDomCoreDom.getChildrenByName('first-go-first', mainForm)[0].element.checked
+    const firstGoesFirst = jDomCoreDom.getChildrenByName('first-go-first', mainForm)[0].element.checked
     humans = humans < 0 ? 0 : humans
     if (humans === 0) {
       robots = robots < 2 ? 2 : robots
@@ -296,8 +296,8 @@
       robots = robots < 1 ? 1 : robots
     }
     jDomCoreDom.removeChild(jDomCoreDom.getChildrenByClass('main-menu', parent.body)[0], parent.body)
-    let players = jDomCoreDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
-    let firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[jDomCore.randomInteger(players.length)])
+    const players = jDomCoreDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
+    const firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[jDomCore.randomInteger(players.length)])
     if (firstAttacker.isRobot) {
       gameActions.computerAttack(firstAttacker, players)
     }
@@ -334,4 +334,4 @@
     }
     exports = Object.assign(exports, gameStart)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || {}) // Use the external context to assign this, which will be Window if rendered via browser

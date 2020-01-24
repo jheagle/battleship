@@ -334,7 +334,7 @@
    */
   jDomCoreDom.registerListener = (listener, name = listener.name, parent = jDomObjects.documentItem) => Object.assign(
     parent.eventListeners,
-    {[name]: listener}
+    { [name]: listener }
   )
 
   /**
@@ -348,8 +348,8 @@
    */
   jDomCoreDom.registerListeners = (listeners, parent = jDomObjects.documentItem) => jDomCore.mergeObjects(
     parent,
-    {eventListeners: parent.eventListeners},
-    {eventListeners: listeners}
+    { eventListeners: parent.eventListeners },
+    { eventListeners: listeners }
   )
 
   /**
@@ -376,7 +376,7 @@
       listenerOptions.supportsOptions = true
       try {
         // If it is possible to use OptionsObject, then set our flag to true
-        window.addEventListener('test', null, {capture: false, once: false, passive: false})
+        window.addEventListener('test', null, { capture: false, once: false, passive: false })
       } catch (err) {
         // When using an OptionsObjects fails, it is only possible to pass the boolean UseCapture as the option
         listenerOptions.supportsOptions = false
@@ -401,9 +401,9 @@
     if (elem.addEventListener) {
       // Latest support is provided fro addEventListener with the options parameter varying slightly
       elem.addEventListener(trigger, fn, listenerOptions(options))
-    } else if (elem['attachEvent']) {
+    } else if (elem.attachEvent) {
       // Older browsers, especially Internet Explorer
-      elem['attachEvent'](`on${trigger}`, fn)
+      elem.attachEvent(`on${trigger}`, fn)
     } else {
       // General support for adding a new function onto the element which can be called to trigger the function
       elem[`on${trigger}`] = fn
@@ -568,8 +568,8 @@
   jDomCoreDom.getParentsFromAttribute = (attr, value, item = jDomObjects.documentItem.body) =>
     Object.keys(item.parentItem).length
       ? (item.parentItem.attributes[attr] || item[attr] || false) === value
-      ? jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem).concat([item.parentItem])
-      : jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem)
+        ? jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem).concat([item.parentItem])
+        : jDomCoreDom.getParentsFromAttribute(attr, value, item.parentItem)
       : []
 
   /**
@@ -625,7 +625,7 @@
         domItem.eventListeners,
         prop => jDomCore.mergeObjects(
           prop,
-          {listenerFunc: jDomCoreDom.retrieveListener(prop.listenerFunc, jDomCoreDom.getTopParentItem(parent))}
+          { listenerFunc: jDomCoreDom.retrieveListener(prop.listenerFunc, jDomCoreDom.getTopParentItem(parent)) }
         )
       ),
       domItem
@@ -644,5 +644,5 @@
     }
     exports = Object.assign(exports, jDomCoreDom)
   }
-}).call(this || window || base || {})
+}).call(this || window || {})
 // Use the external context to assign this, which will be Window if rendered via browser

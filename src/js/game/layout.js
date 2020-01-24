@@ -4,7 +4,7 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -207,7 +207,7 @@
           value: 'Restart'
         },
         eventListeners: {
-          click: {listenerFunc: 'restart', listenerArgs: {}, listenerOptions: false}
+          click: { listenerFunc: 'restart', listenerArgs: {}, listenerOptions: false }
         }
       }
     ]
@@ -222,4 +222,4 @@
     }
     exports = Object.assign(exports, gameLayout)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || {}) // Use the external context to assign this, which will be Window if rendered via browser

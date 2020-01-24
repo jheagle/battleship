@@ -1,6 +1,6 @@
 const PseudoEvent = require('../../../src/js/jDom/pseudoDom/class/PseudoEvent')
 
-let testEvent = new PseudoEvent('click')
+const testEvent = new PseudoEvent('click')
 
 test('event has type', () => {
   expect(testEvent.type).toBe('click')
@@ -8,19 +8,19 @@ test('event has type', () => {
 
 test('event has bubbles', () => {
   expect(testEvent.bubbles).toBe(true)
-  let nonBubblesEvent = new PseudoEvent('click', {bubbles: false})
+  const nonBubblesEvent = new PseudoEvent('click', { bubbles: false })
   expect(nonBubblesEvent.bubbles).toBe(false)
 })
 
 test('event has cancelable', () => {
   expect(testEvent.cancelable).toBe(true)
-  let nonCancelableEvent = new PseudoEvent('click', {cancelable: false})
+  const nonCancelableEvent = new PseudoEvent('click', { cancelable: false })
   expect(nonCancelableEvent.cancelable).toBe(false)
 })
 
 test('event has composed', () => {
   expect(testEvent.composed).toBe(true)
-  let nonComposedEvent = new PseudoEvent('click', {composed: false})
+  const nonComposedEvent = new PseudoEvent('click', { composed: false })
   expect(nonComposedEvent.composed).toBe(false)
 })
 

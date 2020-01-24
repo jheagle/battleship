@@ -2,9 +2,9 @@ const Linker = require('../../src/js/jDom/collections/Linker')
 
 test('Linker can store data and pointer to next and previous linkers', () => {
   const arrayData = ['one', 'two', 'three']
-  const linkerHead = new Linker({data: arrayData[0]})
-  linkerHead.next = new Linker({data: arrayData[1], prev: linkerHead})
-  const linkerTail = linkerHead.next.next = new Linker({data: arrayData[2], prev: linkerHead.next})
+  const linkerHead = new Linker({ data: arrayData[0] })
+  linkerHead.next = new Linker({ data: arrayData[1], prev: linkerHead })
+  const linkerTail = linkerHead.next.next = new Linker({ data: arrayData[2], prev: linkerHead.next })
   expect(linkerHead.data).toBe(arrayData[0])
   expect(linkerHead.next.data).toBe(arrayData[1])
   expect(linkerHead.next.next.data).toBe(arrayData[2])
@@ -33,9 +33,9 @@ test('Linkers can be generated from an array', () => {
 
 test('Linkers can assign next with after helper', () => {
   const arrayData = ['one', 'two', 'three']
-  const linkerHead = new Linker({data: arrayData[0]})
+  const linkerHead = new Linker({ data: arrayData[0] })
   const linkerTail = linkerHead.after(arrayData[2])
-  const linkerMiddle = linkerHead.after(new Linker({data: arrayData[1]}))
+  const linkerMiddle = linkerHead.after(new Linker({ data: arrayData[1] }))
   expect(linkerHead.data).toBe(arrayData[0])
   expect(linkerHead.prev).toBeNull()
   expect(linkerHead.next).toBe(linkerMiddle)
@@ -49,9 +49,9 @@ test('Linkers can assign next with after helper', () => {
 
 test('Linkers can assign prev with before helper', () => {
   const arrayData = ['one', 'two', 'three']
-  const linkerTail = new Linker({data: arrayData[2]})
+  const linkerTail = new Linker({ data: arrayData[2] })
   const linkerHead = linkerTail.before(arrayData[0])
-  const linkerMiddle = linkerTail.before(new Linker({data: arrayData[1]}))
+  const linkerMiddle = linkerTail.before(new Linker({ data: arrayData[1] }))
   expect(linkerTail.data).toBe(arrayData[2])
   expect(linkerTail.prev).toBe(linkerMiddle)
   expect(linkerTail.next).toBeNull()

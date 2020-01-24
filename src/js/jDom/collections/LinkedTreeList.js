@@ -14,4 +14,17 @@ class LinkedTreeList extends LinkedList {
   }
 }
 
+/**
+ *
+ * @param values
+ * @param linkerClass
+ * @param listClass
+ * @returns {LinkedList}
+ */
+LinkedTreeList.fromArray = (values = [], linkerClass = TreeLinker, listClass = LinkedTreeList) => {
+  const list = new listClass(linkerClass)
+  list.innerList = list.linkerClass.fromArray(values, linkerClass)
+  return list
+}
+
 module.exports = LinkedTreeList

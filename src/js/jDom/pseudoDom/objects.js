@@ -8,7 +8,7 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -79,7 +79,7 @@
      */
     const Node = root.Node || new jDomPseudoDom.PseudoNode()
     if (typeof window.Node === 'undefined') {
-      window['Node'] = Node
+      window.Node = Node
     }
 
     /**
@@ -88,7 +88,7 @@
      */
     const Element = root.Element || new jDomPseudoDom.PseudoElement()
     if (typeof window.Element === 'undefined') {
-      window['Element'] = Element
+      window.Element = Element
     }
 
     /**
@@ -97,7 +97,7 @@
      */
     const HTMLElement = root.HTMLElement || new jDomPseudoDom.PseudoHTMLElement()
     if (typeof window.HTMLElement === 'undefined') {
-      window['HTMLElement'] = HTMLElement
+      window.HTMLElement = HTMLElement
     }
 
     /**
@@ -121,4 +121,4 @@
     }
     exports = Object.assign(exports, jDomPseudoDom)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || {}) // Use the external context to assign this, which will be Window if rendered via browser

@@ -4,7 +4,7 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -191,7 +191,7 @@
   /**
    *
    */
-  const setViewShip = jDomCore.curry(update3dCell)(jDomCore.mergeObjects(gamePieces.shipTile(), {attributes: {style: {backgroundColor: '#777'}}}))
+  const setViewShip = jDomCore.curry(update3dCell)(jDomCore.mergeObjects(gamePieces.shipTile(), { attributes: { style: { backgroundColor: '#777' } } }))
 
   /**
    *
@@ -301,7 +301,7 @@
    * @returns {*}
    */
   const findNextAttacker = (attacker, players, attackerIndex) => {
-    let nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex]
+    const nextAttacker = (players.length > 1 && attackerIndex >= players.length - 1) ? players[0] : players[++attackerIndex]
     return nextAttacker.status > 0 ? nextAttacker : findNextAttacker(attacker, players, attackerIndex) // Only use players with a positive status
   }
 
@@ -329,7 +329,7 @@
     if (players.length < 2) {
       return jDomCore.queueTimeout(() => endGame(players[0]), 200)
     }
-    let nextAttacker = getNextAttacker(attacker, players, hitShip)
+    const nextAttacker = getNextAttacker(attacker, players, hitShip)
     if (nextAttacker.isRobot) {
       jDomCore.queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
     }
@@ -345,13 +345,13 @@
   gameActions.attackFleet = (target) => {
     gameActions.attackFleet.isLocked = gameActions.attackFleet.isLocked || false
     let player = jDomCoreDom.getParentsByClass('player', target)[0]
-    let players = jDomCoreDom.getParentsByClass('boards', target)[0].children
+    const players = jDomCoreDom.getParentsByClass('boards', target)[0].children
     // Player cannot attack themselves (current attacker) or if they have bad status
     if (player.status <= 0 || player.attacker || gameActions.attackFleet.isLocked) {
       return players
     }
     // Update cell to hit
-    let hitCell = setHit(player.board, target.point.x, target.point.y, target.point.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
+    const hitCell = setHit(player.board, target.point.x, target.point.y, target.point.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
     let hitShip = false
     let sunkShip = 0
     if (hitCell.hasShip) {
@@ -359,7 +359,7 @@
       // Update all ship status and player status by checking all ships / parts
       player.shipFleet.map((ship) => {
         // Get all healthy ships
-        let healthy = ship.parts.filter((part) => {
+        const healthy = ship.parts.filter((part) => {
           if (jDomMatrixCore.areEqualPoints(part.point, target.point)) {
             hitShip = ship
           }
@@ -398,7 +398,7 @@
    */
   const selectTargetPlayer = (players) => {
     // Get a list of all players with broken ships or with lowest status.
-    let victims = gameUtils.getBrokenShipsPlayers(players).length ? gameUtils.getBrokenShipsPlayers(players) : gameUtils.getLowStatusItems(players)
+    const victims = gameUtils.getBrokenShipsPlayers(players).length ? gameUtils.getBrokenShipsPlayers(players) : gameUtils.getLowStatusItems(players)
     // If more than one possible victim, select a random target, otherwise return the lowest status player.
     return victims.length === 1 ? victims[0] : victims[jDomCore.randomInteger(victims.length)]
   }
@@ -410,29 +410,29 @@
    */
   const selectTargetCoordinate = (victim) => {
     // Try to get broken ships
-    let brokenShips = gameUtils.getBrokenItems(victim.shipFleet)
+    const brokenShips = gameUtils.getBrokenItems(victim.shipFleet)
     let availTargets = []
     if (brokenShips.length) {
       // If there are broken ships, target those first, select the most broken ships (more than one damaged part)
-      let moreBrokenShips = brokenShips.filter(ship => gameUtils.numDamagedParts(ship.parts.length, ship.status) > 1)
+      const moreBrokenShips = brokenShips.filter(ship => gameUtils.numDamagedParts(ship.parts.length, ship.status) > 1)
       // Of the broken ships, attack the lowest status ship
-      let targetShip = gameUtils.getALowStatusItem(moreBrokenShips.length ? moreBrokenShips : brokenShips)
+      const targetShip = gameUtils.getALowStatusItem(moreBrokenShips.length ? moreBrokenShips : brokenShips)
       // Get all of the parts which have been hit
-      let hitParts = targetShip.parts.filter(part => gameUtils.checkIfHitCell(part.point, victim.board))
+      const hitParts = targetShip.parts.filter(part => gameUtils.checkIfHitCell(part.point, victim.board))
       if (moreBrokenShips.length) {
         // If there are more broken ships, attack the parts between hit points first.
         for (let i = 0; i < hitParts.length; ++i) {
-          let targetPoints = jDomMatrixCore.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
+          const targetPoints = jDomMatrixCore.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
           if (targetPoints.false.length) {
             displayTargets(targetPoints.false, targetPoints.false[0], victim)
             return jDomMatrixCore.getDomItemFromPoint(targetPoints.false[0], victim.board)
           }
         }
         // If there are no points between, attack the outer points first.
-        let pntDiff = jDomMatrixCore.pointDifference(hitParts[0].point, hitParts[1].point)
-        let dirPnts = (pntDiff.x > 0 ? [jDomMatrixObjects.point(-1, 0, 0), jDomMatrixObjects.point(1, 0, 0)] : [jDomMatrixObjects.point(0, -1, 0), jDomMatrixObjects.point(0, 1, 0)]).map((p, i) => jDomMatrixCore.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => jDomMatrixCore.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
+        const pntDiff = jDomMatrixCore.pointDifference(hitParts[0].point, hitParts[1].point)
+        const dirPnts = (pntDiff.x > 0 ? [jDomMatrixObjects.point(-1, 0, 0), jDomMatrixObjects.point(1, 0, 0)] : [jDomMatrixObjects.point(0, -1, 0), jDomMatrixObjects.point(0, 1, 0)]).map((p, i) => jDomMatrixCore.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => jDomMatrixCore.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
         // Check outer points which are valid and not hit.
-        let target = dirPnts.reduce((a, b) => gameUtils.checkIfHitCell(a, victim.board) ? b : a)
+        const target = dirPnts.reduce((a, b) => gameUtils.checkIfHitCell(a, victim.board) ? b : a)
         if (target) {
           displayTargets(dirPnts, target, victim)
           return jDomMatrixCore.getDomItemFromPoint(target, victim.board)
@@ -441,8 +441,8 @@
       // If there is only one hit part, then set that as the lastTarget for detecting adjacent parts.
       availTargets = gameUtils.getAdjEdgeNonHitCells(hitParts[0].point, victim.board)
     }
-    let finalTargets = availTargets.length ? availTargets : gameUtils.getAllNonHitCells(victim.board).filter(t => gameUtils.filterAdjacentPoints(t))
-    let target = finalTargets[jDomCore.randomInteger(finalTargets.length)]
+    const finalTargets = availTargets.length ? availTargets : gameUtils.getAllNonHitCells(victim.board).filter(t => gameUtils.filterAdjacentPoints(t))
+    const target = finalTargets[jDomCore.randomInteger(finalTargets.length)]
     displayTargets(finalTargets, target, victim)
 
     // If there are available targets then hit one at random
@@ -458,8 +458,8 @@
    */
   const displayTargets = (targets, target, victim) => {
     return [
-      jDomCore.queueTimeout(resetTargets, 0, {targets: targets, victim: victim}),
-      jDomCore.queueTimeout(resetTargets, 200, {targets: targets, target: target, victim: victim})
+      jDomCore.queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
+      jDomCore.queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
     ]
   }
 
@@ -469,11 +469,11 @@
    * @returns {void|Array|Object|*}
    */
   const resetTargets = data => {
-    data.victim.board.children.map(l => jDomCoreDom.updateElement(jDomCore.mergeObjects(l, {attributes: {style: {borderColor: '#333'}}})))
-    data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), {attributes: {style: {borderColor: '#333'}}})))
+    data.victim.board.children.map(l => jDomCoreDom.updateElement(jDomCore.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
+    data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
     if (!data.target) {
-      data.victim.board.children.map(l => jDomCoreDom.updateElement(jDomCore.mergeObjects(l, {attributes: {style: {borderColor: 'yellow'}}})))
-      data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), {attributes: {style: {borderColor: 'yellow'}}})))
+      data.victim.board.children.map(l => jDomCoreDom.updateElement(jDomCore.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
+      data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
     }
     return data
   }
@@ -485,7 +485,7 @@
    * @param players
    */
   gameActions.computerAttack = (player, players) => {
-    let victim = selectTargetPlayer(players.filter(p => !p.attacker))
+    const victim = selectTargetPlayer(players.filter(p => !p.attacker))
     gameActions.attackFleet.isLocked = false
     return gameActions.attackFleet(selectTargetCoordinate(victim))
   }
@@ -499,4 +499,4 @@
     }
     exports = Object.assign(exports, gameActions)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || {}) // Use the external context to assign this, which will be Window if rendered via browser

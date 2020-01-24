@@ -57,7 +57,7 @@ const sampleArrayData = () => ([
 
 test('TreeLinker prev and next values contain correct data', () => {
   const arrayData = ['one', 'two', 'three']
-  const linkerTail = new TreeLinker.fromArray(arrayData, TreeLinker)
+  const linkerTail = TreeLinker.fromArray(arrayData, TreeLinker)
   const linkerHead = linkerTail.prev.prev
   expect(linkerHead.data).toBe(arrayData[0])
   expect(linkerHead.next.data).toBe(arrayData[1])
@@ -71,7 +71,7 @@ test('TreeLinker prev and next values contain correct data', () => {
 
 test('TreeLinker prev and next data set from objects', () => {
   const arrayData = sampleArrayData()
-  const linkerTail = new TreeLinker.fromArray(arrayData, TreeLinker)
+  const linkerTail = TreeLinker.fromArray(arrayData, TreeLinker)
   const linkerHead = linkerTail.prev.prev
   expect(linkerHead.data).toBe(arrayData[0].data)
   expect(linkerHead.next.data).toBe(arrayData[1].data)
@@ -85,7 +85,7 @@ test('TreeLinker prev and next data set from objects', () => {
 
 test('TreeLinker has children set for each of the Linkers', () => {
   const arrayData = sampleArrayData()
-  const linkerTail = new TreeLinker.fromArray(arrayData, TreeLinker)
+  const linkerTail = TreeLinker.fromArray(arrayData, TreeLinker)
   expect(linkerTail.children.next).toBeNull()
   expect(linkerTail.children.data).toBe(arrayData[2].children[2].data)
   expect(linkerTail.children.parent).toBe(linkerTail)
@@ -113,7 +113,7 @@ test('TreeLinker has children set for each of the Linkers', () => {
 
 test('TreeLinker children can have children', () => {
   const arrayData = sampleArrayData()
-  const linkerTail = new TreeLinker.fromArray(arrayData, TreeLinker)
+  const linkerTail = TreeLinker.fromArray(arrayData, TreeLinker)
   const linkerHead = linkerTail.prev.prev
   expect(linkerHead.children.next).toBeNull()
   expect(linkerHead.children.data).toBe(arrayData[0].children[0].data)
@@ -137,7 +137,7 @@ test('TreeLinker children can have children', () => {
 
 test('TreeLinker children can be added from array', () => {
   const arrayData = ['one', 'two', 'three']
-  const linkerTail = new TreeLinker.fromArray(arrayData, TreeLinker)
+  const linkerTail = TreeLinker.fromArray(arrayData, TreeLinker)
   const arrayChildData = sampleArrayData()
   const linkerHead = linkerTail.prev.prev
   linkerHead.children = linkerHead.childrenFromArray(arrayChildData[0].children)

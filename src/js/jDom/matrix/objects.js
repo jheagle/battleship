@@ -8,7 +8,7 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -184,9 +184,9 @@
    * @returns {module:jDom/matrix/objects.Matrix}
    */
   jDomMatrixObjects.matrix = (
-    x = {coordinate: 0, props: []},
-    y = {coordinate: 0, props: []},
-    z = {coordinate: 1, props: []},
+    x = { coordinate: 0, props: [] },
+    y = { coordinate: 0, props: [] },
+    z = { coordinate: 1, props: [] },
     matrixProps = []
   ) => jDomObjects.createDomItem({
     tagName: 'div',
@@ -227,10 +227,10 @@
    * @param {number} size - Used to define height and width as equal values (depth is set to 1)
    * @returns {module:jDom/matrix/objects.Matrix}
    */
-  jDomMatrixObjects.square = ({x = [], y = [], z = [], matrixProps = []} = {}, size) => jDomMatrixObjects.matrix(
-    {coordinate: size, props: x},
-    {coordinate: size, props: y},
-    {coordinate: 1, props: z},
+  jDomMatrixObjects.square = ({ x = [], y = [], z = [], matrixProps = [] } = {}, size) => jDomMatrixObjects.matrix(
+    { coordinate: size, props: x },
+    { coordinate: size, props: y },
+    { coordinate: 1, props: z },
     matrixProps
   )
 
@@ -245,10 +245,10 @@
    * @param {number} size - Used to define height, width, and depth as equal values
    * @returns {module:jDom/matrix/objects.Matrix}
    */
-  jDomMatrixObjects.cube = ({x = [], y = [], z = [], matrixProps = []} = {}, size) => jDomMatrixObjects.matrix(
-    {coordinate: size, props: x},
-    {coordinate: size, props: y},
-    {coordinate: size, props: z},
+  jDomMatrixObjects.cube = ({ x = [], y = [], z = [], matrixProps = [] } = {}, size) => jDomMatrixObjects.matrix(
+    { coordinate: size, props: x },
+    { coordinate: size, props: y },
+    { coordinate: size, props: z },
     matrixProps
   )
 
@@ -261,5 +261,5 @@
     }
     exports = Object.assign(exports, jDomMatrixObjects)
   }
-}).call(this || window || base || {})
+}).call(this || window || {})
 // Use the external context to assign this, which will be Window if rendered via browser

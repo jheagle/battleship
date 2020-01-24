@@ -4,12 +4,11 @@
  * @version 1.0.0
  */
 'use strict'
-const base = this || window || {}
 ;(function () {
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -451,7 +450,7 @@ const base = this || window || {}
     // Do not run more than one queued item at a time
     jDomCore.queueTimeout.isRunning = jDomCore.queueTimeout.isRunning || false
     // Construct an object which will store the queued function data
-    const queueItem = {id: 0, func: fn, timeout: time, args: args, result: 0}
+    const queueItem = { id: 0, func: fn, timeout: time, args: args, result: 0 }
     if (fn) {
       // When the function is valid, append it to the end of the queue
       jDomCore.queueTimeout.queue.push(queueItem)
@@ -488,5 +487,5 @@ const base = this || window || {}
     }
     exports = Object.assign(exports, jDomCore)
   }
-}).call(this || window || base || {})
+}).call(this || window || {})
 // Use the external context to assign this, which will be Window if rendered via browser

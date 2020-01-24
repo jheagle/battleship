@@ -23,7 +23,7 @@ test('LinkedList can iterate with for-of loop', () => {
   const arrayData = ['one', 'two', 'three', 'four']
   const someList = LinkedList.fromArray(arrayData)
   let count = -1
-  for (let item of someList) {
+  for (const item of someList) {
     expect(item).toBe(arrayData[++count])
   }
   expect(count).toBe(3)
@@ -61,7 +61,8 @@ test('LinkedList can fetch an element by negative index from end', () => {
 
 test('LinkedList can prepend to the array', () => {
   const someList = LinkedList.fromArray(['one', 'two', 'three', 'four'])
-  const newNode = new someList.linkerClass({data: 'zero'})
+  const LinkerClass = someList.linkerClass
+  const newNode = new LinkerClass({ data: 'zero' })
   let head = someList.prepend(newNode)
   expect(someList.length).toBe(5)
   expect(someList.first.data).toBe('zero')
@@ -74,7 +75,8 @@ test('LinkedList can prepend to the array', () => {
 
 test('LinkedList can append to the array', () => {
   const someList = LinkedList.fromArray(['one', 'two', 'three', 'four'])
-  const newNode = new someList.linkerClass({data: 'five'})
+  const LinkerClass = someList.linkerClass
+  const newNode = new LinkerClass({ data: 'five' })
   let head = someList.append(newNode)
   expect(someList.length).toBe(5)
   expect(someList.last.data).toBe('five')

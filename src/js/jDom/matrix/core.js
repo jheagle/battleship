@@ -8,7 +8,7 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -80,9 +80,9 @@
    */
   jDomMatrixCore.bindPointData = (item, pnt = jDomMatrixObjects.point(0, 0, 0)) => jDomCore.mergeObjects(
     item,
-    item.point ? {point: jDomCore.cloneObject(pnt)} : {
+    item.point ? { point: jDomCore.cloneObject(pnt) } : {
       children: item.children.map(
-        (el, i) => jDomMatrixCore.bindPointData(el, Object.assign(pnt, {[el.axis]: i}))
+        (el, i) => jDomMatrixCore.bindPointData(el, Object.assign(pnt, { [el.axis]: i }))
       )
     }
   )
@@ -146,7 +146,7 @@
    */
   const pointAndCoordinateToDirection = (pnt, highestCoordinate) => (
     axis => axis !== false
-      ? jDomCore.mergeObjects(jDomMatrixObjects.point(0, 0, 0), {[`${axis}`]: highestCoordinate > 0 ? 1 : -1})
+      ? jDomCore.mergeObjects(jDomMatrixObjects.point(0, 0, 0), { [`${axis}`]: highestCoordinate > 0 ? 1 : -1 })
       : jDomMatrixObjects.point(0, 0, 0)
   )(jDomMatrixCore.getFirstAxisOfCoordinate(pnt, highestCoordinate))
 
@@ -251,7 +251,7 @@
     jDomMatrixCore.getPointsLine(start, end).filter(
       (prop, i, line) => ((i !== 0 && i !== line.length - 1) || inclusive)
     ).reduce(
-      (newPoints, next) => jDomCore.mergeObjects(newPoints, {[`${func(next, matrix)}`]: [next]}), {
+      (newPoints, next) => jDomCore.mergeObjects(newPoints, { [`${func(next, matrix)}`]: [next] }), {
         true: [],
         false: []
       }
@@ -295,10 +295,10 @@
    * @param {module:jDom/matrix/objects.Matrix} matrix - The matrix that contains valid points.
    * @returns {boolean}
    */
-  jDomMatrixCore.checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z]
-    && !!matrix.children[pnt.z].children[pnt.y]
-    && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x]
-    && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
+  jDomMatrixCore.checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] &&
+    !!matrix.children[pnt.z].children[pnt.y] &&
+    !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] &&
+    !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
 
   /**
    * Retrieve the DomItem associated with the provided point
@@ -395,4 +395,4 @@
     }
     exports = Object.assign(exports, jDomMatrixCore)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || {}) // Use the external context to assign this, which will be Window if rendered via browser

@@ -32,7 +32,7 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -203,7 +203,7 @@
    * @param view
    * @returns {{name: string, status: number, parts: Array}}
    */
-  const buildShip = (shipInfo, line, matrix, view = false) => jDomCore.mergeObjects(gamePieces.ship(shipInfo.name), {parts: line.map(p => gameActions.setShip(matrix, p, view))})
+  const buildShip = (shipInfo, line, matrix, view = false) => jDomCore.mergeObjects(gamePieces.ship(shipInfo.name), { parts: line.map(p => gameActions.setShip(matrix, p, view)) })
 
   /**
    *
@@ -253,11 +253,11 @@
    * @returns {Array}
    */
   const defaultFleet = jDomCore.curry(generateRandomFleet)([
-    {name: 'Aircraft Carrier', size: 5},
-    {name: 'Battleship', size: 4},
-    {name: 'Submarine', size: 3},
-    {name: 'Cruiser', size: 3},
-    {name: 'Destroyer', size: 2}
+    { name: 'Aircraft Carrier', size: 5 },
+    { name: 'Battleship', size: 4 },
+    { name: 'Submarine', size: 3 },
+    { name: 'Cruiser', size: 3 },
+    { name: 'Destroyer', size: 2 }
   ])
 
   /**
@@ -274,7 +274,7 @@
     if (humans &lt; 1 &amp;&amp; robots &lt; 1) {
       return players
     }
-    let player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
+    const player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans &lt;= 0
     player.board = jDomMatrixCore.bindPointData(jDomMatrixObjects.square({
       x: [
@@ -283,7 +283,7 @@
       matrixProps: [
         {
           eventListeners: {
-            click: {listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false}
+            click: { listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }
           }
         }
       ]
@@ -304,18 +304,18 @@
    * @returns {boolean}
    */
   gameStart.beginRound = (e, mainForm) => {
-    if (e.eventPhase !== 2){
+    if (e.eventPhase !== 2) {
       return false
     }
     console.log('beginRound', e.eventPhase, e.type)
     e.preventDefault()
-    let parent = jDomCoreDom.getTopParentItem(mainForm)
+    const parent = jDomCoreDom.getTopParentItem(mainForm)
     let humans = parseInt(jDomCoreDom.getChildrenByName('human-players', mainForm)[0].element.value)
     let robots = parseInt(jDomCoreDom.getChildrenByName('robot-players', mainForm)[0].element.value)
     if (humans &lt; 0 || humans > 100 || robots &lt; 0 || robots > 100) {
       return false
     }
-    let firstGoesFirst = jDomCoreDom.getChildrenByName('first-go-first', mainForm)[0].element.checked
+    const firstGoesFirst = jDomCoreDom.getChildrenByName('first-go-first', mainForm)[0].element.checked
     humans = humans &lt; 0 ? 0 : humans
     if (humans === 0) {
       robots = robots &lt; 2 ? 2 : robots
@@ -324,8 +324,8 @@
       robots = robots &lt; 1 ? 1 : robots
     }
     jDomCoreDom.removeChild(jDomCoreDom.getChildrenByClass('main-menu', parent.body)[0], parent.body)
-    let players = jDomCoreDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
-    let firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[jDomCore.randomInteger(players.length)])
+    const players = jDomCoreDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
+    const firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[jDomCore.randomInteger(players.length)])
     if (firstAttacker.isRobot) {
       gameActions.computerAttack(firstAttacker, players)
     }
@@ -362,7 +362,7 @@
     }
     exports = Object.assign(exports, gameStart)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || {}) // Use the external context to assign this, which will be Window if rendered via browser
 </code></pre>
         </article>
     </section>
@@ -373,13 +373,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game_actions.html">game/actions</a></li><li><a href="module-game_functions.html">game/functions</a></li><li><a href="module-game_layout.html">game/layout</a></li><li><a href="module-game_main.html">game/main</a></li><li><a href="module-game_pieces.html">game/pieces</a></li><li><a href="module-game_setup.html">game/setup</a></li><li><a href="module-jDom_core_core.html">jDom/core/core</a></li><li><a href="module-jDom_core_dom_core.html">jDom/core/dom/core</a></li><li><a href="module-jDom_core_dom_objects.html">jDom/core/dom/objects</a></li><li><a href="module-jDom_matrix_core.html">jDom/matrix/core</a></li><li><a href="module-jDom_matrix_objects.html">jDom/matrix/objects</a></li><li><a href="module-jDom_pseudoDom_objects.html">jDom/pseudoDom/objects</a></li></ul><h3>Classes</h3><ul><li><a href="LinkedList.html">LinkedList</a></li><li><a href="Linker.html">Linker</a></li><li><a href="PseudoElement.html">PseudoElement</a></li><li><a href="PseudoEvent.html">PseudoEvent</a></li><li><a href="PseudoEventListener.html">PseudoEventListener</a></li><li><a href="PseudoEventTarget.html">PseudoEventTarget</a></li><li><a href="PseudoHTMLDocument.html">PseudoHTMLDocument</a></li><li><a href="global.html#PseudoHTMLElement">PseudoHTMLElement</a></li><li><a href="PseudoNode.html">PseudoNode</a></li><li><a href="TreeLinker.html">TreeLinker</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Sun Jan 05 2020 21:07:39 GMT-0500 (Eastern Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Thu Jan 23 2020 22:25:49 GMT-0500 (Eastern Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

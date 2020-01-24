@@ -3,7 +3,7 @@
   /**
    * Store a reference to this scope which will be Window if rendered via browser
    */
-  let root = this || {}
+  const root = this || {}
 
   /**
    * Store reference to any pre-existing module of the same name
@@ -108,6 +108,7 @@
   }))
   console.log('Document Item: ', documentItem)
 
+  // eslint-disable-next-line no-undef
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module
     const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
@@ -124,5 +125,4 @@
     }
     exports = Object.assign(exports, gameMain)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via
-                                      // browser
+}).call(this || window || {}) // Use the external context to assign this, which will be Window if rendered via browser

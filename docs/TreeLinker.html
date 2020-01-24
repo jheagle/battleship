@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: jDom/pseudoDom/objects</title>
+    <title>JSDoc: Class: TreeLinker</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: jDom/pseudoDom/objects</h1>
+    <h1 class="page-title">Class: TreeLinker</h1>
 
     
 
@@ -28,8 +28,7 @@
 
 <header>
     
-        
-            
+        <h2><span class="attribs"><span class="type-signature"></span></span>TreeLinker<span class="signature">(data, prev, next, children, parent, linkerClass)</span><span class="type-signature"></span></h2>
         
     
 </header>
@@ -38,130 +37,16 @@
     <div class="container-overview">
     
         
-            <div class="description">All methods exported from this module are encapsulated within jDomPseudoDom.</div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
 
     
 
     
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-author">Author:</dt>
-    <dd class="tag-author">
-        <ul>
-            <li><a href="mailto:joshuaheagle@gmail.com">Joshua Heagle</a></li>
-        </ul>
-    </dd>
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_objects.js.html">jDom/pseudoDom/objects.js</a>, <a href="jDom_pseudoDom_objects.js.html#line19">line 19</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~generate"><span class="type-signature">(inner) </span>generate<span class="signature">(context)</span><span class="type-signature"> &rarr; {Window|<a href="PseudoEventTarget.html">PseudoEventTarget</a>}</span></h4>
+    <h4 class="name" id="TreeLinker"><span class="type-signature"></span>new TreeLinker<span class="signature">(data, prev, next, children, parent, linkerClass)</span><span class="type-signature"></span></h4>
     
 
     
 
 
-
-<div class="description">
-    Construct the Pseudo Dom to provide access to Dom objects which are otherwise not available outside of the browser
-context.
-</div>
 
 
 
@@ -196,15 +81,100 @@ context.
 
         <tr>
             
-                <td class="name"><code>context</code></td>
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
             
-                
-<span class="param-type">Object</span>
+            </td>
 
+            
 
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prev</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>next</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>children</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parent</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>linkerClass</code></td>
+            
+
+            <td class="type">
             
             </td>
 
@@ -253,7 +223,7 @@ context.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_objects.js.html">jDom/pseudoDom/objects.js</a>, <a href="jDom_pseudoDom_objects.js.html#line63">line 63</a>
+        <a href="jDom_collections_TreeLinker.js.html">jDom/collections/TreeLinker.js</a>, <a href="jDom_collections_TreeLinker.js.html#line20">line 20</a>
     </li></ul></dd>
     
 
@@ -278,62 +248,13 @@ context.
 
 
 
-<h5>Returns:</h5>
-
-        
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Window</span>
-|
-
-<span class="param-type"><a href="PseudoEventTarget.html">PseudoEventTarget</a></span>
 
 
-    </dd>
-</dl>
 
     
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~noConflict"><span class="type-signature">(inner) </span>noConflict<span class="signature">()</span><span class="type-signature"> &rarr; {jDomPseudoDom}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Return a reference to this library while preserving the original same-named library
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
+    </div>
 
     
 
@@ -349,68 +270,6 @@ context.
 
     
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="jDom_pseudoDom_objects.js.html">jDom/pseudoDom/objects.js</a>, <a href="jDom_pseudoDom_objects.js.html#line28">line 28</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">jDomPseudoDom</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
     
 
     
