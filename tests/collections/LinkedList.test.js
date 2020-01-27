@@ -61,7 +61,7 @@ test('LinkedList can fetch an element by negative index from end', () => {
 
 test('LinkedList can prepend to the array', () => {
   const someList = LinkedList.fromArray(['one', 'two', 'three', 'four'])
-  const LinkerClass = someList.linkerClass
+  const LinkerClass = someList.LinkerClass
   const newNode = new LinkerClass({ data: 'zero' })
   let head = someList.prepend(newNode)
   expect(someList.length).toBe(5)
@@ -75,7 +75,7 @@ test('LinkedList can prepend to the array', () => {
 
 test('LinkedList can append to the array', () => {
   const someList = LinkedList.fromArray(['one', 'two', 'three', 'four'])
-  const LinkerClass = someList.linkerClass
+  const LinkerClass = someList.LinkerClass
   const newNode = new LinkerClass({ data: 'five' })
   let head = someList.append(newNode)
   expect(someList.length).toBe(5)

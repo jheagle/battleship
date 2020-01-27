@@ -13,13 +13,13 @@ const Linker = require('./Linker')
 class LinkedList {
   /**
    *
-   * @param linkerClass
-   * @param listClass
+   * @param LinkerClass
+   * @param ListClass
    */
-  constructor (linkerClass = Linker, listClass = LinkedList) {
-    this.linkerClass = linkerClass
-    this.listClass = listClass
-    this.innerList = new this.linkerClass()
+  constructor (LinkerClass = Linker, ListClass = LinkedList) {
+    this.LinkerClass = LinkerClass
+    this.ListClass = ListClass
+    this.innerList = new this.LinkerClass()
   }
 
   /**
@@ -97,7 +97,7 @@ class LinkedList {
     }
     let current = this.last
     let currentIndex = this.length
-    let calculatedIndex = this.length + index
+    const calculatedIndex = this.length + index
     if (calculatedIndex < 0) {
       return null
     }
@@ -113,14 +113,9 @@ class LinkedList {
    */
   forEach (callback) {
     let current = this.first
-    let next = current.next
-    if (current) {
+    while (current !== null) {
       callback(current.data)
-    }
-    while (next !== null) {
-      current = next
-      next = current.next
-      callback(current.data)
+      current = current.next
     }
   }
 
@@ -132,7 +127,7 @@ class LinkedList {
     let inner = this.first
     return {
       next: () => {
-        let result = {value: (inner ? inner.data : null), done: !inner}
+        const result = { value: (inner ? inner.data : null), done: !inner }
         inner = (inner ? inner.next : null)
         return result
       }
@@ -143,13 +138,13 @@ class LinkedList {
 /**
  *
  * @param values
- * @param linkerClass
- * @param listClass
+ * @param LinkerClass
+ * @param ListClass
  * @returns {LinkedList}
  */
-LinkedList.fromArray = (values = [], linkerClass = Linker, listClass = LinkedList) => {
-  const list = new listClass(linkerClass)
-  list.innerList = list.linkerClass.fromArray(values, linkerClass)
+LinkedList.fromArray = (values = [], LinkerClass = Linker, ListClass = LinkedList) => {
+  const list = new ListClass(LinkerClass)
+  list.innerList = list.LinkerClass.fromArray(values, LinkerClass)
   return list
 }
 

@@ -15,21 +15,20 @@ class TreeLinker extends Linker {
    * @param next
    * @param children
    * @param parent
-   * @param linkerClass
+   * @param LinkerClass
    */
-  constructor ({data = null, prev = null, next = null, children = null, parent = null} = {}, linkerClass = TreeLinker) {
-    super({data, prev, next}, linkerClass)
+  constructor ({ data = null, prev = null, next = null, children = null, parent = null } = {}, LinkerClass = TreeLinker) {
+    super({ data, prev, next }, LinkerClass)
     this.parent = parent
-    this.children = this.childrenFromArray(children, linkerClass)
+    this.children = this.childrenFromArray(children, LinkerClass)
   }
 
-  childrenFromArray (children = null, linkerClass = TreeLinker) {
+  childrenFromArray (children = null, LinkerClass = TreeLinker) {
     return children !== null
       ? Linker.fromArray.apply(this, [
-          children.map(child => Object.assign({}, child, {parent: this})),
-          linkerClass
-        ]
-      )
+        children.map(child => Object.assign({}, child, { parent: this })),
+        LinkerClass
+      ])
       : null
   }
 }
