@@ -28,18 +28,18 @@ class PseudoHTMLElement extends require('./PseudoElement') {
    * @returns {PseudoHTMLElement}
    * @constructor
    */
-  constructor ({tagName = '', parent = {}, children = []} = {}) {
+  constructor ({ tagName = '', parent = {}, children = [] } = {}) {
     super({
       tagName,
       attributes: [
-        {name: 'hidden', value: false},
-        {name: 'offsetHeight', value: 0},
-        {name: 'offsetLeft', value: 0},
-        {name: 'offsetParent', value: null},
-        {name: 'offsetTop', value: 0},
-        {name: 'offsetWidth', value: 0},
-        {name: 'style', value: {}},
-        {name: 'title', value: ''}
+        { name: 'hidden', value: false },
+        { name: 'offsetHeight', value: 0 },
+        { name: 'offsetLeft', value: 0 },
+        { name: 'offsetParent', value: null },
+        { name: 'offsetTop', value: 0 },
+        { name: 'offsetWidth', value: 0 },
+        { name: 'style', value: {} },
+        { name: 'title', value: '' }
       ],
       parent,
       children

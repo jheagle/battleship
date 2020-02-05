@@ -27,6 +27,23 @@ class LinkedTreeList extends LinkedList {
       parent.children = this
     }
   }
+
+  get rootParent () {
+    let current = this.first
+    let parent = this.first.parent
+    while (parent !== null) {
+      current = parent
+      parent = current.parent
+    }
+    return current
+  }
+
+  setChildren (item, children = null) {
+    if (Array.from(this).indexOf(item) < 0) {
+      console.error('item is not a child of this')
+    }
+    children.parent = item
+  }
 }
 
 /**

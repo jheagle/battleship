@@ -5,144 +5,162 @@
  */
 'use strict'
 
-/**
- * Simulate the behaviour of the Node Class when there is no DOM available.
- * @author Joshua Heagle <joshuaheagle@gmail.com>
- * @class
- * @augments PseudoEventTarget
- * @property {string} name
- * @property {Object} parent
- * @property {Array} children
- * @property {function} appendChild
- * @property {function} removeChild
- */
-class PseudoNode extends require('./PseudoEventTarget') {
-  /**
-   *
-   * @param {PseudoNode|Object} [parent={}]
-   * @param {Array} [children=[]]
-   * @constructor
-   */
-  constructor ({parent = {}, children = []} = {}) {
-    super()
-    this.parent = parent
-    this.children = children
-    this.nodeValue = ''
-    this.textContext = ''
-  }
+const TreeLinker = require('../../collections/TreeLinker')
+const PseudoEventTarget = require('./PseudoEventTarget')
 
-  get baseURI () {
-    return window.location || '/'
-  }
+class NodeFactory extends TreeLinker {}
+module.exports.generateNode = () => {
+  NodeFactory.fromArray = (values = [], LinkerClass = NodeFactory) => values.reduce(
+    (list, element) => {
+      if (typeof element !== 'object') {
+        element = { data: element }
+      }
+      let newList = false
+      if (list === null) {
+        newList = true
+        list = new LinkerClass(Object.assign({}, element, { prev: list }))
+      }
+      /**
+       * Simulate the behaviour of the Node Class when there is no DOM available.
+       * @author Joshua Heagle <joshuaheagle@gmail.com>
+       * @class
+       * @augments PseudoEventTarget
+       * @property {string} name
+       * @property {function} appendChild
+       * @property {function} removeChild
+       */
+      class PseudoNode extends PseudoEventTarget {
+        /**
+         *
+         * @constructor
+         */
+        constructor () {
+          super()
+          this.nodeValue = element.data
+          this.textContext = ''
+        }
 
-  get childNodes () {
-    return this.children || [] // NodeList
-  }
+        get baseURI () {
+          return window.location || '/'
+        }
 
-  get firstChild () {
-    return this.children[0] || null
-  }
+        get childNodes () {
+          return list.children
+        }
 
-  get isConnected () {
-    return Object.keys(this.parent).length > 0
-  }
+        get firstChild () {
+          return list.children.first.data
+        }
 
-  get lastChild () {
-    return this.children[this.children.length - 1] || null
-  }
+        get isConnected () {
+          return list.parent !== null
+        }
 
-  get nextSibling () {
-    const siblings = this.parent.children
-    return siblings[siblings.indexOf(this) + 1] || null
-  }
+        get lastChild () {
+          return list.children.last.data
+        }
 
-  get nodeName () {
-    return this.name || ''
-  }
+        get nextSibling () {
+          return list.next.data
+        }
 
-  get nodeType () {
-    let typeName = 'DEFAULT_NODE'
-    const nodeTypes = [
-      'DEFAULT_NODE',
-      'ELEMENT_NODE',
-      'ATTRIBUTE_NODE',
-      'TEXT_NODE',
-      'CDATA_SECTION_NODE',
-      'ENTITY_REFERENCE_NODE',
-      'ENTITY_NODE',
-      'PROCESSING_INSTRUCTION_NODE',
-      'COMMENT_NODE',
-      'DOCUMENT_NODE',
-      'DOCUMENT_TYPE_NODE',
-      'DOCUMENT_FRAGMENT_NODE',
-      'NOTATION_NODE'
-    ]
-    return nodeTypes.indexOf(typeName)
-  }
+        get nodeName () {
+          return this.name || ''
+        }
 
-  get ownerDocument () {
-    const allParents = getParentNodes(this) || []
-    return allParents[allParents.length - 1]
-  }
+        get nodeType () {
+          const typeName = 'DEFAULT_NODE'
+          const nodeTypes = [
+            'DEFAULT_NODE',
+            'ELEMENT_NODE',
+            'ATTRIBUTE_NODE',
+            'TEXT_NODE',
+            'CDATA_SECTION_NODE',
+            'ENTITY_REFERENCE_NODE',
+            'ENTITY_NODE',
+            'PROCESSING_INSTRUCTION_NODE',
+            'COMMENT_NODE',
+            'DOCUMENT_NODE',
+            'DOCUMENT_TYPE_NODE',
+            'DOCUMENT_FRAGMENT_NODE',
+            'NOTATION_NODE'
+          ]
+          return nodeTypes.indexOf(typeName)
+        }
 
-  get parentNode () {
-    return this.parent
-  }
+        get ownerDocument () {
+          return list.rootParent
+        }
 
-  get parentElement () {
-    return this.parent.nodeType === 1 ? this.parent : null
-  }
+        get parentNode () {
+          return list.parent
+        }
 
-  get previousSibling () {
-    const siblings = this.parent.children
-    return siblings[siblings.indexOf(this) - 1] || null
-  }
+        get parentElement () {
+          return list.parent.nodeType === 1 ? list.parent : null
+        }
 
-  /**
-   *
-   * @param {PseudoNode} childNode
-   * @returns {PseudoNode}
-   */
-  appendChild (childNode) {
-    childNode.parent = this
-    this.children = this.children.concat([childNode])
-    return childNode
-  }
+        get previousSibling () {
+          return list.prev
+        }
 
-  cloneNode () {}
+        /**
+         *
+         * @param {PseudoNode} childNode
+         * @returns {PseudoNode}
+         */
+        appendChild (childNode) {
+          list.after(list, [childNode])
+          return childNode
+        }
 
-  compareDocumentPosition () {}
+        cloneNode () {}
 
-  contains () {}
+        compareDocumentPosition () {}
 
-  getRootNode () {}
+        contains () {}
 
-  hasChildNodes () {}
+        getRootNode () {
+          return list.rootParent
+        }
 
-  insertBefore () {}
+        hasChildNodes () {}
 
-  isDefaultNamespace () {}
+        insertBefore () {}
 
-  isEqualNode () {}
+        isDefaultNamespace () {}
 
-  isSameNode () {}
+        isEqualNode () {}
 
-  lookupPrefix () {}
+        isSameNode () {}
 
-  lookupNamespaceURI () {}
+        lookupPrefix () {}
 
-  normalize () {}
+        lookupNamespaceURI () {}
 
-  /**
-   *
-   * @param {PseudoNode} childElement
-   * @returns {PseudoNode}
-   */
-  removeChild (childElement) {
-    return this.children.splice(this.children.indexOf(childElement), 1)[0]
-  }
+        normalize () {}
 
-  replaceChild () {}
+        /**
+         *
+         * @param {PseudoNode} childElement
+         * @returns {PseudoNode}
+         */
+        removeChild (childElement) {
+          return this.children.splice(this.children.indexOf(childElement), 1)[0]
+        }
+
+        replaceChild () {}
+      }
+      module.exports.PseudoNode = PseudoNode
+      if (newList) {
+        list.data = new PseudoNode()
+        return list
+      }
+      element.data = new PseudoNode()
+      return TreeLinker.prototype.after.apply(list, [element])
+    },
+    null
+  )
+  return NodeFactory
 }
-
-module.exports = PseudoNode
+module.exports.NodeFactory = NodeFactory

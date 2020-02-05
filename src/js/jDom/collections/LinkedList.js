@@ -114,7 +114,7 @@ class LinkedList {
   forEach (callback) {
     let current = this.first
     while (current !== null) {
-      callback(current.data)
+      callback(current)
       current = current.next
     }
   }
@@ -124,11 +124,11 @@ class LinkedList {
    * @returns {{next: (function(): {value: (*|null), done: boolean})}}
    */
   [Symbol.iterator] () {
-    let inner = this.first
+    let current = this.first
     return {
       next: () => {
-        const result = { value: (inner ? inner.data : null), done: !inner }
-        inner = (inner ? inner.next : null)
+        const result = { value: current, done: !current }
+        current = (current ? current.next : null)
         return result
       }
     }

@@ -4,7 +4,7 @@ test('LinkedList can store elements', () => {
   const arrayData = ['one', 'two', 'three', 'four']
   const someList = LinkedList.fromArray(arrayData)
   expect(someList.length).toBe(4)
-  expect(Array.from(someList)).toEqual(arrayData)
+  expect(Array.from(someList).map(item => item.data)).toEqual(arrayData)
 })
 
 test('LinkedList first contains the head value', () => {
@@ -24,7 +24,7 @@ test('LinkedList can iterate with for-of loop', () => {
   const someList = LinkedList.fromArray(arrayData)
   let count = -1
   for (const item of someList) {
-    expect(item).toBe(arrayData[++count])
+    expect(item.data).toBe(arrayData[++count])
   }
   expect(count).toBe(3)
 })
@@ -34,7 +34,7 @@ test('LinkedList can iterate with forEach loop', () => {
   const someList = LinkedList.fromArray(arrayData)
   let count = -1
   someList.forEach(item => {
-    expect(item).toBe(arrayData[++count])
+    expect(item.data).toBe(arrayData[++count])
   })
   expect(count).toBe(3)
 })

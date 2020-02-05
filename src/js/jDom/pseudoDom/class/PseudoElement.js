@@ -29,21 +29,21 @@ class PseudoElement extends require('./PseudoNode') {
    * @param {Array} [children=[]]
    * @constructor
    */
-  constructor ({tagName = '', attributes = [], parent = {}, children = []} = {}) {
-    super({parent, children})
+  constructor ({ tagName = '', attributes = [], parent = {}, children = [] } = {}) {
+    super({ parent, children })
     this.tagName = tagName
     this.attributes = attributes.concat([
-      {name: 'className', value: ''},
-      {name: 'id', value: ''},
-      {name: 'innerHTML', value: ''}
+      { name: 'className', value: '' },
+      { name: 'id', value: '' },
+      { name: 'innerHTML', value: '' }
     ])
 
     /**
      * Map all incoming attributes to the attributes array and attach each as a property of this element
      */
-    this.attributes.map(({name, value}) => {
+    this.attributes.map(({ name, value }) => {
       this[name] = value
-      return {name, value}
+      return { name, value }
     })
 
     // this.classList = new DOMSettableTokenList(this.className)
@@ -104,7 +104,7 @@ class PseudoElement extends require('./PseudoNode') {
   setAttribute (attributeName, attributeValue) {
     if (this.hasAttribute(attributeName) || this[attributeName] === 'undefined') {
       this[attributeName] = attributeValue
-      this.attributes.push({name: attributeName, value: attributeValue})
+      this.attributes.push({ name: attributeName, value: attributeValue })
     }
     return undefined
   }

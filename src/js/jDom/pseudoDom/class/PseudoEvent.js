@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 'use strict'
-const {curry} = require('../../core/core.js')
+const { curry } = require('../../core/core.js')
 
 /**
  * Simulate the behaviour of the Event Class when there is no DOM available.
@@ -45,7 +45,7 @@ class PseudoEvent {
    * @returns {PseudoEvent}
    * @constructor
    */
-  constructor (typeArg = '', {bubbles = true, cancelable = true, composed = true} = {}) {
+  constructor (typeArg = '', { bubbles = true, cancelable = true, composed = true } = {}) {
     let properties = {
       bubbles,
       cancelable,
@@ -63,15 +63,15 @@ class PseudoEvent {
     this.setReadOnlyProperties = (updateProps = {}) => {
       properties = Object.assign({}, properties, updateProps)
       this.getReadOnlyProperties = (
-        (properties) => (name = '') => this.hasOwnProperty(name) ? properties[name] : properties
+        (properties) => (name = '') => properties[name]
       )(properties)
       return properties
     }
     this.setReadOnlyProperties()
     Object.keys(properties).map(propKey => Object.defineProperty(this, propKey, {
-        enumerable: true,
-        get: () => this.getReadOnlyProperties(propKey)
-      })
+      enumerable: true,
+      get: () => this.getReadOnlyProperties(propKey)
+    })
     )
   }
 
@@ -98,7 +98,9 @@ class PseudoEvent {
    * @param {PseudoNode} node
    * @returns {Array.<PseudoNode>}
    */
-  static getParentNodes = curry(PseudoEvent.getParentNodesFromAttribute)('', false)
+  static getParentNodes () {
+    return curry(PseudoEvent.getParentNodesFromAttribute)('', false)()
+  }
 
   /**
    * Return an array of targets that will have the event executed open them. The order is based on the eventPhase
@@ -124,7 +126,7 @@ class PseudoEvent {
    * @returns {null}
    */
   preventDefault () {
-    this.setReadOnlyProperties({defaultPrevented: true})
+    this.setReadOnlyProperties({ defaultPrevented: true })
     return null
   }
 
@@ -136,7 +138,7 @@ class PseudoEvent {
    * @returns {null}
    */
   stopImmediatePropagation () {
-    this.setReadOnlyProperties({immediatePropagationStopped: true})
+    this.setReadOnlyProperties({ immediatePropagationStopped: true })
     return null
   }
 
@@ -146,7 +148,7 @@ class PseudoEvent {
    * @returns {null}
    */
   stopPropagation () {
-    this.setReadOnlyProperties({propagationStopped: true})
+    this.setReadOnlyProperties({ propagationStopped: true })
     return null
   }
 }
@@ -161,9 +163,9 @@ class PseudoEvent {
   Object.defineProperty(PseudoEvent, phase, {
     value: key,
     writable: false,
-    static: {get: () => key}
+    static: { get: () => key }
   })
-  return Object.assign({}, phases, {[`${phase}`]: key})
+  return Object.assign({}, phases, { [`${phase}`]: key })
 }, {})
 
 module.exports = PseudoEvent

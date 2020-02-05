@@ -17,7 +17,7 @@ const PseudoEvent = require('./PseudoEvent')
  */
 const PseudoEventListener = {
   eventType: '',
-  eventOptions: {capture: false, once: false, passive: false},
+  eventOptions: { capture: false, once: false, passive: false },
   isDefault: false,
   /**
    * @method
@@ -87,9 +87,9 @@ const PseudoEventListener = {
    * @returns {boolean|*}
    */
   nonPassiveHalt (event) {
-    return !this.eventOptions.passive && (this.skipDefault(event)
-      || event.immediatePropagationStopped
-      || this.stopPropagation(event)
+    return !this.eventOptions.passive && (this.skipDefault(event) ||
+      event.immediatePropagationStopped ||
+      this.stopPropagation(event)
     )
   },
   /**

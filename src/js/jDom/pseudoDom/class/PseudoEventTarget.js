@@ -100,7 +100,7 @@ class PseudoEventTarget {
      * type PseudoEvent
      */
     const event = new PseudoEvent(eventType)
-    event.setReadOnlyProperties({target: this})
+    event.setReadOnlyProperties({ target: this })
     console.log('startEvents', event.type, event.target)
     ;[
       PseudoEvent.CAPTURING_PHASE,
@@ -109,9 +109,9 @@ class PseudoEventTarget {
     ].forEach(phase => {
       let continueEvents = null
       if (phase === PseudoEvent.AT_TARGET || !event.propagationStopped) {
-        event.setReadOnlyProperties({eventPhase: phase})
+        event.setReadOnlyProperties({ eventPhase: phase })
         event.composedPath().forEach(target => {
-          event.setReadOnlyProperties({currentTarget: target})
+          event.setReadOnlyProperties({ currentTarget: target })
           continueEvents = event.currentTarget.runEvents(event)
         })
       }
@@ -129,7 +129,7 @@ class PseudoEventTarget {
    * @param {boolean|Object} [useCapture=false]
    */
   addEventListener (type, callback, useCapture = false) {
-    let options = {capture: false, once: false, passive: false}
+    let options = { capture: false, once: false, passive: false }
     if (typeof useCapture === 'object') {
       options = Object.keys(useCapture).reduce((opts, opt) => {
         opts[opt] = useCapture[opt]
@@ -155,9 +155,9 @@ class PseudoEventTarget {
     ])
     const groupedDefault = this.listeners[type].reduce(
       (listeners, listener) => listener.isDefault
-        ? Object.assign({}, listeners, {default: listeners.default.concat([listener])})
-        : Object.assign({}, listeners, {explicit: listeners.explicit.concat([listener])}),
-      {explicit: [], default: []}
+        ? Object.assign({}, listeners, { default: listeners.default.concat([listener]) })
+        : Object.assign({}, listeners, { explicit: listeners.explicit.concat([listener]) }),
+      { explicit: [], default: [] }
     )
     this.listeners[type] = [].concat(groupedDefault.explicit, groupedDefault.default)
   }
@@ -187,7 +187,7 @@ class PseudoEventTarget {
    * @returns {boolean}
    */
   dispatchEvent (event, target = this) {
-    event.setReadOnlyProperties({target})
+    event.setReadOnlyProperties({ target })
     if (!(event.type in this.listeners)) {
       return true
     }

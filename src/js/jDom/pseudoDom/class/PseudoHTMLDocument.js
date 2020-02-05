@@ -28,18 +28,18 @@ class PseudoHTMLDocument extends PseudoHTMLElement {
   constructor () {
     super()
 
-    const html = new PseudoHTMLElement({tagName: 'html', parent: this})
+    const html = new PseudoHTMLElement({ tagName: 'html', parent: this })
     /**
      * Create document head element
      * @type {PseudoHTMLElement}
      */
-    this.head = new PseudoHTMLElement({tagName: 'head', parent: html})
+    this.head = new PseudoHTMLElement({ tagName: 'head', parent: html })
 
     /**
      * Create document body element
      * @type {PseudoHTMLElement}
      */
-    this.body = new PseudoHTMLElement({tagName: 'body', parent: html})
+    this.body = new PseudoHTMLElement({ tagName: 'body', parent: html })
 
     html.children = [this.head, this.body]
 
@@ -56,7 +56,7 @@ class PseudoHTMLDocument extends PseudoHTMLElement {
    * @returns {PseudoHTMLElement}
    */
   createElement (tagName = 'div') {
-    const returnElement = new PseudoHTMLElement({tagName})
+    const returnElement = new PseudoHTMLElement({ tagName })
     returnElement.parent = this
     return returnElement
   }
