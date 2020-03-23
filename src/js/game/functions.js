@@ -41,7 +41,7 @@
    */
   if (typeof jDomMatrixCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomMatrixCore = require('../jDom/matrix/core.js')
+      jDomMatrixCore = require('../vendor/json-dom').default.default.matrixCore
     } else {
       console.error('functions.js requires jDom/matrix/core')
     }

@@ -32,18 +32,18 @@
 
   /**
    * Verify availability of jDomCore
-   * @typedef {*|module:jDom/core/dom/objects} jDomObjects
+   * @typedef {*|module:jDom/core/dom/objects} jDomObjectsDom
    */
-  let jDomObjects = root.jDomObjects
+  let jDomObjectsDom = root.jDomObjectsDom
 
   /**
-   * If jDomObjects remains undefined, attempt to retrieve it as a module
+   * If jDomObjectsDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomObjects === 'undefined') {
+  if (typeof jDomObjectsDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('../jDom/core/dom/objects.js')
+      jDomObjectsDom = require('../vendor/json-dom').default.default.domObjects
     } else {
-      console.error('layout.js requires jDomObjects')
+      console.error('layout.js requires jDomObjectsDom')
     }
   }
 
@@ -52,7 +52,7 @@
    * @function mainMenu
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.mainMenu = () => jDomObjects.createDomItem({
+  gameLayout.mainMenu = () => jDomObjectsDom.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'main-menu'
@@ -167,7 +167,7 @@
    * @param {Array} [players=[]]
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.boards = (players = []) => jDomObjects.createDomItem({
+  gameLayout.boards = (players = []) => jDomObjectsDom.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'boards'
@@ -181,7 +181,7 @@
    * @param {Array} players
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.finalScore = (players) => jDomObjects.createDomItem({
+  gameLayout.finalScore = (players) => jDomObjectsDom.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'final-scores'

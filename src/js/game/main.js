@@ -30,17 +30,17 @@
   }
 
   /**
-   * Verify availability of jDomObjects
-   * @typedef {*|module:jDom/core/dom/objects} jDomObjects
+   * Verify availability of jDomObjectsDom
+   * @typedef {*|module:jDom/core/dom/objects} jDomObjectsDom
    */
-  let jDomObjects = root.jDomObjects
+  let jDomObjectsDom = root.jDomObjectsDom
 
   /**
-   * If jDomObjects remains undefined, attempt to retrieve it as a module
+   * If jDomObjectsDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomObjects === 'undefined') {
+  if (typeof jDomObjectsDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('../jDom/core/dom/objects.js')
+      jDomObjectsDom = require('../vendor/json-dom').domObjects
     } else {
       console.error('main.js requires jDom/core/dom/objects')
     }
@@ -57,7 +57,7 @@
    */
   if (typeof jDomCoreDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreDom = require('../jDom/core/dom/core.js')
+      jDomCoreDom = require('../vendor/json-dom').domCore
     } else {
       console.error('main.js requires jDom/core/dom/core')
     }
@@ -101,7 +101,7 @@
    * Create new private reference to the document
    * @typedef {module:jDom/core/dom/objects.documentItem} documentItem
    */
-  const documentItem = gameStart.main(jDomObjects.documentDomItem({
+  const documentItem = gameStart.main(jDomObjectsDom.documentDomItem({
     beginRound: gameStart.beginRound,
     attackListener: gameActions.attackListener,
     restart: gameStart.restart

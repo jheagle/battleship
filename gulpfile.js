@@ -1,14 +1,15 @@
-const gulp = require('gulp'),
-  browserSync = require('browser-sync').create(),
-  sass = require('gulp-sass'),
-  useref = require('gulp-useref'),
-  uglify = require('gulp-uglify-es').default,
-  gulpIf = require('gulp-if'),
-  cssnano = require('gulp-cssnano'),
-  imagemin = require('gulp-imagemin'),
-  cache = require('gulp-cache'),
-  del = require('del'),
-  babel = require('gulp-babel')
+const babel = require('gulp-babel')
+const browserSync = require('browser-sync').create()
+const cache = require('gulp-cache')
+const concat = require('gulp-concat')
+const cssnano = require('gulp-cssnano')
+const del = require('del')
+const gulp = require('gulp')
+const gulpIf = require('gulp-if')
+const imagemin = require('gulp-imagemin')
+const uglify = require('gulp-uglify-es').default
+const useref = require('gulp-useref')
+const sass = require('gulp-sass')
 
 // Development Tasks
 // -----------------
@@ -43,6 +44,15 @@ gulp.task('useref', () => gulp.src('src/*.html')
   .pipe(gulp.dest('dist'))
 )
 
+// Build vendor file
+gulp.task('vendor', () => gulp.src([
+  'node_modules/json-dom/browser/json-dom.js'
+])
+  .pipe(concat('vendor.js'))
+  .pipe(gulp.dest('src/js/vendor'))
+  .pipe(gulp.dest('dist/js/vendor'))
+)
+
 // Optimizing Images
 gulp.task('images', () =>
   gulp.src('src/img/**/*.+(png|jpg|jpeg|gif|svg)')
@@ -57,28 +67,25 @@ gulp.task('images', () =>
 gulp.task('fonts', () => gulp.src('src/fonts/**/*').pipe(gulp.dest('dist/fonts')))
 
 // Cleaning
-gulp.task('clean', (
-  async () => {
-    await del('dist')
-    cache.clearAll()
-  })
-)
+gulp.task('clean', async () => {
+  await del('dist')
+  cache.clearAll()
+})
 
-gulp.task('clean:dist', (
-  async () =>
-    await del(['dist/**/*', '!dist/img', '!dist/img/**/*'])
-))
+gulp.task('clean:dist', () => del(['dist/**/*', '!dist/img', '!dist/img/**/*']))
 
 gulp.task('default', gulp.series(
   'sass',
   'useref',
-  'browser-sync',
-  )
+  'vendor',
+  'browser-sync'
+)
 )
 
 gulp.task('build', gulp.series(
   'clean:dist',
   'sass',
   gulp.parallel('useref', 'images', 'fonts'),
-  )
+  'vendor'
+)
 )

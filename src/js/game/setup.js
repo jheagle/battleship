@@ -41,7 +41,7 @@
    */
   if (typeof jDomCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('../jDom/core/core.js')
+      jDomCore = require('../vendor/json-dom').default.default.core
     } else {
       console.error('setup.js requires jDom/core/core')
     }
@@ -58,7 +58,7 @@
    */
   if (typeof jDomCoreDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreDom = require('../jDom/core/dom/core.js')
+      jDomCoreDom = require('../vendor/json-dom').default.default.domCore
     } else {
       console.error('setup.js requires jDom/core/dom/core')
     }
@@ -75,7 +75,7 @@
    */
   if (typeof jDomMatrixCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomMatrixCore = require('../jDom/matrix/core.js')
+      jDomMatrixCore = require('../vendor/json-dom').default.default.matrixCore
     } else {
       console.error('setup.js requires jDom/matrix/core')
     }
@@ -92,7 +92,7 @@
    */
   if (typeof jDomMatrixObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomMatrixObjects = require('../jDom/matrix/objects.js')
+      jDomMatrixObjects = require('../vendor/json-dom').default.default.matrixObjects
     } else {
       console.error('setup.js requires jDom/matrix/objects')
     }

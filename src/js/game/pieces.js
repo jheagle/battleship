@@ -41,24 +41,24 @@
    */
   if (typeof jDomCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('../jDom/core/core.js')
+      jDomCore = require('../vendor/json-dom').default.default.core
     } else {
       console.error('pieces.js requires jDom/core/core')
     }
   }
 
   /**
-   * Verify availability of jDomObjects
-   * @typedef {*|module:jDom/core/dom/objects} jDomObjects
+   * Verify availability of jDomObjectsDom
+   * @typedef {*|module:jDom/core/dom/objects} jDomObjectsDom
    */
-  let jDomObjects = root.jDomObjects
+  let jDomObjectsDom = root.jDomObjectsDom
 
   /**
-   * If jDomObjects remains undefined, attempt to retrieve it as a module
+   * If jDomObjectsDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomObjects === 'undefined') {
+  if (typeof jDomObjectsDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('../jDom/core/dom/objects.js')
+      jDomObjectsDom = require('../vendor/json-dom').default.default.domObjects
     } else {
       console.error('setup.js requires jDom/core/dom/objects')
     }
@@ -75,7 +75,7 @@
    */
   if (typeof jDomMatrixObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomMatrixObjects = require('../jDom/matrix/objects.js')
+      jDomMatrixObjects = require('../vendor/json-dom').default.default.matrixObjects
     } else {
       console.error('pieces.js requires jDom/matrix/objects')
     }
@@ -85,7 +85,7 @@
    * Default properties for a tile in the battleship game.
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  const gameTile = () => jDomObjects.createDomItem({
+  const gameTile = () => jDomObjectsDom.createDomItem({
     hasShip: false,
     isHit: false
   })
