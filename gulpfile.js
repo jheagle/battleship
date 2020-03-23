@@ -46,7 +46,7 @@ gulp.task('useref', () => gulp.src('src/*.html')
 
 // Build vendor file
 gulp.task('vendor', () => gulp.src([
-  'node_modules/json-dom/browser/json-dom.js'
+  'node_modules/json-dom/browser/json-dom.min.js'
 ])
   .pipe(concat('vendor.js'))
   .pipe(gulp.dest('src/js/vendor'))
