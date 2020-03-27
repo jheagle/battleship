@@ -7,9 +7,9 @@ const del = require('del')
 const gulp = require('gulp')
 const gulpIf = require('gulp-if')
 const imagemin = require('gulp-imagemin')
+const sass = require('gulp-sass')
 const uglify = require('gulp-uglify-es').default
 const useref = require('gulp-useref')
-const sass = require('gulp-sass')
 
 // Development Tasks
 // -----------------
@@ -46,11 +46,11 @@ gulp.task('useref', () => gulp.src('src/*.html')
 
 // Build vendor file
 gulp.task('vendor', () => gulp.src([
-  'node_modules/json-dom/browser/json-dom.min.js'
+  'node_modules/json-dom/browser/json-dom.js'
 ])
   .pipe(concat('vendor.js'))
-  .pipe(gulp.dest('src/js/vendor'))
-  .pipe(gulp.dest('dist/js/vendor'))
+  .pipe(gulp.dest('src/js'))
+  .pipe(gulp.dest('dist/js'))
 )
 
 // Optimizing Images
@@ -74,18 +74,22 @@ gulp.task('clean', async () => {
 
 gulp.task('clean:dist', () => del(['dist/**/*', '!dist/img', '!dist/img/**/*']))
 
-gulp.task('default', gulp.series(
-  'sass',
-  'useref',
-  'vendor',
-  'browser-sync'
-)
+gulp.task(
+  'default',
+  gulp.series(
+    'sass',
+    'useref',
+    'vendor',
+    'browser-sync'
+  )
 )
 
-gulp.task('build', gulp.series(
-  'clean:dist',
-  'sass',
-  gulp.parallel('useref', 'images', 'fonts'),
-  'vendor'
-)
+gulp.task(
+  'build',
+  gulp.series(
+    'clean:dist',
+    'sass',
+    gulp.parallel('useref', 'images', 'fonts'),
+    'vendor'
+  )
 )

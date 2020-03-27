@@ -15,7 +15,7 @@
   /**
    * A reference to all functions to be used globally / exported
    * @typedef (Object) gamePieces
-   * @module game/pieces
+   * @module pieces
    */
   const gamePieces = {}
   root.gamePieces = gamePieces
@@ -31,53 +31,19 @@
   }
 
   /**
-   * Verify availability of jDomCore
-   * @typedef {*|module:jDom/core/core} jDomCore
+   * Verify availability of jsonDom
+   * @typedef {*|module:json-dom} jsonDom
    */
-  let jDomCore = root.jDomCore
+  let jsonDom = root.jsonDom
 
   /**
-   * If gameUtils remains undefined, attempt to retrieve it as a module
+   * If jsonDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomCore === 'undefined') {
+  if (typeof jsonDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('../vendor/json-dom').default.default.core
+      jsonDom = require('json-dom')
     } else {
-      console.error('pieces.js requires jDom/core/core')
-    }
-  }
-
-  /**
-   * Verify availability of jDomObjectsDom
-   * @typedef {*|module:jDom/core/dom/objects} jDomObjectsDom
-   */
-  let jDomObjectsDom = root.jDomObjectsDom
-
-  /**
-   * If jDomObjectsDom remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomObjectsDom === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomObjectsDom = require('../vendor/json-dom').default.default.domObjects
-    } else {
-      console.error('setup.js requires jDom/core/dom/objects')
-    }
-  }
-
-  /**
-   * Verify availability of jDomMatrixObjects
-   * @typedef {*|module:jDom/matrix/objects} jDomMatrixObjects
-   */
-  let jDomMatrixObjects = root.jDomMatrixObjects
-
-  /**
-   * If jDomMatrixObjects remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomMatrixObjects === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomMatrixObjects = require('../vendor/json-dom').default.default.matrixObjects
-    } else {
-      console.error('pieces.js requires jDom/matrix/objects')
+      console.error('pieces.js requires json-dom')
     }
   }
 
@@ -85,7 +51,7 @@
    * Default properties for a tile in the battleship game.
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  const gameTile = () => jDomObjectsDom.createDomItem({
+  const gameTile = () => jsonDom.jDomObjects.createDomItem({
     hasShip: false,
     isHit: false
   })
@@ -95,7 +61,7 @@
    * @function waterTile
    * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}, point: {}}}
    */
-  gamePieces.waterTile = () => jDomCore.mergeObjects(gameTile(), jDomMatrixObjects.tile())
+  gamePieces.waterTile = () => jsonDom.functionalHelpers.mergeObjects(gameTile(), jsonDom.jDomMatrixObjects.tile())
 
   /**
    * Set status and custom properties for tiles that have a ship
@@ -140,7 +106,7 @@
     status: 100,
     turnCnt: 0,
     attacker: false,
-    attacks: {hit: 0, miss: 0, sunk: 0},
+    attacks: { hit: 0, miss: 0, sunk: 0 },
     board: board,
     shipFleet: [],
     playerStats: {},
@@ -192,4 +158,4 @@
     }
     exports = Object.assign(exports, gamePieces)
   }
-}).call(this || window || base || {}) // Use the external context to assign this, which will be Window if rendered via browser
+}).call(this || window || {}) // Use the external context to assign this, which will be Window if rendered via browser

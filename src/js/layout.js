@@ -15,7 +15,7 @@
   /**
    * A reference to all functions to be used globally / exported
    * @typedef {Object} gameLayout
-   * @module game/layout
+   * @module layout
    */
   const gameLayout = {}
   root.gameLayout = gameLayout
@@ -31,19 +31,19 @@
   }
 
   /**
-   * Verify availability of jDomCore
-   * @typedef {*|module:jDom/core/dom/objects} jDomObjectsDom
+   * Verify availability of jsonDom
+   * @typedef {*|module:json-dom} jsonDom
    */
-  let jDomObjectsDom = root.jDomObjectsDom
+  let jsonDom = root.jsonDom
 
   /**
-   * If jDomObjectsDom remains undefined, attempt to retrieve it as a module
+   * If jsonDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomObjectsDom === 'undefined') {
+  if (typeof jsonDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjectsDom = require('../vendor/json-dom').default.default.domObjects
+      jsonDom = require('json-dom')
     } else {
-      console.error('layout.js requires jDomObjectsDom')
+      console.error('layout.js requires json-dom')
     }
   }
 
@@ -52,7 +52,7 @@
    * @function mainMenu
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.mainMenu = () => jDomObjectsDom.createDomItem({
+  gameLayout.mainMenu = () => jsonDom.jDomObjects.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'main-menu'
@@ -167,7 +167,7 @@
    * @param {Array} [players=[]]
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.boards = (players = []) => jDomObjectsDom.createDomItem({
+  gameLayout.boards = (players = []) => jsonDom.jDomObjects.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'boards'
@@ -181,7 +181,7 @@
    * @param {Array} players
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.finalScore = (players) => jDomObjectsDom.createDomItem({
+  gameLayout.finalScore = (players) => jsonDom.jDomObjects.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'final-scores'

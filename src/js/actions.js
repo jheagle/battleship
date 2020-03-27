@@ -15,7 +15,7 @@
   /**
    * All methods exported from this module are encapsulated within gameActions.
    * @typedef {Object} gameActions
-   * @module game/actions
+   * @module actions
    */
   const gameActions = {}
   root.gameActions = gameActions
@@ -31,93 +31,42 @@
   }
 
   /**
-   * Verify availability of jDomCore
-   * @typedef {*|module:jDom/core/core} jDomCore
+   * Verify availability of json-dom
+   * @typedef {*|module:json-dom} jsonDom
    */
-  let jDomCore = root.jDomCore
+  let jsonDom = root.jsonDom
 
   /**
-   * If gameUtils remains undefined, attempt to retrieve it as a module
+   * If jsonDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomCore === 'undefined') {
+  if (typeof jsonDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('../vendor/json-dom').default.default.core
+      jsonDom = require('json-dom')
     } else {
-      console.error('actions.js requires jDom/core/core')
-    }
-  }
-
-  /**
-   * Verify availability of jDomCoreDom
-   * @typedef {*|module:jDom/core/dom/core} jDomCoreDom
-   */
-  let jDomCoreDom = root.jDomCoreDom
-
-  /**
-   * If jDomCoreDom remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomCoreDom === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomCoreDom = require('../vendor/json-dom').default.default.domCore
-    } else {
-      console.error('actions.js requires jDom/core/dom/core')
-    }
-  }
-
-  /**
-   * Verify availability of jDomMatrixObjects
-   * @typedef {*|module:jDom/matrix/objects} jDomMatrixObjects
-   */
-  let jDomMatrixObjects = root.jDomMatrixObjects
-
-  /**
-   * If jDomMatrixObjects remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomMatrixObjects === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomMatrixObjects = require('../vendor/json-dom').default.default.matrixObjects
-    } else {
-      console.error('actions.js requires jDom/matrix/objects')
-    }
-  }
-
-  /**
-   * Verify availability of jDomMatrixCore
-   * @typedef {*|module:jDom/matrix/core} jDomMatrixCore
-   */
-  let jDomMatrixCore = root.jDomMatrixCore
-
-  /**
-   * If jDomCoreDom remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomMatrixCore === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomMatrixCore = require('../vendor/json-dom').default.default.matrixCore
-    } else {
-      console.error('actions.js requires jDom/matrix/core')
+      console.error('actions.js requires json-dom')
     }
   }
 
   /**
    * Verify availability of gameLayout
-   * @typedef {*|module:game/layout} gameLayout
+   * @typedef {*|module:layout} gameLayout
    */
   let gameLayout = root.gameLayout
 
   /**
-   * If jDomCoreDom remains undefined, attempt to retrieve it as a module
+   * If jsonDom.jDomCore remains undefined, attempt to retrieve it as a module
    */
   if (typeof gameLayout === 'undefined') {
     if (typeof require !== 'undefined') {
       gameLayout = require('./layout.js')
     } else {
-      console.error('actions.js requires game/layout')
+      console.error('actions.js requires layout')
     }
   }
 
   /**
    * Verify availability of gamePieces
-   * @typedef {*|module:game/pieces} gamePieces
+   * @typedef {*|module:pieces} gamePieces
    */
   let gamePieces = root.gamePieces
 
@@ -128,13 +77,13 @@
     if (typeof require !== 'undefined') {
       gamePieces = require('./pieces.js')
     } else {
-      console.error('actions.js requires game/pieces')
+      console.error('actions.js requires pieces')
     }
   }
 
   /**
    * Verify availability of gameUtils
-   * @typedef {*|module:game/functions} gameUtils
+   * @typedef {*|module:functions} gameUtils
    */
   let gameUtils = root.gameUtils
 
@@ -145,7 +94,7 @@
     if (typeof require !== 'undefined') {
       gameUtils = require('./functions.js')
     } else {
-      console.error('actions.js requires game/functions')
+      console.error('actions.js requires functions')
     }
   }
 
@@ -160,11 +109,11 @@
     // Add any other style changes to the cell
     if (isRobot) {
       gameActions.attackFleet.isLocked = true
-      jDomCore.queueTimeout(() => {
+      jsonDom.functionalHelpers.queueTimeout(() => {
         if (config.isHit) {
           config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
         }
-        config = jDomCoreDom.updateElement(config)
+        config = jsonDom.jDomCore.updateElement(config)
         gameActions.attackFleet.isLocked = false
         return config
       }, 0)
@@ -172,7 +121,7 @@
       if (config.isHit) {
         config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
       }
-      config = jDomCoreDom.updateElement(config)
+      config = jsonDom.jDomCore.updateElement(config)
     }
     return config
   }
@@ -186,22 +135,22 @@
    * @param z
    * @param isRobot
    */
-  const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(jDomCore.mergeObjectsMutable(matrix.children[z].children[y].children[x], config), isRobot)
+  const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(jsonDom.functionalHelpers.mergeObjectsMutable(matrix.children[z].children[y].children[x], config), isRobot)
 
   /**
    *
    */
-  const setViewShip = jDomCore.curry(update3dCell)(jDomCore.mergeObjects(gamePieces.shipTile(), { attributes: { style: { backgroundColor: '#777' } } }))
+  const setViewShip = jsonDom.functionalHelpers.curry(update3dCell)(jsonDom.functionalHelpers.mergeObjects(gamePieces.shipTile(), { attributes: { style: { backgroundColor: '#777' } } }))
 
   /**
    *
    */
-  const setHiddenShip = jDomCore.curry(update3dCell)(gamePieces.shipTile())
+  const setHiddenShip = jsonDom.functionalHelpers.curry(update3dCell)(gamePieces.shipTile())
 
   /**
    *
    */
-  const setHit = jDomCore.curry(update3dCell)(gamePieces.hitTile())
+  const setHit = jsonDom.functionalHelpers.curry(update3dCell)(gamePieces.hitTile())
 
   /**
    * Set a specified point to be part of a ship
@@ -219,7 +168,7 @@
    * @returns {*}
    */
   const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
-    player.playerStats = jDomCoreDom.updateElements(jDomCore.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
+    player.playerStats = jsonDom.jDomCore.updateElements(jsonDom.functionalHelpers.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
     // console.log(gamePieces.playerStats(player, status).children[0].attributes.innerHTML)
     return player
   }
@@ -247,9 +196,9 @@
       gameActions.attackFleet.isLocked = true
       if (player.attacker) {
         if (!player.isRobot) {
-          jDomCore.queueTimeout(() => {
+          jsonDom.functionalHelpers.queueTimeout(() => {
             gameActions.attackFleet.isLocked = false
-            return player.board.children.map(l => l.children.map(r => r.children.map(c => jDomCoreDom.updateElement(jDomCore.mergeObjects(c, {
+            return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.jDomCore.updateElement(jsonDom.functionalHelpers.mergeObjects(c, {
               attributes: {
                 style: {
                   width: '17px',
@@ -261,9 +210,9 @@
         }
         ++player.turnCnt
       } else {
-        jDomCore.queueTimeout(() => {
+        jsonDom.functionalHelpers.queueTimeout(() => {
           gameActions.attackFleet.isLocked = false
-          return player.board.children.map(l => l.children.map(r => r.children.map(c => jDomCoreDom.updateElement(jDomCore.mergeObjects(c, {
+          return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.jDomCore.updateElement(jsonDom.functionalHelpers.mergeObjects(c, {
             attributes: {
               style: {
                 width: '35px',
@@ -274,7 +223,7 @@
         }, 0)
       }
     }
-    const result = jDomCore.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
+    const result = jsonDom.functionalHelpers.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
     return result.result || player
   }
 
@@ -284,13 +233,13 @@
    * @returns {Array.<*>}
    */
   const endGame = (winner) => {
-    const parent = jDomCoreDom.getTopParentItem(winner)
+    const parent = jsonDom.jDomCore.getTopParentItem(winner)
     const players = winner.parentItem.children
     players.map(player => updatePlayerStats(player))
     winner = updatePlayerStats(winner, 'WINNER')
-    const finalScore = jDomCoreDom.renderHTML(gameLayout.finalScore(players), parent)
+    const finalScore = jsonDom.jDomCore.renderHTML(gameLayout.finalScore(players), parent)
     finalScore.children[0].children.map(child => child.attributes.innerHTML)
-    return [jDomCore.trace('Winner')(winner)]
+    return [jsonDom.functionalHelpers.trace('Winner')(winner)]
   }
 
   /**
@@ -327,11 +276,11 @@
     let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
     attacker = gameActions.updatePlayer(attacker, hitShip, sunkShip)
     if (players.length < 2) {
-      return jDomCore.queueTimeout(() => endGame(players[0]), 200)
+      return jsonDom.functionalHelpers.queueTimeout(() => endGame(players[0]), 200)
     }
     const nextAttacker = getNextAttacker(attacker, players, hitShip)
     if (nextAttacker.isRobot) {
-      jDomCore.queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
+      jsonDom.functionalHelpers.queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
     }
     return players
   }
@@ -344,8 +293,8 @@
    */
   gameActions.attackFleet = (target) => {
     gameActions.attackFleet.isLocked = gameActions.attackFleet.isLocked || false
-    let player = jDomCoreDom.getParentsByClass('player', target)[0]
-    const players = jDomCoreDom.getParentsByClass('boards', target)[0].children
+    let player = jsonDom.jDomCore.getParentsByClass('player', target)[0]
+    const players = jsonDom.jDomCore.getParentsByClass('boards', target)[0].children
     // Player cannot attack themselves (current attacker) or if they have bad status
     if (player.status <= 0 || player.attacker || gameActions.attackFleet.isLocked) {
       return players
@@ -360,7 +309,7 @@
       player.shipFleet.map((ship) => {
         // Get all healthy ships
         const healthy = ship.parts.filter((part) => {
-          if (jDomMatrixCore.areEqualPoints(part.point, target.point)) {
+          if (jsonDom.jDomMatrixCore.areEqualPoints(part.point, target.point)) {
             hitShip = ship
           }
           return !part.isHit
@@ -389,7 +338,7 @@
    * @param target
    * @returns {*}
    */
-  gameActions.attackListener = (e, target) => gameActions.attackFleet(jDomMatrixCore.getDomItemFromElement(e.target, target))
+  gameActions.attackListener = (e, target) => gameActions.attackFleet(jsonDom.jDomMatrixCore.getDomItemFromElement(e.target, target))
 
   /**
    * Choose which player to attack.
@@ -400,7 +349,7 @@
     // Get a list of all players with broken ships or with lowest status.
     const victims = gameUtils.getBrokenShipsPlayers(players).length ? gameUtils.getBrokenShipsPlayers(players) : gameUtils.getLowStatusItems(players)
     // If more than one possible victim, select a random target, otherwise return the lowest status player.
-    return victims.length === 1 ? victims[0] : victims[jDomCore.randomInteger(victims.length)]
+    return victims.length === 1 ? victims[0] : victims[jsonDom.functionalHelpers.randomInteger(victims.length)]
   }
 
   /**
@@ -422,31 +371,31 @@
       if (moreBrokenShips.length) {
         // If there are more broken ships, attack the parts between hit points first.
         for (let i = 0; i < hitParts.length; ++i) {
-          const targetPoints = jDomMatrixCore.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
+          const targetPoints = jsonDom.jDomMatrixCore.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
           if (targetPoints.false.length) {
             displayTargets(targetPoints.false, targetPoints.false[0], victim)
-            return jDomMatrixCore.getDomItemFromPoint(targetPoints.false[0], victim.board)
+            return jsonDom.jDomMatrixCore.getDomItemFromPoint(targetPoints.false[0], victim.board)
           }
         }
         // If there are no points between, attack the outer points first.
-        const pntDiff = jDomMatrixCore.pointDifference(hitParts[0].point, hitParts[1].point)
-        const dirPnts = (pntDiff.x > 0 ? [jDomMatrixObjects.point(-1, 0, 0), jDomMatrixObjects.point(1, 0, 0)] : [jDomMatrixObjects.point(0, -1, 0), jDomMatrixObjects.point(0, 1, 0)]).map((p, i) => jDomMatrixCore.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => jDomMatrixCore.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
+        const pntDiff = jsonDom.jDomMatrixCore.pointDifference(hitParts[0].point, hitParts[1].point)
+        const dirPnts = (pntDiff.x > 0 ? [jsonDom.jDomMatrixObjects.point(-1, 0, 0), jsonDom.jDomMatrixObjects.point(1, 0, 0)] : [jsonDom.jDomMatrixObjects.point(0, -1, 0), jsonDom.jDomMatrixObjects.point(0, 1, 0)]).map((p, i) => jsonDom.jDomMatrixCore.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => jsonDom.jDomMatrixCore.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
         // Check outer points which are valid and not hit.
         const target = dirPnts.reduce((a, b) => gameUtils.checkIfHitCell(a, victim.board) ? b : a)
         if (target) {
           displayTargets(dirPnts, target, victim)
-          return jDomMatrixCore.getDomItemFromPoint(target, victim.board)
+          return jsonDom.jDomMatrixCore.getDomItemFromPoint(target, victim.board)
         }
       }
       // If there is only one hit part, then set that as the lastTarget for detecting adjacent parts.
       availTargets = gameUtils.getAdjEdgeNonHitCells(hitParts[0].point, victim.board)
     }
     const finalTargets = availTargets.length ? availTargets : gameUtils.getAllNonHitCells(victim.board).filter(t => gameUtils.filterAdjacentPoints(t))
-    const target = finalTargets[jDomCore.randomInteger(finalTargets.length)]
+    const target = finalTargets[jsonDom.functionalHelpers.randomInteger(finalTargets.length)]
     displayTargets(finalTargets, target, victim)
 
     // If there are available targets then hit one at random
-    return jDomMatrixCore.getDomItemFromPoint(target, victim.board)
+    return jsonDom.jDomMatrixCore.getDomItemFromPoint(target, victim.board)
   }
 
   /**
@@ -458,8 +407,8 @@
    */
   const displayTargets = (targets, target, victim) => {
     return [
-      jDomCore.queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
-      jDomCore.queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
+      jsonDom.functionalHelpers.queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
+      jsonDom.functionalHelpers.queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
     ]
   }
 
@@ -469,11 +418,11 @@
    * @returns {void|Array|Object|*}
    */
   const resetTargets = data => {
-    data.victim.board.children.map(l => jDomCoreDom.updateElement(jDomCore.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
-    data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
+    data.victim.board.children.map(l => jsonDom.jDomCore.updateElement(jsonDom.functionalHelpers.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
+    data.targets.forEach(t => jsonDom.jDomCore.updateElement(jsonDom.functionalHelpers.mergeObjects(jsonDom.jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
     if (!data.target) {
-      data.victim.board.children.map(l => jDomCoreDom.updateElement(jDomCore.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
-      data.targets.forEach(t => jDomCoreDom.updateElement(jDomCore.mergeObjects(jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
+      data.victim.board.children.map(l => jsonDom.jDomCore.updateElement(jsonDom.functionalHelpers.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
+      data.targets.forEach(t => jsonDom.jDomCore.updateElement(jsonDom.functionalHelpers.mergeObjects(jsonDom.jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
     }
     return data
   }

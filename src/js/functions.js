@@ -15,7 +15,7 @@
   /**
    * A reference to all functions to be used globally / exported
    * @typedef (Object) gameUtils
-   * @module game/functions
+   * @module functions
    */
   const gameUtils = {}
   root.gameUtils = gameUtils
@@ -31,19 +31,19 @@
   }
 
   /**
-   * Verify availability of jDomMatrixCore
-   * @typedef {*|module:jDom/matrix/core} jDomMatrixCore
+   * Verify availability of jsonDom
+   * @typedef {*|module:json-dom} jsonDom
    */
-  let jDomMatrixCore = root.jDomMatrixCore
+  let jsonDom = root.jsonDom
 
   /**
-   * If jDomMatrixCore remains undefined, attempt to retrieve it as a module
+   * If jsonDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomMatrixCore === 'undefined') {
+  if (typeof jsonDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomMatrixCore = require('../vendor/json-dom').default.default.matrixCore
+      jsonDom = require('json-dom')
     } else {
-      console.error('functions.js requires jDom/matrix/core')
+      console.error('functions.js requires json-dom')
     }
   }
 
@@ -71,7 +71,7 @@
    * @param matrix
    * @returns {Array}
    */
-  gameUtils.getAllNonHitCells = matrix => jDomMatrixCore.getAllPoints(matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
+  gameUtils.getAllNonHitCells = matrix => jsonDom.jDomMatrixCore.getAllPoints(matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
 
   /**
    * Get the points which have same edges with the provided point and are not hit.
@@ -80,7 +80,7 @@
    * @param matrix
    * @returns {Array}
    */
-  gameUtils.getAdjEdgeNonHitCells = (pnt, matrix) => jDomMatrixCore.adjacentEdgePoints(pnt, matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
+  gameUtils.getAdjEdgeNonHitCells = (pnt, matrix) => jsonDom.jDomMatrixCore.adjacentEdgePoints(pnt, matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
 
   /**
    * Given an array of items, return the item with the lowest status property (at the end of the array)

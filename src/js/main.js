@@ -14,7 +14,7 @@
   /**
    * A reference to all functions to be used globally / exported
    * @typedef (Object) gameMain
-   * @module game/main
+   * @module main
    */
   const gameMain = {}
   root.gameMain = gameMain
@@ -30,42 +30,25 @@
   }
 
   /**
-   * Verify availability of jDomObjectsDom
-   * @typedef {*|module:jDom/core/dom/objects} jDomObjectsDom
+   * Verify availability of jsonDom
+   * @typedef {*|module:json-dom} jsonDom
    */
-  let jDomObjectsDom = root.jDomObjectsDom
+  let jsonDom = root.jsonDom
 
   /**
-   * If jDomObjectsDom remains undefined, attempt to retrieve it as a module
+   * If jsonDom remains undefined, attempt to retrieve it as a module
    */
-  if (typeof jDomObjectsDom === 'undefined') {
+  if (typeof jsonDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjectsDom = require('../vendor/json-dom').domObjects
+      jsonDom = require('json-dom')
     } else {
-      console.error('main.js requires jDom/core/dom/objects')
-    }
-  }
-
-  /**
-   * Verify availability of jDomCoreDom
-   * @typedef {*|module:jDom/core/dom/core} jDomCoreDom
-   */
-  let jDomCoreDom = root.jDomCoreDom
-
-  /**
-   * If jDomCoreDom remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomCoreDom === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomCoreDom = require('../vendor/json-dom').domCore
-    } else {
-      console.error('main.js requires jDom/core/dom/core')
+      console.error('main.js requires json-dom')
     }
   }
 
   /**
    * Verify availability of gameActions
-   * @typedef {*|module:game/actions} gameActions
+   * @typedef {*|module:actions} gameActions
    */
   let gameActions = root.gameActions
 
@@ -76,32 +59,32 @@
     if (typeof require !== 'undefined') {
       gameActions = require('./actions.js')
     } else {
-      console.error('main.js requires game/actions')
+      console.error('main.js requires actions')
     }
   }
 
   /**
    * Verify availability of gameStart
-   * @typedef {*|module:game/setup} gameStart
+   * @typedef {*|module:setup} gameStart
    */
   let gameStart = root.gameStart
 
   /**
-   * If jDomCoreDom remains undefined, attempt to retrieve it as a module
+   * If jsonDom.jDomCore remains undefined, attempt to retrieve it as a module
    */
   if (typeof gameStart === 'undefined') {
     if (typeof require !== 'undefined') {
       gameStart = require('./setup.js')
     } else {
-      console.error('main.js requires game/setup')
+      console.error('main.js requires setup')
     }
   }
 
   /**
    * Create new private reference to the document
-   * @typedef {module:jDom/core/dom/objects.documentItem} documentItem
+   * @typedef {module:json-dom.documentItem} documentItem
    */
-  const documentItem = gameStart.main(jDomObjectsDom.documentDomItem({
+  const documentItem = gameStart.main(jsonDom.jDomObjects.documentDomItem({
     beginRound: gameStart.beginRound,
     attackListener: gameActions.attackListener,
     restart: gameStart.restart
@@ -111,8 +94,8 @@
   // eslint-disable-next-line no-undef
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module
-    const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
-    const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form)
+    const form = jsonDom.jDomCore.getChildrenByClass('main-menu-form', documentItem.body)[0]
+    const submitBtn = jsonDom.jDomCore.getChildrenFromAttribute('type', 'submit', form)
     submitBtn[0].element.click()
   }
 
