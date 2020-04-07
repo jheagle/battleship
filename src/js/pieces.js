@@ -31,6 +31,23 @@
   }
 
   /**
+   * Verify availability of functional-helpers
+   * @typedef {*|module:functionalHelpers} functionalHelpers
+   */
+  let functionalHelpers = root.functionalHelpers
+
+  /**
+   * If functionalHelpers remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof functionalHelpers === 'undefined') {
+    if (typeof require !== 'undefined') {
+      functionalHelpers = require('functional-helpers/dist/helpers')
+    } else {
+      console.error('actions.js requires functional-helpers')
+    }
+  }
+
+  /**
    * Verify availability of jsonDom
    * @typedef {*|module:json-dom} jsonDom
    */
@@ -61,7 +78,7 @@
    * @function waterTile
    * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}, point: {}}}
    */
-  gamePieces.waterTile = () => jsonDom.functionalHelpers.mergeObjects(gameTile(), jsonDom.jDomMatrixObjects.tile())
+  gamePieces.waterTile = () => functionalHelpers.mergeObjects(gameTile(), jsonDom.jDomMatrixObjects.tile())
 
   /**
    * Set status and custom properties for tiles that have a ship

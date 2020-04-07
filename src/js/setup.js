@@ -31,6 +31,23 @@
   }
 
   /**
+   * Verify availability of functional-helpers
+   * @typedef {*|module:functionalHelpers} functionalHelpers
+   */
+  let functionalHelpers = root.functionalHelpers
+
+  /**
+   * If functionalHelpers remains undefined, attempt to retrieve it as a module
+   */
+  if (typeof functionalHelpers === 'undefined') {
+    if (typeof require !== 'undefined') {
+      functionalHelpers = require('functional-helpers/dist/helpers')
+    } else {
+      console.error('actions.js requires functional-helpers')
+    }
+  }
+
+  /**
    * Verify availability of jsonDom
    * @typedef {*|module:json-dom} jsonDom
    */
@@ -124,7 +141,7 @@
    * @param view
    * @returns {{name: string, status: number, parts: Array}}
    */
-  const buildShip = (shipInfo, line, matrix, view = false) => jsonDom.functionalHelpers.mergeObjects(gamePieces.ship(shipInfo.name), { parts: line.map(p => gameActions.setShip(matrix, p, view)) })
+  const buildShip = (shipInfo, line, matrix, view = false) => functionalHelpers.mergeObjects(gamePieces.ship(shipInfo.name), { parts: line.map(p => gameActions.setShip(matrix, p, view)) })
 
   /**
    *
@@ -173,7 +190,7 @@
    * @param {boolean} [view=false]
    * @returns {Array}
    */
-  const defaultFleet = jsonDom.functionalHelpers.curry(generateRandomFleet)([
+  const defaultFleet = functionalHelpers.curry(generateRandomFleet)([
     { name: 'Aircraft Carrier', size: 5 },
     { name: 'Battleship', size: 4 },
     { name: 'Submarine', size: 3 },
@@ -246,7 +263,7 @@
     }
     jsonDom.jDomCore.removeChild(jsonDom.jDomCore.getChildrenByClass('main-menu', parent.body)[0], parent.body)
     const players = jsonDom.jDomCore.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
-    const firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[jsonDom.functionalHelpers.randomInteger(players.length)])
+    const firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[functionalHelpers.randomInteger(players.length)])
     if (firstAttacker.isRobot) {
       gameActions.computerAttack(firstAttacker, players)
     }
