@@ -46,7 +46,7 @@ gulp.task('useref', () => gulp.src('src/*.html')
 
 // Build vendor file
 gulp.task('vendor', () => gulp.src([
-  'node_modules/functional-helpers/main.js',
+  'node_modules/functional-helpers/browser/main.js',
   'node_modules/json-dom/browser/json-dom.js'
 ])
   .pipe(concat('vendor.js'))
@@ -68,12 +68,10 @@ gulp.task('images', () =>
 gulp.task('fonts', () => gulp.src('src/fonts/**/*').pipe(gulp.dest('dist/fonts')))
 
 // Cleaning
-gulp.task('clean', async () => {
-  await del('dist')
-  cache.clearAll()
-})
-
 gulp.task('clean:dist', () => del(['dist/**/*', '!dist/img', '!dist/img/**/*']))
+gulp.task('clean:vendor', () => del('src/js/vendor.js'))
+gulp.task('clean:cache', () => cache.clearAll())
+gulp.task('clean', gulp.parallel('clean:dist', 'clean:vendor', 'clean:cache'))
 
 gulp.task(
   'default',
@@ -88,7 +86,7 @@ gulp.task(
 gulp.task(
   'build',
   gulp.series(
-    'clean:dist',
+    'clean',
     'sass',
     gulp.parallel('useref', 'images', 'fonts'),
     'vendor'

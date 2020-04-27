@@ -41,7 +41,7 @@
    */
   if (typeof functionalHelpers === 'undefined') {
     if (typeof require !== 'undefined') {
-      functionalHelpers = require('functional-helpers/dist/helpers')
+      functionalHelpers = require('functional-helpers')
     } else {
       console.error('actions.js requires functional-helpers')
     }
@@ -256,7 +256,8 @@
     winner = updatePlayerStats(winner, 'WINNER')
     const finalScore = jsonDom.jDomCore.renderHTML(gameLayout.finalScore(players), parent)
     finalScore.children[0].children.map(child => child.attributes.innerHTML)
-    return [functionalHelpers.trace('Winner')(winner)]
+    console.log('Winner', winner)
+    return [winner]
   }
 
   /**

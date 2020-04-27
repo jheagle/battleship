@@ -1,39 +1,32 @@
-/**
- * @file All of the functionalHelpers system functions for stringing together functions and simplifying logic.
- * @author Joshua Heagle <joshuaheagle@gmail.com>
- * @version 1.0.0
- */
-;(() => {
-  /**
-   * Store a reference to this scope which will be Window if rendered via browser
-   */
-  const root = this || {}
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-  /**
-   * Store reference to any pre-existing module of the same name
-   * @type {module|*}
-   */
-  const previousFunctionalHelpers = root.functionalHelpers || {}
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+;
+(function () {
   /**
-   * All methods exported from this module are encapsulated within functionalHelpers.
+   * @file All of the functionHelpers system functions for stringing together functions and simplifying logic.
    * @author Joshua Heagle <joshuaheagle@gmail.com>
-   * @typedef {Object} functionalHelpers
-   * @module core/core
+   * @version 1.0.0
    */
-  const functionalHelpers = {}
-  root.functionalHelpers = functionalHelpers
 
   /**
-   * Return a reference to this library while preserving the original same-named library
-   * @function noConflict
-   * @returns {functionalHelpers}
+   * All methods exported from this module are encapsulated within functionHelpers.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
+   * @typedef {Object} functionHelpers
+   * @module functionHelpers
    */
-  functionalHelpers.noConflict = () => {
-    root.functionalHelpers = previousFunctionalHelpers
-    return functionalHelpers
-  }
-
+  var functionHelpers = {};
   /**
    * Return a curried version of the passed function.
    * The returned function expects the same number of arguments minus the ones provided.
@@ -42,10 +35,24 @@
    * @param {function} fn - Receives a function to be curried
    * @returns {function(...[*]): function(...[*])}
    */
-  functionalHelpers.curry = fn => (...args) => args.length >= fn.length
-    ? fn(...args)
-    : (...a) => functionalHelpers.curry(fn)(...[...args, ...a])
 
+  var curry = function curry(fn) {
+    return function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return args.length >= fn.length ? fn.apply(void 0, args) : function () {
+        for (var _len2 = arguments.length, a = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          a[_key2] = arguments[_key2];
+        }
+
+        return curry(fn).apply(void 0, [].concat(args, a));
+      };
+    };
+  };
+
+  functionHelpers.curry = curry;
   /**
    * Take one or more function with a single parameter and return value.
    * Pass a paramter and the value will be transformed by each function then returned.
@@ -53,8 +60,20 @@
    * @param {...function} fns - Takes a series of functions having the same parameter
    * @returns {function(*=): (*|any)}
    */
-  functionalHelpers.pipe = (...fns) => x => fns.reduce((y, f) => f(y), x)
 
+  var pipe = function pipe() {
+    for (var _len3 = arguments.length, fns = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      fns[_key3] = arguments[_key3];
+    }
+
+    return function (x) {
+      return fns.reduce(function (y, f) {
+        return f(y);
+      }, x);
+    };
+  };
+
+  functionHelpers.pipe = pipe;
   /**
    * Given a function, call with the correct number of paramters from an array of possible parameters.
    * @function callWithParams
@@ -63,9 +82,345 @@
    * @param {number} [minimum]
    * @returns {*}
    */
-  functionalHelpers.callWithParams = (fn, params = [], minimum = 2) =>
-    fn(...params.slice(0, fn.length || minimum))
 
+  var callWithParams = function callWithParams(fn) {
+    var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+    var minimum = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 2;
+    return fn.apply(void 0, _toConsumableArray(params.slice(0, fn.length || minimum)));
+  };
+
+  functionHelpers.callWithParams = callWithParams;
+  /**
+   * Run Timeout functions one after the other in queue. This function needs some work to comply with the standards
+   * applied to the rest of this file where this is not a Pure function, and it does not reliably return a result. This
+   * implementation should likely be used with Promise instead.
+   * WARNING: This is a recursive function.
+   * @function queueTimeout
+   * @param {function|object|boolean} fn - A callback function to be performed at some time in the future.
+   * @param {number} time - The time in milliseconds to delay.
+   * @param {...*} args - Arguments to be passed to the callback once it is implemented.
+   * @returns {{id: number, func: function, timeout: number, args: {Array}, result: *}}
+   */
+
+  var queueTimeout = function queueTimeout() {
+    var fn = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var time = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    // Track the queue to be processed in FIFO
+    queueTimeout.queue = queueTimeout.queue || []; // Do not run more than one queued item at a time
+
+    queueTimeout.isRunning = queueTimeout.isRunning || false; // Construct an object which will store the queued function data
+
+    for (var _len4 = arguments.length, args = new Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+      args[_key4 - 2] = arguments[_key4];
+    }
+
+    var queueItem = {
+      id: 0,
+      func: fn,
+      timeout: time,
+      args: args,
+      result: 0
+    };
+
+    if (fn) {
+      // When the function is valid, append it to the end of the queue
+      queueTimeout.queue.push(queueItem);
+    }
+
+    if (queueTimeout.queue.length && !queueTimeout.isRunning) {
+      // Check that the queue is not empty, and it is not running a queued item
+      // Set isRunning flag to begin processing the next queued item
+      queueTimeout.isRunning = true; // Pick an item off the front of the queue, and thereby reduce the queue size
+
+      var toRun = queueTimeout.queue.shift(); // Get the timeout ID when it has begun
+
+      toRun.id = setTimeout(function () {
+        // Run the function after the provided timeout
+        toRun.result = toRun.func.apply(toRun, _toConsumableArray(toRun.args)); // Reset isRunning flag
+
+        queueTimeout.isRunning = false; // Re-run the queue which will get the next queued item if there is one
+
+        return queueTimeout(false);
+      }, toRun.timeout); // Return whatever object we have for the current queued item being processed, likely incomplete because the
+      // function will complete in the future
+
+      return toRun;
+    } // Return newly created queuedItem
+
+
+    return queueItem;
+  };
+
+  functionHelpers.queueTimeout = queueTimeout;
+  /**
+   * @file All of the numberHelpers system functions for stringing together functions and simplifying logic.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
+   * @version 1.0.0
+   */
+
+  /**
+   * All methods exported from this module are encapsulated within numberHelpers.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
+   * @typedef {Object} numberHelpers
+   * @module numberHelpers
+   */
+
+  var numberHelpers = {};
+  /**
+   * Helper for returning the absolute max value
+   * @function getAbsoluteMax
+   * @param {number} num1 - A number to compare
+   * @param {number} num2 - Another number to be compared against
+   * @returns {number}
+   */
+
+  var getAbsoluteMax = function getAbsoluteMax(num1, num2) {
+    return Math.abs(num1) > Math.abs(num2) ? num1 : num2;
+  };
+
+  numberHelpers.getAbsoluteMax = getAbsoluteMax;
+  /**
+   * Helper for returning the absolute min value
+   * @function getAbsoluteMin
+   * @param {number} num1 - A number to compare
+   * @param {number} num2 - Another number to be compared against
+   * @returns {number}
+   */
+
+  var getAbsoluteMin = function getAbsoluteMin(num1, num2) {
+    return Math.abs(num1) < Math.abs(num2) ? num1 : num2;
+  };
+
+  numberHelpers.getAbsoluteMin = getAbsoluteMin;
+  /**
+   * Create a single random number within provided range. And with optional offset,
+   * The distance between the result numbers can be adjusted with interval.
+   * @function randomNumber
+   * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
+   * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
+   * @param {number} [interval=1] - Choose the distance between numbers (~5, ~10, ~15 would be 5 for interval, 1 for
+   * offset, 2 for range)
+   * @returns {number}
+   */
+
+  var randomNumber = function randomNumber(range) {
+    var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var interval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+    return (Math.random() * range + offset) * interval;
+  };
+
+  numberHelpers.randomNumber = randomNumber;
+  /**
+   * Create a single random integer within provide range. And with optional offset,
+   * The distance between the result numbers can be adjusted with interval.
+   * @function randomInteger
+   * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
+   * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
+   * @param {number} [interval=1] - Choose the distance between numbers (5, 10, 15 would be 5 for interval, 1 for
+   * offset, 2 for range)
+   * @returns {number}
+   */
+
+  var randomInteger = function randomInteger(range) {
+    var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var interval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+    return (Math.floor(Math.random() * range) + offset) * interval;
+  };
+
+  numberHelpers.randomInteger = randomInteger;
+  /**
+   * Compare two numbers and return:
+   * -1 to indicate val1 is less than val2
+   * 0 to indicate both values are the equal
+   * 1 to indicate val1 is greater than val2
+   * @function compare
+   * @param {number} val1 - The first number to compare
+   * @param {number} val2 - The second number to compare
+   * @returns {number}
+   */
+
+  var compare = function compare(val1, val2) {
+    return val1 === val2 ? 0 : val1 > val2 ? 1 : -1;
+  };
+
+  numberHelpers.compare = compare;
+  /**
+   * @file All of the arrayHelpers system functions for stringing together functions and simplifying logic.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
+   * @version 1.0.0
+   */
+
+  /**
+   * All methods exported from this module are encapsulated within arrayHelpers.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
+   * @typedef {Object} arrayHelpers
+   * @module arrayHelpers
+   */
+
+  var arrayHelpers = {};
+  /**
+   * Generate an array filled with a copy of the provided item or references to the provided item.
+   * The length defines how long the array should be.
+   * WARNING: This is a recursive function.
+   * @param {boolean} useReference - Choose to multiply by clone or reference, true is by reference
+   * @param {*} item - The item to be used for each array element
+   * @param {number} length - The desired length of the array
+   * @param {Array} [arr=[]] - The in-progress array of elements to be built and returned, will be used internally
+   * @returns {Array.<*>}
+   */
+
+  var buildArrayBase = function buildArrayBase(useReference, item, length) {
+    var arr = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+    item = useReference ? item : cloneObject(item);
+    return --length > 0 ? buildArrayBase(useReference, item, length, arr.concat([item])) : arr.concat([item]);
+  };
+  /**
+   * Leverage buildArrayBase to generate an array filled with a copy of the provided item.
+   * The length defines how long the array should be.
+   * @function buildArray
+   * @param {*} item - The item to be used for each array element
+   * @param {number} length - The desired length of the array
+   * @param {Array} [arr=[]] - The in-progress array of elements to be built and returned, will be used internally
+   * @returns {Array.<*>}
+   */
+
+
+  var buildArray = curry(buildArrayBase)(false);
+  arrayHelpers.buildArray = buildArray;
+  /**
+   * Leverage buildArrayBase to generate an array filled with references to the provided item.
+   * The length defines how long the array should be.
+   * @function buildArrayOfReferences
+   * @param {*} item - The item to be used for each array element
+   * @param {number} length - The desired length of the array
+   * @param {Array} [arr=[]] - The in-progress array of elements to be built and returned, will be used internally
+   * @returns {Array.<*>}
+   */
+
+  var buildArrayOfReferences = curry(buildArrayBase)(true);
+  arrayHelpers.buildArrayOfReferences = buildArrayOfReferences;
+  /**
+   * Remove duplicate values from an array.
+   * @function uniqueArray
+   * @param {Array} array - The array to make unique
+   * @returns {Array}
+   */
+
+  var uniqueArray = function uniqueArray(array) {
+    return array.filter(function (item, index) {
+      return array.indexOf(item) === index;
+    });
+  };
+
+  arrayHelpers.uniqueArray = uniqueArray;
+  /**
+   * Take multiple arrays and then filter all these into one unique array.
+   * @function uniqueArray
+   * @param {...Array} arrays - Provide mulitple arrays to create one unique array
+   * @returns {Array}
+   */
+
+  var mergeArrays = function mergeArrays() {
+    for (var _len5 = arguments.length, arrays = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+      arrays[_key5] = arguments[_key5];
+    }
+
+    return arrays.map(arrayHelpers.uniqueArray).reduce(function (merged, arr) {
+      return [].concat(_toConsumableArray(merged), _toConsumableArray(arr.filter(function (attr) {
+        return !merged.includes(attr);
+      })));
+    }, []);
+  };
+
+  arrayHelpers.mergeArrays = mergeArrays;
+  /**
+   * Compare two Arrays and return the Object where the value for each property is as follows:
+   * -1 to indicate val1 is less than val2
+   * 0 to indicate both values are the equal
+   * 1 to indicate val1 is greater than val2
+   * The returned Object uses the element values as the property names
+   * This functions works by first creating a concatenated array of all unique values. Then for each unique values,
+   * convert to a string and use it as a new property name. Array filter each array checking if it has the unique value.
+   * Use the lengths of these filtered arrays to compare. So if the first array has the value and the second one doesn't
+   * the first length will be one or more and the second will be zero, if the both have the value then both will be one
+   * or more.
+   * @example
+   * // example of input and resulting output
+   * arrayHelpers.compareArrays(
+   *   ['match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1'],
+   *   ['match1', 'match2', 'secondMismatch1', 'badMatch1', 'badMatch1']
+   * )
+   * // unique array
+   * ['match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1', 'secondMismatch1']
+   * // result object
+   * [
+   *   {
+   *     value: 'match1',
+   *     result: [0, 0]
+   *   },
+   *   {
+   *     value: 'firstMismatch1',
+   *     result: [1, -1]
+   *   },
+   *   {
+   *     value: 'match2',
+   *     result: [0, 0]
+   *   },
+   *   {
+   *     value: 'firstMismatch2',
+   *     result: [1, -1]
+   *   },
+   *   {
+   *     value: 'badMatch1',
+   *     result: [0, 0]
+   *   },
+   *   {
+   *     value: 'secondMismatch1',
+   *     result: [-1, 1]
+   *   }
+   * ]
+   *
+   * @function compareArrays
+   * @param {Array} arr1 - The first array to compare
+   * @param {Array} arr2 - The second array to compare
+   * @returns {Object.<string, number>}
+   */
+
+  var compareArrays = function compareArrays() {
+    for (var _len6 = arguments.length, arrays = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+      arrays[_key6] = arguments[_key6];
+    }
+
+    return arrayHelpers.mergeArrays.apply(arrayHelpers, arrays).reduce(function (results, attr) {
+      var arrayResults = arrays.map(function (array) {
+        return array.includes(attr) ? 1 : -1;
+      });
+      return [].concat(_toConsumableArray(results), [{
+        value: attr,
+        result: arrayResults.every(function (result) {
+          return result === 1;
+        }) ? arrayResults.map(function (result) {
+          return 0;
+        }) : arrayResults
+      }]);
+    }, []);
+  };
+
+  arrayHelpers.compareArrays = compareArrays;
+  /**
+   * @file All of the objectHelpers system functions for stringing together functions and simplifying logic.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
+   * @version 1.0.0
+   */
+
+  /**
+   * All methods exported from this module are encapsulated within objectHelpers.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
+   * @typedef {Object} objectHelpers
+   * @module objectHelpers
+   */
+
+  var objectHelpers = {};
   /**
    * Set a value on an item, then return the item
    * @function setValue
@@ -74,11 +429,13 @@
    * @param {Object|Array} item - An object or array to be updated
    * @returns {Object|Array}
    */
-  functionalHelpers.setValue = (key, value, item) => {
-    item[key] = value
-    return item
-  }
 
+  var setValue = function setValue(key, value, item) {
+    item[key] = value;
+    return item;
+  };
+
+  objectHelpers.setValue = setValue;
   /**
    * Set a value on an item, then return the value
    * @function setAndReturnValue
@@ -87,14 +444,16 @@
    * @param {*} value - Any value to be applied to the key
    * @returns {*}
    */
-  functionalHelpers.setAndReturnValue = (item, key, value) => {
-    item[key] = value
-    return value
-  }
 
+  var setAndReturnValue = function setAndReturnValue(item, key, value) {
+    item[key] = value;
+    return value;
+  };
+
+  objectHelpers.setAndReturnValue = setAndReturnValue;
   /**
    * Function that produces a property of the new Object, taking three arguments
-   * @callback module:core/core~mapCallback
+   * @callback module:objectHelpers~mapCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
    * @param {Object|Array} [object] - The object map was called upon.
@@ -107,38 +466,38 @@
    * always use the standard map() function when it is known that the object is actually an array.
    * @function mapObject
    * @param {Object|Array} obj - The Object (or Array) to be mapped
-   * @param {module:core/core~mapCallback|function} fn - The function to be processed for each mapped property
+   * @param {module:objectHelpers~mapCallback|function} fn - The function to be processed for each mapped property
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
-  functionalHelpers.mapObject = (obj, fn, thisArg = undefined) => Array.isArray(obj)
-    ? obj.map(fn, thisArg)
-    : Object.keys(obj).reduce(
-      (newObj, curr) => functionalHelpers.setValue(
-        curr,
-        functionalHelpers.callWithParams(fn, [obj[curr], curr, obj], 2),
-        newObj
-      ),
-      thisArg || {}
-    )
 
+  var mapObject = function mapObject(obj, fn) {
+    var thisArg = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
+    return Array.isArray(obj) ? obj.map(fn, thisArg) : Object.keys(obj).reduce(function (newObj, curr) {
+      return setValue(curr, callWithParams(fn, [obj[curr], curr, obj], 2), newObj);
+    }, thisArg || {});
+  };
+
+  objectHelpers.mapObject = mapObject;
   /**
    * Perform map on an array property of an object, then return the object
    * @function mapArrayProperty
    * @param {string} property - The string key for the array property to be mapped
-   * @param {module:core/core~mapCallback|function} mapFunction - A function suitable to be passed to map
+   * @param {module:objectHelpers~mapCallback|function} mapFunction - A function suitable to be passed to map
    * @param {Object|Array} obj - An object having an array property
    * @returns {object}
    */
-  functionalHelpers.mapProperty = (property, mapFunction, obj) => {
-    obj[property] = functionalHelpers.mapObject(obj[property] || [], mapFunction)
-    return obj
-  }
 
+  var mapProperty = function mapProperty(property, mapFunction, obj) {
+    obj[property] = mapObject(obj[property] || [], mapFunction);
+    return obj;
+  };
+
+  objectHelpers.mapProperty = mapProperty;
   /**
    * Function is a predicate, to test each property value of the object. Return true to keep the element, false
    * otherwise, taking three arguments
-   * @callback module:core/core~filterCallback
+   * @callback module:objectHelpers~filterCallback
    * @param {*} currentProperty - The current property being processed in the object.
    * @param {string} [currentIndex] - The property name of the current property being processed in the object.
    * @param {Object|Array} [object] - The object filter was called upon.
@@ -151,24 +510,28 @@
    * always use the standard filter() function when it is known that the object is actually an array.
    * @function filterObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
-   * @param {module:core/core~filterCallback|function} fn - The function to be processed for each filtered property
+   * @param {module:objectHelpers~filterCallback|function} fn - The function to be processed for each filtered property
    * @param {Object|Array} [thisArg] - Optional. Value to use as this when executing callback.
    * @returns {Object|Array}
    */
-  functionalHelpers.filterObject = (obj, fn, thisArg = undefined) => Array.isArray(obj)
-    ? obj.filter(fn, thisArg)
-    : Object.keys(obj).reduce((newObj, curr) => {
-      if (functionalHelpers.callWithParams(fn, [obj[curr], curr, obj], 2)) {
-        newObj[curr] = obj[curr]
-      } else {
-        delete newObj[curr]
-      }
-      return newObj
-    }, thisArg || {})
 
+  var filterObject = function filterObject(obj, fn) {
+    var thisArg = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
+    return Array.isArray(obj) ? obj.filter(fn, thisArg) : Object.keys(obj).reduce(function (newObj, curr) {
+      if (callWithParams(fn, [obj[curr], curr, obj], 2)) {
+        newObj[curr] = obj[curr];
+      } else {
+        delete newObj[curr];
+      }
+
+      return newObj;
+    }, thisArg || {});
+  };
+
+  objectHelpers.filterObject = filterObject;
   /**
    * Function to execute on each property in the object, taking four arguments
-   * @callback module:core/core~reduceCallback
+   * @callback module:objectHelpers~reduceCallback
    * @param {*} [accumulator={}] - The accumulator accumulates the callback's return values; it is the accumulated
    * value previously returned in the last invocation of the callback, or initialValue, if supplied (see below).
    * @param {*} [currentProperty={}] - The current property being processed in the object.
@@ -184,29 +547,33 @@
    * always use the standard reduce() function when it is known that the object is actually an array.
    * @function reduceObject
    * @param {Object|Array} obj - The Object (or Array) to be filtered
-   * @param {module:core/core~reduceCallback|function} fn - The function to be processed for each filtered property
+   * @param {module:objectHelpers~reduceCallback|function} fn - The function to be processed for each filtered property
    * @param {Object|Array} [initialValue] - Optional. Value to use as the first argument to the first call of the
    * callback. If no initial value is supplied, the first element in the array will be used. Calling reduce on an empty
    * array without an initial value is an error.
    * @returns {Object|Array}
    */
-  functionalHelpers.reduceObject = (obj, fn, initialValue = obj[Object.keys(obj)[0]] || obj[0]) => Array.isArray(obj)
-    ? obj.reduce(fn, initialValue)
-    : Object.keys(obj).reduce(
-      (newObj, curr) => functionalHelpers.callWithParams(fn, [newObj, obj[curr], curr, obj], 2),
-      initialValue
-    )
 
+  var reduceObject = function reduceObject(obj, fn) {
+    var initialValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : obj[Object.keys(obj)[0]] || obj[0];
+    return Array.isArray(obj) ? obj.reduce(fn, initialValue) : Object.keys(obj).reduce(function (newObj, curr) {
+      return callWithParams(fn, [newObj, obj[curr], curr, obj], 2);
+    }, initialValue);
+  };
+
+  objectHelpers.reduceObject = reduceObject;
   /**
    * Helper function for testing if the item is an Object or Array that contains properties or elements
    * @function notEmptyObjectOrArray
    * @param {Object|Array} item - Object or Array to test
    * @returns {boolean}
    */
-  functionalHelpers.notEmptyObjectOrArray = item => !!(
-    (typeof item === 'object' && Object.keys(item).length) || (Array.isArray(item) && item.length)
-  )
 
+  var notEmptyObjectOrArray = function notEmptyObjectOrArray(item) {
+    return !!(_typeof(item) === 'object' && Object.keys(item).length || Array.isArray(item) && item.length);
+  };
+
+  objectHelpers.notEmptyObjectOrArray = notEmptyObjectOrArray;
   /**
    * Re-add the Object Properties which cannot be cloned and must be directly copied to the new cloned object
    * WARNING: This is a recursive function.
@@ -214,34 +581,34 @@
    * @param {Object} object - The original object that is being cloned
    * @returns {Object|Array}
    */
-  const cloneCopy = (object, cloned) =>
-    functionalHelpers.notEmptyObjectOrArray(object)
-      ? functionalHelpers.reduceObject(object, (start, prop, key) => {
-        start[key] = (cloned[key] && !/^(parentItem|listenerArgs|element)$/.test(key))
-          ? cloneCopy(prop, cloned[key])
-          : prop
-        return start
-      }, cloned)
-      : cloned
 
+  var cloneCopy = function cloneCopy(object, cloned) {
+    return notEmptyObjectOrArray(object) ? reduceObject(object, function (start, prop, key) {
+      start[key] = cloned[key] && !/^(parentItem|listenerArgs|element)$/.test(key) ? cloneCopy(prop, cloned[key]) : prop;
+      return start;
+    }, cloned) : cloned;
+  };
   /**
    * Clone objects for manipulation without data corruption, returns a copy of the provided object.
    * @function cloneObject
    * @param {Object} object - The original object that is being cloned
    * @returns {Object}
    */
-  functionalHelpers.cloneObject = object => cloneCopy(object, JSON.parse(
-    JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key)
-      ? val
-      : undefined)
-  ))
 
+
+  var cloneObject = function cloneObject(object) {
+    return cloneCopy(object, JSON.parse(JSON.stringify(object, function (key, val) {
+      return !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined;
+    })));
+  };
+
+  objectHelpers.cloneObject = cloneObject;
   /**
    * Merge two objects and provide clone or original on the provided function.
    * The passed function should accept a minimum of two objects to be merged.
    * If the desire is to mutate the input objects, then the function name should
    * have the word 'mutable' in the name (case-insensitive).
-   * @param {module:core/core.mergeObjects|module:core/core.mergeObjectsMutable|Function} fn - Pass one of
+   * @param {module:objectHelpers.mergeObjects|module:objectHelpers.mergeObjectsMutable|Function} fn - Pass one of
    * the mergeObjects functions to be used
    * @param {Object} obj1 - The receiving object; this is the object which will have it's properties overridden
    * @param {Object} obj2 - The contributing object; this is the object which will contribute new properties and
@@ -250,16 +617,13 @@
    * modify them
    * @returns {Object}
    */
-  const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => functionalHelpers.notEmptyObjectOrArray(obj2)
-    ? functionalHelpers.mapObject(
-      obj2,
-      (prop, key) => (obj1[key] && !/^(parentItem|listenerArgs|element)$/.test(key))
-        ? fn(obj1[key], prop)
-        : prop,
-      isMutable ? obj1 : functionalHelpers.cloneObject(obj1)
-    )
-    : obj2
 
+  var mergeObjectsBase = function mergeObjectsBase(fn, obj1, obj2) {
+    var isMutable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+    return notEmptyObjectOrArray(obj2) ? mapObject(obj2, function (prop, key) {
+      return obj1[key] && !/^(parentItem|listenerArgs|element)$/.test(key) ? fn(obj1[key], prop) : prop;
+    }, isMutable ? obj1 : cloneObject(obj1)) : obj2;
+  };
   /**
    * Perform a deep merge of objects. This will combine all objects and sub-objects,
    * objects having the same attributes will overwrite starting from the end of the argument
@@ -270,12 +634,17 @@
    * object
    * @returns {Object}
    */
-  functionalHelpers.mergeObjects = (...args) => args.length === 2
-    ? mergeObjectsBase(functionalHelpers.mergeObjects, args[0], args[1])
-    : args.length === 1
-      ? functionalHelpers.cloneObject(args[0])
-      : args.reduce(functionalHelpers.curry(mergeObjectsBase)(functionalHelpers.mergeObjects), {})
 
+
+  var mergeObjects = function mergeObjects() {
+    for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+      args[_key7] = arguments[_key7];
+    }
+
+    return args.length === 2 ? mergeObjectsBase(mergeObjects, args[0], args[1]) : args.length === 1 ? cloneObject(args[0]) : args.reduce(curry(mergeObjectsBase)(mergeObjects), {});
+  };
+
+  objectHelpers.mergeObjects = mergeObjects;
   /**
    * Perform a deep merge of objects. This will combine all objects and sub-objects,
    * objects having the same attributes will overwrite starting from the end of the argument
@@ -287,222 +656,56 @@
    * object
    * @returns {Object}
    */
-  functionalHelpers.mergeObjectsMutable = (...args) => args.length === 2
-    ? mergeObjectsBase(functionalHelpers.mergeObjectsMutable, args[0], args[1], true)
-    : args.length === 1
-      ? args[0]
-      : args.reduce(functionalHelpers.curry(mergeObjectsBase)(functionalHelpers.mergeObjectsMutable), {})
 
-  /**
-   * Generate an array filled with a copy of the provided item or references to the provided item.
-   * The length defines how long the array should be.
-   * WARNING: This is a recursive function.
-   * @param {boolean} useReference - Choose to multiply by clone or reference, true is by reference
-   * @param {*} item - The item to be used for each array element
-   * @param {number} length - The desired length of the array
-   * @param {Array} [arr=[]] - The in-progress array of elements to be built and returned, will be used internally
-   * @returns {Array.<*>}
-   */
-  const buildArrayBase = (useReference, item, length, arr = []) => --length > 0
-    ? buildArrayBase(useReference, (useReference ? item : functionalHelpers.cloneObject(item)), length, arr.concat([item]))
-    : arr.concat([item])
-
-  /**
-   * Leverage buildArrayBase to generate an array filled with a copy of the provided item.
-   * The length defines how long the array should be.
-   * @function buildArray
-   * @param {*} item - The item to be used for each array element
-   * @param {number} length - The desired length of the array
-   * @param {Array} [arr=[]] - The in-progress array of elements to be built and returned, will be used internally
-   * @returns {Array.<*>}
-   */
-  functionalHelpers.buildArray = functionalHelpers.curry(buildArrayBase)(false)
-
-  /**
-   * Leverage buildArrayBase to generate an array filled with references to the provided item.
-   * The length defines how long the array should be.
-   * @function buildArrayOfReferences
-   * @param {*} item - The item to be used for each array element
-   * @param {number} length - The desired length of the array
-   * @param {Array} [arr=[]] - The in-progress array of elements to be built and returned, will be used internally
-   * @returns {Array.<*>}
-   */
-  functionalHelpers.buildArrayOfReferences = functionalHelpers.curry(buildArrayBase)(true)
-
-  /**
-   * A simple function to check if an item is in an array
-   * @function inArray
-   * @param {Array} arr - Haystack which may contain the specified property
-   * @param {*} prop - Needle to be found within the haystack
-   * @returns {boolean}
-   */
-  functionalHelpers.inArray = (arr, prop) => arr.indexOf(prop) >= 0
-
-  /**
-   * Helper for returning the absolute max value
-   * @function getAbsoluteMax
-   * @param {number} num1 - A number to compare
-   * @param {number} num2 - Another number to be compared against
-   * @returns {number}
-   */
-  functionalHelpers.getAbsoluteMax = (num1, num2) => Math.abs(num1) > Math.abs(num2) ? num1 : num2
-
-  /**
-   * Helper for returning the absolute min value
-   * @function getAbsoluteMin
-   * @param {number} num1 - A number to compare
-   * @param {number} num2 - Another number to be compared against
-   * @returns {number}
-   */
-  functionalHelpers.getAbsoluteMin = (num1, num2) => Math.abs(num1) < Math.abs(num2) ? num1 : num2
-
-  /**
-   * Create a single random number within provided range. And with optional offset,
-   * The distance between the result numbers can be adjusted with interval.
-   * @function randomNumber
-   * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
-   * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
-   * @param {number} [interval=1] - Choose the distance between numbers (~5, ~10, ~15 would be 5 for interval, 1 for
-   * offset, 2 for range)
-   * @returns {number}
-   */
-  functionalHelpers.randomNumber = (range, offset = 0, interval = 1) => (Math.random() * range + offset) * interval
-
-  /**
-   * Create a single random integer within provide range. And with optional offset,
-   * The distance between the result numbers can be adjusted with interval.
-   * @function randomInteger
-   * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
-   * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
-   * @param {number} [interval=1] - Choose the distance between numbers (5, 10, 15 would be 5 for interval, 1 for
-   * offset, 2 for range)
-   * @returns {number}
-   */
-  functionalHelpers.randomInteger = (range, offset = 0, interval = 1) => (Math.floor(Math.random() * range) + offset) * interval
-
-  /**
-   * Compare two numbers and return:
-   * -1 to indicate val1 is less than val2
-   * 0 to indicate both values are the equal
-   * 1 to indicate val1 is greater than val2
-   * @function compare
-   * @param {number} val1 - The first number to compare
-   * @param {number} val2 - The second number to compare
-   * @returns {number}
-   */
-  functionalHelpers.compare = (val1, val2) => val1 === val2 ? 0 : val1 > val2 ? 1 : -1
-
-  /**
-   * Compare two Arrays and return the Object where the value for each property is as follows:
-   * -1 to indicate val1 is less than val2
-   * 0 to indicate both values are the equal
-   * 1 to indicate val1 is greater than val2
-   * The returned Object uses the element values as the property names
-   * This functions works by first creating a concatenated array of all unique values. Then for each unique values,
-   * convert to a string and use it as a new property name. Array filter each array checking if it has the unique value.
-   * Use the lengths of these filtered arrays to compare. So if the first array has the value and the second one doesn't
-   * the first length will be one or more and the second will be zero, if the both have the value then both will be one
-   * or more.
-   * @example
-   * // example of input and resulting output
-   * functionalHelpers.compareArrays(
-   *   ['match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1'],
-   *   ['match1', 'match2', 'secondMismatch1', 'badMatch1', 'badMatch1']
-   * )
-   * // unique array
-   * ['secondMismatch1', 'match1', 'firstMismatch1', 'match2', 'firstMismatch2', 'badMatch1']
-   * // result object
-   * {secondMismatch1: -1, match1: 0, firstMismatch1: 1, match2: 0, firstMismatch2: 1, badMatch1: -1}
-   * @function compareArrays
-   * @param {Array} arr1 - The first array to compare
-   * @param {Array} arr2 - The second array to compare
-   * @returns {Object.<string, number>}
-   */
-  functionalHelpers.compareArrays = (arr1, arr2) =>
-    arr2.filter(attr => !functionalHelpers.inArray(arr1, attr))
-      .concat(arr1)
-      .reduce(
-        (returnObj, attr) => functionalHelpers.setValue(
-          (typeof attr === 'string')
-            ? attr
-            : JSON.stringify(attr, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key) ? val : undefined),
-          functionalHelpers.compare(arr1.filter(val => val === attr).length, arr2.filter(val => val === attr).length),
-          returnObj
-        ),
-        {}
-      )
-
-  /**
-   * This was adapted from a blog post on Composing Software written by Eric Elliott. Trace provides a way to traces
-   * steps through code via the console, while maintaining the functional-style return value.
-   * Returns a function which can then receive a value to output, the value will then be returned.
-   * @author Eric Elliott
-   * @function trace
-   * @param {string} label - Pass an identifying label of the value being output.
-   * @returns {function(*=)}
-   */
-  functionalHelpers.trace = label => value => {
-    console.info(`${label}: `, value)
-    return value
-  }
-
-  /**
-   * Run Timeout functions one after the other in queue. This function needs some work to comply with the standards
-   * applied to the rest of this file where this is not a Pure function, and it does not reliably return a result. This
-   * implementation should likely be used with Promise instead.
-   * WARNING: This is a recursive function.
-   * @function queueTimeout
-   * @param {function|object|boolean} fn - A callback function to be performed at some time in the future.
-   * @param {number} time - The time in milliseconds to delay.
-   * @param {...*} args - Arguments to be passed to the callback once it is implemented.
-   * @returns {{id: number, func: function, timeout: number, args: {Array}, result: *}}
-   */
-  functionalHelpers.queueTimeout = (fn = {}, time = 0, ...args) => {
-    // Track the queue to be processed in FIFO
-    functionalHelpers.queueTimeout.queue = functionalHelpers.queueTimeout.queue || []
-    // Do not run more than one queued item at a time
-    functionalHelpers.queueTimeout.isRunning = functionalHelpers.queueTimeout.isRunning || false
-    // Construct an object which will store the queued function data
-    const queueItem = { id: 0, func: fn, timeout: time, args: args, result: 0 }
-    if (fn) {
-      // When the function is valid, append it to the end of the queue
-      functionalHelpers.queueTimeout.queue.push(queueItem)
+  var mergeObjectsMutable = function mergeObjectsMutable() {
+    for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+      args[_key8] = arguments[_key8];
     }
-    if (functionalHelpers.queueTimeout.queue.length && !functionalHelpers.queueTimeout.isRunning) {
-      // Check that the queue is not empty, and it is not running a queued item
-      // Set isRunning flag to begin processing the next queued item
-      functionalHelpers.queueTimeout.isRunning = true
-      // Pick an item off the front of the queue, and thereby reduce the queue size
-      const toRun = functionalHelpers.queueTimeout.queue.shift()
-      // Get the timeout ID when it has begun
-      toRun.id = setTimeout(() => {
-        // Run the function after the provided timeout
-        toRun.result = toRun.func(...toRun.args)
-        // Reset isRunning flag
-        functionalHelpers.queueTimeout.isRunning = false
-        // Re-run the queue which will get the next queued item if there is one
-        return functionalHelpers.queueTimeout(false)
-      }, toRun.timeout)
-      // Return whatever object we have for the current queued item being processed, likely incomplete because the
-      // function will complete in the future
-      return toRun
-    }
-    // Return newly created queuedItem
-    return queueItem
-  }
+
+    return args.length === 2 ? mergeObjectsBase(mergeObjectsMutable, args[0], args[1], true) : args.length === 1 ? args[0] : args.reduce(curry(mergeObjectsBase)(mergeObjectsMutable), {});
+  };
+
+  objectHelpers.mergeObjectsMutable = mergeObjectsMutable;
+  /**
+   * @file All of the functionalHelpers system functions for stringing together functions and simplifying logic.
+   * @author Joshua Heagle <joshuaheagle@gmail.com>
+   * @version 1.0.0
+   */
 
   /**
-   * Either export all functions to be exported, or assign to the Window context
-   */
-  if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-      exports = module.exports = functionalHelpers
-    }
-    exports = Object.assign(exports, functionalHelpers)
-  }
-}).call(this || window || {})
-// Use the external context to assign this, which will be Window if rendered via browser
+     * Store a reference to this scope which will be Window if rendered via browser
+     */
 
+  var root = this || {};
+  /**
+     * Store reference to any pre-existing module of the same name
+     * @type {module|*}
+     */
+
+  var previousFunctionalHelpers = root.functionalHelpers || {};
+  /**
+     * All methods exported from this module are encapsulated within functionalHelpers.
+     * @author Joshua Heagle <joshuaheagle@gmail.com>
+     * @typedef {Object} functionalHelpers
+     * @module functionalHelpers
+     */
+
+  var functionalHelpers = {};
+  root.functionalHelpers = functionalHelpers;
+  /**
+     * Return a reference to this library while preserving the original same-named library
+     * @function noConflict
+     * @returns {functionalHelpers}
+     */
+
+  functionalHelpers.noConflict = function () {
+    root.functionalHelpers = previousFunctionalHelpers;
+    return functionalHelpers;
+  };
+
+  Object.assign(functionalHelpers, arrayHelpers, functionHelpers, numberHelpers, objectHelpers);
+  this.functionalHelpers = functionalHelpers;
+}).call(this);
 "use strict";
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
@@ -1081,7 +1284,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
 
   var addUniqueToArray = function addUniqueToArray(item, array) {
-    return !functionalHelpers.inArray(array, item) ? array.concat([item]) : array;
+    return !array.includes(item) ? array.concat([item]) : array;
   };
   /**
    * Provide a DomItem to be appended to a parent item, return the DomItem.
@@ -1171,7 +1374,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
   jDomCore.retrieveListener = function (listenerName) {
     var parent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : jDomObjects.documentItem;
-    return functionalHelpers.inArray(Object.keys(parent.eventListeners), listenerName) ? parent.eventListeners[listenerName] : {};
+    return Object.keys(parent.eventListeners).includes(listenerName) ? parent.eventListeners[listenerName] : {};
   };
   /**
    * Provide compatibility for using the options parameter of addEventListener

@@ -7,7 +7,8 @@
   "license": "ISC",
   "scripts": {
     "start": "node src/js/main.js",
-    "test": "jest"
+    "test": "jest",
+    "readme": "echo '# battleship\nThis is just a fun project creating a game of battleship. Experimenting with functional programming and ES6 features.\n\nA relatively recent version is running at https: //joshuaheagle.com/battleship/\n' > README.md && jsdoc2md src/js/*.js >> README.md"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
@@ -29,10 +30,11 @@
     "gulp-concat": "^2.6.1",
     "gulp-if": "^3.0.0",
     "gulp-imagemin": "^7.1.0",
-    "gulp-sass": "^4.0.2",
+    "gulp-sass": "^4.1.0",
     "gulp-uglify-es": "^2.0.0",
     "gulp-useref": "^4.0.1",
-    "jest": "^25.2.7",
+    "jest": "^25.4.0",
+    "jsdoc-to-markdown": "^5.0.3",
     "standard": "^14.3.3"
   },
   "dependencies": {
