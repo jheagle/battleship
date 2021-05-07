@@ -1,7 +1,8 @@
 # battleship
+
 This is just a fun project creating a game of battleship. Experimenting with functional programming and ES6 features.
 
-A relatively recent version is running at [battleship live sample](https://joshuaheagle.com/battleship/)
+A relatively recent version is running at https: //joshuaheagle.com/battleship/
 
 ## Modules
 
@@ -497,8 +498,7 @@ Return a reference to this library while preserving the original same-named libr
 <a name="module_setup..beginRound"></a>
 
 ### setup~beginRound(e, mainForm) ⇒ <code>boolean</code>
-Logic for setting up and starting a new round
-(selects random start player and calls computer attack if it is AI starting)
+Logic for setting up and starting a new round(selects random start player and calls computer attack if it is AI starting)
 
 **Kind**: inner method of [<code>setup</code>](#module_setup)  
 

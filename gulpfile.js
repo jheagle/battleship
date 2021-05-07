@@ -1,15 +1,17 @@
 const babel = require('gulp-babel')
+const browserify = require('browserify')
 const browserSync = require('browser-sync').create()
+const buffer = require('vinyl-buffer')
 const cache = require('gulp-cache')
-const concat = require('gulp-concat')
-// const cssnano = require('gulp-cssnano')
+const cssnano = require('gulp-cssnano')
 const del = require('del')
+const eslint = require('gulp-eslint')
 const gulp = require('gulp')
-const gulpIf = require('gulp-if')
 const imagemin = require('gulp-imagemin')
+const rename = require('gulp-rename')
 const sass = require('gulp-sass')
+const source = require('vinyl-source-stream')
 const uglify = require('gulp-uglify-es').default
-const useref = require('gulp-useref')
 
 // Development Tasks
 // -----------------
@@ -18,39 +20,77 @@ const useref = require('gulp-useref')
 gulp.task('browser-sync', () => {
   browserSync.init({
     server: {
-      baseDir: 'dist'
+      baseDir: 'browser'
     }
   })
   gulp.watch('src/sass/**/*.+(scss|sass)', gulp.series('sass'))
-  gulp.watch('src/*.html', gulp.series('useref')).on('change', browserSync.reload)
-  gulp.watch('src/js/**/*.js', gulp.series('useref')).on('change', browserSync.reload)
+  gulp.watch('src/*.html', gulp.series('dist:quick', 'bundle:quick')).on('change', browserSync.reload)
+  gulp.watch('src/js/**/*.js', gulp.series('dist:quick', 'bundle:quick')).on('change', browserSync.reload)
 })
 
 // Compile sass into CSS & auto-inject into browsers
 gulp.task('sass', () => gulp.src('src/sass/**/*.+(scss|sass)')
   .pipe(sass().on('error', sass.logError)) // Passes it through a gulp-sass, log errors to console
-  .pipe(gulp.dest('src/css'))
+  .pipe(gulp.dest('browser/css'))
+  .pipe(cssnano())
+  .pipe(rename({ extname: '.min.css' }))
+  .pipe(gulp.dest('browser/css'))
   .pipe(browserSync.stream())
 )
 
 // Optimizing CSS and JavaScript
-gulp.task('useref', () => gulp.src('src/*.html')
-  .pipe(useref())
-  .pipe(gulpIf('*.js', babel({
-    presets: ['@babel/preset-env']
-  })))
-  .pipe(gulpIf('*.js', uglify()))
-  // .pipe(gulpIf('*.css', cssnano()))
+gulp.task('dist:quick', () => gulp.src('src/js/**/*.js')
+  .pipe(babel())
   .pipe(gulp.dest('dist'))
 )
 
+gulp.task('bundle:quick', () => browserify('dist/main.js')
+  .bundle()
+  .pipe(source('main.js'))
+  .pipe(buffer())
+  .pipe(gulp.dest('browser/js'))
+)
+
+gulp.task('dist', () => gulp.src('src/js/**/*.js')
+  .pipe(babel())
+  .pipe(eslint({ fix: true }))
+  .pipe(eslint.format())
+  .pipe(gulp.dest('dist'))
+  .pipe(uglify())
+  .pipe(rename({ extname: '.min.js' }))
+  .pipe(gulp.dest('dist'))
+)
+
+gulp.task('bundle', () => browserify('dist/main.js')
+  .bundle()
+  .pipe(source('main.js'))
+  .pipe(buffer())
+  .pipe(eslint({ fix: true }))
+  .pipe(eslint.format())
+  .pipe(gulp.dest('browser/js'))
+  .pipe(uglify())
+  .pipe(rename({ extname: '.min.js' }))
+  .pipe(gulp.dest('browser/js'))
+)
+
+gulp.task('html', () => gulp.src('src/*.html')
+  .pipe(gulp.dest('browser'))
+)
+
 // Build vendor file
-gulp.task('vendor', () => gulp.src([
-  'node_modules/functional-helpers/browser/main.js',
-  'node_modules/json-dom/browser/json-dom.js'
+gulp.task('vendor', () => browserify([
+  'node_modules/functional-helpers/dist/main.js',
+  'node_modules/json-dom/dist/main.js'
 ])
-  .pipe(concat('vendor.js'))
+  .bundle()
+  .pipe(source('vendor.js'))
+  .pipe(buffer())
+  .pipe(eslint({ fix: true }))
+  .pipe(eslint.format())
   .pipe(gulp.dest('src/js'))
+  .pipe(gulp.dest('prep/js'))
+  .pipe(uglify())
+  .pipe(rename({ extname: '.min.js' }))
   .pipe(gulp.dest('dist/js'))
 )
 
@@ -69,17 +109,24 @@ gulp.task('fonts', () => gulp.src('src/fonts/**/*').pipe(gulp.dest('dist/fonts')
 
 // Cleaning
 gulp.task('clean:dist', () => del(['dist/**/*', '!dist/img', '!dist/img/**/*']))
-gulp.task('clean:vendor', () => del('src/js/vendor.js'))
+gulp.task('clean:browser', () => del(['browser/**/*', '!browser/img', '!browser/img/**/*']))
 gulp.task('clean:cache', () => cache.clearAll())
-gulp.task('clean', gulp.parallel('clean:dist', 'clean:vendor', 'clean:cache'))
+gulp.task('clean', gulp.parallel('clean:dist', 'clean:browser', 'clean:cache'))
 
 gulp.task(
   'default',
   gulp.series(
-    'sass',
-    'useref',
-    'vendor',
+    gulp.parallel('sass', 'dist:quick', 'html'),
+    'bundle:quick',
     'browser-sync'
+  )
+)
+
+gulp.task(
+  'quick',
+  gulp.series(
+    gulp.parallel('sass', 'dist:quick', 'html'),
+    'bundle:quick'
   )
 )
 
@@ -87,8 +134,7 @@ gulp.task(
   'build',
   gulp.series(
     'clean',
-    'sass',
-    gulp.parallel('useref', 'images', 'fonts'),
-    'vendor'
+    gulp.parallel('sass', 'dist', 'html'),
+    gulp.parallel('bundle', 'images', 'fonts')
   )
 )
