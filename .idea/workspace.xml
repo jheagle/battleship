@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e7d7cd96-d705-45d5-ad6e-57d0ee9ce87d" name="Default Changelist" comment="Merge in dependency updates and minimal changes from refactor work.">
+      <change afterPath="$PROJECT_DIR$/.browserslistrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/MAIN.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-chrome-192x192.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android-chrome-512x512.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apple-touch-icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/babel.config.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/actions.js.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/functions.js.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/layout.js.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/main.js.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/module-actions.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/module-functions.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/module-layout.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/module-main.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/module-pieces.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/module-setup.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/pieces.js.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/setup.js.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/favicon-16x16.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/favicon-32x32.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/favicon.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/site.webmanifest" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.eslintrc.json" beforeDir="false" afterPath="$PROJECT_DIR$/.eslintrc.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/functions.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/layouts.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/main.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/vendor.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gulpfile.js" beforeDir="false" afterPath="$PROJECT_DIR$/gulpfile.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/css/game-pieces.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/game-pieces.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/css/layouts-custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/layouts-custom.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/css/layouts.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/layouts.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/css/matrix.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/matrix.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sass/game-pieces.sass" beforeDir="false" afterPath="$PROJECT_DIR$/src/sass/game-pieces.sass" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sass/layouts-custom.sass" beforeDir="false" afterPath="$PROJECT_DIR$/src/sass/layouts-custom.sass" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sass/layouts.sass" beforeDir="false" afterPath="$PROJECT_DIR$/src/sass/layouts.sass" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sass/matrix.sass" beforeDir="false" afterPath="$PROJECT_DIR$/src/sass/matrix.sass" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="master" />
+                    <option name="lastUsedInstant" value="1620418743" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="use-import-statements-and-bundler" />
+                    <option name="lastUsedInstant" value="1620411963" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="ProjectId" id="1sBl4g5UIXNuWu4qgKMjvJf5pqL" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.16.1" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.14.44" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../functional-helpers.local" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.standard" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.standard" value="C:\Users\joshu\Sites\battleship.local\node_modules\standard" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path" value="wsl://Ubuntu-20.04@/home/jheagle/.nvm/versions/node/v14.16.1/bin/node" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="settings.nodejs" />
+    <property name="standardjs.codestyle.accepted" value="true" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e7d7cd96-d705-45d5-ad6e-57d0ee9ce87d" name="Default Changelist" comment="" />
+      <created>1620353680225</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1620353680225</updated>
+      <workItem from="1620353683689" duration="18000" />
+      <workItem from="1620353735930" duration="616000" />
+      <workItem from="1620405641910" duration="6063000" />
+      <workItem from="1620422152473" duration="1147000" />
+      <workItem from="1620429669125" duration="1582000" />
+    </task>
+    <task id="LOCAL-00001" summary="Bump dependency versions.">
+      <created>1620418328615</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1620418328615</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Merge in dependency updates and minimal changes from refactor work.">
+      <created>1620431641441</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1620431641441</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Bump dependency versions." />
+    <MESSAGE value="Merge in dependency updates and minimal changes from refactor work." />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge in dependency updates and minimal changes from refactor work." />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
