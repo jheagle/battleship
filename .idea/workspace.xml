@@ -1,54 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e7d7cd96-d705-45d5-ad6e-57d0ee9ce87d" name="Default Changelist" comment="Merge in dependency updates and minimal changes from refactor work.">
-      <change afterPath="$PROJECT_DIR$/.browserslistrc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MAIN.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android-chrome-192x192.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android-chrome-512x512.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apple-touch-icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/babel.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/actions.js.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/functions.js.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/layout.js.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/main.js.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/module-actions.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/module-functions.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/module-layout.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/module-main.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/module-pieces.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/module-setup.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/pieces.js.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/setup.js.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/favicon-16x16.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/favicon-32x32.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/favicon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/site.webmanifest" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.eslintrc.json" beforeDir="false" afterPath="$PROJECT_DIR$/.eslintrc.json" afterDir="false" />
+    <list default="true" id="e7d7cd96-d705-45d5-ad6e-57d0ee9ce87d" name="Default Changelist" comment="Update workspace.xml">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/js/functions.min.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/js/layouts.min.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/js/main.min.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/js/vendor.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gulpfile.js" beforeDir="false" afterPath="$PROJECT_DIR$/gulpfile.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/css/game-pieces.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/game-pieces.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/css/layouts-custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/layouts-custom.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/css/layouts.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/layouts.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/css/matrix.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/matrix.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sass/game-pieces.sass" beforeDir="false" afterPath="$PROJECT_DIR$/src/sass/game-pieces.sass" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sass/layouts-custom.sass" beforeDir="false" afterPath="$PROJECT_DIR$/src/sass/layouts-custom.sass" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sass/layouts.sass" beforeDir="false" afterPath="$PROJECT_DIR$/src/sass/layouts.sass" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sass/matrix.sass" beforeDir="false" afterPath="$PROJECT_DIR$/src/sass/matrix.sass" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +27,7 @@
                 <list>
                   <RecentBranch>
                     <option name="branchName" value="master" />
-                    <option name="lastUsedInstant" value="1620418743" />
+                    <option name="lastUsedInstant" value="1620439476" />
                   </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="use-import-statements-and-bundler" />
@@ -116,19 +72,6 @@
     <property name="standardjs.codestyle.accepted" value="true" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
-  <component name="RunManager">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -141,7 +84,8 @@
       <workItem from="1620353735930" duration="616000" />
       <workItem from="1620405641910" duration="6063000" />
       <workItem from="1620422152473" duration="1147000" />
-      <workItem from="1620429669125" duration="1582000" />
+      <workItem from="1620429669125" duration="2702000" />
+      <workItem from="1620439146924" duration="358000" />
     </task>
     <task id="LOCAL-00001" summary="Bump dependency versions.">
       <created>1620418328615</created>
@@ -157,7 +101,28 @@
       <option name="project" value="LOCAL" />
       <updated>1620431641441</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Merge in updates from master.">
+      <created>1620432517886</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1620432517886</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Delete browser and dist from git.">
+      <created>1620439330473</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1620439330473</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Update workspace.xml">
+      <created>1620439398615</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1620439398615</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -179,7 +144,10 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="Bump dependency versions." />
     <MESSAGE value="Merge in dependency updates and minimal changes from refactor work." />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge in dependency updates and minimal changes from refactor work." />
+    <MESSAGE value="Merge in updates from master." />
+    <MESSAGE value="Delete browser and dist from git." />
+    <MESSAGE value="Update workspace.xml" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update workspace.xml" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
