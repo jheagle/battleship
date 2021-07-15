@@ -1,14 +1,14 @@
-const gulp = require('gulp'),
-  browserSync = require('browser-sync').create(),
-  sass = require('gulp-sass'),
-  useref = require('gulp-useref'),
-  uglify = require('gulp-uglify-es').default,
-  gulpIf = require('gulp-if'),
-  cssnano = require('gulp-cssnano'),
-  imagemin = require('gulp-imagemin'),
-  cache = require('gulp-cache'),
-  del = require('del'),
-  babel = require('gulp-babel')
+const gulp = require('gulp')
+const browserSync = require('browser-sync').create()
+const sass = require('gulp-sass')(require('sass'))
+const useref = require('gulp-useref')
+const uglify = require('gulp-uglify-es').default
+const gulpIf = require('gulp-if')
+const cssnano = require('gulp-cssnano')
+const imagemin = require('gulp-imagemin')
+const cache = require('gulp-cache')
+const del = require('del')
+const babel = require('gulp-babel')
 
 // Development Tasks
 // -----------------
@@ -57,28 +57,28 @@ gulp.task('images', () =>
 gulp.task('fonts', () => gulp.src('src/fonts/**/*').pipe(gulp.dest('dist/fonts')))
 
 // Cleaning
-gulp.task('clean', (
+gulp.task('clean',
   async () => {
     await del('dist')
     cache.clearAll()
-  })
+  }
 )
 
-gulp.task('clean:dist', (
+gulp.task('clean:dist',
   async () =>
     await del(['dist/**/*', '!dist/img', '!dist/img/**/*'])
-))
+)
 
 gulp.task('default', gulp.series(
   'sass',
   'useref',
-  'browser-sync',
-  )
+  'browser-sync'
+)
 )
 
 gulp.task('build', gulp.series(
   'clean:dist',
   'sass',
-  gulp.parallel('useref', 'images', 'fonts'),
-  )
+  gulp.parallel('useref', 'images', 'fonts')
+)
 )
