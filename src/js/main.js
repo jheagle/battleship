@@ -40,7 +40,7 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('../jDom/core/dom/objects.js')
+      jDomObjects = require('./jDom/core/dom/objects.js')
     } else {
       console.error('main.js requires jDom/core/dom/objects')
     }
@@ -57,7 +57,7 @@
    */
   if (typeof jDomCoreDom === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCoreDom = require('../jDom/core/dom/core.js')
+      jDomCoreDom = require('./jDom/core/dom/core.js')
     } else {
       console.error('main.js requires jDom/core/dom/core')
     }

@@ -41,7 +41,7 @@
    */
   if (typeof jDomCore === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomCore = require('../jDom/core/core.js')
+      jDomCore = require('./jDom/core/core.js')
     } else {
       console.error('pieces.js requires jDom/core/core')
     }
@@ -58,7 +58,7 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('../jDom/core/dom/objects.js')
+      jDomObjects = require('./jDom/core/dom/objects.js')
     } else {
       console.error('setup.js requires jDom/core/dom/objects')
     }
@@ -75,7 +75,7 @@
    */
   if (typeof jDomMatrixObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomMatrixObjects = require('../jDom/matrix/objects.js')
+      jDomMatrixObjects = require('./jDom/matrix/objects.js')
     } else {
       console.error('pieces.js requires jDom/matrix/objects')
     }
@@ -140,7 +140,7 @@
     status: 100,
     turnCnt: 0,
     attacker: false,
-    attacks: {hit: 0, miss: 0, sunk: 0},
+    attacks: { hit: 0, miss: 0, sunk: 0 },
     board: board,
     shipFleet: [],
     playerStats: {},

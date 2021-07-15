@@ -1,0 +1,1 @@
+.player{color:#fff;font-size:1.6rem;display:inline-block;min-width:370px;min-width:37em;width:50%;margin:10px auto;margin:1em auto}.player ul{list-style:none;padding:0}.boards{margin:0 auto 3rem;padding-top:3rem}.matrix{transition:all .4s linear .1s}.matrix .layer{transition:all .4s linear}.matrix .layer .row .column{transition:all .25s cubic-bezier(.19,1,.22,1) 50ms}

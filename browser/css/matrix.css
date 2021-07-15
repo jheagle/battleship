@@ -1,0 +1,28 @@
+.matrix {
+  font-size: 1rem;
+  position: relative;
+}
+.matrix .layer {
+  display: inline-block;
+  position: relative;
+  margin: 0 auto;
+  border: 2px solid #333;
+  border: 0.2em solid #333;
+}
+.matrix .layer .row {
+  display: flex;
+}
+.matrix .layer .row .column {
+  height: 35px;
+  height: 3.5em;
+  width: 35px;
+  width: 3.5em;
+  border: 1px solid #333;
+  border: 0.1em solid #333;
+  background-color: blue;
+  cursor: pointer;
+  display: inline-block;
+}
+.matrix .layer .row .column:hover {
+  opacity: 0.7;
+}

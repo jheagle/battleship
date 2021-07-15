@@ -41,7 +41,7 @@
    */
   if (typeof jDomObjects === 'undefined') {
     if (typeof require !== 'undefined') {
-      jDomObjects = require('../jDom/core/dom/objects.js')
+      jDomObjects = require('./jDom/core/dom/objects.js')
     } else {
       console.error('layout.js requires jDomObjects')
     }
