@@ -68,7 +68,7 @@
    * Default properties for a tile in the battleship game.
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  const gameTile = () => jsonDom.jDomObjects.createDomItem({
+  const gameTile = () => jsonDom.createDomItem({
     hasShip: false,
     isHit: false
   })
@@ -78,7 +78,7 @@
    * @function waterTile
    * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}, point: {}}}
    */
-  gamePieces.waterTile = () => functionalHelpers.mergeObjects(gameTile(), jsonDom.jDomMatrixObjects.tile())
+  gamePieces.waterTile = () => functionalHelpers.mergeObjects(gameTile(), jsonDom.tile())
 
   /**
    * Set status and custom properties for tiles that have a ship

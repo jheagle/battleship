@@ -115,6 +115,8 @@
     }
   }
 
+  const queueTimeout = functionalHelpers.queueTimeout([])
+
   /**
    * Update view based on actions performed
    * @param config
@@ -126,11 +128,11 @@
     // Add any other style changes to the cell
     if (isRobot) {
       gameActions.attackFleet.isLocked = true
-      functionalHelpers.queueTimeout(() => {
+      queueTimeout(() => {
         if (config.isHit) {
           config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
         }
-        config = jsonDom.jDomCore.updateElement(config)
+        config = jsonDom.updateElement(config)
         gameActions.attackFleet.isLocked = false
         return config
       }, 0)
@@ -138,7 +140,7 @@
       if (config.isHit) {
         config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
       }
-      config = jsonDom.jDomCore.updateElement(config)
+      config = jsonDom.updateElement(config)
     }
     return config
   }
@@ -185,7 +187,7 @@
    * @returns {*}
    */
   const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
-    player.playerStats = jsonDom.jDomCore.updateElements(functionalHelpers.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
+    player.playerStats = jsonDom.updateElements(functionalHelpers.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
     // console.log(gamePieces.playerStats(player, status).children[0].attributes.innerHTML)
     return player
   }
@@ -213,9 +215,9 @@
       gameActions.attackFleet.isLocked = true
       if (player.attacker) {
         if (!player.isRobot) {
-          functionalHelpers.queueTimeout(() => {
+          queueTimeout(() => {
             gameActions.attackFleet.isLocked = false
-            return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.jDomCore.updateElement(functionalHelpers.mergeObjects(c, {
+            return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(functionalHelpers.mergeObjects(c, {
               attributes: {
                 style: {
                   width: '17px',
@@ -227,9 +229,9 @@
         }
         ++player.turnCnt
       } else {
-        functionalHelpers.queueTimeout(() => {
+        queueTimeout(() => {
           gameActions.attackFleet.isLocked = false
-          return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.jDomCore.updateElement(functionalHelpers.mergeObjects(c, {
+          return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(functionalHelpers.mergeObjects(c, {
             attributes: {
               style: {
                 width: '35px',
@@ -240,7 +242,7 @@
         }, 0)
       }
     }
-    const result = functionalHelpers.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
+    const result = queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
     return result.result || player
   }
 
@@ -250,11 +252,11 @@
    * @returns {Array.<*>}
    */
   const endGame = (winner) => {
-    const parent = jsonDom.jDomCore.getTopParentItem(winner)
+    const parent = jsonDom.getTopParentItem(winner)
     const players = winner.parentItem.children
     players.map(player => updatePlayerStats(player))
     winner = updatePlayerStats(winner, 'WINNER')
-    const finalScore = jsonDom.jDomCore.renderHTML(gameLayout.finalScore(players), parent)
+    const finalScore = jsonDom.renderHTML(gameLayout.finalScore(players), parent)
     finalScore.children[0].children.map(child => child.attributes.innerHTML)
     console.log('Winner', winner)
     return [winner]
@@ -294,11 +296,11 @@
     let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
     attacker = gameActions.updatePlayer(attacker, hitShip, sunkShip)
     if (players.length < 2) {
-      return functionalHelpers.queueTimeout(() => endGame(players[0]), 200)
+      return queueTimeout(() => endGame(players[0]), 200)
     }
     const nextAttacker = getNextAttacker(attacker, players, hitShip)
     if (nextAttacker.isRobot) {
-      functionalHelpers.queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
+      queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
     }
     return players
   }
@@ -311,8 +313,8 @@
    */
   gameActions.attackFleet = (target) => {
     gameActions.attackFleet.isLocked = gameActions.attackFleet.isLocked || false
-    let player = jsonDom.jDomCore.getParentsByClass('player', target)[0]
-    const players = jsonDom.jDomCore.getParentsByClass('boards', target)[0].children
+    let player = jsonDom.getParentsByClass('player', target)[0]
+    const players = jsonDom.getParentsByClass('boards', target)[0].children
     // Player cannot attack themselves (current attacker) or if they have bad status
     if (player.status <= 0 || player.attacker || gameActions.attackFleet.isLocked) {
       return players
@@ -327,7 +329,7 @@
       player.shipFleet.map((ship) => {
         // Get all healthy ships
         const healthy = ship.parts.filter((part) => {
-          if (jsonDom.jDomMatrixCore.areEqualPoints(part.point, target.point)) {
+          if (jsonDom.areEqualPoints(part.point, target.point)) {
             hitShip = ship
           }
           return !part.isHit
@@ -356,7 +358,7 @@
    * @param target
    * @returns {*}
    */
-  gameActions.attackListener = (e, target) => gameActions.attackFleet(jsonDom.jDomMatrixCore.getDomItemFromElement(e.target, target))
+  gameActions.attackListener = (e, target) => gameActions.attackFleet(jsonDom.getDomItemFromElement(e.target, target))
 
   /**
    * Choose which player to attack.
@@ -389,20 +391,20 @@
       if (moreBrokenShips.length) {
         // If there are more broken ships, attack the parts between hit points first.
         for (let i = 0; i < hitParts.length; ++i) {
-          const targetPoints = jsonDom.jDomMatrixCore.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
+          const targetPoints = jsonDom.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
           if (targetPoints.false.length) {
             displayTargets(targetPoints.false, targetPoints.false[0], victim)
-            return jsonDom.jDomMatrixCore.getDomItemFromPoint(targetPoints.false[0], victim.board)
+            return jsonDom.getDomItemFromPoint(targetPoints.false[0], victim.board)
           }
         }
         // If there are no points between, attack the outer points first.
-        const pntDiff = jsonDom.jDomMatrixCore.pointDifference(hitParts[0].point, hitParts[1].point)
-        const dirPnts = (pntDiff.x > 0 ? [jsonDom.jDomMatrixObjects.point(-1, 0, 0), jsonDom.jDomMatrixObjects.point(1, 0, 0)] : [jsonDom.jDomMatrixObjects.point(0, -1, 0), jsonDom.jDomMatrixObjects.point(0, 1, 0)]).map((p, i) => jsonDom.jDomMatrixCore.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => jsonDom.jDomMatrixCore.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
+        const pntDiff = jsonDom.pointDifference(hitParts[0].point, hitParts[1].point)
+        const dirPnts = (pntDiff.x > 0 ? [jsonDom.point(-1, 0, 0), jsonDom.point(1, 0, 0)] : [jsonDom.point(0, -1, 0), jsonDom.point(0, 1, 0)]).map((p, i) => jsonDom.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => jsonDom.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
         // Check outer points which are valid and not hit.
         const target = dirPnts.reduce((a, b) => gameUtils.checkIfHitCell(a, victim.board) ? b : a)
         if (target) {
           displayTargets(dirPnts, target, victim)
-          return jsonDom.jDomMatrixCore.getDomItemFromPoint(target, victim.board)
+          return jsonDom.getDomItemFromPoint(target, victim.board)
         }
       }
       // If there is only one hit part, then set that as the lastTarget for detecting adjacent parts.
@@ -413,7 +415,7 @@
     displayTargets(finalTargets, target, victim)
 
     // If there are available targets then hit one at random
-    return jsonDom.jDomMatrixCore.getDomItemFromPoint(target, victim.board)
+    return jsonDom.getDomItemFromPoint(target, victim.board)
   }
 
   /**
@@ -425,8 +427,8 @@
    */
   const displayTargets = (targets, target, victim) => {
     return [
-      functionalHelpers.queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
-      functionalHelpers.queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
+      queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
+      queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
     ]
   }
 
@@ -436,11 +438,11 @@
    * @returns {void|Array|Object|*}
    */
   const resetTargets = data => {
-    data.victim.board.children.map(l => jsonDom.jDomCore.updateElement(functionalHelpers.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
-    data.targets.forEach(t => jsonDom.jDomCore.updateElement(functionalHelpers.mergeObjects(jsonDom.jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
+    data.victim.board.children.map(l => jsonDom.updateElement(functionalHelpers.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
+    data.targets.forEach(t => jsonDom.updateElement(functionalHelpers.mergeObjects(jsonDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
     if (!data.target) {
-      data.victim.board.children.map(l => jsonDom.jDomCore.updateElement(functionalHelpers.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
-      data.targets.forEach(t => jsonDom.jDomCore.updateElement(functionalHelpers.mergeObjects(jsonDom.jDomMatrixCore.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
+      data.victim.board.children.map(l => jsonDom.updateElement(functionalHelpers.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
+      data.targets.forEach(t => jsonDom.updateElement(functionalHelpers.mergeObjects(jsonDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
     }
     return data
   }

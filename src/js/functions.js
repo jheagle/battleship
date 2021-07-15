@@ -71,7 +71,7 @@
    * @param matrix
    * @returns {Array}
    */
-  gameUtils.getAllNonHitCells = matrix => jsonDom.jDomMatrixCore.getAllPoints(matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
+  gameUtils.getAllNonHitCells = matrix => jsonDom.getAllPoints(matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
 
   /**
    * Get the points which have same edges with the provided point and are not hit.
@@ -80,7 +80,7 @@
    * @param matrix
    * @returns {Array}
    */
-  gameUtils.getAdjEdgeNonHitCells = (pnt, matrix) => jsonDom.jDomMatrixCore.adjacentEdgePoints(pnt, matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
+  gameUtils.getAdjEdgeNonHitCells = (pnt, matrix) => jsonDom.adjacentEdgePoints(pnt, matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
 
   /**
    * Given an array of items, return the item with the lowest status property (at the end of the array)

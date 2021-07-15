@@ -84,7 +84,7 @@
    * Create new private reference to the document
    * @typedef {module:json-dom.documentItem} documentItem
    */
-  const documentItem = gameStart.main(jsonDom.jDomObjects.documentDomItem({
+  const documentItem = gameStart.main(jsonDom.documentDomItem({
     beginRound: gameStart.beginRound,
     attackListener: gameActions.attackListener,
     restart: gameStart.restart
@@ -94,8 +94,8 @@
   // eslint-disable-next-line no-undef
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module
-    const form = jsonDom.jDomCore.getChildrenByClass('main-menu-form', documentItem.body)[0]
-    const submitBtn = jsonDom.jDomCore.getChildrenFromAttribute('type', 'submit', form)
+    const form = jsonDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
+    const submitBtn = jsonDom.getChildrenFromAttribute('type', 'submit', form)
     submitBtn[0].element.click()
   }
 

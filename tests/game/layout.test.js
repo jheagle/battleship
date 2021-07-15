@@ -1,5 +1,8 @@
-const jDomCore = require('json-dom').jDomCore
-const jDomLayout = require('../../src/js/layout.js')
+/**
+ * @jest-environment jsdom
+ */
+import jDomCore from 'json-dom'
+import jDomLayout from '../../src/js/layout.js'
 
 // boards
 // finalScore

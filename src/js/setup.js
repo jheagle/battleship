@@ -148,7 +148,7 @@
    * @param lengths
    * @param shipLength
    */
-  const selectShipDirection = (lengths, shipLength) => jsonDom.jDomMatrixCore.randDirection([jsonDom.jDomMatrixObjects.point(1, 0, 0), jsonDom.jDomMatrixObjects.point(0, 1, 0), jsonDom.jDomMatrixObjects.point(0, 0, 1)].filter(p => lengths[jsonDom.jDomMatrixCore.getFirstAxisOfCoordinate(p, 1)] > shipLength))
+  const selectShipDirection = (lengths, shipLength) => jsonDom.randDirection([jsonDom.point(1, 0, 0), jsonDom.point(0, 1, 0), jsonDom.point(0, 0, 1)].filter(p => lengths[jsonDom.getFirstAxisOfCoordinate(p, 1)] > shipLength))
 
   /**
    *
@@ -158,7 +158,7 @@
    * @returns {{start: {x: number, y: number, z: number}, dir}}
    */
   const randomStartDir = (lengths, shipLength, dir = selectShipDirection(lengths, shipLength)) => ({
-    start: jsonDom.jDomMatrixCore.randomStart(shipLength, dir, lengths),
+    start: jsonDom.randomStart(shipLength, dir, lengths),
     dir: dir
   })
 
@@ -172,7 +172,7 @@
    * @returns {Array}
    */
   const generateStartEnd = (matrix, shipLength, lengths, startDir = randomStartDir(lengths, shipLength)) =>
-    jsonDom.jDomMatrixCore.getHighestAbsoluteCoordinate(startDir.dir) === 0 ? [jsonDom.jDomMatrixObjects.point(0, 0, 0), jsonDom.jDomMatrixObjects.point(0, 0, 0)] : jsonDom.jDomMatrixCore.checkInBetween(...[startDir.start, jsonDom.jDomMatrixCore.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jsonDom.jDomMatrixCore.lineEndPoint(startDir.start, shipLength, startDir.dir)]
+    jsonDom.getHighestAbsoluteCoordinate(startDir.dir) === 0 ? [jsonDom.point(0, 0, 0), jsonDom.point(0, 0, 0)] : jsonDom.checkInBetween(...[startDir.start, jsonDom.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jsonDom.lineEndPoint(startDir.start, shipLength, startDir.dir)]
 
   /**
    * Create a series of randomly placed ships based on the provided shipLengths.
@@ -182,7 +182,7 @@
    * @param {boolean} [view=false]
    * @returns {Array}
    */
-  const generateRandomFleet = (ships, matrix, view = false) => ships.map(ship => buildShip(ship, jsonDom.jDomMatrixCore.getPointsLine(...generateStartEnd(matrix, ship.size, jsonDom.jDomMatrixCore.getAxisLengths(matrix))), matrix, view))
+  const generateRandomFleet = (ships, matrix, view = false) => ships.map(ship => buildShip(ship, jsonDom.getPointsLine(...generateStartEnd(matrix, ship.size, jsonDom.getAxisLengths(matrix))), matrix, view))
 
   /**
    * Create a default fleet using the standard battleship lengths.
@@ -214,7 +214,7 @@
     }
     const player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
     player.isRobot = humans <= 0
-    player.board = jsonDom.jDomMatrixCore.bindPointData(jsonDom.jDomMatrixObjects.square({
+    player.board = jsonDom.bindPointData(jsonDom.square({
       x: [
         gamePieces.waterTile(player, players)
       ],
@@ -229,6 +229,8 @@
     player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
     player.playerStats = gamePieces.playerStats(player, `${Math.round(player.status * 100) / 100}%`)
     player.children = [player.board, player.playerStats]
+    player.board.parentItem = player
+    player.playerStats.parentItem = player
     players.push(player)
     return buildPlayers(--humans, humans < 0 ? --robots : robots, players)
   }
@@ -247,13 +249,13 @@
     }
     console.log('beginRound', e.eventPhase, e.type)
     e.preventDefault()
-    const parent = jsonDom.jDomCore.getTopParentItem(mainForm)
-    let humans = parseInt(jsonDom.jDomCore.getChildrenByName('human-players', mainForm)[0].element.value)
-    let robots = parseInt(jsonDom.jDomCore.getChildrenByName('robot-players', mainForm)[0].element.value)
+    const parent = jsonDom.getTopParentItem(mainForm)
+    let humans = parseInt(jsonDom.getChildrenByName('human-players', mainForm)[0].element.value)
+    let robots = parseInt(jsonDom.getChildrenByName('robot-players', mainForm)[0].element.value)
     if (humans < 0 || humans > 100 || robots < 0 || robots > 100) {
       return false
     }
-    const firstGoesFirst = jsonDom.jDomCore.getChildrenByName('first-go-first', mainForm)[0].element.checked
+    const firstGoesFirst = jsonDom.getChildrenByName('first-go-first', mainForm)[0].element.checked
     humans = humans < 0 ? 0 : humans
     if (humans === 0) {
       robots = robots < 2 ? 2 : robots
@@ -261,8 +263,12 @@
     if (humans === 1) {
       robots = robots < 1 ? 1 : robots
     }
-    jsonDom.jDomCore.removeChild(jsonDom.jDomCore.getChildrenByClass('main-menu', parent.body)[0], parent.body)
-    const players = jsonDom.jDomCore.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
+    jsonDom.removeChild(jsonDom.getChildrenByClass('main-menu', parent.body)[0], parent.body)
+    const players = jsonDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
+    players.forEach(player => {
+      player.board = player.children[0]
+      player.playerStats = player.children[1]
+    })
     const firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[functionalHelpers.randomInteger(players.length)])
     if (firstAttacker.isRobot) {
       gameActions.computerAttack(firstAttacker, players)
@@ -278,9 +284,9 @@
    */
   gameStart.main = (parent) => {
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
-      jsonDom.jDomCore.removeChild(parent.body.children[i], parent.body)
+      jsonDom.removeChild(parent.body.children[i], parent.body)
     }
-    jsonDom.jDomCore.renderHTML(gameLayout.mainMenu(), parent)
+    jsonDom.renderHTML(gameLayout.mainMenu(), parent)
     return parent
   }
 
@@ -289,7 +295,7 @@
    * @param e
    * @param button
    */
-  gameStart.restart = (e, button) => gameStart.main(jsonDom.jDomCore.getTopParentItem(button))
+  gameStart.restart = (e, button) => gameStart.main(jsonDom.getTopParentItem(button))
 
   /**
    * Either export all functions to be exported, or assign to the Window context

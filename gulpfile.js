@@ -9,7 +9,7 @@ const eslint = require('gulp-eslint')
 const gulp = require('gulp')
 const imagemin = require('gulp-imagemin')
 const rename = require('gulp-rename')
-const sass = require('gulp-sass')
+const sass = require('gulp-sass')(require('sass'))
 const source = require('vinyl-source-stream')
 const uglify = require('gulp-uglify-es').default
 
@@ -87,11 +87,10 @@ gulp.task('vendor', () => browserify([
   .pipe(buffer())
   .pipe(eslint({ fix: true }))
   .pipe(eslint.format())
-  .pipe(gulp.dest('src/js'))
-  .pipe(gulp.dest('prep/js'))
+  .pipe(gulp.dest('src/js/'))
   .pipe(uglify())
   .pipe(rename({ extname: '.min.js' }))
-  .pipe(gulp.dest('dist/js'))
+  .pipe(gulp.dest('dist/js/'))
 )
 
 // Optimizing Images

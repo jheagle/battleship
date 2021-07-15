@@ -52,7 +52,7 @@
    * @function mainMenu
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.mainMenu = () => jsonDom.jDomObjects.createDomItem({
+  gameLayout.mainMenu = () => jsonDom.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'main-menu'
@@ -167,13 +167,20 @@
    * @param {Array} [players=[]]
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.boards = (players = []) => jsonDom.jDomObjects.createDomItem({
-    tagName: 'div',
-    attributes: {
-      className: 'boards'
-    },
-    children: players
-  })
+  gameLayout.boards = (players = []) => {
+    const boards = jsonDom.createDomItem({
+      tagName: 'div',
+      attributes: {
+        className: 'boards'
+      },
+      children: []
+    })
+    boards.children = players.map(player => {
+      player.parentItem = boards
+      return player
+    })
+    return boards
+  }
 
   /**
    * Display the final scores after a game has ended and have a button to restart.
@@ -181,7 +188,7 @@
    * @param {Array} players
    * @returns {module:jDom/core/dom/objects.DomItem}
    */
-  gameLayout.finalScore = (players) => jsonDom.jDomObjects.createDomItem({
+  gameLayout.finalScore = (players) => jsonDom.createDomItem({
     tagName: 'div',
     attributes: {
       className: 'final-scores'
