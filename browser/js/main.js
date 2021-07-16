@@ -4976,35 +4976,7 @@
    * @typedef {*|module:jDom/core/dom/objects} jDomObjects
    */
 
-      let jDomObjects = root.jDomObjects
-      /**
-   * If jDomObjects remains undefined, attempt to retrieve it as a module
-   */
-
-      if (typeof jDomObjects === 'undefined') {
-        if (typeof require !== 'undefined') {
-          jDomObjects = require('./jDom/core/dom/objects.js')
-        } else {
-          console.error('main.js requires jDom/core/dom/objects')
-        }
-      }
-      /**
-   * Verify availability of jDomCoreDom
-   * @typedef {*|module:jDom/core/dom/core} jDomCoreDom
-   */
-
-      let jDomCoreDom = root.jDomCoreDom
-      /**
-   * If jDomCoreDom remains undefined, attempt to retrieve it as a module
-   */
-
-      if (typeof jDomCoreDom === 'undefined') {
-        if (typeof require !== 'undefined') {
-          jDomCoreDom = require('./jDom/core/dom/core.js')
-        } else {
-          console.error('main.js requires jDom/core/dom/core')
-        }
-      }
+      const jsonDom = root.jsonDom
       /**
    * Verify availability of gameActions
    * @typedef {*|module:game/actions} gameActions
@@ -5044,7 +5016,7 @@
    * @typedef {module:jDom/core/dom/objects.documentItem} documentItem
    */
 
-      const documentItem = gameStart.main(jDomObjects.documentDomItem({
+      const documentItem = gameStart.main(jsonDom.documentDomItem({
         beginRound: gameStart.beginRound,
         attackListener: gameActions.attackListener,
         restart: gameStart.restart
@@ -5053,8 +5025,8 @@
 
       if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
         // Trigger game to start if running as node module
-        const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
-        const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form)
+        const form = jsonDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
+        const submitBtn = jsonDom.getChildrenFromAttribute('type', 'submit', form)
         submitBtn[0].element.click()
       }
       /**
@@ -5069,7 +5041,7 @@
         exports = Object.assign(exports, gameMain)
       }
     }).call(void 0 || window || {}) // Use the external context to assign this, which will be Window if rendered via browser
-  }, { './actions.js': 1, './jDom/core/dom/core.js': 6, './jDom/core/dom/objects.js': 7, './setup.js': 21 }],
+  }, { './actions.js': 1, './setup.js': 21 }],
   20: [function (require, module, exports) {
     'use strict';
 

@@ -33,35 +33,7 @@
    * Verify availability of jDomObjects
    * @typedef {*|module:jDom/core/dom/objects} jDomObjects
    */
-  let jDomObjects = root.jDomObjects
-
-  /**
-   * If jDomObjects remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomObjects === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomObjects = require('./jDom/core/dom/objects.js')
-    } else {
-      console.error('main.js requires jDom/core/dom/objects')
-    }
-  }
-
-  /**
-   * Verify availability of jDomCoreDom
-   * @typedef {*|module:jDom/core/dom/core} jDomCoreDom
-   */
-  let jDomCoreDom = root.jDomCoreDom
-
-  /**
-   * If jDomCoreDom remains undefined, attempt to retrieve it as a module
-   */
-  if (typeof jDomCoreDom === 'undefined') {
-    if (typeof require !== 'undefined') {
-      jDomCoreDom = require('./jDom/core/dom/core.js')
-    } else {
-      console.error('main.js requires jDom/core/dom/core')
-    }
-  }
+  const jsonDom = root.jsonDom
 
   /**
    * Verify availability of gameActions
@@ -101,7 +73,7 @@
    * Create new private reference to the document
    * @typedef {module:jDom/core/dom/objects.documentItem} documentItem
    */
-  const documentItem = gameStart.main(jDomObjects.documentDomItem({
+  const documentItem = gameStart.main(jsonDom.documentDomItem({
     beginRound: gameStart.beginRound,
     attackListener: gameActions.attackListener,
     restart: gameStart.restart
@@ -111,8 +83,8 @@
   // eslint-disable-next-line no-undef
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
     // Trigger game to start if running as node module
-    const form = jDomCoreDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
-    const submitBtn = jDomCoreDom.getChildrenFromAttribute('type', 'submit', form)
+    const form = jsonDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
+    const submitBtn = jsonDom.getChildrenFromAttribute('type', 'submit', form)
     submitBtn[0].element.click()
   }
 
