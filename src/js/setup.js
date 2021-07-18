@@ -65,7 +65,7 @@ const generateRandomFleet = (ships, matrix, view = false) => ships.map(ship => b
  * @param {boolean} [view=false]
  * @returns {Array}
  */
-const defaultFleet = jDomCore.curry(generateRandomFleet)([
+const defaultFleet = functionalHelpers.curry(generateRandomFleet)([
   { name: 'Aircraft Carrier', size: 5 },
   { name: 'Battleship', size: 4 },
   { name: 'Submarine', size: 3 },
@@ -137,7 +137,7 @@ gameStart.beginRound = (e, mainForm) => {
     robots = robots < 1 ? 1 : robots
   }
   jsonDom.removeChild(jsonDom.getChildrenByClass('main-menu', parent.body)[0], parent.body)
-  const players = jDomCoreDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
+  const players = jsonDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
   const firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[functionalHelpers.randomInteger(players.length)])
   if (firstAttacker.isRobot) {
     gameActions.computerAttack(firstAttacker, players)
@@ -155,7 +155,7 @@ gameStart.main = (parent) => {
   for (let i = parent.body.children.length - 1; i >= 0; --i) {
     jsonDom.removeChild(parent.body.children[i], parent.body)
   }
-  jDomCoreDom.renderHTML(gameLayout.mainMenu(), parent)
+  jsonDom.renderHTML(gameLayout.mainMenu(), parent)
   return parent
 }
 

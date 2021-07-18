@@ -49,17 +49,17 @@ const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml
 /**
  *
  */
-const setViewShip = jDomCore.curry(update3dCell)(jDomCore.mergeObjects(gamePieces.shipTile(), { attributes: { style: { backgroundColor: '#777' } } }))
+const setViewShip = functionalHelpers.curry(update3dCell)(jDomCore.mergeObjects(gamePieces.shipTile(), { attributes: { style: { backgroundColor: '#777' } } }))
 
 /**
  *
  */
-const setHiddenShip = jDomCore.curry(update3dCell)(gamePieces.shipTile())
+const setHiddenShip = functionalHelpers.curry(update3dCell)(gamePieces.shipTile())
 
 /**
  *
  */
-const setHit = jDomCore.curry(update3dCell)(gamePieces.hitTile())
+const setHit = functionalHelpers.curry(update3dCell)(gamePieces.hitTile())
 
 /**
  * Set a specified point to be part of a ship
@@ -78,7 +78,6 @@ gameActions.setShip = (matrix, point, view) => view ? setViewShip(matrix, point.
  */
 const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
   player.playerStats = jsonDom.updateElements(jDomCore.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
-  // console.log(gamePieces.playerStats(player, status).children[0].attributes.innerHTML)
   return player
 }
 
@@ -146,7 +145,7 @@ const endGame = (winner) => {
   const players = winner.parentItem.children
   players.map(player => updatePlayerStats(player))
   winner = updatePlayerStats(winner, 'WINNER')
-  const finalScore = jDomCoreDom.renderHTML(gameLayout.finalScore(players), parent)
+  const finalScore = jsonDom.renderHTML(gameLayout.finalScore(players), parent)
   finalScore.children[0].children.map(child => child.attributes.innerHTML)
   return [jDomCore.trace('Winner')(winner)]
 }
