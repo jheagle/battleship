@@ -36,7 +36,7 @@ const cloneCopy = (object, cloned) =>
  * @returns {Object}
  */
 jDomCore.cloneObject = object => cloneCopy(object, JSON.parse(
-  JSON.stringify(object, (key, val) => !/^(parentItem|listenerArgs|element)$/.test(key)
+  JSON.stringify(object, (key, val) => key !== 'parentItem' || !functionalHelpers.isCloneable(val)
     ? val
     : undefined)
 ))
@@ -60,7 +60,7 @@ const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => functionalHelper
     obj2,
     (newObj, prop, key) => functionalHelpers.setValue(
       key,
-      (obj1[key] && !/^(parentItem|listenerArgs|element)$/.test(key))
+      (obj1[key] && (key !== 'parentItem' || !functionalHelpers.isCloneable(prop)))
         ? fn(obj1[key], prop)
         : prop,
       newObj
