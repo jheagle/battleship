@@ -36,7 +36,7 @@ const cloneCopy = (object, cloned) =>
  * @returns {Object}
  */
 jDomCore.cloneObject = object => cloneCopy(object, JSON.parse(
-  JSON.stringify(object, (key, val) => key !== 'parentItem' || !functionalHelpers.isCloneable(val)
+  JSON.stringify(object, (key, val) => key !== 'parentItem'
     ? val
     : undefined)
 ))
@@ -60,7 +60,7 @@ const mergeObjectsBase = (fn, obj1, obj2, isMutable = false) => functionalHelper
     obj2,
     (newObj, prop, key) => functionalHelpers.setValue(
       key,
-      (obj1[key] && (key !== 'parentItem' || !functionalHelpers.isCloneable(prop)))
+      (obj1[key] && key !== 'parentItem')
         ? fn(obj1[key], prop)
         : prop,
       newObj
@@ -103,16 +103,15 @@ jDomCore.mergeObjectsMutable = (...args) => args.length === 2
     : args.reduce(functionalHelpers.curry(mergeObjectsBase)(jDomCore.mergeObjectsMutable), {})
 
 /**
- * This was adapted from a blog post on Composing Software written by Eric Elliott. Trace provides a way to traces
- * steps through code via the console, while maintaining the functional-style return value.
- * Returns a function which can then receive a value to output, the value will then be returned.
- * @author Eric Elliott
+ * Output the a value with label to the console and return the value to not interrupt the code.
  * @function trace
  * @param {string} label - Pass an identifying label of the value being output.
+ * @param useClone
  * @returns {function(*=)}
  */
-jDomCore.trace = label => value => {
-  console.info(`${label}: `, value)
+jDomCore.trace = (label, useClone = true) => value => {
+  // noinspection JSForgottenDebugStatementInspection
+  console.info(`${label}: `, useClone ? jDomCore.cloneObject(value) : value)
   return value
 }
 

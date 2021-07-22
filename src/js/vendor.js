@@ -12370,7 +12370,7 @@
     Object.defineProperty(exports, '__esModule', {
       value: true
     })
-    exports.queueTimeout = exports.queueManager = exports.delay = exports.preloadParams = exports.callWithParams = exports.pipe = exports.curry = void 0
+    exports.trace = exports.queueTimeout = exports.queueManager = exports.delay = exports.preloadParams = exports.callWithParams = exports.pipe = exports.curry = void 0
 
     require('regenerator-runtime/runtime.js')
 
@@ -12389,6 +12389,8 @@
     require('core-js/stable')
 
     require('regenerator-runtime/runtime')
+
+    const _objects = require('./objects')
 
     function _toConsumableArray (arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread() }
 
@@ -12637,9 +12639,27 @@
         })
       }
     }
+    /**
+ * Output the a value with label to the console and return the value to not interrupt the code.
+ * @function
+ * @param {string} label - Pass an identifying label of the value being output.
+ * @param useClone - Determines if the logged data should be a clone of the original to preserve state.
+ * @returns {function(*=)}
+ */
 
     exports.queueTimeout = queueTimeout
-  }, { 'core-js/modules/es.array.concat.js': 173, 'core-js/modules/es.array.from.js': 183, 'core-js/modules/es.array.iterator.js': 187, 'core-js/modules/es.array.reduce.js': 193, 'core-js/modules/es.array.slice.js': 195, 'core-js/modules/es.array.splice.js': 199, 'core-js/modules/es.function.name.js': 214, 'core-js/modules/es.object.to-string.js': 272, 'core-js/modules/es.promise.js': 279, 'core-js/modules/es.string.iterator.js': 314, 'core-js/modules/es.symbol.description.js': 336, 'core-js/modules/es.symbol.iterator.js': 339, 'core-js/modules/es.symbol.js': 340, 'core-js/modules/web.dom-collections.iterator.js': 389, 'core-js/stable': 396, 'regenerator-runtime/runtime': 423, 'regenerator-runtime/runtime.js': 423 }],
+
+    const trace = function trace (label) {
+      const useClone = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true
+      return function (value) {
+        // noinspection JSForgottenDebugStatementInspection
+        console.info(''.concat(label, ': '), useClone ? (0, _objects.cloneObject)(value) : value)
+        return value
+      }
+    }
+
+    exports.trace = trace
+  }, { './objects': 400, 'core-js/modules/es.array.concat.js': 173, 'core-js/modules/es.array.from.js': 183, 'core-js/modules/es.array.iterator.js': 187, 'core-js/modules/es.array.reduce.js': 193, 'core-js/modules/es.array.slice.js': 195, 'core-js/modules/es.array.splice.js': 199, 'core-js/modules/es.function.name.js': 214, 'core-js/modules/es.object.to-string.js': 272, 'core-js/modules/es.promise.js': 279, 'core-js/modules/es.string.iterator.js': 314, 'core-js/modules/es.symbol.description.js': 336, 'core-js/modules/es.symbol.iterator.js': 339, 'core-js/modules/es.symbol.js': 340, 'core-js/modules/web.dom-collections.iterator.js': 389, 'core-js/stable': 396, 'regenerator-runtime/runtime': 423, 'regenerator-runtime/runtime.js': 423 }],
   399: [function (require, module, exports) {
     'use strict'
 
@@ -13029,7 +13049,7 @@
  * @param {Object} [options={}]
  * @param {number} [options.mapLimit=100]
  * @param {Iterable} [options.map=[]]
- * @param {bool} [options.useClone=false]
+ * @param {boolean} [options.useClone=false]
  * @returns {module:objects~mergeObjectsCallback}
  */
 
@@ -13038,18 +13058,29 @@
     const mergeObjectsBase = function mergeObjectsBase () {
       const _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {}
       const _ref$mapLimit = _ref.mapLimit
-      const mapLimit = _ref$mapLimit === void 0 ? 50000 : _ref$mapLimit
+      const mapLimit = _ref$mapLimit === void 0 ? 1000 : _ref$mapLimit
+      const _ref$relevancyRange = _ref.relevancyRange
+      const relevancyRange = _ref$relevancyRange === void 0 ? 100 : _ref$relevancyRange
       const _ref$map = _ref.map
-      const map = _ref$map === void 0 ? [] : _ref$map
+      let map = _ref$map === void 0 ? [] : _ref$map
       const _ref$useClone = _ref.useClone
       const useClone = _ref$useClone === void 0 ? false : _ref$useClone
+
+      const updateMap = function updateMap (map) {
+        const minRelevance = map.length - relevancyRange
+        return map.filter(function (reference) {
+          return reference.relevance > minRelevance
+        }).map(function (reference) {
+          return setValue('relevance', reference.relevance > map.length ? map.length : reference.relevance, reference)
+        })
+      }
 
       return function () {
         for (var _len = arguments.length, objects = new Array(_len), _key = 0; _key < _len; _key++) {
           objects[_key] = arguments[_key]
         }
 
-        const firstObject = objects.shift()
+        const firstObject = useClone ? Array.isArray(objects[0]) ? [] : {} : objects.shift()
 
         if (objects.length < 1) {
           return firstObject
@@ -13062,11 +13093,12 @@
 
           map.push({
             source: arg,
-            object: newObj
+            object: newObj,
+            relevance: map.length
           })
 
           if (map.length > mapLimit) {
-            map.shift()
+            map = updateMap(map)
           }
 
           return reduceObject(arg, function (returnObj, value, key) {
@@ -13077,6 +13109,7 @@
               })
 
               if (exists) {
+                exists.relevance = map.length + 1
                 return setValue(key, exists.object, returnObj)
               }
 
@@ -13094,11 +13127,12 @@
 
               map.push({
                 source: value,
-                object: objectValue
+                object: objectValue,
+                relevance: map.length
               })
 
               if (map.length > mapLimit) {
-                map.shift()
+                map = updateMap(map)
               }
             }
 
@@ -13152,7 +13186,7 @@
         mapLimit: mapLimit,
         map: map,
         useClone: true
-      })(Array.isArray(object) ? [] : {}, object)
+      })(object)
     }
 
     exports.cloneObject = cloneObject
@@ -15130,7 +15164,7 @@
     })
     exports.documentItem = exports.documentDomItem = exports.createDomItem = void 0
 
-    require('core-js/modules/web.dom-collections.for-each.js')
+    require('core-js/modules/es.array.concat.js')
 
     require('core-js/modules/es.array.map.js')
 
@@ -15212,7 +15246,11 @@
  * @returns {module:dom/objects.DomItem}
  */
     const createDomItem = function createDomItem () {
-      const item = {
+      for (var _len = arguments.length, attributes = new Array(_len), _key = 0; _key < _len; _key++) {
+        attributes[_key] = arguments[_key]
+      }
+
+      return _functionalHelpers.default.mergeObjectsMutable.apply(_functionalHelpers.default, [{
         tagName: 'div',
         attributes: {
           style: {}
@@ -15221,28 +15259,7 @@
         eventListeners: {},
         parentItem: {},
         children: []
-      }
-
-      for (var _len = arguments.length, attributes = new Array(_len), _key = 0; _key < _len; _key++) {
-        attributes[_key] = arguments[_key]
-      }
-
-      attributes.forEach(function (attributeGroup) {
-        for (const attribute in attributeGroup) {
-          if (!(attribute in item) || !_functionalHelpers.default.isCloneable(attributeGroup[attribute])) {
-            item[attribute] = attributeGroup[attribute]
-            continue
-          }
-
-          item[attribute] = _functionalHelpers.default.mergeObjectsMutable(item[attribute], attributeGroup[attribute])
-        }
-      })
-
-      if (!('style' in item.attributes)) {
-        item.attributes.style = {}
-      }
-
-      return item
+      }].concat(attributes))
     }
     /**
  * DomItemHead defines the structure for a single element in the Dom
@@ -15353,7 +15370,7 @@
     exports.documentDomItem = documentDomItem
     const documentItem = documentDomItem()
     exports.documentItem = documentItem
-  }, { 'core-js/modules/es.array.map.js': 190, 'core-js/modules/es.object.assign.js': 249, 'core-js/modules/web.dom-collections.for-each.js': 388, 'functional-helpers': 402 }],
+  }, { 'core-js/modules/es.array.concat.js': 173, 'core-js/modules/es.array.map.js': 190, 'core-js/modules/es.object.assign.js': 249, 'functional-helpers': 402 }],
   411: [function (require, module, exports) {
     (function (global) {
       (function () {
