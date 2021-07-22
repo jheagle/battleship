@@ -36,7 +36,7 @@ const cloneCopy = (object, cloned) =>
  * @returns {Object}
  */
 jDomCore.cloneObject = object => cloneCopy(object, JSON.parse(
-  JSON.stringify(object, (key, val) => key !== 'parentItem'
+  JSON.stringify(object, (key, val) => key !== 'parentItem' || !functionalHelpers.isCloneable(val)
     ? val
     : undefined)
 ))
