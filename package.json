@@ -52,7 +52,7 @@
     "core-js": "^3.15.2",
     "functional-helpers": "github:jheagle/functional-helpers",
     "json-dom": "github:jheagle/JSON-DOM",
-    "npm": "^7.19.1",
+    "npm": "^8.11.0",
     "regenerator-runtime": "^0.13.7"
   },
   "directories": {
