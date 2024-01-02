@@ -171,3 +171,5 @@ gameLayout.finalScore = (players) => jsonDom.createDomItem({
     }
   ]
 })
+
+export default gameLayout

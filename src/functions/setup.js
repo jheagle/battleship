@@ -1,4 +1,8 @@
-'use strict'
+import jsonDom from 'json-dom'
+import siFunciona from 'si-funciona'
+import gameLayout from '../components/layout'
+import gamePieces from '../components/pieces'
+import jDomMatrix from 'matrix-dom'
 
 /**
  * A reference to all functions to be used globally / exported
@@ -16,7 +20,7 @@ const gameStart = {}
  * @param view
  * @returns {{name: string, status: number, parts: Array}}
  */
-const buildShip = (shipInfo, line, matrix, view = false) => jDomCore.mergeObjects(gamePieces.ship(shipInfo.name), { parts: line.map(p => gameActions.setShip(matrix, p, view)) })
+const buildShip = (shipInfo, line, matrix, view = false) => siFunciona.mergeObjects(gamePieces.ship(shipInfo.name), { parts: line.map(p => gameActions.setShip(matrix, p, view)) })
 
 /**
  *
@@ -33,8 +37,7 @@ const selectShipDirection = (lengths, shipLength) => jsonDom.randDirection([json
  * @returns {{start: {x: number, y: number, z: number}, dir}}
  */
 const randomStartDir = (lengths, shipLength, dir = selectShipDirection(lengths, shipLength)) => ({
-  start: jsonDom.randomStart(shipLength, dir, lengths),
-  dir: dir
+  start: jsonDom.randomStart(shipLength, dir, lengths), dir: dir
 })
 
 /**
@@ -46,8 +49,7 @@ const randomStartDir = (lengths, shipLength, dir = selectShipDirection(lengths, 
  * @param startDir
  * @returns {Array}
  */
-const generateStartEnd = (matrix, shipLength, lengths, startDir = randomStartDir(lengths, shipLength)) =>
-  jsonDom.getHighestAbsoluteCoordinate(startDir.dir) === 0 ? [jsonDom.point(0, 0, 0), jsonDom.point(0, 0, 0)] : jsonDom.checkInBetween(...[startDir.start, jsonDom.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jsonDom.lineEndPoint(startDir.start, shipLength, startDir.dir)]
+const generateStartEnd = (matrix, shipLength, lengths, startDir = randomStartDir(lengths, shipLength)) => jsonDom.getHighestAbsoluteCoordinate(startDir.dir) === 0 ? [jsonDom.point(0, 0, 0), jsonDom.point(0, 0, 0)] : jsonDom.checkInBetween(...[startDir.start, jsonDom.lineEndPoint(startDir.start, shipLength, startDir.dir)], matrix, gameUtils.checkIfShipCell) ? generateStartEnd(matrix, shipLength, lengths) : [startDir.start, jsonDom.lineEndPoint(startDir.start, shipLength, startDir.dir)]
 
 /**
  * Create a series of randomly placed ships based on the provided shipLengths.
@@ -65,13 +67,10 @@ const generateRandomFleet = (ships, matrix, view = false) => ships.map(ship => b
  * @param {boolean} [view=false]
  * @returns {Array}
  */
-const defaultFleet = functionalHelpers.curry(generateRandomFleet)([
-  { name: 'Aircraft Carrier', size: 5 },
-  { name: 'Battleship', size: 4 },
-  { name: 'Submarine', size: 3 },
-  { name: 'Cruiser', size: 3 },
-  { name: 'Destroyer', size: 2 }
-])
+const defaultFleet = siFunciona.curry(generateRandomFleet)([{ name: 'Aircraft Carrier', size: 5 }, {
+  name: 'Battleship',
+  size: 4
+}, { name: 'Submarine', size: 3 }, { name: 'Cruiser', size: 3 }, { name: 'Destroyer', size: 2 }])
 
 /**
  * Create players and associated properties.
@@ -89,17 +88,12 @@ const buildPlayers = (humans, robots = 0, players = []) => {
   }
   const player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
   player.isRobot = humans <= 0
-  player.board = jDomMatrixCore.bindPointData(jsonDom.square({
-    x: [
-      gamePieces.waterTile(player, players)
-    ],
-    matrixProps: [
-      {
-        eventListeners: {
-          click: { listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }
-        }
+  player.board = jDomMatrix.bindPointData(jDomMatrix.square({
+    x: [gamePieces.waterTile(player, players)], matrixProps: [{
+      eventListeners: {
+        click: { listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }
       }
-    ]
+    }]
   }, 10))
   player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
   player.playerStats = gamePieces.playerStats(player, `${Math.round(player.status * 100) / 100}%`)
@@ -137,8 +131,8 @@ gameStart.beginRound = (e, mainForm) => {
     robots = robots < 1 ? 1 : robots
   }
   jsonDom.removeChild(jsonDom.getChildrenByClass('main-menu', parent.body)[0], parent.body)
-  const players = jsonDom.renderHTML(gameLayout.boards(buildPlayers(humans, robots)), parent).children
-  const firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[functionalHelpers.randomInteger(players.length)])
+  const players = jsonDom.renderHtml(gameLayout.boards(buildPlayers(humans, robots)), parent).children
+  const firstAttacker = gameActions.updatePlayer(firstGoesFirst ? players[0] : players[siFunciona.randomInteger(players.length)])
   if (firstAttacker.isRobot) {
     gameActions.computerAttack(firstAttacker, players)
   }
@@ -155,7 +149,7 @@ gameStart.main = (parent) => {
   for (let i = parent.body.children.length - 1; i >= 0; --i) {
     jsonDom.removeChild(parent.body.children[i], parent.body)
   }
-  jsonDom.renderHTML(gameLayout.mainMenu(), parent)
+  jsonDom.renderHtml(gameLayout.mainMenu(), parent)
   return parent
 }
 
@@ -165,3 +159,5 @@ gameStart.main = (parent) => {
  * @param button
  */
 gameStart.restart = (e, button) => gameStart.main(jsonDom.getTopParentItem(button))
+
+export default gameStart

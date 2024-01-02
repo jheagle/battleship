@@ -21,7 +21,7 @@ const gameTile = () => jsonDom.createDomItem({
  * @function waterTile
  * @returns {{hasShip: boolean, isHit: boolean, eventListeners: {click: {listenerFunc: attackListener, listenerArgs: {}, listenerOptions: boolean}}, point: {}}}
  */
-gamePieces.waterTile = () => jDomCore.mergeObjects(gameTile(), jsonDom.tile())
+gamePieces.waterTile = () => siFunciona.mergeObjects(gameTile(), jsonDom.tile())
 
 /**
  * Set status and custom properties for tiles that have a ship
@@ -108,3 +108,5 @@ gamePieces.playerStats = (player = {}, status = '') => ({
     }
   ]
 })
+
+export default gamePieces

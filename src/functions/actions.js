@@ -1,4 +1,6 @@
-'use strict'
+import gamePieces from '../components/pieces'
+import jsonDom from 'json-dom'
+import siFunciona from 'si-funciona'
 
 /**
  * All methods exported from this module are encapsulated within gameActions.
@@ -18,7 +20,7 @@ const configureHtml = (config, isRobot) => {
   // Add any other style changes to the cell
   if (isRobot) {
     gameActions.attackFleet.isLocked = true
-    jDomCore.queueTimeout(() => {
+    siFunciona.queueTimeout(() => {
       if (config.isHit) {
         config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
       }
@@ -44,22 +46,22 @@ const configureHtml = (config, isRobot) => {
  * @param z
  * @param isRobot
  */
-const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(jDomCore.mergeObjectsMutable(matrix.children[z].children[y].children[x], config), isRobot)
+const update3dCell = (config, matrix, x, y, z, isRobot = false) => configureHtml(siFunciona.mergeObjectsMutable(matrix.children[z].children[y].children[x], config), isRobot)
 
 /**
  *
  */
-const setViewShip = functionalHelpers.curry(update3dCell)(jDomCore.mergeObjects(gamePieces.shipTile(), { attributes: { style: { backgroundColor: '#777' } } }))
+const setViewShip = siFunciona.curry(update3dCell)(siFunciona.mergeObjects(gamePieces.shipTile(), { attributes: { style: { backgroundColor: '#777' } } }))
 
 /**
  *
  */
-const setHiddenShip = functionalHelpers.curry(update3dCell)(gamePieces.shipTile())
+const setHiddenShip = siFunciona.curry(update3dCell)(gamePieces.shipTile())
 
 /**
  *
  */
-const setHit = functionalHelpers.curry(update3dCell)(gamePieces.hitTile())
+const setHit = siFunciona.curry(update3dCell)(gamePieces.hitTile())
 
 /**
  * Set a specified point to be part of a ship
@@ -77,7 +79,7 @@ gameActions.setShip = (matrix, point, view) => view ? setViewShip(matrix, point.
  * @returns {*}
  */
 const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
-  player.playerStats = jsonDom.updateElements(jDomCore.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
+  player.playerStats = jsonDom.updateElements(siFunciona.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
   return player
 }
 
@@ -104,9 +106,9 @@ gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
     gameActions.attackFleet.isLocked = true
     if (player.attacker) {
       if (!player.isRobot) {
-        jDomCore.queueTimeout(() => {
+        siFunciona.queueTimeout(() => {
           gameActions.attackFleet.isLocked = false
-          return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(jDomCore.mergeObjects(c, {
+          return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjects(c, {
             attributes: {
               style: {
                 width: '17px',
@@ -118,9 +120,9 @@ gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
       }
       ++player.turnCnt
     } else {
-      jDomCore.queueTimeout(() => {
+      siFunciona.queueTimeout(() => {
         gameActions.attackFleet.isLocked = false
-        return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(jDomCore.mergeObjects(c, {
+        return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjects(c, {
           attributes: {
             style: {
               width: '35px',
@@ -131,7 +133,7 @@ gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
       }, 0)
     }
   }
-  const result = jDomCore.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
+  const result = siFunciona.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
   return result.result || player
 }
 
@@ -145,9 +147,9 @@ const endGame = (winner) => {
   const players = winner.parentItem.children
   players.map(player => updatePlayerStats(player))
   winner = updatePlayerStats(winner, 'WINNER')
-  const finalScore = jsonDom.renderHTML(gameLayout.finalScore(players), parent)
+  const finalScore = jsonDom.renderHtml(gameLayout.finalScore(players), parent)
   finalScore.children[0].children.map(child => child.attributes.innerHTML)
-  return [jDomCore.trace('Winner')(winner)]
+  return [winner]
 }
 
 /**
@@ -184,11 +186,11 @@ const updateScore = (player, hitShip, sunkShip, players) => {
   let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
   attacker = gameActions.updatePlayer(attacker, hitShip, sunkShip)
   if (players.length < 2) {
-    return jDomCore.queueTimeout(() => endGame(players[0]), 200)
+    return siFunciona.queueTimeout(() => endGame(players[0]), 200)
   }
   const nextAttacker = getNextAttacker(attacker, players, hitShip)
   if (nextAttacker.isRobot) {
-    jDomCore.queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
+    siFunciona.queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
   }
   return players
 }
@@ -257,7 +259,7 @@ const selectTargetPlayer = (players) => {
   // Get a list of all players with broken ships or with lowest status.
   const victims = gameUtils.getBrokenShipsPlayers(players).length ? gameUtils.getBrokenShipsPlayers(players) : gameUtils.getLowStatusItems(players)
   // If more than one possible victim, select a random target, otherwise return the lowest status player.
-  return victims.length === 1 ? victims[0] : victims[functionalHelpers.randomInteger(victims.length)]
+  return victims.length === 1 ? victims[0] : victims[siFunciona.randomInteger(victims.length)]
 }
 
 /**
@@ -299,7 +301,7 @@ const selectTargetCoordinate = (victim) => {
     availTargets = gameUtils.getAdjEdgeNonHitCells(hitParts[0].point, victim.board)
   }
   const finalTargets = availTargets.length ? availTargets : gameUtils.getAllNonHitCells(victim.board).filter(t => gameUtils.filterAdjacentPoints(t))
-  const target = finalTargets[functionalHelpers.randomInteger(finalTargets.length)]
+  const target = finalTargets[siFunciona.randomInteger(finalTargets.length)]
   displayTargets(finalTargets, target, victim)
 
   // If there are available targets then hit one at random
@@ -315,8 +317,8 @@ const selectTargetCoordinate = (victim) => {
  */
 const displayTargets = (targets, target, victim) => {
   return [
-    jDomCore.queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
-    jDomCore.queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
+    siFunciona.queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
+    siFunciona.queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
   ]
 }
 
@@ -326,11 +328,11 @@ const displayTargets = (targets, target, victim) => {
  * @returns {void|Array|Object|*}
  */
 const resetTargets = data => {
-  data.victim.board.children.map(l => jsonDom.updateElement(jDomCore.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
-  data.targets.forEach(t => jsonDom.updateElement(jDomCore.mergeObjects(jsonDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
+  data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
+  data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjects(jsonDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
   if (!data.target) {
-    data.victim.board.children.map(l => jsonDom.updateElement(jDomCore.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
-    data.targets.forEach(t => jsonDom.updateElement(jDomCore.mergeObjects(jsonDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
+    data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
+    data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjects(jsonDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
   }
   return data
 }
@@ -346,3 +348,5 @@ gameActions.computerAttack = (player, players) => {
   gameActions.attackFleet.isLocked = false
   return gameActions.attackFleet(selectTargetCoordinate(victim))
 }
+
+export default gameActions
