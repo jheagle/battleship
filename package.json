@@ -21,7 +21,7 @@
     "gulp-rename": "^2.0.0",
     "gulp-sass": "^5.1.0",
     "js-build-tools": "^2.2.12",
-    "sass": "^1.69.6"
+    "sass": "^1.69.7"
   },
   "dependencies": {
     "json-dom": "github:jheagle/JSON-DOM",

@@ -20822,17 +20822,10 @@
           value: true
         })
         exports.default = void 0
-
-        require('core-js/modules/es.object.assign.js')
-
         require('core-js/stable')
-
-        const _functions = _interopRequireDefault(require('./source/functions'))
-
-        const _objects = _interopRequireDefault(require('./source/objects'))
-
+        var _functions = _interopRequireDefault(require('./source/functions'))
+        var _objects = _interopRequireDefault(require('./source/objects'))
         function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
         /**
  * All of the Matrix DOM functions and objects necessary to create DOM Matrices
  * @file
@@ -20845,38 +20838,34 @@
  * Store a reference to this scope which will be Window if rendered via browser
  */
         const root = void 0 || window || global || {}
+
         /**
  * Store reference to any pre-existing module of the same name
  * @type {module|*}
  */
-
         const previousMatrixDom = root.jsonDom || {}
+
         /**
  * All methods exported from this module are encapsulated within jsonDom.
  * @typedef {module:matrixDom} matrixDom
  */
-
         const matrixDom = {}
         root.matrixDom = matrixDom
+
         /**
  * Return a reference to this library while preserving the original same-named library
  * @function
  * @returns {module:matrixDom~matrixDom|module:matrixFunctions|module:matrixObjects}
  */
-
-        const noConflict = function noConflict () {
+        const noConflict = () => {
           root.jsonDom = previousMatrixDom
           return matrixDom
         }
-
         matrixDom.noConflict = noConflict
-
-        const _default = root.matrixDom = Object.assign(matrixDom, _functions.default, _objects.default)
-
-        exports.default = _default
+        var _default = exports.default = root.matrixDom = Object.assign(matrixDom, _functions.default, _objects.default)
       }).call(this)
     }).call(this, typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : {})
-  }, { './source/functions': 620, './source/objects': 645, 'core-js/modules/es.object.assign.js': 355, 'core-js/stable': 561 }],
+  }, { './source/functions': 620, './source/objects': 645, 'core-js/stable': 561 }],
   620: [function (require, module, exports) {
     'use strict'
 
@@ -20884,66 +20873,39 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _adjacentEdgePoints = _interopRequireDefault(require('./functions/adjacentEdgePoints'))
-
-    const _adjacentPoints = _interopRequireDefault(require('./functions/adjacentPoints'))
-
-    const _areEqualPoints = _interopRequireDefault(require('./functions/areEqualPoints'))
-
-    const _bindPointData = _interopRequireDefault(require('./functions/bindPointData'))
-
-    const _checkInBetween = _interopRequireDefault(require('./functions/checkInBetween'))
-
-    const _checkValidPoint = _interopRequireDefault(require('./functions/checkValidPoint'))
-
-    const _getAllPoints = _interopRequireDefault(require('./functions/getAllPoints'))
-
-    const _getAxisLengths = _interopRequireDefault(require('./functions/getAxisLengths'))
-
-    const _getDomItemFromElement = _interopRequireDefault(require('./functions/getDomItemFromElement'))
-
-    const _getDomItemFromPoint = _interopRequireDefault(require('./functions/getDomItemFromPoint'))
-
-    const _getFirstAxisOfCoordinate = _interopRequireDefault(require('./functions/getFirstAxisOfCoordinate'))
-
-    const _getHighestAbsoluteCoordinate = _interopRequireDefault(require('./functions/getHighestAbsoluteCoordinate'))
-
-    const _getPointFromElement = _interopRequireDefault(require('./functions/getPointFromElement'))
-
-    const _getPointsLine = _interopRequireDefault(require('./functions/getPointsLine'))
-
-    const _getPointsLines = _interopRequireDefault(require('./functions/getPointsLines'))
-
-    const _lineEndPoint = _interopRequireDefault(require('./functions/lineEndPoint'))
-
-    const _nextCell = _interopRequireDefault(require('./functions/nextCell'))
-
-    const _pointAndCoordinateToDirection = _interopRequireDefault(require('./functions/pointAndCoordinateToDirection'))
-
-    const _pointDifference = _interopRequireDefault(require('./functions/pointDifference'))
-
-    const _pointToDirection = _interopRequireDefault(require('./functions/pointToDirection'))
-
-    const _pointsToDirection = _interopRequireDefault(require('./functions/pointsToDirection'))
-
-    const _randDirection = _interopRequireDefault(require('./functions/randDirection'))
-
-    const _randomStart = _interopRequireDefault(require('./functions/randomStart'))
-
-    const _testPointsBetween = _interopRequireDefault(require('./functions/testPointsBetween'))
-
+    var _adjacentEdgePoints = _interopRequireDefault(require('./functions/adjacentEdgePoints'))
+    var _adjacentPoints = _interopRequireDefault(require('./functions/adjacentPoints'))
+    var _areEqualPoints = _interopRequireDefault(require('./functions/areEqualPoints'))
+    var _bindPointData = _interopRequireDefault(require('./functions/bindPointData'))
+    var _checkInBetween = _interopRequireDefault(require('./functions/checkInBetween'))
+    var _checkValidPoint = _interopRequireDefault(require('./functions/checkValidPoint'))
+    var _getAllPoints = _interopRequireDefault(require('./functions/getAllPoints'))
+    var _getAxisLengths = _interopRequireDefault(require('./functions/getAxisLengths'))
+    var _getDomItemFromElement = _interopRequireDefault(require('./functions/getDomItemFromElement'))
+    var _getDomItemFromPoint = _interopRequireDefault(require('./functions/getDomItemFromPoint'))
+    var _getFirstAxisOfCoordinate = _interopRequireDefault(require('./functions/getFirstAxisOfCoordinate'))
+    var _getHighestAbsoluteCoordinate = _interopRequireDefault(require('./functions/getHighestAbsoluteCoordinate'))
+    var _getPointFromElement = _interopRequireDefault(require('./functions/getPointFromElement'))
+    var _getPointsLine = _interopRequireDefault(require('./functions/getPointsLine'))
+    var _getPointsLines = _interopRequireDefault(require('./functions/getPointsLines'))
+    var _lineEndPoint = _interopRequireDefault(require('./functions/lineEndPoint'))
+    var _nextCell = _interopRequireDefault(require('./functions/nextCell'))
+    var _pointAndCoordinateToDirection = _interopRequireDefault(require('./functions/pointAndCoordinateToDirection'))
+    var _pointDifference = _interopRequireDefault(require('./functions/pointDifference'))
+    var _pointToDirection = _interopRequireDefault(require('./functions/pointToDirection'))
+    var _pointsToDirection = _interopRequireDefault(require('./functions/pointsToDirection'))
+    var _randDirection = _interopRequireDefault(require('./functions/randDirection'))
+    var _randomStart = _interopRequireDefault(require('./functions/randomStart'))
+    var _testPointsBetween = _interopRequireDefault(require('./functions/testPointsBetween'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * @file All of the siFunciona matrix functions for working with a grid of points.
  * @author Joshua Heagle <joshuaheagle@gmail.com>
  * @version 1.0.0
  * @module matrixFunctions
  */
-    const _default = {
+    var _default = exports.default = {
       adjacentEdgePoints: _adjacentEdgePoints.default,
       adjacentPoints: _adjacentPoints.default,
       areEqualPoints: _areEqualPoints.default,
@@ -20969,7 +20931,6 @@
       randomStart: _randomStart.default,
       testPointsBetween: _testPointsBetween.default
     }
-    exports.default = _default
   }, { './functions/adjacentEdgePoints': 621, './functions/adjacentPoints': 622, './functions/areEqualPoints': 623, './functions/bindPointData': 624, './functions/checkInBetween': 625, './functions/checkValidPoint': 626, './functions/getAllPoints': 627, './functions/getAxisLengths': 628, './functions/getDomItemFromElement': 629, './functions/getDomItemFromPoint': 630, './functions/getFirstAxisOfCoordinate': 631, './functions/getHighestAbsoluteCoordinate': 632, './functions/getPointFromElement': 633, './functions/getPointsLine': 634, './functions/getPointsLines': 635, './functions/lineEndPoint': 636, './functions/nextCell': 637, './functions/pointAndCoordinateToDirection': 638, './functions/pointDifference': 639, './functions/pointToDirection': 640, './functions/pointsToDirection': 641, './functions/randDirection': 642, './functions/randomStart': 643, './functions/testPointsBetween': 644, 'core-js/stable': 561 }],
   621: [function (require, module, exports) {
     'use strict'
@@ -20978,21 +20939,16 @@
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.filter.js')
-
-    require('core-js/modules/es.array.map.js')
-
+    require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.iterator.constructor.js')
+    require('core-js/modules/esnext.iterator.filter.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
+    require('core-js/modules/esnext.iterator.map.js')
     require('core-js/stable')
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
-    const _nextCell = _interopRequireDefault(require('./nextCell'))
-
-    const _checkValidPoint = _interopRequireDefault(require('./checkValidPoint'))
-
+    var _point = _interopRequireDefault(require('../objects/point'))
+    var _nextCell = _interopRequireDefault(require('./nextCell'))
+    var _checkValidPoint = _interopRequireDefault(require('./checkValidPoint'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Return all points which touch on edges (not diagonal)
  * @function
@@ -21000,17 +20956,9 @@
  * @param {module:matrixObjects~Matrix} matrix - The matrix having the point.
  * @returns {Array.<module:matrixObjects~Point>}
  */
-    const adjacentEdgePoints = function adjacentEdgePoints (pnt, matrix) {
-      return [(0, _point.default)(-1, 0, 0), (0, _point.default)(1, 0, 0), (0, _point.default)(0, -1, 0), (0, _point.default)(0, 1, 0), (0, _point.default)(0, 0, -1), (0, _point.default)(0, 0, 1)].map(function (p) {
-        return (0, _nextCell.default)(pnt, p)
-      }).filter(function (p) {
-        return (0, _checkValidPoint.default)(p, matrix)
-      })
-    }
-
-    const _default = adjacentEdgePoints
-    exports.default = _default
-  }, { '../objects/point': 648, './checkValidPoint': 626, './nextCell': 637, 'core-js/modules/es.array.filter.js': 269, 'core-js/modules/es.array.map.js': 284, 'core-js/stable': 561 }],
+    const adjacentEdgePoints = (pnt, matrix) => [(0, _point.default)(-1, 0, 0), (0, _point.default)(1, 0, 0), (0, _point.default)(0, -1, 0), (0, _point.default)(0, 1, 0), (0, _point.default)(0, 0, -1), (0, _point.default)(0, 0, 1)].map(p => (0, _nextCell.default)(pnt, p)).filter(p => (0, _checkValidPoint.default)(p, matrix))
+    var _default = exports.default = adjacentEdgePoints
+  }, { '../objects/point': 648, './checkValidPoint': 626, './nextCell': 637, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561 }],
   622: [function (require, module, exports) {
     'use strict'
 
@@ -21018,25 +20966,17 @@
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.filter.js')
-
-    require('core-js/modules/es.array.map.js')
-
-    require('core-js/modules/es.array.concat.js')
-
+    require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.iterator.constructor.js')
+    require('core-js/modules/esnext.iterator.filter.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
+    require('core-js/modules/esnext.iterator.map.js')
     require('core-js/stable')
-
-    const _getPointsLines = _interopRequireDefault(require('./getPointsLines'))
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
-    const _nextCell = _interopRequireDefault(require('./nextCell'))
-
-    const _checkValidPoint = _interopRequireDefault(require('./checkValidPoint'))
-
+    var _getPointsLines = _interopRequireDefault(require('./getPointsLines'))
+    var _point = _interopRequireDefault(require('../objects/point'))
+    var _nextCell = _interopRequireDefault(require('./nextCell'))
+    var _checkValidPoint = _interopRequireDefault(require('./checkValidPoint'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Return all valid points surrounding a provided point
  * @function
@@ -21044,17 +20984,9 @@
  * @param {module:matrixObjects~Matrix} matrix - The matrix having the point.
  * @returns {Array.<module:matrixObjects~Point>}
  */
-    const adjacentPoints = function adjacentPoints (pnt, matrix) {
-      return (0, _getPointsLines.default)([[(0, _point.default)(-1, 1, 1), (0, _point.default)(1, -1, -1)], [(0, _point.default)(1, 1, 1), (0, _point.default)(-1, 1, -1)], [(0, _point.default)(-1, -1, 1), (0, _point.default)(1, -1, 1)], [(0, _point.default)(1, 0, 0), (0, _point.default)(1, 1, -1)], [(0, _point.default)(-1, 1, 0), (0, _point.default)(1, 1, 0)]]).concat([(0, _point.default)(0, 0, 1), (0, _point.default)(1, 0, 0), (0, _point.default)(-1, 0, -1), (0, _point.default)(0, 0, -1)]).map(function (p) {
-        return (0, _nextCell.default)(pnt, p)
-      }).filter(function (p) {
-        return (0, _checkValidPoint.default)((0, _nextCell.default)(pnt, p), matrix)
-      })
-    }
-
-    const _default = adjacentPoints
-    exports.default = _default
-  }, { '../objects/point': 648, './checkValidPoint': 626, './getPointsLines': 635, './nextCell': 637, 'core-js/modules/es.array.concat.js': 265, 'core-js/modules/es.array.filter.js': 269, 'core-js/modules/es.array.map.js': 284, 'core-js/stable': 561 }],
+    const adjacentPoints = (pnt, matrix) => (0, _getPointsLines.default)([[(0, _point.default)(-1, 1, 1), (0, _point.default)(1, -1, -1)], [(0, _point.default)(1, 1, 1), (0, _point.default)(-1, 1, -1)], [(0, _point.default)(-1, -1, 1), (0, _point.default)(1, -1, 1)], [(0, _point.default)(1, 0, 0), (0, _point.default)(1, 1, -1)], [(0, _point.default)(-1, 1, 0), (0, _point.default)(1, 1, 0)]]).concat([(0, _point.default)(0, 0, 1), (0, _point.default)(1, 0, 0), (0, _point.default)(-1, 0, -1), (0, _point.default)(0, 0, -1)]).map(p => (0, _nextCell.default)(pnt, p)).filter(p => (0, _checkValidPoint.default)((0, _nextCell.default)(pnt, p), matrix))
+    var _default = exports.default = adjacentPoints
+  }, { '../objects/point': 648, './checkValidPoint': 626, './getPointsLines': 635, './nextCell': 637, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561 }],
   623: [function (require, module, exports) {
     'use strict'
 
@@ -21062,9 +20994,7 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
     /**
  * Given two points, compare the x, y, and z of each to see if they are the same
  * @function
@@ -21072,12 +21002,8 @@
  * @param {module:matrixObjects~Point} p2 - The other point to be compared
  * @returns {boolean}
  */
-    const areEqualPoints = function areEqualPoints (p1, p2) {
-      return p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
-    }
-
-    const _default = areEqualPoints
-    exports.default = _default
+    const areEqualPoints = (p1, p2) => p1.x === p2.x && p1.y === p2.y && p1.z === p2.z
+    var _default = exports.default = areEqualPoints
   }, { 'core-js/stable': 561 }],
   624: [function (require, module, exports) {
     'use strict'
@@ -21086,21 +21012,12 @@
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.map.js')
-
-    require('core-js/modules/es.object.assign.js')
-
+    require('core-js/modules/esnext.async-iterator.map.js')
+    require('core-js/modules/esnext.iterator.map.js')
     require('core-js/stable')
-
-    const _siFunciona = _interopRequireDefault(require('si-funciona'))
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
+    var _siFunciona = _interopRequireDefault(require('si-funciona'))
+    var _point = _interopRequireDefault(require('../objects/point'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
-    function _defineProperty (obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }) } else { obj[key] = value } return obj }
-
     /**
  * Generate point data for each item in the matrix
  * WARNING: This is a recursive function.
@@ -21110,22 +21027,18 @@
  * @param {module:matrixObjects~Point} pnt - A point to be added to a specific Matrix Column
  * @returns {module:matrixObjects~MatrixColumn|module:matrixObjects~MatrixRow}
  */
-    const bindPointData = function bindPointData (item) {
+    const bindPointData = function (item) {
       const pnt = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : (0, _point.default)(0, 0, 0)
-      return _siFunciona.default.mergeObjects(item, item.point
-        ? {
-          point: _siFunciona.default.cloneObject(pnt)
-        }
-        : {
-          children: item.children.map(function (el, i) {
-            return bindPointData(el, Object.assign({}, pnt, _defineProperty({}, el.axis, i)))
-          })
-        })
+      return _siFunciona.default.mergeObjects(item, item.point ? {
+        point: _siFunciona.default.cloneObject(pnt)
+      } : {
+        children: item.children.map((el, i) => bindPointData(el, Object.assign({}, pnt, {
+          [el.axis]: i
+        })))
+      })
     }
-
-    const _default = bindPointData
-    exports.default = _default
-  }, { '../objects/point': 648, 'core-js/modules/es.array.map.js': 284, 'core-js/modules/es.object.assign.js': 355, 'core-js/stable': 561, 'si-funciona': 779 }],
+    var _default = exports.default = bindPointData
+  }, { '../objects/point': 648, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 779 }],
   625: [function (require, module, exports) {
     'use strict'
 
@@ -21133,13 +21046,9 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _testPointsBetween = _interopRequireDefault(require('./testPointsBetween'))
-
+    var _testPointsBetween = _interopRequireDefault(require('./testPointsBetween'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Given two points, check the cells between using specified function.
  * When inclusive is set to true the provided start and end points will also be tested
@@ -21147,12 +21056,10 @@
  * @param {...*} args - These args match the parameter list for {@link module:matrixFunctions~testPointsBetween}
  * @returns {boolean}
  */
-    const checkInBetween = function checkInBetween () {
-      return !!_testPointsBetween.default.apply(void 0, arguments).true.length
+    const checkInBetween = function () {
+      return !!(0, _testPointsBetween.default)(...arguments).true.length
     }
-
-    const _default = checkInBetween
-    exports.default = _default
+    var _default = exports.default = checkInBetween
   }, { './testPointsBetween': 644, 'core-js/stable': 561 }],
   626: [function (require, module, exports) {
     'use strict'
@@ -21161,9 +21068,7 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
     /**
  * Test if the provided point exists in the matrix.
  * @function
@@ -21171,12 +21076,8 @@
  * @param {module:matrixObjects~Matrix} matrix - The matrix that contains valid points.
  * @returns {boolean}
  */
-    const checkValidPoint = function checkValidPoint (pnt, matrix) {
-      return !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
-    }
-
-    const _default = checkValidPoint
-    exports.default = _default
+    const checkValidPoint = (pnt, matrix) => !!matrix.children[pnt.z] && !!matrix.children[pnt.z].children[pnt.y] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x] && !!matrix.children[pnt.z].children[pnt.y].children[pnt.x].point
+    var _default = exports.default = checkValidPoint
   }, { 'core-js/stable': 561 }],
   627: [function (require, module, exports) {
     'use strict'
@@ -21185,13 +21086,10 @@
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.concat.js')
-
-    require('core-js/modules/es.array.reduce.js')
-
+    require('core-js/modules/esnext.async-iterator.reduce.js')
+    require('core-js/modules/esnext.iterator.constructor.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
-
     /**
  * Return an array of all the points in the matrix
  * @function
@@ -21200,18 +21098,12 @@
  * @param {Array.<module:matrixObjects~Point>} [allPoints=[]] - The array of points to be returned
  * @returns {Array.<module:matrixObjects~Point>}
  */
-    const getAllPoints = function getAllPoints (matrix) {
+    const getAllPoints = function (matrix) {
       const allPoints = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : []
-      return matrix.point
-        ? allPoints.concat([matrix.point])
-        : matrix.children.reduce(function (allPoints, child) {
-          return allPoints.concat(getAllPoints(child, []))
-        }, [])
+      return matrix.point ? allPoints.concat([matrix.point]) : matrix.children.reduce((allPoints, child) => allPoints.concat(getAllPoints(child, [])), [])
     }
-
-    const _default = getAllPoints
-    exports.default = _default
-  }, { 'core-js/modules/es.array.concat.js': 265, 'core-js/modules/es.array.reduce.js': 288, 'core-js/stable': 561 }],
+    var _default = exports.default = getAllPoints
+  }, { 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
   628: [function (require, module, exports) {
     'use strict'
 
@@ -21219,25 +21111,17 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
+    var _point = _interopRequireDefault(require('../objects/point'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Return point-like object with all of the axis lengths.
  * @function
  * @param {module:matrixObjects~Matrix} matrix - The matrix to get the dimensions of.
  * @returns {module:matrixObjects~Point}
  */
-    const getAxisLengths = function getAxisLengths (matrix) {
-      return (0, _point.default)(matrix.children[0].children[0].children.length, matrix.children[0].children.length, matrix.children.length)
-    }
-
-    const _default = getAxisLengths
-    exports.default = _default
+    const getAxisLengths = matrix => (0, _point.default)(matrix.children[0].children[0].children.length, matrix.children[0].children.length, matrix.children.length)
+    var _default = exports.default = getAxisLengths
   }, { '../objects/point': 648, 'core-js/stable': 561 }],
   629: [function (require, module, exports) {
     'use strict'
@@ -21246,15 +21130,10 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _getDomItemFromPoint = _interopRequireDefault(require('./getDomItemFromPoint'))
-
-    const _getPointFromElement = _interopRequireDefault(require('./getPointFromElement'))
-
+    var _getDomItemFromPoint = _interopRequireDefault(require('./getDomItemFromPoint'))
+    var _getPointFromElement = _interopRequireDefault(require('./getPointFromElement'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Retrieve the DomItem associated with the provided element in the matrix
  * @function
@@ -21263,12 +21142,8 @@
  * @param {module:matrixObjects~Matrix} matrix - The matrix potentially containing the DomItem with Point.
  * @returns {false|module:domObjects~DomItem}
  */
-    const getDomItemFromElement = function getDomItemFromElement (elem, matrix) {
-      return (0, _getDomItemFromPoint.default)((0, _getPointFromElement.default)(elem), matrix)
-    }
-
-    const _default = getDomItemFromElement
-    exports.default = _default
+    const getDomItemFromElement = (elem, matrix) => (0, _getDomItemFromPoint.default)((0, _getPointFromElement.default)(elem), matrix)
+    var _default = exports.default = getDomItemFromElement
   }, { './getDomItemFromPoint': 630, './getPointFromElement': 633, 'core-js/stable': 561 }],
   630: [function (require, module, exports) {
     'use strict'
@@ -21277,13 +21152,9 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _checkValidPoint = _interopRequireDefault(require('./checkValidPoint'))
-
+    var _checkValidPoint = _interopRequireDefault(require('./checkValidPoint'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Retrieve the DomItem associated with the provided point
  * @function
@@ -21291,12 +21162,8 @@
  * @param {module:matrixObjects~Matrix} matrix - The matrix containing the point.
  * @returns {false|module:domObjects~DomItem}
  */
-    const getDomItemFromPoint = function getDomItemFromPoint (pnt, matrix) {
-      return (0, _checkValidPoint.default)(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false
-    }
-
-    const _default = getDomItemFromPoint
-    exports.default = _default
+    const getDomItemFromPoint = (pnt, matrix) => (0, _checkValidPoint.default)(pnt, matrix) ? matrix.children[pnt.z].children[pnt.y].children[pnt.x] : false
+    var _default = exports.default = getDomItemFromPoint
   }, { './checkValidPoint': 626, 'core-js/stable': 561 }],
   631: [function (require, module, exports) {
     'use strict'
@@ -21305,13 +21172,10 @@
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.filter.js')
-
-    require('core-js/modules/es.object.keys.js')
-
+    require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.iterator.constructor.js')
+    require('core-js/modules/esnext.iterator.filter.js')
     require('core-js/stable')
-
     /**
  * Having provided a coordinate number, find all corresponding axis, return the first match.
  * @function
@@ -21319,15 +21183,9 @@
  * @param {module:matrixObjects~coordinate} coordinate - The coordinate to search for.
  * @returns {false|module:matrixObjects~axis}
  */
-    const getFirstAxisOfCoordinate = function getFirstAxisOfCoordinate (pnt, coordinate) {
-      return Object.keys(pnt).filter(function (key) {
-        return pnt[key] === coordinate
-      })[0] || false
-    }
-
-    const _default = getFirstAxisOfCoordinate
-    exports.default = _default
-  }, { 'core-js/modules/es.array.filter.js': 269, 'core-js/modules/es.object.keys.js': 375, 'core-js/stable': 561 }],
+    const getFirstAxisOfCoordinate = (pnt, coordinate) => Object.keys(pnt).filter(key => pnt[key] === coordinate)[0] || false
+    var _default = exports.default = getFirstAxisOfCoordinate
+  }, { 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/stable': 561 }],
   632: [function (require, module, exports) {
     'use strict'
 
@@ -21335,25 +21193,17 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _siFunciona = _interopRequireDefault(require('si-funciona'))
-
+    var _siFunciona = _interopRequireDefault(require('si-funciona'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Return the first coordinate number with the highest absolute value.
  * @function
  * @param {module:matrixObjects~Point} pnt - A Point to be assessed.
  * @returns {module:matrixObjects~coordinate}
  */
-    const getHighestAbsoluteCoordinate = function getHighestAbsoluteCoordinate (pnt) {
-      return _siFunciona.default.reduceObject(pnt, _siFunciona.default.absoluteMax, 0)
-    }
-
-    const _default = getHighestAbsoluteCoordinate
-    exports.default = _default
+    const getHighestAbsoluteCoordinate = pnt => _siFunciona.default.reduceObject(pnt, _siFunciona.default.absoluteMax, 0)
+    var _default = exports.default = getHighestAbsoluteCoordinate
   }, { 'core-js/stable': 561, 'si-funciona': 779 }],
   633: [function (require, module, exports) {
     'use strict'
@@ -21362,19 +21212,9 @@
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.index-of.js')
-
-    require('core-js/modules/es.array.from.js')
-
-    require('core-js/modules/es.string.iterator.js')
-
     require('core-js/stable')
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
+    var _point = _interopRequireDefault(require('../objects/point'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Retrieve the point associated with the provided element.
  * @function
@@ -21382,13 +21222,9 @@
  * a point.
  * @returns {module:matrixObjects~Point}
  */
-    const getPointFromElement = function getPointFromElement (elem) {
-      return (0, _point.default)(Array.from(elem.parentNode.childNodes).indexOf(elem), Array.from(elem.parentNode.parentNode.childNodes).indexOf(elem.parentNode), Array.from(elem.parentNode.parentNode.parentNode.childNodes).indexOf(elem.parentNode.parentNode))
-    }
-
-    const _default = getPointFromElement
-    exports.default = _default
-  }, { '../objects/point': 648, 'core-js/modules/es.array.from.js': 277, 'core-js/modules/es.array.index-of.js': 279, 'core-js/modules/es.string.iterator.js': 434, 'core-js/stable': 561 }],
+    const getPointFromElement = elem => (0, _point.default)(Array.from(elem.parentNode.childNodes).indexOf(elem), Array.from(elem.parentNode.parentNode.childNodes).indexOf(elem.parentNode), Array.from(elem.parentNode.parentNode.parentNode.childNodes).indexOf(elem.parentNode.parentNode))
+    var _default = exports.default = getPointFromElement
+  }, { '../objects/point': 648, 'core-js/stable': 561 }],
   634: [function (require, module, exports) {
     'use strict'
 
@@ -21396,19 +21232,11 @@
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.concat.js')
-
     require('core-js/stable')
-
-    const _areEqualPoints = _interopRequireDefault(require('./areEqualPoints'))
-
-    const _nextCell = _interopRequireDefault(require('./nextCell'))
-
-    const _pointsToDirection = _interopRequireDefault(require('./pointsToDirection'))
-
+    var _areEqualPoints = _interopRequireDefault(require('./areEqualPoints'))
+    var _nextCell = _interopRequireDefault(require('./nextCell'))
+    var _pointsToDirection = _interopRequireDefault(require('./pointsToDirection'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Having provided two points, return an array of transition points connecting 'start' and 'end'. Return array
  * includes 'start' (line[0]) and 'end' (line[line.length-1])
@@ -21418,64 +21246,25 @@
  * @param {Array.<module:matrixObjects~Point>} [line=[]] - The resulting line to connect start and end.
  * @returns {Array.<module:matrixObjects~Point>}
  */
-    const getPointsLine = function getPointsLine (start, end) {
+    const getPointsLine = function (start, end) {
       const line = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : []
       return (0, _areEqualPoints.default)(start, end) ? line.concat([start]) : getPointsLine((0, _nextCell.default)(start, (0, _pointsToDirection.default)(start, end)), end, line.concat([start]))
     }
-
-    const _default = getPointsLine
-    exports.default = _default
-  }, { './areEqualPoints': 623, './nextCell': 637, './pointsToDirection': 641, 'core-js/modules/es.array.concat.js': 265, 'core-js/stable': 561 }],
+    var _default = exports.default = getPointsLine
+  }, { './areEqualPoints': 623, './nextCell': 637, './pointsToDirection': 641, 'core-js/stable': 561 }],
   635: [function (require, module, exports) {
     'use strict'
-
-    require('core-js/modules/es.symbol.js')
-
-    require('core-js/modules/es.symbol.description.js')
-
-    require('core-js/modules/es.object.to-string.js')
-
-    require('core-js/modules/es.symbol.iterator.js')
-
-    require('core-js/modules/es.array.iterator.js')
-
-    require('core-js/modules/es.string.iterator.js')
-
-    require('core-js/modules/web.dom-collections.iterator.js')
-
-    require('core-js/modules/es.array.from.js')
-
-    require('core-js/modules/es.array.slice.js')
-
-    require('core-js/modules/es.function.name.js')
 
     Object.defineProperty(exports, '__esModule', {
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.reduce.js')
-
-    require('core-js/modules/es.array.concat.js')
-
+    require('core-js/modules/esnext.async-iterator.reduce.js')
+    require('core-js/modules/esnext.iterator.constructor.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
-
-    const _getPointsLine = _interopRequireDefault(require('./getPointsLine'))
-
+    var _getPointsLine = _interopRequireDefault(require('./getPointsLine'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
-    function _toConsumableArray (arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread() }
-
-    function _nonIterableSpread () { throw new TypeError('Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.') }
-
-    function _unsupportedIterableToArray (o, minLen) { if (!o) return; if (typeof o === 'string') return _arrayLikeToArray(o, minLen); let n = Object.prototype.toString.call(o).slice(8, -1); if (n === 'Object' && o.constructor) n = o.constructor.name; if (n === 'Map' || n === 'Set') return Array.from(o); if (n === 'Arguments' || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen) }
-
-    function _iterableToArray (iter) { if (typeof Symbol !== 'undefined' && iter[Symbol.iterator] != null || iter['@@iterator'] != null) return Array.from(iter) }
-
-    function _arrayWithoutHoles (arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr) }
-
-    function _arrayLikeToArray (arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i] } return arr2 }
-
     /**
  * Takes an array of arrays containing two points each. Calls getPointsLine for each array of points. Returns an
  * array of all points captured for each line segment
@@ -21483,15 +21272,9 @@
  * @param {Array.<Array.<module:matrixObjects~Point>>} lines - An array of lines only containing start and end.
  * @returns {Array.<Array.<module:matrixObjects~Point>>}
  */
-    const getPointsLines = function getPointsLines (lines) {
-      return lines.reduce(function (pointsArray, line) {
-        return pointsArray.concat(_getPointsLine.default.apply(void 0, _toConsumableArray(line)))
-      }, [])
-    }
-
-    const _default = getPointsLines
-    exports.default = _default
-  }, { './getPointsLine': 634, 'core-js/modules/es.array.concat.js': 265, 'core-js/modules/es.array.from.js': 277, 'core-js/modules/es.array.iterator.js': 281, 'core-js/modules/es.array.reduce.js': 288, 'core-js/modules/es.array.slice.js': 290, 'core-js/modules/es.function.name.js': 317, 'core-js/modules/es.object.to-string.js': 382, 'core-js/modules/es.string.iterator.js': 434, 'core-js/modules/es.symbol.description.js': 460, 'core-js/modules/es.symbol.iterator.js': 464, 'core-js/modules/es.symbol.js': 465, 'core-js/modules/web.dom-collections.iterator.js': 540, 'core-js/stable': 561 }],
+    const getPointsLines = lines => lines.reduce((pointsArray, line) => pointsArray.concat((0, _getPointsLine.default)(...line)), [])
+    var _default = exports.default = getPointsLines
+  }, { './getPointsLine': 634, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
   636: [function (require, module, exports) {
     'use strict'
 
@@ -21499,13 +21282,9 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
+    var _point = _interopRequireDefault(require('../objects/point'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Given a start point, line length, and a direction, generate the end point of the line.
  * @function
@@ -21514,12 +21293,8 @@
  * @param {module:matrixObjects~Direction} dir - The direction of the line.
  * @returns {module:matrixObjects~Point}
  */
-    const lineEndPoint = function lineEndPoint (start, length, dir) {
-      return (0, _point.default)(start.x + dir.x * (length - 1), start.y + dir.y * (length - 1), start.z + dir.z * (length - 1))
-    }
-
-    const _default = lineEndPoint
-    exports.default = _default
+    const lineEndPoint = (start, length, dir) => (0, _point.default)(start.x + dir.x * (length - 1), start.y + dir.y * (length - 1), start.z + dir.z * (length - 1))
+    var _default = exports.default = lineEndPoint
   }, { '../objects/point': 648, 'core-js/stable': 561 }],
   637: [function (require, module, exports) {
     'use strict'
@@ -21528,13 +21303,9 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
+    var _point = _interopRequireDefault(require('../objects/point'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Based on provided point and point direction generate next point.
  * @function
@@ -21542,12 +21313,8 @@
  * @param {module:matrixObjects~Direction} dir - Provide the direction to be applied to find the next point
  * @returns {module:matrixObjects~Point}
  */
-    const nextCell = function nextCell (pnt, dir) {
-      return (0, _point.default)(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z)
-    }
-
-    const _default = nextCell
-    exports.default = _default
+    const nextCell = (pnt, dir) => (0, _point.default)(pnt.x + dir.x, pnt.y + dir.y, pnt.z + dir.z)
+    var _default = exports.default = nextCell
   }, { '../objects/point': 648, 'core-js/stable': 561 }],
   638: [function (require, module, exports) {
     'use strict'
@@ -21556,17 +21323,10 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
-    const _getFirstAxisOfCoordinate = _interopRequireDefault(require('./getFirstAxisOfCoordinate'))
-
+    var _point = _interopRequireDefault(require('../objects/point'))
+    var _getFirstAxisOfCoordinate = _interopRequireDefault(require('./getFirstAxisOfCoordinate'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
-    function _defineProperty (obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }) } else { obj[key] = value } return obj }
-
     /**
  * Given a point and the value of the highest coordinate select the corresponding axis which will be the direction
  * (-1 or 1) to and set the other axis to 0.
@@ -21574,14 +21334,10 @@
  * @param {module:matrixObjects~coordinate} highestCoordinate - The highest coordinate provided by the point.
  * @returns {module:matrixObjects~Direction}
  */
-    const pointAndCoordinateToDirection = function pointAndCoordinateToDirection (pnt, highestCoordinate) {
-      return (function (axis) {
-        return axis !== false ? siFunciona.mergeObjects((0, _point.default)(0, 0, 0), _defineProperty({}, ''.concat(axis), highestCoordinate > 0 ? 1 : -1)) : (0, _point.default)(0, 0, 0)
-      }((0, _getFirstAxisOfCoordinate.default)(pnt, highestCoordinate)))
-    }
-
-    const _default = pointAndCoordinateToDirection
-    exports.default = _default
+    const pointAndCoordinateToDirection = (pnt, highestCoordinate) => (axis => axis !== false ? siFunciona.mergeObjects((0, _point.default)(0, 0, 0), {
+      [`${axis}`]: highestCoordinate > 0 ? 1 : -1
+    }) : (0, _point.default)(0, 0, 0))((0, _getFirstAxisOfCoordinate.default)(pnt, highestCoordinate))
+    var _default = exports.default = pointAndCoordinateToDirection
   }, { '../objects/point': 648, './getFirstAxisOfCoordinate': 631, 'core-js/stable': 561 }],
   639: [function (require, module, exports) {
     'use strict'
@@ -21590,13 +21346,9 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
+    var _point = _interopRequireDefault(require('../objects/point'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Based on provided point and another point, get a point with the difference between each axis
  * @function
@@ -21604,12 +21356,8 @@
  * @param {module:matrixObjects~Point} end - The other point to be compared
  * @returns {module:matrixObjects~Point}
  */
-    const pointDifference = function pointDifference (start, end) {
-      return (0, _point.default)(end.x - start.x, end.y - start.y, end.z - start.z)
-    }
-
-    const _default = pointDifference
-    exports.default = _default
+    const pointDifference = (start, end) => (0, _point.default)(end.x - start.x, end.y - start.y, end.z - start.z)
+    var _default = exports.default = pointDifference
   }, { '../objects/point': 648, 'core-js/stable': 561 }],
   640: [function (require, module, exports) {
     'use strict'
@@ -21618,26 +21366,17 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _pointAndCoordinateToDirection = _interopRequireDefault(require('./pointAndCoordinateToDirection'))
-
-    const _getHighestAbsoluteCoordinate = _interopRequireDefault(require('./getHighestAbsoluteCoordinate'))
-
+    var _pointAndCoordinateToDirection = _interopRequireDefault(require('./pointAndCoordinateToDirection'))
+    var _getHighestAbsoluteCoordinate = _interopRequireDefault(require('./getHighestAbsoluteCoordinate'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Having a point, convert it to a direction where the axis with the highest coordinate value will be set to -1 or 1.
  * @param {module:matrixObjects~Point} pnt - The point to be converted to a direction.
  * @returns {module:matrixObjects~Direction}
  */
-    const pointToDirection = function pointToDirection (pnt) {
-      return (0, _pointAndCoordinateToDirection.default)(pnt, (0, _getHighestAbsoluteCoordinate.default)(pnt))
-    }
-
-    const _default = pointToDirection
-    exports.default = _default
+    const pointToDirection = pnt => (0, _pointAndCoordinateToDirection.default)(pnt, (0, _getHighestAbsoluteCoordinate.default)(pnt))
+    var _default = exports.default = pointToDirection
   }, { './getHighestAbsoluteCoordinate': 632, './pointAndCoordinateToDirection': 638, 'core-js/stable': 561 }],
   641: [function (require, module, exports) {
     'use strict'
@@ -21646,15 +21385,10 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _pointToDirection = _interopRequireDefault(require('./pointToDirection'))
-
-    const _pointDifference = _interopRequireDefault(require('./pointDifference'))
-
+    var _pointToDirection = _interopRequireDefault(require('./pointToDirection'))
+    var _pointDifference = _interopRequireDefault(require('./pointDifference'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Retrieve a directional coordinate value based on two provided points
  * (directions consist of two zero coordinates and a single coordinate of 1 / -1)
@@ -21663,12 +21397,8 @@
  * @param {module:matrixObjects~Point} end - The other point to assess.
  * @returns {module:matrixObjects~Direction}
  */
-    const pointsToDirection = function pointsToDirection (start, end) {
-      return (0, _pointToDirection.default)((0, _pointDifference.default)(start, end))
-    }
-
-    const _default = pointsToDirection
-    exports.default = _default
+    const pointsToDirection = (start, end) => (0, _pointToDirection.default)((0, _pointDifference.default)(start, end))
+    var _default = exports.default = pointsToDirection
   }, { './pointDifference': 639, './pointToDirection': 640, 'core-js/stable': 561 }],
   642: [function (require, module, exports) {
     'use strict'
@@ -21677,28 +21407,21 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _siFunciona = _interopRequireDefault(require('si-funciona'))
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
+    var _siFunciona = _interopRequireDefault(require('si-funciona'))
+    var _point = _interopRequireDefault(require('../objects/point'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Get random direction point
  * @function
  * @param {Array.<module:matrixObjects~Point>} [useCoordinates=[]] - An array of possible directions.
  * @returns {module:matrixObjects~Direction}
  */
-    const randDirection = function randDirection () {
+    const randDirection = function () {
       const useCoordinates = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : []
       return useCoordinates.length ? useCoordinates[_siFunciona.default.randomInteger(useCoordinates.length)] : (0, _point.default)(0, 0, 0)
     }
-
-    const _default = randDirection
-    exports.default = _default
+    var _default = exports.default = randDirection
   }, { '../objects/point': 648, 'core-js/stable': 561, 'si-funciona': 779 }],
   643: [function (require, module, exports) {
     'use strict'
@@ -21707,15 +21430,10 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _siFunciona = _interopRequireDefault(require('si-funciona'))
-
-    const _point = _interopRequireDefault(require('../objects/point'))
-
+    var _siFunciona = _interopRequireDefault(require('si-funciona'))
+    var _point = _interopRequireDefault(require('../objects/point'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Generate a random starting point for a line with the provided length and direction.
  * @function
@@ -21724,13 +21442,11 @@
  * @param {module:matrixObjects~Point} [lengthLimits={x: 10, y: 10, z: 10}] - The maximum grid size.
  * @returns {module:matrixObjects~Point}
  */
-    const randomStart = function randomStart (length, dir) {
+    const randomStart = function (length, dir) {
       const lengthLimits = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : (0, _point.default)(10, 10, 10)
       return (0, _point.default)(_siFunciona.default.randomInteger(lengthLimits.x - (length - 1) * dir.x), _siFunciona.default.randomInteger(lengthLimits.y - (length - 1) * dir.y), _siFunciona.default.randomInteger(lengthLimits.z - (length - 1) * dir.z))
     }
-
-    const _default = randomStart
-    exports.default = _default
+    var _default = exports.default = randomStart
   }, { '../objects/point': 648, 'core-js/stable': 561, 'si-funciona': 779 }],
   644: [function (require, module, exports) {
     'use strict'
@@ -21739,21 +21455,15 @@
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.reduce.js')
-
-    require('core-js/modules/es.array.filter.js')
-
+    require('core-js/modules/esnext.async-iterator.reduce.js')
+    require('core-js/modules/esnext.iterator.constructor.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
+    require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.iterator.filter.js')
     require('core-js/stable')
-
-    const _siFunciona = _interopRequireDefault(require('si-funciona'))
-
-    const _getPointsLine = _interopRequireDefault(require('./getPointsLine'))
-
+    var _siFunciona = _interopRequireDefault(require('si-funciona'))
+    var _getPointsLine = _interopRequireDefault(require('./getPointsLine'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
-    function _defineProperty (obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }) } else { obj[key] = value } return obj }
-
     /**
  * Function that produces a property of the new Object, taking three arguments
  * @callback module:matrixFunctions~testPointStatus
@@ -21773,21 +21483,17 @@
  * @param {boolean} [inclusive=true] - Choose whether to include or exclude the start and end points in the results.
  * @returns {Object.<string, Array.<module:matrixObjects~Point>>}
  */
-    const testPointsBetween = function testPointsBetween (start, end, matrix, func) {
+    const testPointsBetween = function (start, end, matrix, func) {
       const inclusive = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true
-      return (0, _getPointsLine.default)(start, end).filter(function (prop, i, line) {
-        return i !== 0 && i !== line.length - 1 || inclusive
-      }).reduce(function (newPoints, next) {
-        return _siFunciona.default.mergeObjects(newPoints, _defineProperty({}, ''.concat(func(next, matrix)), [next]))
-      }, {
+      return (0, _getPointsLine.default)(start, end).filter((prop, i, line) => i !== 0 && i !== line.length - 1 || inclusive).reduce((newPoints, next) => _siFunciona.default.mergeObjects(newPoints, {
+        [`${func(next, matrix)}`]: [next]
+      }), {
         true: [],
         false: []
       })
     }
-
-    const _default = testPointsBetween
-    exports.default = _default
-  }, { './getPointsLine': 634, 'core-js/modules/es.array.filter.js': 269, 'core-js/modules/es.array.reduce.js': 288, 'core-js/stable': 561, 'si-funciona': 779 }],
+    var _default = exports.default = testPointsBetween
+  }, { './getPointsLine': 634, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, 'si-funciona': 779 }],
   645: [function (require, module, exports) {
     'use strict'
 
@@ -21795,35 +21501,26 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _cube = _interopRequireDefault(require('./objects/cube'))
-
-    const _matrix = _interopRequireDefault(require('./objects/matrix'))
-
-    const _point = _interopRequireDefault(require('./objects/point'))
-
-    const _square = _interopRequireDefault(require('./objects/square'))
-
-    const _tile = _interopRequireDefault(require('./objects/tile'))
-
+    var _cube = _interopRequireDefault(require('./objects/cube'))
+    var _matrix = _interopRequireDefault(require('./objects/matrix'))
+    var _point = _interopRequireDefault(require('./objects/point'))
+    var _square = _interopRequireDefault(require('./objects/square'))
+    var _tile = _interopRequireDefault(require('./objects/tile'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * @file Core Matrix objects for representing DOM grid in JSON.
  * @author Joshua Heagle <joshuaheagle@gmail.com>
  * @version 1.0.0
  * @module matrixObjects
  */
-    const _default = {
+    var _default = exports.default = {
       cube: _cube.default,
       matrix: _matrix.default,
       point: _point.default,
       square: _square.default,
       tile: _tile.default
     }
-    exports.default = _default
   }, { './objects/cube': 646, './objects/matrix': 647, './objects/point': 648, './objects/square': 649, './objects/tile': 650, 'core-js/stable': 561 }],
   646: [function (require, module, exports) {
     'use strict'
@@ -21832,13 +21529,9 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _matrix = _interopRequireDefault(require('./matrix'))
-
+    var _matrix = _interopRequireDefault(require('./matrix'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Return a matrix where x, y, and z are equal
  * @function
@@ -21850,17 +21543,13 @@
  * @param {number} size - Used to define height, width, and depth as equal values
  * @returns {module:matrixObjects~Matrix}
  */
-    const cube = function cube () {
-      const _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {}
-      const _ref$x = _ref.x
-      const x = _ref$x === void 0 ? [] : _ref$x
-      const _ref$y = _ref.y
-      const y = _ref$y === void 0 ? [] : _ref$y
-      const _ref$z = _ref.z
-      const z = _ref$z === void 0 ? [] : _ref$z
-      const _ref$matrixProps = _ref.matrixProps
-      const matrixProps = _ref$matrixProps === void 0 ? [] : _ref$matrixProps
-
+    const cube = function () {
+      const {
+        x = [],
+        y = [],
+        z = [],
+        matrixProps = []
+      } = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {}
       const size = arguments.length > 1 ? arguments[1] : undefined
       return (0, _matrix.default)({
         coordinate: size,
@@ -21873,60 +21562,19 @@
         props: z
       }, matrixProps)
     }
-
-    const _default = cube
-    exports.default = _default
+    var _default = exports.default = cube
   }, { './matrix': 647, 'core-js/stable': 561 }],
   647: [function (require, module, exports) {
     'use strict'
-
-    require('core-js/modules/es.symbol.js')
-
-    require('core-js/modules/es.symbol.description.js')
-
-    require('core-js/modules/es.object.to-string.js')
-
-    require('core-js/modules/es.symbol.iterator.js')
-
-    require('core-js/modules/es.array.iterator.js')
-
-    require('core-js/modules/es.string.iterator.js')
-
-    require('core-js/modules/web.dom-collections.iterator.js')
-
-    require('core-js/modules/es.array.from.js')
-
-    require('core-js/modules/es.array.slice.js')
-
-    require('core-js/modules/es.function.name.js')
 
     Object.defineProperty(exports, '__esModule', {
       value: true
     })
     exports.default = void 0
-
-    require('core-js/modules/es.array.concat.js')
-
     require('core-js/stable')
-
-    const _siFunciona = _interopRequireDefault(require('si-funciona'))
-
-    const _jsonDom = _interopRequireDefault(require('json-dom'))
-
+    var _siFunciona = _interopRequireDefault(require('si-funciona'))
+    var _jsonDom = _interopRequireDefault(require('json-dom'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
-    function _toConsumableArray (arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread() }
-
-    function _nonIterableSpread () { throw new TypeError('Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.') }
-
-    function _unsupportedIterableToArray (o, minLen) { if (!o) return; if (typeof o === 'string') return _arrayLikeToArray(o, minLen); let n = Object.prototype.toString.call(o).slice(8, -1); if (n === 'Object' && o.constructor) n = o.constructor.name; if (n === 'Map' || n === 'Set') return Array.from(o); if (n === 'Arguments' || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen) }
-
-    function _iterableToArray (iter) { if (typeof Symbol !== 'undefined' && iter[Symbol.iterator] != null || iter['@@iterator'] != null) return Array.from(iter) }
-
-    function _arrayWithoutHoles (arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr) }
-
-    function _arrayLikeToArray (arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i] } return arr2 }
-
     /**
  * MatrixColumn is a DomItem which represents the x axis and also stores {@link module:matrixObjects~MatrixTile}
  * @typedef {
@@ -21979,59 +21627,51 @@
  * @param {Array.<module:matrixObjects~Matrix>} matrixProps - Properties to be added to the matrix
  * @returns {module:matrixObjects~Matrix}
  */
-    const matrix = function matrix () {
-      const x = arguments.length > 0 && arguments[0] !== undefined
-        ? arguments[0]
-        : {
-          coordinate: 0,
-          props: []
-        }
-      const y = arguments.length > 1 && arguments[1] !== undefined
-        ? arguments[1]
-        : {
-          coordinate: 0,
-          props: []
-        }
-      const z = arguments.length > 2 && arguments[2] !== undefined
-        ? arguments[2]
-        : {
-          coordinate: 1,
-          props: []
-        }
+    const matrix = function () {
+      const x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
+        coordinate: 0,
+        props: []
+      }
+      const y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+        coordinate: 0,
+        props: []
+      }
+      const z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
+        coordinate: 1,
+        props: []
+      }
       const matrixProps = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : []
-      return _siFunciona.default.mergeObjects.apply(_siFunciona.default, [_jsonDom.default.createDomItem({
+      return _siFunciona.default.mergeObjects(_jsonDom.default.createDomItem({
         tagName: 'div',
         attributes: {
           className: 'matrix'
         },
-        children: _siFunciona.default.buildArray(_siFunciona.default.mergeObjectsMutable.apply(_siFunciona.default, [_jsonDom.default.createDomItem({
+        children: _siFunciona.default.buildArray(_siFunciona.default.mergeObjectsMutable(_jsonDom.default.createDomItem({
           axis: 'z',
           tagName: 'div',
           attributes: {
             className: 'layer'
           },
-          children: _siFunciona.default.buildArray(_siFunciona.default.mergeObjectsMutable.apply(_siFunciona.default, [_jsonDom.default.createDomItem({
+          children: _siFunciona.default.buildArray(_siFunciona.default.mergeObjectsMutable(_jsonDom.default.createDomItem({
             axis: 'y',
             tagName: 'div',
             attributes: {
               className: 'row'
             },
-            children: _siFunciona.default.buildArray(_siFunciona.default.mergeObjectsMutable.apply(_siFunciona.default, [_jsonDom.default.createDomItem({
+            children: _siFunciona.default.buildArray(_siFunciona.default.mergeObjectsMutable(_jsonDom.default.createDomItem({
               axis: 'x',
               tagName: 'div',
               attributes: {
                 className: 'column'
               },
               children: []
-            })].concat(_toConsumableArray(x.props))), x.coordinate)
-          })].concat(_toConsumableArray(y.props))), y.coordinate)
-        })].concat(_toConsumableArray(z.props))), z.coordinate)
-      })].concat(_toConsumableArray(matrixProps)))
+            }), ...x.props), x.coordinate)
+          }), ...y.props), y.coordinate)
+        }), ...z.props), z.coordinate)
+      }), ...matrixProps)
     }
-
-    const _default = matrix
-    exports.default = _default
-  }, { 'core-js/modules/es.array.concat.js': 265, 'core-js/modules/es.array.from.js': 277, 'core-js/modules/es.array.iterator.js': 281, 'core-js/modules/es.array.slice.js': 290, 'core-js/modules/es.function.name.js': 317, 'core-js/modules/es.object.to-string.js': 382, 'core-js/modules/es.string.iterator.js': 434, 'core-js/modules/es.symbol.description.js': 460, 'core-js/modules/es.symbol.iterator.js': 464, 'core-js/modules/es.symbol.js': 465, 'core-js/modules/web.dom-collections.iterator.js': 540, 'core-js/stable': 561, 'json-dom': 651, 'si-funciona': 779 }],
+    var _default = exports.default = matrix
+  }, { 'core-js/stable': 561, 'json-dom': 651, 'si-funciona': 779 }],
   648: [function (require, module, exports) {
     'use strict'
 
@@ -22039,9 +21679,7 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
     /**
  * A string representing an axis: x, y, z
  * @typedef {string} module:matrixObjects~axis
@@ -22080,7 +21718,7 @@
  * {@link module:matrixObjects~Matrix})
  * @returns {module:matrixObjects~Point}
  */
-    const point = function point (x, y) {
+    const point = function (x, y) {
       const z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0
       return {
         x: x,
@@ -22088,9 +21726,7 @@
         z: z
       }
     }
-
-    const _default = point
-    exports.default = _default
+    var _default = exports.default = point
   }, { 'core-js/stable': 561 }],
   649: [function (require, module, exports) {
     'use strict'
@@ -22099,13 +21735,9 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
-    const _matrix = _interopRequireDefault(require('./matrix'))
-
+    var _matrix = _interopRequireDefault(require('./matrix'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
-
     /**
  * Return a single layer matrix where x and y are equal
  * @function
@@ -22117,17 +21749,13 @@
  * @param {number} size - Used to define height and width as equal values (depth is set to 1)
  * @returns {module:matrixObjects~Matrix}
  */
-    const square = function square () {
-      const _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {}
-      const _ref$x = _ref.x
-      const x = _ref$x === void 0 ? [] : _ref$x
-      const _ref$y = _ref.y
-      const y = _ref$y === void 0 ? [] : _ref$y
-      const _ref$z = _ref.z
-      const z = _ref$z === void 0 ? [] : _ref$z
-      const _ref$matrixProps = _ref.matrixProps
-      const matrixProps = _ref$matrixProps === void 0 ? [] : _ref$matrixProps
-
+    const square = function () {
+      const {
+        x = [],
+        y = [],
+        z = [],
+        matrixProps = []
+      } = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {}
       const size = arguments.length > 1 ? arguments[1] : undefined
       return (0, _matrix.default)({
         coordinate: size,
@@ -22140,9 +21768,7 @@
         props: z
       }, matrixProps)
     }
-
-    const _default = square
-    exports.default = _default
+    var _default = exports.default = square
   }, { './matrix': 647, 'core-js/stable': 561 }],
   650: [function (require, module, exports) {
     'use strict'
@@ -22151,9 +21777,7 @@
       value: true
     })
     exports.default = void 0
-
     require('core-js/stable')
-
     /**
  * MatrixTile is an Object which stores a reference a {@link Point} and can be populated with additionally associated
  * fields.
@@ -22168,14 +21792,10 @@
  * @function
  * @returns {module:matrixObjects~MatrixTile}
  */
-    const tile = function tile () {
-      return {
-        point: {}
-      }
-    }
-
-    const _default = tile
-    exports.default = _default
+    const tile = () => ({
+      point: {}
+    })
+    var _default = exports.default = tile
   }, { 'core-js/stable': 561 }],
   651: [function (require, module, exports) {
     arguments[4][562][0].apply(exports, arguments)
