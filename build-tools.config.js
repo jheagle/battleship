@@ -1,3 +1,5 @@
 module.exports = {
-  browserName: 'battleship',
+  browser: {
+    name: 'battleship'
+  },
 }

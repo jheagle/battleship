@@ -150,7 +150,7 @@
           tagName: 'div',
           attributes: {
             className: 'score-card',
-            innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${Math.round(player.status * 100) / 100}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
+            innerHTML: '<strong>'.concat(player.name, '</strong><hr><br></strong><strong>Status:</strong> ').concat(Math.round(player.status * 100) / 100, '%, <strong>Sunk:</strong> ').concat(player.attacks.sunk, '<br><strong>Hit:</strong> ').concat(player.attacks.hit, ' / <strong>Miss:</strong> ').concat(player.attacks.miss, '<br><strong>Turns:</strong> ').concat(player.turnCnt)
           }
         }))
       }, {
@@ -283,7 +283,7 @@
         children: [{
           tagName: 'span',
           attributes: {
-            innerHTML: `<strong>${player.name}</strong>: ${status}`
+            innerHTML: '<strong>'.concat(player.name, '</strong>: ').concat(status)
           }
         }, {
           tagName: 'ul',
@@ -291,7 +291,7 @@
           children: player.shipFleet.map(ship => ({
             tagName: 'li',
             attributes: {
-              innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
+              innerHTML: '<strong>'.concat(ship.name, ' (').concat(ship.parts.length, '):</strong> ').concat(Math.round(ship.status * 100) / 100, '%')
             }
           }))
         }]
@@ -306,15 +306,15 @@
       value: true
     })
     exports.default = void 0
-    require('core-js/modules/esnext.async-iterator.map.js')
-    require('core-js/modules/esnext.iterator.map.js')
     require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.async-iterator.for-each.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
+    require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.constructor.js')
     require('core-js/modules/esnext.iterator.filter.js')
-    require('core-js/modules/esnext.async-iterator.reduce.js')
-    require('core-js/modules/esnext.iterator.reduce.js')
-    require('core-js/modules/esnext.async-iterator.for-each.js')
     require('core-js/modules/esnext.iterator.for-each.js')
+    require('core-js/modules/esnext.iterator.map.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
     var _pieces = _interopRequireDefault(require('../components/pieces'))
     var _jsonDom = _interopRequireDefault(require('json-dom'))
     var _siFunciona = _interopRequireDefault(require('si-funciona'))
@@ -405,7 +405,7 @@
  * @returns {*}
  */
     const updatePlayerStats = function (player) {
-      const status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : `${Math.round(player.status * 100) / 100}%`
+      const status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ''.concat(Math.round(player.status * 100) / 100, '%')
       player.playerStats = _jsonDom.default.updateElements(_siFunciona.default.mergeObjects(player.playerStats, _pieces.default.playerStats(player, status)))
       return player
     }
@@ -461,7 +461,7 @@
           }, 0)
         }
       }
-      const result = _siFunciona.default.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
+      const result = _siFunciona.default.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : ''.concat(Math.round(player.status * 100) / 100, '%')), 0)
       return result.result || player
     }
 
@@ -562,7 +562,7 @@
         player.status = status / player.shipFleet.length
       }
       if (hitShip) {
-        player = updatePlayerStats(player, `${Math.round(player.status * 100) / 100}%`)
+        player = updatePlayerStats(player, ''.concat(Math.round(player.status * 100) / 100, '%'))
         // Check if the hit ship was sunk
         sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
       }
@@ -705,7 +705,7 @@
       return gameActions.attackFleet(selectTargetCoordinate(victim))
     }
     var _default = exports.default = gameActions
-  }, { '../components/pieces': 2, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/modules/esnext.iterator.reduce.js': 534, 'json-dom': 562, 'si-funciona': 779 }],
+  }, { '../components/pieces': 2, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/modules/esnext.iterator.reduce.js': 534, 'json-dom': 562, 'si-funciona': 782 }],
   4: [function (require, module, exports) {
     'use strict'
 
@@ -713,11 +713,12 @@
       value: true
     })
     exports.default = void 0
-    require('core-js/modules/esnext.async-iterator.map.js')
-    require('core-js/modules/esnext.iterator.map.js')
     require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
     require('core-js/modules/esnext.iterator.constructor.js')
     require('core-js/modules/esnext.iterator.filter.js')
+    require('core-js/modules/esnext.iterator.map.js')
+    require('core-js/modules/web.dom-collections.iterator.js')
     var _jsonDom = _interopRequireDefault(require('json-dom'))
     var _siFunciona = _interopRequireDefault(require('si-funciona'))
     var _layout = _interopRequireDefault(require('../components/layout'))
@@ -835,7 +836,7 @@
       if (humans < 1 && robots < 1) {
         return players
       }
-      const player = _pieces.default.playerSet({}, `Player ${players.length + 1}`)
+      const player = _pieces.default.playerSet({}, 'Player '.concat(players.length + 1))
       player.isRobot = humans <= 0
       player.board = _matrixDom.default.bindPointData(_matrixDom.default.square({
         x: [_pieces.default.waterTile(player, players)],
@@ -850,7 +851,7 @@
         }]
       }, 10))
       player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
-      player.playerStats = _pieces.default.playerStats(player, `${Math.round(player.status * 100) / 100}%`)
+      player.playerStats = _pieces.default.playerStats(player, ''.concat(Math.round(player.status * 100) / 100, '%'))
       player.children = [player.board, player.playerStats]
       players.push(player)
       return buildPlayers(--humans, humans < 0 ? --robots : robots, players)
@@ -914,7 +915,7 @@
  */
     gameStart.restart = (e, button) => gameStart.main(_jsonDom.default.getTopParentItem(button))
     var _default = exports.default = gameStart
-  }, { '../components/layout': 1, '../components/pieces': 2, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.map.js': 533, 'json-dom': 562, 'matrix-dom': 619, 'si-funciona': 779 }],
+  }, { '../components/layout': 1, '../components/pieces': 2, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/modules/web.dom-collections.iterator.js': 540, 'json-dom': 562, 'matrix-dom': 619, 'si-funciona': 782 }],
   5: [function (require, module, exports) {
     'use strict'
 
@@ -3609,7 +3610,7 @@
       } else if (STATIC) {
         target = global[TARGET] || defineGlobalProperty(TARGET, {})
       } else {
-        target = (global[TARGET] || {}).prototype
+        target = global[TARGET] && global[TARGET].prototype
       }
       if (target) {
         for (key in source) {
@@ -3647,7 +3648,7 @@
     'use strict'
     // TODO: Remove from `core-js@4` since it's moved to entry points
     require('../modules/es.regexp.exec')
-    var uncurryThis = require('../internals/function-uncurry-this-clause')
+    var call = require('../internals/function-call')
     var defineBuiltIn = require('../internals/define-built-in')
     var regexpExec = require('../internals/regexp-exec')
     var fails = require('../internals/fails')
@@ -3661,7 +3662,7 @@
       var SYMBOL = wellKnownSymbol(KEY)
 
       var DELEGATES_TO_SYMBOL = !fails(function () {
-        // String methods call symbol-named RegEp methods
+        // String methods call symbol-named RegExp methods
         var O = {}
         O[SYMBOL] = function () { return 7 }
         return ''[KEY](O) !== 7
@@ -3699,18 +3700,17 @@
     !DELEGATES_TO_EXEC ||
     FORCED
       ) {
-        var uncurriedNativeRegExpMethod = uncurryThis(/./[SYMBOL])
+        var nativeRegExpMethod = /./[SYMBOL]
         var methods = exec(SYMBOL, ''[KEY], function (nativeMethod, regexp, str, arg2, forceStringMethod) {
-          var uncurriedNativeMethod = uncurryThis(nativeMethod)
           var $exec = regexp.exec
           if ($exec === regexpExec || $exec === RegExpPrototype.exec) {
             if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
               // The native String method already delegates to @@method (this
               // polyfilled function), leasing to infinite recursion.
               // We avoid it by directly calling the native @@method method.
-              return { done: true, value: uncurriedNativeRegExpMethod(regexp, str, arg2) }
+              return { done: true, value: call(nativeRegExpMethod, regexp, str, arg2) }
             }
-            return { done: true, value: uncurriedNativeMethod(str, regexp, arg2) }
+            return { done: true, value: call(nativeMethod, str, regexp, arg2) }
           }
           return { done: false }
         })
@@ -3721,7 +3721,7 @@
 
       if (SHAM) createNonEnumerableProperty(RegExpPrototype[SYMBOL], 'sham', true)
     }
-  }, { '../internals/create-non-enumerable-property': 54, '../internals/define-built-in': 60, '../internals/fails': 89, '../internals/function-uncurry-this-clause': 100, '../internals/regexp-exec': 192, '../internals/well-known-symbol': 255, '../modules/es.regexp.exec': 413 }],
+  }, { '../internals/create-non-enumerable-property': 54, '../internals/define-built-in': 60, '../internals/fails': 89, '../internals/function-call': 97, '../internals/regexp-exec': 192, '../internals/well-known-symbol': 255, '../modules/es.regexp.exec': 413 }],
   91: [function (require, module, exports) {
     'use strict'
     var isArray = require('../internals/is-array')
@@ -4541,7 +4541,6 @@
     var inspectSource = require('../internals/inspect-source')
 
     var noop = function () { /* empty */ }
-    var empty = []
     var construct = getBuiltIn('Reflect', 'construct')
     var constructorRegExp = /^\s*(?:class|function)\b/
     var exec = uncurryThis(constructorRegExp.exec)
@@ -4550,7 +4549,7 @@
     var isConstructorModern = function isConstructor (argument) {
       if (!isCallable(argument)) return false
       try {
-        construct(noop, empty, argument)
+        construct(noop, [], argument)
         return true
       } catch (error) {
         return false
@@ -5124,7 +5123,7 @@
 
     var makeBuiltIn = module.exports = function (value, name, options) {
       if (stringSlice($String(name), 0, 7) === 'Symbol(') {
-        name = '[' + replace($String(name), /^Symbol\(([^)]*)\)/, '$1') + ']'
+        name = '[' + replace($String(name), /^Symbol\(([^)]*)\).*$/, '$1') + ']'
       }
       if (options && options.getter) name = 'get ' + name
       if (options && options.setter) name = 'set ' + name
@@ -6539,10 +6538,10 @@
     (module.exports = function (key, value) {
       return store[key] || (store[key] = value !== undefined ? value : {})
     })('versions', []).push({
-      version: '3.35.0',
+      version: '3.35.1',
       mode: IS_PURE ? 'pure' : 'global',
-      copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-      license: 'https://github.com/zloirock/core-js/blob/v3.35.0/LICENSE',
+      copyright: '© 2014-2024 Denis Pushkarev (zloirock.ru)',
+      license: 'https://github.com/zloirock/core-js/blob/v3.35.1/LICENSE',
       source: 'https://github.com/zloirock/core-js'
     })
   }, { '../internals/is-pure': 134, '../internals/shared-store': 207 }],
@@ -7215,7 +7214,8 @@
     // `ToLength` abstract operation
     // https://tc39.es/ecma262/#sec-tolength
     module.exports = function (argument) {
-      return argument > 0 ? min(toIntegerOrInfinity(argument), 0x1FFFFFFFFFFFFF) : 0 // 2 ** 53 - 1 == 9007199254740991
+      var len = toIntegerOrInfinity(argument)
+      return len > 0 ? min(len, 0x1FFFFFFFFFFFFF) : 0 // 2 ** 53 - 1 == 9007199254740991
     }
   }, { '../internals/to-integer-or-infinity': 230 }],
   232: [function (require, module, exports) {
@@ -12829,12 +12829,6 @@
     var stringSlice = uncurryThis(''.slice)
     var max = Math.max
 
-    var stringIndexOf = function (string, searchValue, fromIndex) {
-      if (fromIndex > string.length) return -1
-      if (searchValue === '') return fromIndex
-      return indexOf(string, searchValue, fromIndex)
-    }
-
     // `String.prototype.replaceAll` method
     // https://tc39.es/ecma262/#sec-string.prototype.replaceall
     $({ target: 'String', proto: true }, {
@@ -12863,14 +12857,14 @@
         if (!functionalReplace) replaceValue = toString(replaceValue)
         searchLength = searchString.length
         advanceBy = max(1, searchLength)
-        position = stringIndexOf(string, searchString, 0)
+        position = indexOf(string, searchString)
         while (position !== -1) {
           replacement = functionalReplace
             ? toString(replaceValue(searchString, position, string))
             : getSubstitution(searchString, string, position, [], undefined, replaceValue)
           result += stringSlice(string, endOfLastMatch, position) + replacement
           endOfLastMatch = position + searchLength
-          position = stringIndexOf(string, searchString, position + advanceBy)
+          position = position + advanceBy > string.length ? -1 : indexOf(string, searchString, position + advanceBy)
         }
         if (endOfLastMatch < string.length) {
           result += stringSlice(string, endOfLastMatch)
@@ -13079,31 +13073,25 @@
   }, { '../internals/create-html': 52, '../internals/export': 88, '../internals/string-html-forced': 210 }],
   446: [function (require, module, exports) {
     'use strict'
-    var apply = require('../internals/function-apply')
     var call = require('../internals/function-call')
     var uncurryThis = require('../internals/function-uncurry-this')
     var fixRegExpWellKnownSymbolLogic = require('../internals/fix-regexp-well-known-symbol-logic')
     var anObject = require('../internals/an-object')
     var isNullOrUndefined = require('../internals/is-null-or-undefined')
-    var isRegExp = require('../internals/is-regexp')
     var requireObjectCoercible = require('../internals/require-object-coercible')
     var speciesConstructor = require('../internals/species-constructor')
     var advanceStringIndex = require('../internals/advance-string-index')
     var toLength = require('../internals/to-length')
     var toString = require('../internals/to-string')
     var getMethod = require('../internals/get-method')
-    var arraySlice = require('../internals/array-slice')
-    var callRegExpExec = require('../internals/regexp-exec-abstract')
-    var regexpExec = require('../internals/regexp-exec')
+    var regExpExec = require('../internals/regexp-exec-abstract')
     var stickyHelpers = require('../internals/regexp-sticky-helpers')
     var fails = require('../internals/fails')
 
     var UNSUPPORTED_Y = stickyHelpers.UNSUPPORTED_Y
     var MAX_UINT32 = 0xFFFFFFFF
     var min = Math.min
-    var $push = [].push
-    var exec = uncurryThis(/./.exec)
-    var push = uncurryThis($push)
+    var push = uncurryThis([].push)
     var stringSlice = uncurryThis(''.slice)
 
     // Chrome 51 has a buggy "split" implementation when RegExp#exec !== nativeExec
@@ -13117,60 +13105,20 @@
       return result.length !== 2 || result[0] !== 'a' || result[1] !== 'b'
     })
 
+    var BUGGY = 'abbc'.split(/(b)*/)[1] === 'c' ||
+  // eslint-disable-next-line regexp/no-empty-group -- required for testing
+  'test'.split(/(?:)/, -1).length !== 4 ||
+  'ab'.split(/(?:ab)*/).length !== 2 ||
+  '.'.split(/(.?)(.?)/).length !== 4 ||
+  // eslint-disable-next-line regexp/no-empty-capturing-group, regexp/no-empty-group -- required for testing
+  '.'.split(/()()/).length > 1 ||
+  ''.split(/.?/).length
+
     // @@split logic
     fixRegExpWellKnownSymbolLogic('split', function (SPLIT, nativeSplit, maybeCallNative) {
-      var internalSplit
-      if (
-        'abbc'.split(/(b)*/)[1] === 'c' ||
-    // eslint-disable-next-line regexp/no-empty-group -- required for testing
-    'test'.split(/(?:)/, -1).length !== 4 ||
-    'ab'.split(/(?:ab)*/).length !== 2 ||
-    '.'.split(/(.?)(.?)/).length !== 4 ||
-    // eslint-disable-next-line regexp/no-empty-capturing-group, regexp/no-empty-group -- required for testing
-    '.'.split(/()()/).length > 1 ||
-    ''.split(/.?/).length
-      ) {
-        // based on es5-shim implementation, need to rework it
-        internalSplit = function (separator, limit) {
-          var string = toString(requireObjectCoercible(this))
-          var lim = limit === undefined ? MAX_UINT32 : limit >>> 0
-          if (lim === 0) return []
-          if (separator === undefined) return [string]
-          // If `separator` is not a regex, use native split
-          if (!isRegExp(separator)) {
-            return call(nativeSplit, string, separator, lim)
-          }
-          var output = []
-          var flags = (separator.ignoreCase ? 'i' : '') +
-                  (separator.multiline ? 'm' : '') +
-                  (separator.unicode ? 'u' : '') +
-                  (separator.sticky ? 'y' : '')
-          var lastLastIndex = 0
-          // Make `global` and avoid `lastIndex` issues by working with a copy
-          var separatorCopy = new RegExp(separator.source, flags + 'g')
-          var match, lastIndex, lastLength
-          while (match = call(regexpExec, separatorCopy, string)) {
-            lastIndex = separatorCopy.lastIndex
-            if (lastIndex > lastLastIndex) {
-              push(output, stringSlice(string, lastLastIndex, match.index))
-              if (match.length > 1 && match.index < string.length) apply($push, output, arraySlice(match, 1))
-              lastLength = match[0].length
-              lastLastIndex = lastIndex
-              if (output.length >= lim) break
-            }
-            if (separatorCopy.lastIndex === match.index) separatorCopy.lastIndex++ // Avoid an infinite loop
-          }
-          if (lastLastIndex === string.length) {
-            if (lastLength || !exec(separatorCopy, '')) push(output, '')
-          } else push(output, stringSlice(string, lastLastIndex))
-          return output.length > lim ? arraySlice(output, 0, lim) : output
-        }
-      // Chakra, V8
-      } else if ('0'.split(undefined, 0).length) {
-        internalSplit = function (separator, limit) {
-          return separator === undefined && limit === 0 ? [] : call(nativeSplit, this, separator, limit)
-        }
-      } else internalSplit = nativeSplit
+      var internalSplit = '0'.split(undefined, 0).length ? function (separator, limit) {
+        return separator === undefined && limit === 0 ? [] : call(nativeSplit, this, separator, limit)
+      } : nativeSplit
 
       return [
         // `String.prototype.split` method
@@ -13190,30 +13138,30 @@
         function (string, limit) {
           var rx = anObject(this)
           var S = toString(string)
-          var res = maybeCallNative(internalSplit, rx, S, limit, internalSplit !== nativeSplit)
 
-          if (res.done) return res.value
+          if (!BUGGY) {
+            var res = maybeCallNative(internalSplit, rx, S, limit, internalSplit !== nativeSplit)
+            if (res.done) return res.value
+          }
 
           var C = speciesConstructor(rx, RegExp)
-
           var unicodeMatching = rx.unicode
           var flags = (rx.ignoreCase ? 'i' : '') +
                   (rx.multiline ? 'm' : '') +
                   (rx.unicode ? 'u' : '') +
                   (UNSUPPORTED_Y ? 'g' : 'y')
-
           // ^(? + rx + ) is needed, in combination with some S slicing, to
           // simulate the 'y' flag.
           var splitter = new C(UNSUPPORTED_Y ? '^(?:' + rx.source + ')' : rx, flags)
           var lim = limit === undefined ? MAX_UINT32 : limit >>> 0
           if (lim === 0) return []
-          if (S.length === 0) return callRegExpExec(splitter, S) === null ? [S] : []
+          if (S.length === 0) return regExpExec(splitter, S) === null ? [S] : []
           var p = 0
           var q = 0
           var A = []
           while (q < S.length) {
             splitter.lastIndex = UNSUPPORTED_Y ? 0 : q
-            var z = callRegExpExec(splitter, UNSUPPORTED_Y ? stringSlice(S, q) : S)
+            var z = regExpExec(splitter, UNSUPPORTED_Y ? stringSlice(S, q) : S)
             var e
             if (
               z === null ||
@@ -13234,8 +13182,8 @@
           return A
         }
       ]
-    }, !SPLIT_WORKS_WITH_OVERWRITTEN_EXEC, UNSUPPORTED_Y)
-  }, { '../internals/advance-string-index': 10, '../internals/an-object': 12, '../internals/array-slice': 30, '../internals/fails': 89, '../internals/fix-regexp-well-known-symbol-logic': 90, '../internals/function-apply': 93, '../internals/function-call': 97, '../internals/function-uncurry-this': 101, '../internals/get-method': 108, '../internals/is-null-or-undefined': 131, '../internals/is-regexp': 135, '../internals/regexp-exec': 192, '../internals/regexp-exec-abstract': 191, '../internals/regexp-sticky-helpers': 195, '../internals/require-object-coercible': 198, '../internals/species-constructor': 209, '../internals/to-length': 231, '../internals/to-string': 238 }],
+    }, BUGGY || !SPLIT_WORKS_WITH_OVERWRITTEN_EXEC, UNSUPPORTED_Y)
+  }, { '../internals/advance-string-index': 10, '../internals/an-object': 12, '../internals/fails': 89, '../internals/fix-regexp-well-known-symbol-logic': 90, '../internals/function-call': 97, '../internals/function-uncurry-this': 101, '../internals/get-method': 108, '../internals/is-null-or-undefined': 131, '../internals/regexp-exec-abstract': 191, '../internals/regexp-sticky-helpers': 195, '../internals/require-object-coercible': 198, '../internals/species-constructor': 209, '../internals/to-length': 231, '../internals/to-string': 238 }],
   447: [function (require, module, exports) {
     'use strict'
     var $ = require('../internals/export')
@@ -18619,7 +18567,7 @@
       return item
     }
     var _default = exports.default = applyActiveListeners
-  }, { '../objects/createEventProxy.js': 609, '../objects/options/getListenerOptions.js': 616, '../objects/options/numberToOptions.js': 617, './assignListener.js': 568, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { '../objects/createEventProxy.js': 609, '../objects/options/getListenerOptions.js': 616, '../objects/options/numberToOptions.js': 617, './assignListener.js': 568, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 782 }],
   568: [function (require, module, exports) {
     'use strict'
 
@@ -18752,7 +18700,7 @@
  */
     const bindListeners = item => !_siFunciona.default.emptyObject(item.eventListeners) && item.element ? (0, _bindElementListeners.default)(item) : item
     var _default = exports.default = bindListeners
-  }, { './bindElementListeners.js': 570, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './bindElementListeners.js': 570, 'core-js/stable': 561, 'si-funciona': 782 }],
   572: [function (require, module, exports) {
     'use strict'
 
@@ -18936,7 +18884,7 @@
       }, changeList)
     }
     var _default = exports.default = domItemChanges
-  }, { '../objects/createChangeList': 607, './elementHasAttribute.js': 577, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { '../objects/createChangeList': 607, './elementHasAttribute.js': 577, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, 'si-funciona': 782 }],
   574: [function (require, module, exports) {
     'use strict'
 
@@ -19007,7 +18955,7 @@
       return 1
     }
     var _default = exports.default = domItemHasAttribute
-  }, { './getAssignedStyles': 580, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './getAssignedStyles': 580, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 782 }],
   575: [function (require, module, exports) {
     'use strict'
 
@@ -19216,7 +19164,7 @@
       }, changeList)
     }
     var _default = exports.default = elementChanges
-  }, { '../objects/createChangeList.js': 607, './domItemHasAttribute.js': 574, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { '../objects/createChangeList.js': 607, './domItemHasAttribute.js': 574, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, 'si-funciona': 782 }],
   577: [function (require, module, exports) {
     'use strict'
 
@@ -19294,7 +19242,7 @@
       return 1
     }
     var _default = exports.default = elementHasAttribute
-  }, { './getAssignedStyles.js': 580, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './getAssignedStyles.js': 580, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 782 }],
   578: [function (require, module, exports) {
     'use strict'
 
@@ -19373,7 +19321,7 @@
       return (0, _updateElement.default)(domItem)
     }
     var _default = exports.default = generateElement
-  }, { './updateElement.js': 604, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './updateElement.js': 604, 'core-js/stable': 561, 'si-funciona': 782 }],
   580: [function (require, module, exports) {
     'use strict'
 
@@ -19395,7 +19343,7 @@
  */
     const getAssignedStyles = elementStyles => _siFunciona.default.reduceObject(elementStyles, (styles, attr, key) => isNaN(key) ? styles : _siFunciona.default.setValue(attr, elementStyles[attr], styles), {})
     var _default = exports.default = getAssignedStyles
-  }, { 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, 'si-funciona': 782 }],
   581: [function (require, module, exports) {
     'use strict'
 
@@ -19434,7 +19382,7 @@
  */
     const getChildrenByClass = _siFunciona.default.curry(_getChildrenFromAttribute.default)('className')
     var _default = exports.default = getChildrenByClass
-  }, { './getChildrenFromAttribute.js': 584, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './getChildrenFromAttribute.js': 584, 'core-js/stable': 561, 'si-funciona': 782 }],
   583: [function (require, module, exports) {
     'use strict'
 
@@ -19454,7 +19402,7 @@
  */
     const getChildrenByName = _siFunciona.default.curry(_getChildrenFromAttribute.default)('name')
     var _default = exports.default = getChildrenByName
-  }, { './getChildrenFromAttribute.js': 584, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './getChildrenFromAttribute.js': 584, 'core-js/stable': 561, 'si-funciona': 782 }],
   584: [function (require, module, exports) {
     'use strict'
 
@@ -19505,7 +19453,7 @@
  */
     const getParentsByClass = _siFunciona.default.curry(_getParentsFromAttribute.default)('className')
     var _default = exports.default = getParentsByClass
-  }, { './getParentsFromAttribute.js': 588, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './getParentsFromAttribute.js': 588, 'core-js/stable': 561, 'si-funciona': 782 }],
   586: [function (require, module, exports) {
     'use strict'
 
@@ -19525,7 +19473,7 @@
  */
     const getParentsByName = _siFunciona.default.curry(_getParentsFromAttribute.default)('name')
     var _default = exports.default = getParentsByName
-  }, { './getParentsFromAttribute.js': 588, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './getParentsFromAttribute.js': 588, 'core-js/stable': 561, 'si-funciona': 782 }],
   587: [function (require, module, exports) {
     'use strict'
 
@@ -19545,7 +19493,7 @@
  */
     const getParentsByTagName = _siFunciona.default.curry(_getParentsFromAttribute.default)('nodeName')
     var _default = exports.default = getParentsByTagName
-  }, { './getParentsFromAttribute.js': 588, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './getParentsFromAttribute.js': 588, 'core-js/stable': 561, 'si-funciona': 782 }],
   588: [function (require, module, exports) {
     'use strict'
 
@@ -19762,7 +19710,7 @@
       return parent
     }
     var _default = exports.default = registerListeners
-  }, { '../objects/documentItem.js': 612, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { '../objects/documentItem.js': 612, 'core-js/stable': 561, 'si-funciona': 782 }],
   595: [function (require, module, exports) {
     'use strict'
 
@@ -19826,7 +19774,7 @@
       return item
     }
     var _default = exports.default = removeEmptyProperties
-  }, { 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, 'si-funciona': 782 }],
   597: [function (require, module, exports) {
     'use strict'
 
@@ -20057,7 +20005,7 @@
       return config
     }
     var _default = exports.default = updateDomItem
-  }, { './elementChanges.js': 576, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './elementChanges.js': 576, 'core-js/stable': 561, 'si-funciona': 782 }],
   603: [function (require, module, exports) {
     'use strict'
 
@@ -20185,7 +20133,7 @@
       return (0, _bindListeners.default)(domItem)
     }
     var _default = exports.default = updateElement
-  }, { './bindListeners.js': 571, './deactivateListeners.js': 572, './domItemChanges.js': 573, './generateElement.js': 579, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './bindListeners.js': 571, './deactivateListeners.js': 572, './domItemChanges.js': 573, './generateElement.js': 579, 'core-js/stable': 561, 'si-funciona': 782 }],
   605: [function (require, module, exports) {
     'use strict'
 
@@ -20319,7 +20267,7 @@
       return changeList
     }
     var _default = exports.default = createChangeList
-  }, { 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, 'si-funciona': 782 }],
   608: [function (require, module, exports) {
     'use strict'
 
@@ -20442,7 +20390,7 @@
       return newDomItem
     }
     var _default = exports.default = createDomItem
-  }, { '../functions/appendChild.js': 566, '../functions/removeChild': 595, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { '../functions/appendChild.js': 566, '../functions/removeChild': 595, 'core-js/stable': 561, 'si-funciona': 782 }],
   609: [function (require, module, exports) {
     'use strict'
 
@@ -20785,7 +20733,7 @@
  */
     const numberToOptions = (optionsTemplate, binaryOptions) => _siFunciona.default.mapObject(optionsTemplate, flag => !!(binaryOptions & flag))
     var _default = exports.default = numberToOptions
-  }, { 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, 'si-funciona': 782 }],
   618: [function (require, module, exports) {
     'use strict'
 
@@ -20812,7 +20760,7 @@
       return _siFunciona.default.reduceObject(optionsTemplate, (binaryOptions, flag, name) => listenerOptions[name] ? binaryOptions | flag : binaryOptions, 0)
     }
     var _default = exports.default = optionsToNumber
-  }, { 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, 'si-funciona': 782 }],
   619: [function (require, module, exports) {
     (function (global) {
       (function () {
@@ -21038,7 +20986,7 @@
       })
     }
     var _default = exports.default = bindPointData
-  }, { '../objects/point': 648, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { '../objects/point': 648, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, 'si-funciona': 782 }],
   625: [function (require, module, exports) {
     'use strict'
 
@@ -21204,7 +21152,7 @@
  */
     const getHighestAbsoluteCoordinate = pnt => _siFunciona.default.reduceObject(pnt, _siFunciona.default.absoluteMax, 0)
     var _default = exports.default = getHighestAbsoluteCoordinate
-  }, { 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, 'si-funciona': 782 }],
   633: [function (require, module, exports) {
     'use strict'
 
@@ -21422,7 +21370,7 @@
       return useCoordinates.length ? useCoordinates[_siFunciona.default.randomInteger(useCoordinates.length)] : (0, _point.default)(0, 0, 0)
     }
     var _default = exports.default = randDirection
-  }, { '../objects/point': 648, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { '../objects/point': 648, 'core-js/stable': 561, 'si-funciona': 782 }],
   643: [function (require, module, exports) {
     'use strict'
 
@@ -21447,7 +21395,7 @@
       return (0, _point.default)(_siFunciona.default.randomInteger(lengthLimits.x - (length - 1) * dir.x), _siFunciona.default.randomInteger(lengthLimits.y - (length - 1) * dir.y), _siFunciona.default.randomInteger(lengthLimits.z - (length - 1) * dir.z))
     }
     var _default = exports.default = randomStart
-  }, { '../objects/point': 648, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { '../objects/point': 648, 'core-js/stable': 561, 'si-funciona': 782 }],
   644: [function (require, module, exports) {
     'use strict'
 
@@ -21493,7 +21441,7 @@
       })
     }
     var _default = exports.default = testPointsBetween
-  }, { './getPointsLine': 634, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, 'si-funciona': 779 }],
+  }, { './getPointsLine': 634, 'core-js/modules/esnext.async-iterator.filter.js': 522, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.filter.js': 530, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, 'si-funciona': 782 }],
   645: [function (require, module, exports) {
     'use strict'
 
@@ -21671,7 +21619,7 @@
       }), ...matrixProps)
     }
     var _default = exports.default = matrix
-  }, { 'core-js/stable': 561, 'json-dom': 651, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, 'json-dom': 651, 'si-funciona': 782 }],
   648: [function (require, module, exports) {
     'use strict'
 
@@ -21814,7 +21762,7 @@
   }, { 'core-js/stable': 561, dup: 566 }],
   656: [function (require, module, exports) {
     arguments[4][567][0].apply(exports, arguments)
-  }, { '../objects/createEventProxy.js': 698, '../objects/options/getListenerOptions.js': 705, '../objects/options/numberToOptions.js': 706, './assignListener.js': 657, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, dup: 567, 'si-funciona': 779 }],
+  }, { '../objects/createEventProxy.js': 698, '../objects/options/getListenerOptions.js': 705, '../objects/options/numberToOptions.js': 706, './assignListener.js': 657, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, dup: 567, 'si-funciona': 782 }],
   657: [function (require, module, exports) {
     arguments[4][568][0].apply(exports, arguments)
   }, { './listenerOptions.js': 680, 'core-js/stable': 561, dup: 568 }],
@@ -21826,55 +21774,55 @@
   }, { './activateListener.js': 653, './applyActiveListeners': 656, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, dup: 570 }],
   660: [function (require, module, exports) {
     arguments[4][571][0].apply(exports, arguments)
-  }, { './bindElementListeners.js': 659, 'core-js/stable': 561, dup: 571, 'si-funciona': 779 }],
+  }, { './bindElementListeners.js': 659, 'core-js/stable': 561, dup: 571, 'si-funciona': 782 }],
   661: [function (require, module, exports) {
     arguments[4][572][0].apply(exports, arguments)
   }, { 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, dup: 572 }],
   662: [function (require, module, exports) {
     arguments[4][573][0].apply(exports, arguments)
-  }, { '../objects/createChangeList': 696, './elementHasAttribute.js': 666, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, dup: 573, 'si-funciona': 779 }],
+  }, { '../objects/createChangeList': 696, './elementHasAttribute.js': 666, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, dup: 573, 'si-funciona': 782 }],
   663: [function (require, module, exports) {
     arguments[4][574][0].apply(exports, arguments)
-  }, { './getAssignedStyles': 669, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, dup: 574, 'si-funciona': 779 }],
+  }, { './getAssignedStyles': 669, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, dup: 574, 'si-funciona': 782 }],
   664: [function (require, module, exports) {
     arguments[4][575][0].apply(exports, arguments)
   }, { './removeEmptyProperties': 685, 'core-js/stable': 561, dup: 575 }],
   665: [function (require, module, exports) {
     arguments[4][576][0].apply(exports, arguments)
-  }, { '../objects/createChangeList.js': 696, './domItemHasAttribute.js': 663, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, dup: 576, 'si-funciona': 779 }],
+  }, { '../objects/createChangeList.js': 696, './domItemHasAttribute.js': 663, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, dup: 576, 'si-funciona': 782 }],
   666: [function (require, module, exports) {
     arguments[4][577][0].apply(exports, arguments)
-  }, { './getAssignedStyles.js': 669, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, dup: 577, 'si-funciona': 779 }],
+  }, { './getAssignedStyles.js': 669, 'core-js/modules/esnext.async-iterator.map.js': 525, 'core-js/modules/esnext.iterator.map.js': 533, 'core-js/stable': 561, dup: 577, 'si-funciona': 782 }],
   667: [function (require, module, exports) {
     arguments[4][578][0].apply(exports, arguments)
   }, { 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561, dup: 578 }],
   668: [function (require, module, exports) {
     arguments[4][579][0].apply(exports, arguments)
-  }, { './updateElement.js': 693, 'core-js/stable': 561, dup: 579, 'si-funciona': 779 }],
+  }, { './updateElement.js': 693, 'core-js/stable': 561, dup: 579, 'si-funciona': 782 }],
   669: [function (require, module, exports) {
     arguments[4][580][0].apply(exports, arguments)
-  }, { 'core-js/stable': 561, dup: 580, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, dup: 580, 'si-funciona': 782 }],
   670: [function (require, module, exports) {
     arguments[4][581][0].apply(exports, arguments)
   }, { 'core-js/stable': 561, dup: 581 }],
   671: [function (require, module, exports) {
     arguments[4][582][0].apply(exports, arguments)
-  }, { './getChildrenFromAttribute.js': 673, 'core-js/stable': 561, dup: 582, 'si-funciona': 779 }],
+  }, { './getChildrenFromAttribute.js': 673, 'core-js/stable': 561, dup: 582, 'si-funciona': 782 }],
   672: [function (require, module, exports) {
     arguments[4][583][0].apply(exports, arguments)
-  }, { './getChildrenFromAttribute.js': 673, 'core-js/stable': 561, dup: 583, 'si-funciona': 779 }],
+  }, { './getChildrenFromAttribute.js': 673, 'core-js/stable': 561, dup: 583, 'si-funciona': 782 }],
   673: [function (require, module, exports) {
     arguments[4][584][0].apply(exports, arguments)
   }, { '../objects/documentItem.js': 701, './gatherChildItems.js': 667, './getChildTest.js': 670, 'core-js/stable': 561, dup: 584 }],
   674: [function (require, module, exports) {
     arguments[4][585][0].apply(exports, arguments)
-  }, { './getParentsFromAttribute.js': 677, 'core-js/stable': 561, dup: 585, 'si-funciona': 779 }],
+  }, { './getParentsFromAttribute.js': 677, 'core-js/stable': 561, dup: 585, 'si-funciona': 782 }],
   675: [function (require, module, exports) {
     arguments[4][586][0].apply(exports, arguments)
-  }, { './getParentsFromAttribute.js': 677, 'core-js/stable': 561, dup: 586, 'si-funciona': 779 }],
+  }, { './getParentsFromAttribute.js': 677, 'core-js/stable': 561, dup: 586, 'si-funciona': 782 }],
   676: [function (require, module, exports) {
     arguments[4][587][0].apply(exports, arguments)
-  }, { './getParentsFromAttribute.js': 677, 'core-js/stable': 561, dup: 587, 'si-funciona': 779 }],
+  }, { './getParentsFromAttribute.js': 677, 'core-js/stable': 561, dup: 587, 'si-funciona': 782 }],
   677: [function (require, module, exports) {
     arguments[4][588][0].apply(exports, arguments)
   }, { '../objects/documentItem.js': 701, 'core-js/stable': 561, dup: 588 }],
@@ -21895,13 +21843,13 @@
   }, { '../objects/documentItem.js': 701, 'core-js/stable': 561, dup: 593 }],
   683: [function (require, module, exports) {
     arguments[4][594][0].apply(exports, arguments)
-  }, { '../objects/documentItem.js': 701, 'core-js/stable': 561, dup: 594, 'si-funciona': 779 }],
+  }, { '../objects/documentItem.js': 701, 'core-js/stable': 561, dup: 594, 'si-funciona': 782 }],
   684: [function (require, module, exports) {
     arguments[4][595][0].apply(exports, arguments)
   }, { 'core-js/stable': 561, dup: 595 }],
   685: [function (require, module, exports) {
     arguments[4][596][0].apply(exports, arguments)
-  }, { 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, dup: 596, 'si-funciona': 779 }],
+  }, { 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, dup: 596, 'si-funciona': 782 }],
   686: [function (require, module, exports) {
     arguments[4][597][0].apply(exports, arguments)
   }, { '../objects/documentItem.js': 701, './updateElements.js': 694, 'core-js/stable': 561, dup: 597 }],
@@ -21919,13 +21867,13 @@
   }, { '../objects/createDomItem': 697, 'core-js/modules/esnext.async-iterator.find.js': 523, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.find.js': 531, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, dup: 601 }],
   691: [function (require, module, exports) {
     arguments[4][602][0].apply(exports, arguments)
-  }, { './elementChanges.js': 665, 'core-js/stable': 561, dup: 602, 'si-funciona': 779 }],
+  }, { './elementChanges.js': 665, 'core-js/stable': 561, dup: 602, 'si-funciona': 782 }],
   692: [function (require, module, exports) {
     arguments[4][603][0].apply(exports, arguments)
   }, { './updateChildren.js': 690, './updateDomItem.js': 691, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, dup: 603 }],
   693: [function (require, module, exports) {
     arguments[4][604][0].apply(exports, arguments)
-  }, { './bindListeners.js': 660, './deactivateListeners.js': 661, './domItemChanges.js': 662, './generateElement.js': 668, 'core-js/stable': 561, dup: 604, 'si-funciona': 779 }],
+  }, { './bindListeners.js': 660, './deactivateListeners.js': 661, './domItemChanges.js': 662, './generateElement.js': 668, 'core-js/stable': 561, dup: 604, 'si-funciona': 782 }],
   694: [function (require, module, exports) {
     arguments[4][605][0].apply(exports, arguments)
   }, { './updateChildNodes.js': 689, './updateElement.js': 693, 'core-js/modules/esnext.async-iterator.for-each.js': 524, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.for-each.js': 532, 'core-js/stable': 561, dup: 605 }],
@@ -21934,10 +21882,10 @@
   }, { './objects/createChangeList.js': 696, './objects/createDomItem.js': 697, './objects/createEventProxy.js': 698, './objects/createEventResponder.js': 699, './objects/documentDomItem.js': 700, './objects/documentItem.js': 701, './objects/initChildren.js': 702, './objects/initRoot.js': 703, './objects/options.js': 704, 'core-js/stable': 561, dup: 606 }],
   696: [function (require, module, exports) {
     arguments[4][607][0].apply(exports, arguments)
-  }, { 'core-js/stable': 561, dup: 607, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, dup: 607, 'si-funciona': 782 }],
   697: [function (require, module, exports) {
     arguments[4][608][0].apply(exports, arguments)
-  }, { '../functions/appendChild.js': 655, '../functions/removeChild': 684, 'core-js/stable': 561, dup: 608, 'si-funciona': 779 }],
+  }, { '../functions/appendChild.js': 655, '../functions/removeChild': 684, 'core-js/stable': 561, dup: 608, 'si-funciona': 782 }],
   698: [function (require, module, exports) {
     arguments[4][609][0].apply(exports, arguments)
   }, { 'core-js/stable': 561, dup: 609 }],
@@ -21964,10 +21912,10 @@
   }, { 'core-js/stable': 561, dup: 616 }],
   706: [function (require, module, exports) {
     arguments[4][617][0].apply(exports, arguments)
-  }, { 'core-js/stable': 561, dup: 617, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, dup: 617, 'si-funciona': 782 }],
   707: [function (require, module, exports) {
     arguments[4][618][0].apply(exports, arguments)
-  }, { 'core-js/stable': 561, dup: 618, 'si-funciona': 779 }],
+  }, { 'core-js/stable': 561, dup: 618, 'si-funciona': 782 }],
   708: [function (require, module, exports) {
     /**
  * Copyright (c) 2014-present, Facebook, Inc.
@@ -22829,7 +22777,6 @@
     require('core-js/stable')
     /**
  * Having an array and a potential new array element, check if the element is in the array, if not append to array.
- * @function
  * @memberOf module:arrayHelpers
  * @param {*} item - An potential array element, possibly a DomItem
  * @param {Array} array - An array where an element may be appended.
@@ -22851,7 +22798,6 @@
     /**
  * Leverage buildArrayBase to generate an array filled with a copy of the provided item.
  * The length defines how long the array should be.
- * @function
  * @memberOf module:arrayHelpers
  * @param {*} item - The item to be used for each array element
  * @param {number} length - The desired length of the array
@@ -22878,7 +22824,6 @@
     /**
  * Leverage buildArrayBase to generate an array filled with references to the provided item.
  * The length defines how long the array should be.
- * @function
  * @memberOf module:arrayHelpers
  * @param {*} item - The item to be used for each array element
  * @param {number} length - The desired length of the array
@@ -22900,13 +22845,13 @@
       value: true
     })
     exports.default = void 0
+    require('core-js/modules/esnext.async-iterator.every.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
     require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.constructor.js')
-    require('core-js/modules/esnext.iterator.reduce.js')
-    require('core-js/modules/esnext.async-iterator.map.js')
-    require('core-js/modules/esnext.iterator.map.js')
-    require('core-js/modules/esnext.async-iterator.every.js')
     require('core-js/modules/esnext.iterator.every.js')
+    require('core-js/modules/esnext.iterator.map.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
     var _isObject = _interopRequireDefault(require('../objects/isObject'))
     var _mergeArrays = _interopRequireDefault(require('./mergeArrays'))
@@ -22965,7 +22910,6 @@
  *   }
  * ]
  *
- * @function
  * @memberOf module:arrayHelpers
  * @param {...Array} arrays - The arrays to compare
  * @returns {Array.<module:arrayHelpers~compareArrayResult>}
@@ -23008,19 +22952,18 @@
       value: true
     })
     exports.default = void 0
+    require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
     require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.constructor.js')
-    require('core-js/modules/esnext.iterator.reduce.js')
-    require('core-js/modules/esnext.async-iterator.map.js')
-    require('core-js/modules/esnext.iterator.map.js')
-    require('core-js/modules/esnext.async-iterator.filter.js')
     require('core-js/modules/esnext.iterator.filter.js')
+    require('core-js/modules/esnext.iterator.map.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
     var _uniqueArray = _interopRequireDefault(require('./uniqueArray'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Take multiple arrays and then filter all these into one unique array.
- * @function
  * @memberOf module:arrayHelpers
  * @param {...Array} arrays - Provide multiple arrays to create one unique array
  * @returns {Array}
@@ -23045,8 +22988,7 @@
     require('core-js/modules/esnext.iterator.filter.js')
     require('core-js/stable')
     /**
- * Remove duplicate values from an array.
- * @function uniqueArray
+ * Remove duplicate values from an array. uniqueArray
  * @memberOf module:arrayHelpers
  * @param {Array} array - The array to make unique
  * @returns {Array}
@@ -23105,19 +23047,19 @@
       value: true
     })
     exports.default = void 0
+    require('core-js/modules/esnext.async-iterator.every.js')
+    require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.async-iterator.find.js')
+    require('core-js/modules/esnext.async-iterator.for-each.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
     require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.constructor.js')
-    require('core-js/modules/esnext.iterator.reduce.js')
-    require('core-js/modules/esnext.async-iterator.for-each.js')
-    require('core-js/modules/esnext.iterator.for-each.js')
-    require('core-js/modules/esnext.async-iterator.find.js')
-    require('core-js/modules/esnext.iterator.find.js')
-    require('core-js/modules/esnext.async-iterator.every.js')
     require('core-js/modules/esnext.iterator.every.js')
-    require('core-js/modules/esnext.async-iterator.map.js')
-    require('core-js/modules/esnext.iterator.map.js')
-    require('core-js/modules/esnext.async-iterator.filter.js')
     require('core-js/modules/esnext.iterator.filter.js')
+    require('core-js/modules/esnext.iterator.find.js')
+    require('core-js/modules/esnext.iterator.for-each.js')
+    require('core-js/modules/esnext.iterator.map.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
     var _assignDescriptorDetail = _interopRequireDefault(require('./assignDescriptorDetail'))
     var _cloneDescriptor = _interopRequireDefault(require('./cloneDescriptor'))
@@ -23126,7 +23068,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Apply one or more descriptors to an existing descriptor so that they represent a merged version of the descriptors.
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptor} originalMap
  * @param  {...module:objectDescriptors~descriptor} descriptors
@@ -23174,18 +23115,17 @@
       value: true
     })
     exports.default = void 0
+    require('core-js/modules/esnext.async-iterator.find.js')
     require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.constructor.js')
-    require('core-js/modules/esnext.iterator.reduce.js')
-    require('core-js/modules/esnext.async-iterator.find.js')
     require('core-js/modules/esnext.iterator.find.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
     var _cloneDescriptorDetail = _interopRequireDefault(require('./cloneDescriptorDetail'))
     var _uniqueArray = _interopRequireDefault(require('../arrays/uniqueArray'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Assign properties from other details onto an existing detail.
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptorDetail} originalDetail
  * @param  {...module:objectDescriptors~descriptorDetail} details
@@ -23226,7 +23166,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Check if we should clear the values on this descriptor
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptor} descriptor
  * @param {boolean} [keepValues=false]
@@ -23246,16 +23185,15 @@
     })
     exports.default = void 0
     require('core-js/modules/esnext.async-iterator.every.js')
+    require('core-js/modules/esnext.async-iterator.some.js')
     require('core-js/modules/esnext.iterator.constructor.js')
     require('core-js/modules/esnext.iterator.every.js')
-    require('core-js/modules/esnext.async-iterator.some.js')
     require('core-js/modules/esnext.iterator.some.js')
     require('core-js/stable')
     var _setValue = _interopRequireDefault(require('../objects/setValue'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Check if the descriptors references have all been built and set complete to true if they have.
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptor} descriptor
  * @returns {module:objectDescriptors~descriptor}
@@ -23277,7 +23215,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Make a copy of an object descriptor so that the original will not be mutated.
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptor} originalMap
  * @returns {module:objectDescriptors~descriptor}
@@ -23310,16 +23247,15 @@
     })
     exports.default = void 0
     require('core-js/modules/esnext.async-iterator.for-each.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
     require('core-js/modules/esnext.iterator.constructor.js')
     require('core-js/modules/esnext.iterator.for-each.js')
-    require('core-js/modules/esnext.async-iterator.map.js')
     require('core-js/modules/esnext.iterator.map.js')
     require('core-js/stable')
     var _objectKeys = _interopRequireDefault(require('../objects/objectKeys'))
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Get a new copy of an existing Descriptor Detail
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptorDetail} originalDetail
  * @returns {module:objectDescriptors~descriptorDetail}
@@ -23342,16 +23278,15 @@
     })
     exports.default = void 0
     require('core-js/modules/esnext.async-iterator.every.js')
+    require('core-js/modules/esnext.async-iterator.find.js')
+    require('core-js/modules/esnext.async-iterator.some.js')
     require('core-js/modules/esnext.iterator.constructor.js')
     require('core-js/modules/esnext.iterator.every.js')
-    require('core-js/modules/esnext.async-iterator.some.js')
-    require('core-js/modules/esnext.iterator.some.js')
-    require('core-js/modules/esnext.async-iterator.find.js')
     require('core-js/modules/esnext.iterator.find.js')
+    require('core-js/modules/esnext.iterator.some.js')
     require('core-js/stable')
     /**
  * Check if two descriptors are the same or similar in that they have similar keys and the associated types are the same.
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptor} descriptor1
  * @param {module:objectDescriptors~descriptor} descriptor2
@@ -23384,7 +23319,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Trace an object and return the descriptor which defines the object's structure and attributes.
- * @function
  * @memberOf module:objectDescriptors
  * @param {Object} object
  * @returns {module:objectDescriptors~descriptor}
@@ -23438,7 +23372,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Trace an object's attribute and provide details about it.
- * @function
  * @memberOf module:objectDescriptors
  * @param {*} value
  * @param {string|number} [key=0]
@@ -23472,11 +23405,11 @@
       value: true
     })
     exports.default = void 0
+    require('core-js/modules/esnext.async-iterator.find.js')
     require('core-js/modules/esnext.async-iterator.for-each.js')
     require('core-js/modules/esnext.iterator.constructor.js')
-    require('core-js/modules/esnext.iterator.for-each.js')
-    require('core-js/modules/esnext.async-iterator.find.js')
     require('core-js/modules/esnext.iterator.find.js')
+    require('core-js/modules/esnext.iterator.for-each.js')
     require('core-js/stable')
     var _assignDescriptor = _interopRequireDefault(require('./assignDescriptor'))
     var _checkClearValues = _interopRequireDefault(require('./checkClearValues'))
@@ -23488,7 +23421,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Trace out the entire object including nested objects.
- * @function
  * @memberOf module:objectDescriptors
  * @param {Object|Array} object
  * @param {Object} [options={}]
@@ -23580,7 +23512,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Find the index of the next module:objectDescriptors.descriptorDetail to build a resource for.
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptor} descriptor
  * @param {number} currentReference
@@ -23606,14 +23537,13 @@
     })
     exports.default = void 0
     require('core-js/modules/esnext.async-iterator.every.js')
+    require('core-js/modules/esnext.async-iterator.some.js')
     require('core-js/modules/esnext.iterator.constructor.js')
     require('core-js/modules/esnext.iterator.every.js')
-    require('core-js/modules/esnext.async-iterator.some.js')
     require('core-js/modules/esnext.iterator.some.js')
     require('core-js/stable')
     /**
  * Check if the two descriptors are the same.
- * @function
  * @memberOf module:objectDescriptors
  * @param {module:objectDescriptors~descriptor} descriptor1
  * @param {module:objectDescriptors~descriptor} descriptor2
@@ -23674,7 +23604,6 @@
     require('core-js/stable')
     /**
  * Given a function, call with the correct number of parameters from an array of possible parameters.
- * @function
  * @memberOf module:functionHelpers
  * @param {Function} fn - The function to be called
  * @param {Array} params - Array of possible function parameters
@@ -23700,7 +23629,6 @@
  * Return a curried version of the passed function.
  * The returned function expects the same number of arguments minus the ones provided.
  * fn is the name of the function being curried.
- * @function
  * @memberOf module:functionHelpers
  * @param {Function} fn - Receives a function to be curried
  * @returns {Function|*}
@@ -23729,7 +23657,6 @@
     require('regenerator-runtime/runtime')
     /**
  * Provide a timeout which returns a promise.
- * @function
  * @memberOf module:functionHelpers
  * @param {number} time - Delay in milliseconds
  * @returns {module:functionHelpers~delayHandler}
@@ -23835,7 +23762,6 @@
     })
     /**
  * Prepare functions to be called once the body is available.
- * @function
  * @memberOf module:functionHelpers
  * @param {Function} callback
  * @param {boolean} [reset=false]
@@ -23868,7 +23794,6 @@
     /**
  * Take one or more function with a single parameter and return value.
  * Pass a parameter and the value will be transformed by each function then returned.
- * @function
  * @memberOf module:functionHelpers
  * @param {...Function} fns - Takes a series of functions having the same parameter
  * @returns {*}
@@ -23892,7 +23817,6 @@
     /**
  * Provide an array of parameters to be used with a function, allow the function to be called later
  * with the missing parameter.
- * @function
  * @memberOf module:functionHelpers
  * @param {Function} fn - The function to be called
  * @param {Array} params - The parameters to preload
@@ -23925,7 +23849,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Manage functions to run sequentially.
- * @function
  * @memberOf module:functionHelpers
  * @param {IsQueue} [queue=[]] - The iterable that can be used to store queued functions
  * @returns {module:functionHelpers~queueManagerHandle}
@@ -24058,7 +23981,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Manage functions to run sequentially with delays.
- * @function
  * @memberOf module:functionHelpers
  * @param {module:functionHelpers~queueManagerHandle} [queueManagerHandle=null]
  * @returns {module:functionHelpers~queueTimeoutHandle}
@@ -24085,14 +24007,13 @@
     })
     exports.default = void 0
     require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.async-iterator.map.js')
     require('core-js/modules/esnext.iterator.constructor.js')
     require('core-js/modules/esnext.iterator.filter.js')
-    require('core-js/modules/esnext.async-iterator.map.js')
     require('core-js/modules/esnext.iterator.map.js')
     require('core-js/stable')
     /**
  * Remove elements out of relevance range and update the max relevance.
- * @function
  * @memberOf module:functionHelpers
  * @param {relevanceMap} map
  * @param {Object} [options={}]
@@ -24130,7 +24051,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Output the value with label to the console and return the value to not interrupt the code.
- * @function
  * @memberOf module:functionHelpers
  * @param {string} label - Pass an identifying label of the value being output.
  * @param useClone - Determines if the logged data should be a clone of the original to preserve state.
@@ -24186,7 +24106,6 @@
     require('core-js/stable')
     /**
  * Helper for returning the absolute max value
- * @function
  * @memberOf module:numberHelpers
  * @param {number} num1 - A number to compare
  * @param {number} num2 - Another number to be compared against
@@ -24205,7 +24124,6 @@
     require('core-js/stable')
     /**
  * Helper for returning the absolute min value
- * @function
  * @memberOf module:numberHelpers
  * @param {number} num1 - A number to compare
  * @param {number} num2 - Another number to be compared against
@@ -24227,7 +24145,6 @@
  * -1 to indicate val1 is less than val2
  * 0 to indicate both values are the equal
  * 1 to indicate val1 is greater than val2
- * @function
  * @memberOf module:numberHelpers
  * @param {number} val1 - The first number to compare
  * @param {number} val2 - The second number to compare
@@ -24247,7 +24164,6 @@
     /**
  * Create a single random integer within provide range. And with optional offset,
  * The distance between the result numbers can be adjusted with interval.
- * @function
  * @memberOf module:numberHelpers
  * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
  * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
@@ -24273,7 +24189,6 @@
     /**
  * Create a single random number within provided range. And with optional offset,
  * The distance between the result numbers can be adjusted with interval.
- * @function
  * @memberOf module:numberHelpers
  * @param {number} range - Choose the breadth of the random number (0-100 would be 100 for range)
  * @param {number} [offset=0] - Choose the starting number (1-10 would be 1 for offset, 9 for range)
@@ -24360,7 +24275,6 @@
  * Clone objects for manipulation without data corruption, returns a copy of the provided object.
  * NOTE: Use the mapLimit and relevancyRange to resolve "too much recursion" when the object is large and is known to
  * have circular references. A high mapLimit may lead to heavy memory usage and slow performance.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object} object - The original object that is being cloned
  * @param {Object} [options={}]
@@ -24398,7 +24312,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Get a nested property value from an object.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object} arrayObject - The array or object to get the property from
  * @param {string} dotNotation - The path to the property
@@ -24447,7 +24360,7 @@
       return dotGet(next, (0, _strAfter.default)(dotNotation, '.'), defaultValue)
     }
     var _default = exports.default = dotGet
-  }, { '../strings/strAfter': 772, '../strings/strBefore': 774, './isObject': 758, 'core-js/stable': 561 }],
+  }, { '../strings/strAfter': 775, '../strings/strBefore': 777, './isObject': 758, 'core-js/stable': 561 }],
   751: [function (require, module, exports) {
     'use strict'
 
@@ -24525,7 +24438,6 @@
     }
     /**
  * Convert an array or object to a single dimensional associative array with dot notation.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object} arrayObject - The array or object to dot-notate
  * @param {Array.<DotNotationString>} [retainObjects=[]] - An array of keys to retain as objects
@@ -24551,7 +24463,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Set a nested property value an object.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object} arrayObject - The array or object to set the property on
  * @param {string} dotNotation - The path for the property
@@ -24594,7 +24505,7 @@
       return arrayObject
     }
     var _default = exports.default = dotSet
-  }, { '../strings/strAfter': 772, '../strings/strBefore': 774, './isObject': 758, 'core-js/stable': 561 }],
+  }, { '../strings/strAfter': 775, '../strings/strBefore': 777, './isObject': 758, 'core-js/stable': 561 }],
   753: [function (require, module, exports) {
     'use strict'
 
@@ -24609,7 +24520,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Unset a nested property value an object.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object} arrayObject - The array or object to set the property on
  * @param {string} dotNotation - The path for the property
@@ -24650,7 +24560,7 @@
       return arrayObject
     }
     var _default = exports.default = dotUnset
-  }, { '../strings/strAfter': 772, '../strings/strBefore': 774, './isObject': 758, 'core-js/stable': 561 }],
+  }, { '../strings/strAfter': 775, '../strings/strBefore': 777, './isObject': 758, 'core-js/stable': 561 }],
   754: [function (require, module, exports) {
     'use strict'
 
@@ -24664,7 +24574,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Helper function for testing if the item is an Object or Array that does not have any properties
- * @function
  * @memberOf module:objectHelpers
  * @param {Object|Array} item - Object or Array to test
  * @returns {boolean}
@@ -24680,9 +24589,9 @@
     })
     exports.default = void 0
     require('core-js/modules/esnext.async-iterator.filter.js')
+    require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.constructor.js')
     require('core-js/modules/esnext.iterator.filter.js')
-    require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
     var _callWithParams = _interopRequireDefault(require('../functions/callWithParams'))
@@ -24692,7 +24601,6 @@
  * This function is intended to replicate behaviour of the Array.filter() function but for Objects.
  * If an array is passed in instead then it will perform standard filter(). It is recommended to
  * always use the standard filter() function when it is known that the object is actually an array.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object|Array} obj - The Object (or Array) to be filtered
  * @param {module:objectHelpers~filterCallback|Function} fn - The function to be processed for each filtered property
@@ -24724,7 +24632,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Determine if the value is a reference instance
- * @function
  * @memberOf module:objectHelpers
  * @param {Array|Object|*} value
  * @returns {boolean}
@@ -24745,7 +24652,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Check if the current object has inherited properties.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object|Array} object
  * @returns {boolean}
@@ -24771,7 +24677,6 @@
     require('core-js/stable')
     /**
  * Check if the provided thing is an object / array.
- * @function
  * @memberOf module:objectHelpers
  * @param {*} object
  * @returns {boolean}
@@ -24787,9 +24692,9 @@
     })
     exports.default = void 0
     require('core-js/modules/esnext.async-iterator.map.js')
-    require('core-js/modules/esnext.iterator.map.js')
     require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.constructor.js')
+    require('core-js/modules/esnext.iterator.map.js')
     require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
     var _callWithParams = _interopRequireDefault(require('../functions/callWithParams'))
@@ -24800,7 +24705,6 @@
  * This function is intended to replicate behaviour of the Array.map() function but for Objects.
  * If an array is passed in instead then it will perform standard map(). It is recommended to
  * always use the standard map() function when it is known that the object is actually an array.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object|Array} obj - The Object (or Array) to be mapped
  * @param {module:objectHelpers~mapCallback|Function} fn - The function to be processed for each mapped property
@@ -24825,7 +24729,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Uses mergeObjectsBase deep merge objects and arrays, merge by value.
- * @function
  * @memberOf module:objectHelpers
  * @see {@link module:objectHelpers~mergeObjectsCallback}
  * @param {...Object} objects - Provide a list of objects which will be merged starting from the end up into the first
@@ -24843,13 +24746,13 @@
       value: true
     })
     exports.default = void 0
+    require('core-js/modules/esnext.async-iterator.find.js')
     require('core-js/modules/esnext.async-iterator.map.js')
-    require('core-js/modules/esnext.iterator.map.js')
     require('core-js/modules/esnext.async-iterator.reduce.js')
     require('core-js/modules/esnext.iterator.constructor.js')
-    require('core-js/modules/esnext.iterator.reduce.js')
-    require('core-js/modules/esnext.async-iterator.find.js')
     require('core-js/modules/esnext.iterator.find.js')
+    require('core-js/modules/esnext.iterator.map.js')
+    require('core-js/modules/esnext.iterator.reduce.js')
     require('core-js/stable')
     var _isCloneable = _interopRequireDefault(require('./isCloneable'))
     var _reduceObject = _interopRequireDefault(require('./reduceObject'))
@@ -24861,7 +24764,6 @@
  * Objects having the same attributes will overwrite from last object to first.
  * NOTE: Use the mapLimit and relevancyRange to resolve "too much recursion" when the object is large and is known to
  * have circular references. A high mapLimit may lead to heavy memory usage and slow performance.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object} [options={}]
  * @param {number} [options.mapLimit=100] - Size of temporary reference array used in memory before assessing relevancy.
@@ -24952,7 +24854,6 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Uses mergeObjectsBase deep merge objects and arrays, merge by reference.
- * @function
  * @memberOf module:objectHelpers
  * @see {@link module:objectHelpers~mergeObjectsCallback}
  * @param {...Object} objects - Provide a list of objects which will be merged starting from the end up into the first
@@ -24974,7 +24875,6 @@
     /**
  * Get an array of keys from any object or array. Will return empty array when invalid or there are no keys.
  * Optional flag will include the inherited keys from prototype chain when set.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object|Array} object
  * @param {boolean} [includeInherited=false]
@@ -25020,7 +24920,6 @@
     /**
  * Get an array of values from any object or array. Will return empty array when invalid or there are no values.
  * Optional flag will include the inherited values from prototype chain when set.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object|Array} object
  * @param {boolean} [includeInherited=false]
@@ -25050,7 +24949,6 @@
  * This function is intended to replicate behaviour of the Array.reduce() function but for Objects.
  * If an array is passed in instead then it will perform standard reduce(). It is recommended to
  * always use the standard reduce() function when it is known that the object is actually an array.
- * @function
  * @memberOf module:objectHelpers
  * @param {Object|Array} obj - The Object (or Array) to be filtered
  * @param {module:objectHelpers~reduceCallback|Function|reduceCallback} fn - The function to be processed for each filtered property
@@ -25075,7 +24973,6 @@
     require('core-js/stable')
     /**
  * Set a value on an item, then return the value
- * @function
  * @memberOf module:objectHelpers
  * @param {Object|Array} item - An object or array to be updated
  * @param {string|number} key - The key on the item which will have its value set
@@ -25099,7 +24996,6 @@
     /**
  * Set a value on an item, then return the item.
  * NOTE: Argument order designed for usage with pipe
- * @function
  * @memberOf module:objectHelpers
  * @param {string|number} key - The key on the item which will have its value set
  * @param {*} value - Any value to be applied to the key
@@ -25123,6 +25019,9 @@
     require('core-js/stable')
     var _camelCase = _interopRequireDefault(require('./strings/camelCase'))
     var _kabobCase = _interopRequireDefault(require('./strings/kabobCase'))
+    var _makeFilepath = _interopRequireDefault(require('./strings/makeFilepath'))
+    var _makeRelativePath = _interopRequireDefault(require('./strings/makeRelativePath'))
+    var _regexEscape = _interopRequireDefault(require('./strings/regexEscape'))
     var _snakeCase = _interopRequireDefault(require('./strings/snakeCase'))
     var _strAfter = _interopRequireDefault(require('./strings/strAfter'))
     var _strAfterLast = _interopRequireDefault(require('./strings/strAfterLast'))
@@ -25143,6 +25042,9 @@
     var _default = exports.default = {
       camelCase: _camelCase.default,
       kabobCase: _kabobCase.default,
+      makeFilepath: _makeFilepath.default,
+      makeRelativePath: _makeRelativePath.default,
+      regexEscape: _regexEscape.default,
       snakeCase: _snakeCase.default,
       strAfter: _strAfter.default,
       strAfterLast: _strAfterLast.default,
@@ -25152,7 +25054,7 @@
       ucFirst: _ucFirst.default,
       words: _words.default
     }
-  }, { './strings/camelCase': 769, './strings/kabobCase': 770, './strings/snakeCase': 771, './strings/strAfter': 772, './strings/strAfterLast': 773, './strings/strBefore': 774, './strings/strBeforeLast': 775, './strings/titleCase': 776, './strings/ucFirst': 777, './strings/words': 778, 'core-js/stable': 561 }],
+  }, { './strings/camelCase': 769, './strings/kabobCase': 770, './strings/makeFilepath': 771, './strings/makeRelativePath': 772, './strings/regexEscape': 773, './strings/snakeCase': 774, './strings/strAfter': 775, './strings/strAfterLast': 776, './strings/strBefore': 777, './strings/strBeforeLast': 778, './strings/titleCase': 779, './strings/ucFirst': 780, './strings/words': 781, 'core-js/stable': 561 }],
   769: [function (require, module, exports) {
     'use strict'
 
@@ -25169,14 +25071,13 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Given a string in kebab-case, snake_case or 'Sentence case', convert to camelCase.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @returns {string}
  */
     const camelCase = str => (0, _words.default)(str).reduce((camel, part) => camel ? camel.concat((0, _ucFirst.default)(part)) : part.toLowerCase(), '')
     var _default = exports.default = camelCase
-  }, { './ucFirst': 777, './words': 778, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
+  }, { './ucFirst': 780, './words': 781, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
   770: [function (require, module, exports) {
     'use strict'
 
@@ -25192,15 +25093,128 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Given a string in snake_case, camelCase or 'Sentence case', convert to kabob-case.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @returns {string}
  */
     const kabobCase = str => (0, _words.default)(str).reduce((kabob, part) => kabob ? kabob.concat('-' + part.toLowerCase()) : part.toLowerCase(), '')
     var _default = exports.default = kabobCase
-  }, { './words': 778, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
+  }, { './words': 781, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
   771: [function (require, module, exports) {
+    'use strict'
+
+    Object.defineProperty(exports, '__esModule', {
+      value: true
+    })
+    exports.makeFilepath = exports.default = void 0
+    var _strBeforeLast = _interopRequireDefault(require('./strBeforeLast'))
+    function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
+    /**
+ * Format the given path so that it does not have trailing slashes and also correctly appends a path.
+ * @memberOf module:stringHelpers
+ * @param {string} root
+ * @param {string} [append='']
+ * @returns {string}
+ */
+    const makeFilepath = function (root) {
+      let append = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ''
+      if (root.startsWith('./')) {
+        root = root.slice(2)
+      }
+      if (root.startsWith('/')) {
+        root = root.slice(1)
+      }
+      if (root.endsWith('/')) {
+        root = root.slice(0, -1)
+      }
+      if (append.startsWith('/')) {
+        append = append.slice(1)
+      }
+      if (append.startsWith('./')) {
+        append = append.slice(2)
+      }
+      if (append.startsWith('../')) {
+        if (!root) {
+          return append.endsWith('/') ? append.slice(0, -1) : append
+        }
+        append = append.slice(3)
+        root = (0, _strBeforeLast.default)(root, '/')
+        return makeFilepath(root, append)
+      }
+      if (append.endsWith('/')) {
+        append = append.slice(0, -1)
+      }
+      if (!root) {
+        return append
+      }
+      return append ? `${root}/${append}` : root
+    }
+    exports.makeFilepath = makeFilepath
+    var _default = exports.default = makeFilepath
+  }, { './strBeforeLast': 778 }],
+  772: [function (require, module, exports) {
+    'use strict'
+
+    Object.defineProperty(exports, '__esModule', {
+      value: true
+    })
+    exports.makeRelativePath = exports.default = void 0
+    var _strBefore = _interopRequireDefault(require('./strBefore'))
+    var _strAfter = _interopRequireDefault(require('./strAfter'))
+    function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
+    /**
+ * Compare two file paths and simplify them to a relative path.
+ * @memberOf module:stringHelpers
+ * @param {string} fromFile
+ * @param {string} toFile
+ * @return {string}
+ */
+    const makeRelativePath = (fromFile, toFile) => {
+      let relativePath = toFile
+      let nextPart = fromFile
+      let firstPart = (0, _strBefore.default)(nextPart, '/')
+      let hasMatches = false
+      while (firstPart && relativePath.startsWith(firstPart)) {
+        relativePath = (0, _strAfter.default)(relativePath, `${firstPart}/`)
+        nextPart = (0, _strAfter.default)(nextPart, `${firstPart}/`)
+        firstPart = (0, _strBefore.default)(nextPart, '/')
+        hasMatches = true
+      }
+      if (!hasMatches) {
+        // No similar base paths, use the path as-is
+        return relativePath
+      }
+      let relativePrefix = ''
+      const nextParts = nextPart.split('/')
+      if (nextParts.length < 2) {
+        relativePrefix = './'
+      }
+      for (let i = 1; i < nextParts.length; ++i) {
+        relativePrefix += '../'
+      }
+      return relativePrefix + relativePath
+    }
+    exports.makeRelativePath = makeRelativePath
+    var _default = exports.default = makeRelativePath
+  }, { './strAfter': 775, './strBefore': 777 }],
+  773: [function (require, module, exports) {
+    'use strict'
+
+    Object.defineProperty(exports, '__esModule', {
+      value: true
+    })
+    exports.regexEscape = exports.default = void 0
+    /**
+ * Take a string and escape the regex characters.
+ * @memberOf module:stringHelpers
+ * @param {string} str
+ * @returns {string}
+ */
+    const regexEscape = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    exports.regexEscape = regexEscape
+    var _default = exports.default = regexEscape
+  }, {}],
+  774: [function (require, module, exports) {
     'use strict'
 
     Object.defineProperty(exports, '__esModule', {
@@ -25215,15 +25229,14 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Given a string in kebab-case, camelCase or 'Sentence case', convert to snake_case.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @returns {string}
  */
     const snakeCase = str => (0, _words.default)(str).reduce((snake, part) => snake ? snake.concat('_' + part.toLowerCase()) : part.toLowerCase(), '')
     var _default = exports.default = snakeCase
-  }, { './words': 778, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
-  772: [function (require, module, exports) {
+  }, { './words': 781, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
+  775: [function (require, module, exports) {
     'use strict'
 
     Object.defineProperty(exports, '__esModule', {
@@ -25233,7 +25246,6 @@
     require('core-js/stable')
     /**
  * Retrieve the string part after the search match.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @param {string} search
@@ -25245,7 +25257,7 @@
     }
     var _default = exports.default = strAfter
   }, { 'core-js/stable': 561 }],
-  773: [function (require, module, exports) {
+  776: [function (require, module, exports) {
     'use strict'
 
     Object.defineProperty(exports, '__esModule', {
@@ -25255,7 +25267,6 @@
     require('core-js/stable')
     /**
  * Retrieve the string part after the last search match.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @param {string} search
@@ -25267,7 +25278,7 @@
     }
     var _default = exports.default = strAfterLast
   }, { 'core-js/stable': 561 }],
-  774: [function (require, module, exports) {
+  777: [function (require, module, exports) {
     'use strict'
 
     Object.defineProperty(exports, '__esModule', {
@@ -25277,7 +25288,6 @@
     require('core-js/stable')
     /**
  * Retrieve the string part before the search match.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @param {string} search
@@ -25289,7 +25299,7 @@
     }
     var _default = exports.default = strBefore
   }, { 'core-js/stable': 561 }],
-  775: [function (require, module, exports) {
+  778: [function (require, module, exports) {
     'use strict'
 
     Object.defineProperty(exports, '__esModule', {
@@ -25299,7 +25309,6 @@
     require('core-js/stable')
     /**
  * Retrieve the string part after the last search match.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @param {string} search
@@ -25311,7 +25320,7 @@
     }
     var _default = exports.default = strBeforeLast
   }, { 'core-js/stable': 561 }],
-  776: [function (require, module, exports) {
+  779: [function (require, module, exports) {
     'use strict'
 
     Object.defineProperty(exports, '__esModule', {
@@ -25327,15 +25336,14 @@
     function _interopRequireDefault (obj) { return obj && obj.__esModule ? obj : { default: obj } }
     /**
  * Given a string in kebab-case, snake_case, camelCase or 'Sentence case', convert to 'Title Case'.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @returns {string}
  */
     const titleCase = str => (0, _words.default)(str).reduce((title, part) => title ? title.concat(' ' + (0, _ucFirst.default)(part)) : (0, _ucFirst.default)(part), '')
     var _default = exports.default = titleCase
-  }, { './ucFirst': 777, './words': 778, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
-  777: [function (require, module, exports) {
+  }, { './ucFirst': 780, './words': 781, 'core-js/modules/esnext.async-iterator.reduce.js': 526, 'core-js/modules/esnext.iterator.constructor.js': 528, 'core-js/modules/esnext.iterator.reduce.js': 534, 'core-js/stable': 561 }],
+  780: [function (require, module, exports) {
     'use strict'
 
     Object.defineProperty(exports, '__esModule', {
@@ -25345,7 +25353,6 @@
     require('core-js/stable')
     /**
  * Given a string, make the first character uppercase and the rest lowercase.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @returns {string}
@@ -25353,7 +25360,7 @@
     const ucFirst = str => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
     var _default = exports.default = ucFirst
   }, { 'core-js/stable': 561 }],
-  778: [function (require, module, exports) {
+  781: [function (require, module, exports) {
     'use strict'
 
     Object.defineProperty(exports, '__esModule', {
@@ -25363,7 +25370,6 @@
     require('core-js/stable')
     /**
  * Split a string into sets of numbers or letters.
- * @function
  * @memberOf module:stringHelpers
  * @param {string} str
  * @returns {array}
@@ -25371,7 +25377,7 @@
     const words = str => str.match(/\d+|[A-Z]?[a-z]+|[A-Za-z]+/g)
     var _default = exports.default = words
   }, { 'core-js/stable': 561 }],
-  779: [function (require, module, exports) {
+  782: [function (require, module, exports) {
     'use strict'; Object.defineProperty(exports, '__esModule', { value: !0 }), exports.default = void 0; var _arrays = _interopRequireDefault(require('./helpers/arrays')); var _descriptors = _interopRequireDefault(require('./helpers/descriptors')); var _functions = _interopRequireDefault(require('./helpers/functions')); var _numbers = _interopRequireDefault(require('./helpers/numbers')); var _objects = _interopRequireDefault(require('./helpers/objects')); var _strings = _interopRequireDefault(require('./helpers/strings')); function _interopRequireDefault (e) { return e && e.__esModule ? e : { default: e } } const siFunciona = Object.assign({}, _arrays.default, _descriptors.default, _functions.default, _numbers.default, _objects.default, _strings.default); var _default = exports.default = siFunciona; typeof window !== 'undefined' && (window.siFunciona = siFunciona)
   }, { './helpers/arrays': 709, './helpers/descriptors': 717, './helpers/functions': 730, './helpers/numbers': 742, './helpers/objects': 748, './helpers/strings': 768 }]
 }, {}, [5])
