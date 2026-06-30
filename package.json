@@ -39,7 +39,7 @@
     "gulp-sass": "^5.1.0",
     "gulp-uglify-es": "^3.0.0",
     "jest": "^29.7.0",
-    "jsdoc": "^4.0.2",
+    "jsdoc": "^4.0.5",
     "jsdoc-to-markdown": "^8.0.1",
     "sass": "^1.72.0",
     "standard": "^17.1.0",
