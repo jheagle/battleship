@@ -70,7 +70,7 @@ gamePieces.playerSet = (board = {}, name = '') => ({
   board: board,
   shipFleet: [],
   playerStats: {},
-  tagName: 'div',
+  nodeName: 'div',
   attributes: {
     className: 'player'
   },
@@ -87,20 +87,20 @@ gamePieces.playerSet = (board = {}, name = '') => ({
  * @returns {Object}
  */
 gamePieces.playerStats = (player = {}, status = '') => ({
-  tagName: 'div',
+  nodeName: 'div',
   attributes: {},
   children: [
     {
-      tagName: 'span',
+      nodeName: 'span',
       attributes: {
         innerHTML: `<strong>${player.name}</strong>: ${status}`
       }
     },
     {
-      tagName: 'ul',
+      nodeName: 'ul',
       attributes: {},
       children: player.shipFleet.map(ship => ({
-        tagName: 'li',
+        nodeName: 'li',
         attributes: {
           innerHTML: `<strong>${ship.name} (${ship.parts.length}):</strong> ${Math.round(ship.status * 100) / 100}%`
         }

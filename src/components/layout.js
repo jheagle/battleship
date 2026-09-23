@@ -12,46 +12,48 @@ const gameLayout = {}
  * @returns {module:jDom/core/dom/objects.DomItem}
  */
 gameLayout.mainMenu = () => jsonDom.createDomItem({
-  tagName: 'div',
+  nodeName: 'div',
   attributes: {
     className: 'main-menu'
   },
   children: [
     {
-      tagName: 'div',
+      nodeName: 'div',
       attributes: {
         className: 'content'
       },
       children: [
         {
-          tagName: 'form',
+          nodeName: 'form',
           attributes: {
             name: 'mainMenuForm',
             className: 'main-menu-form'
           },
           eventListeners: {
-            submit: {
-              listenerFunc: 'beginRound',
-              listenerArgs: {},
-              listenerOptions: false
-            }
+            submit: [
+              {
+                listenerFunc: 'beginRound',
+                listenerArgs: {},
+                listenerOptions: false
+              }
+            ]
           },
           children: [
             {
-              tagName: 'div',
+              nodeName: 'div',
               attributes: {
                 className: 'form-group'
               },
               children: [
                 {
-                  tagName: 'label',
+                  nodeName: 'label',
                   attributes: {
                     for: 'human-players',
                     innerText: 'Humans'
                   }
                 },
                 {
-                  tagName: 'input',
+                  nodeName: 'input',
                   attributes: {
                     id: 'human-players',
                     name: 'human-players',
@@ -65,20 +67,20 @@ gameLayout.mainMenu = () => jsonDom.createDomItem({
               ]
             },
             {
-              tagName: 'div',
+              nodeName: 'div',
               attributes: {
                 className: 'form-group'
               },
               children: [
                 {
-                  tagName: 'label',
+                  nodeName: 'label',
                   attributes: {
                     for: 'robot-players',
                     innerText: 'Robots'
                   }
                 },
                 {
-                  tagName: 'input',
+                  nodeName: 'input',
                   attributes: {
                     id: 'robot-players',
                     name: 'robot-players',
@@ -92,14 +94,14 @@ gameLayout.mainMenu = () => jsonDom.createDomItem({
               ]
             },
             {
-              tagName: 'label',
+              nodeName: 'label',
               attributes: {
                 for: 'first-go-first',
                 innerText: 'First Player Starts'
               }
             },
             {
-              tagName: 'input',
+              nodeName: 'input',
               attributes: {
                 id: 'first-go-first',
                 name: 'first-go-first',
@@ -107,7 +109,7 @@ gameLayout.mainMenu = () => jsonDom.createDomItem({
               }
             },
             {
-              tagName: 'input',
+              nodeName: 'input',
               attributes: {
                 type: 'submit',
                 value: 'Start'
@@ -127,7 +129,7 @@ gameLayout.mainMenu = () => jsonDom.createDomItem({
  * @returns {module:jDom/core/dom/objects.DomItem}
  */
 gameLayout.boards = (players = []) => jsonDom.createDomItem({
-  tagName: 'div',
+  nodeName: 'div',
   attributes: {
     className: 'boards'
   },
@@ -140,19 +142,19 @@ gameLayout.boards = (players = []) => jsonDom.createDomItem({
  * @param {Array} players
  * @returns {module:jDom/core/dom/objects.DomItem}
  */
-gameLayout.finalScore = (players) => jsonDom.createDomItem({
-  tagName: 'div',
+gameLayout.finalScore = (players = []) => jsonDom.createDomItem({
+  nodeName: 'div',
   attributes: {
     className: 'final-scores'
   },
   children: [
     {
-      tagName: 'div',
+      nodeName: 'div',
       attributes: {
         className: 'score-cards'
       },
       children: players.map(player => ({
-        tagName: 'div',
+        nodeName: 'div',
         attributes: {
           className: 'score-card',
           innerHTML: `<strong>${player.name}</strong><hr><br></strong><strong>Status:</strong> ${Math.round(player.status * 100) / 100}%, <strong>Sunk:</strong> ${player.attacks.sunk}<br><strong>Hit:</strong> ${player.attacks.hit} / <strong>Miss:</strong> ${player.attacks.miss}<br><strong>Turns:</strong> ${player.turnCnt}`
@@ -160,13 +162,15 @@ gameLayout.finalScore = (players) => jsonDom.createDomItem({
       }))
     },
     {
-      tagName: 'input',
+      nodeName: 'input',
       attributes: {
         type: 'button',
         value: 'Restart'
       },
       eventListeners: {
-        click: { listenerFunc: 'restart', listenerArgs: {}, listenerOptions: false }
+        click: [
+          { listenerFunc: 'restart', listenerArgs: {}, listenerOptions: false }
+        ]
       }
     }
   ]

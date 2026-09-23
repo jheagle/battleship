@@ -1,6 +1,7 @@
 import gameActions from './functions/actions.js'
 import gameStart from './functions/setup.js'
 import jsonDom from 'json-dom'
+import { logObject } from 'test-filesystem'
 
 const battleship = () => {
   /**
@@ -12,7 +13,8 @@ const battleship = () => {
     attackListener: gameActions.attackListener,
     restart: gameStart.restart
   }))
-  console.log('Document Item: ', documentItem)
+  
+  logObject(documentItem, 'Document Item')
 
 // eslint-disable-next-line no-undef
   if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {

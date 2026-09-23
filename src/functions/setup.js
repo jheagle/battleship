@@ -147,9 +147,9 @@ gameStart.beginRound = (e, mainForm) => {
  */
 gameStart.main = (parent) => {
   for (let i = parent.body.children.length - 1; i >= 0; --i) {
-    jsonDom.removeChild(parent.body.children[i], parent.body)
+    jsonDom.removeChild(parent.body, parent.body.children[i])
   }
-  jsonDom.renderHtml(gameLayout.mainMenu(), parent)
+  jsonDom.renderHtml(gameLayout.mainMenu(), parent.body)
   return parent
 }
 
