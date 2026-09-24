@@ -29,7 +29,7 @@
     "json-dom": "github:jheagle/JSON-DOM",
     "matrix-dom": "github:jheagle/matrix-DOM",
     "pseudo-dom": "^0.17.0",
-    "si-funciona": "^2.7.0"
+    "si-funciona": "^2.7.1"
   },
   "repository": {
     "type": "git",
