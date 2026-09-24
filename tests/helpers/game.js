@@ -1,7 +1,10 @@
 import jsonDom from 'json-dom'
-import gameStart from '../../src/functions/setup'
-import gameActions from '../../src/functions/actions'
-import gamePieces from '../../src/components/pieces'
+import startMenu from '../../src/setup/startMenu'
+import beginRound from '../../src/setup/beginRound'
+import restart from '../../src/setup/restart'
+import attackListener from '../../src/attack/attackListener'
+import attackLock from '../../src/attack/attackLock'
+import waterTile from '../../src/components/pieces/waterTile'
 import jDomMatrix from 'matrix-dom'
 
 /**
@@ -20,10 +23,10 @@ export const settle = (ms = 5000) => jest.advanceTimersByTimeAsync(ms)
  * @returns {{doc: Object, players: Array}}
  */
 export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true } = {}) => {
-  const doc = gameStart.main(jsonDom.documentDomItem({
-    beginRound: gameStart.beginRound,
-    attackListener: gameActions.attackListener,
-    restart: gameStart.restart
+  const doc = startMenu(jsonDom.documentDomItem({
+    beginRound,
+    attackListener,
+    restart
   }))
   const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]
   jsonDom.getChildrenByName('human-players', form)[0].element.value = String(humans)
@@ -52,7 +55,7 @@ export const click = async (cell, ms = 1000) => {
 }
 
 /** A bare 10 x 10 board of water tiles, with the point data filled in. */
-export const makeBoard = () => jDomMatrix.updateMatrixPoints(jDomMatrix.square({ x: gamePieces.waterTile() }, 10))
+export const makeBoard = () => jDomMatrix.updateMatrixPoints(jDomMatrix.square({ x: waterTile() }, 10))
 
 /** All the cells the players' boards have been hit on. */
 export const hitCells = player => cells(player).filter(cell => cell.isHit)
@@ -74,7 +77,7 @@ export const useGameLifecycle = () => {
   beforeEach(() => {
     jest.useFakeTimers()
     jest.spyOn(console, 'log').mockImplementation(() => {})
-    gameActions.attackFleet.isLocked = false
+    attackLock.isLocked = false
   })
   afterEach(async () => {
     await settle(60000)
@@ -82,3 +85,13 @@ export const useGameLifecycle = () => {
     jest.restoreAllMocks()
   })
 }
+
+/** Start a game for two humans (player 1 attacks first) and let it settle. */
+export const twoHumans = async () => {
+  const game = startGame({ humans: 2 })
+  await settle()
+  return game
+}
+
+/** The other player in a two player game. */
+export const other = (players, player) => players.find(p => p !== player)

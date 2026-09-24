@@ -1,5 +1,7 @@
-import gameActions from './functions/actions.js'
-import gameStart from './functions/setup.js'
+import attackListener from './attack/attackListener'
+import beginRound from './setup/beginRound'
+import restart from './setup/restart'
+import startMenu from './setup/startMenu'
 import jsonDom from 'json-dom'
 import { isNode } from 'browser-or-node'
 
@@ -8,10 +10,10 @@ const battleship = () => {
    * Create new private reference to the document
    * @typedef {module:jDom/core/dom/objects.documentItem} documentItem
    */
-  const documentItem = gameStart.main(jsonDom.documentDomItem({
-    beginRound: gameStart.beginRound,
-    attackListener: gameActions.attackListener,
-    restart: gameStart.restart
+  const documentItem = startMenu(jsonDom.documentDomItem({
+    beginRound,
+    attackListener,
+    restart
   }))
 
   // Trigger game to start if running as a Node module. This used to check
