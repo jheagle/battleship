@@ -13,7 +13,7 @@ const gameUtils = {}
  * @param matrix
  * @returns {boolean}
  */
-gameUtils.checkIfShipCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.y].children[pnt.x].hasShip
+gameUtils.checkIfShipCell = (pnt, matrix) => matrix.children[pnt.z]?.children[pnt.y]?.children[pnt.x]?.hasShip ?? false
 
 /**
  * Return the isHit tile boolean at the specified point.
@@ -30,7 +30,7 @@ gameUtils.checkIfHitCell = (pnt, matrix) => matrix.children[pnt.z].children[pnt.
  * @param matrix
  * @returns {Array}
  */
-gameUtils.getAllNonHitCells = matrix => jsonDom.getAllPoints(matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
+gameUtils.getAllNonHitCells = matrix => matrixDom.getAllPoints(matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
 
 /**
  * Get the points which have same edges with the provided point and are not hit.
@@ -39,7 +39,7 @@ gameUtils.getAllNonHitCells = matrix => jsonDom.getAllPoints(matrix).filter(p =>
  * @param matrix
  * @returns {Array}
  */
-gameUtils.getAdjEdgeNonHitCells = (pnt, matrix) => jsonDom.adjacentEdgePoints(pnt, matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
+gameUtils.getAdjEdgeNonHitCells = (pnt, matrix) => matrixDom.adjacentEdgePoints(pnt, matrix).filter(p => !gameUtils.checkIfHitCell(p, matrix))
 
 /**
  * Given an array of items, return the item with the lowest status property (at the end of the array)
@@ -89,3 +89,5 @@ gameUtils.numDamagedParts = (total, status) => total - Math.ceil(((status / 100)
  * @returns {boolean}
  */
 gameUtils.filterAdjacentPoints = pnt => ((pnt.z % 2 === 0 && ((pnt.x % 2 === 0 && pnt.y % 2 === 0) || (pnt.x % 2 !== 0 && pnt.y % 2 !== 0))) || (pnt.z % 2 !== 0 && ((pnt.x % 2 !== 0 && pnt.y % 2 === 0) || (pnt.x % 2 === 0 && pnt.y % 2 !== 0))))
+
+export default gameUtils

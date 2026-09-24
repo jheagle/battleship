@@ -1,5 +1,6 @@
 import gamePieces from '../components/pieces'
 import jsonDom from 'json-dom'
+import matrixDom from 'matrix-dom'
 import siFunciona from 'si-funciona'
 
 /**
@@ -147,7 +148,7 @@ const endGame = (winner) => {
   const players = winner.parentItem.children
   players.map(player => updatePlayerStats(player))
   winner = updatePlayerStats(winner, 'WINNER')
-  const finalScore = jsonDom.renderHtml(gameLayout.finalScore(players), parent)
+  const finalScore = jsonDom.renderHtml(gameLayout.finalScore(players), parent.body)
   finalScore.children[0].children.map(child => child.attributes.innerHTML)
   return [winner]
 }
@@ -219,7 +220,7 @@ gameActions.attackFleet = (target) => {
     player.shipFleet.map((ship) => {
       // Get all healthy ships
       const healthy = ship.parts.filter((part) => {
-        if (jsonDom.areEqualPoints(part.point, target.point)) {
+        if (matrixDom.areEqualPoints(part.point, target.point)) {
           hitShip = ship
         }
         return !part.isHit
@@ -248,7 +249,7 @@ gameActions.attackFleet = (target) => {
  * @param target
  * @returns {*}
  */
-gameActions.attackListener = (e, target) => gameActions.attackFleet(jsonDom.getDomItemFromElement(e.target, target))
+gameActions.attackListener = (e, target) => gameActions.attackFleet(matrixDom.getDomItemFromElement(e.target, target))
 
 /**
  * Choose which player to attack.
@@ -281,20 +282,20 @@ const selectTargetCoordinate = (victim) => {
     if (moreBrokenShips.length) {
       // If there are more broken ships, attack the parts between hit points first.
       for (let i = 0; i < hitParts.length; ++i) {
-        const targetPoints = jsonDom.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
+        const targetPoints = matrixDom.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, gameUtils.checkIfHitCell, false)
         if (targetPoints.false.length) {
           displayTargets(targetPoints.false, targetPoints.false[0], victim)
-          return jsonDom.getDomItemFromPoint(targetPoints.false[0], victim.board)
+          return matrixDom.getDomItemFromPoint(targetPoints.false[0], victim.board)
         }
       }
       // If there are no points between, attack the outer points first.
-      const pntDiff = jsonDom.pointDifference(hitParts[0].point, hitParts[1].point)
-      const dirPnts = (pntDiff.x > 0 ? [jsonDom.point(-1, 0, 0), jsonDom.point(1, 0, 0)] : [jsonDom.point(0, -1, 0), jsonDom.point(0, 1, 0)]).map((p, i) => jsonDom.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => jsonDom.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
+      const pntDiff = matrixDom.pointDifference(hitParts[0].point, hitParts[1].point)
+      const dirPnts = (pntDiff.x > 0 ? [matrixDom.point(-1, 0, 0), matrixDom.point(1, 0, 0)] : [matrixDom.point(0, -1, 0), matrixDom.point(0, 1, 0)]).map((p, i) => matrixDom.nextCell(hitParts[(hitParts.length - 1) * i].point, p)).filter(p => matrixDom.checkValidPoint(p, victim.board)).filter(a => !gameUtils.checkIfHitCell(a, victim.board))
       // Check outer points which are valid and not hit.
       const target = dirPnts.reduce((a, b) => gameUtils.checkIfHitCell(a, victim.board) ? b : a)
       if (target) {
         displayTargets(dirPnts, target, victim)
-        return jsonDom.getDomItemFromPoint(target, victim.board)
+        return matrixDom.getDomItemFromPoint(target, victim.board)
       }
     }
     // If there is only one hit part, then set that as the lastTarget for detecting adjacent parts.
@@ -305,7 +306,7 @@ const selectTargetCoordinate = (victim) => {
   displayTargets(finalTargets, target, victim)
 
   // If there are available targets then hit one at random
-  return jsonDom.getDomItemFromPoint(target, victim.board)
+  return matrixDom.getDomItemFromPoint(target, victim.board)
 }
 
 /**
@@ -329,10 +330,10 @@ const displayTargets = (targets, target, victim) => {
  */
 const resetTargets = data => {
   data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
-  data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjects(jsonDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
+  data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjects(matrixDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
   if (!data.target) {
     data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
-    data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjects(jsonDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
+    data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjects(matrixDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
   }
   return data
 }

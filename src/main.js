@@ -2,6 +2,7 @@ import gameActions from './functions/actions.js'
 import gameStart from './functions/setup.js'
 import jsonDom from 'json-dom'
 import { logObject } from 'test-filesystem'
+import { isNode } from 'browser-or-node'
 
 const battleship = () => {
   /**
@@ -13,12 +14,15 @@ const battleship = () => {
     attackListener: gameActions.attackListener,
     restart: gameStart.restart
   }))
-  
+
   logObject(documentItem, 'Document Item')
 
-// eslint-disable-next-line no-undef
-  if (typeof document === 'undefined' || !(document instanceof HTMLDocument)) {
-    // Trigger game to start if running as node module
+  // Trigger game to start if running as a Node module. This used to check
+  // `!(document instanceof HTMLDocument)`, but pseudo-dom's installGlobal (which must already have run - see below -
+  // for `document` to exist here at all) now correctly makes its document satisfy `instanceof HTMLDocument`, since
+  // that is the whole point: code should not be able to tell a real document from pseudo-dom's. isNode checks the
+  // runtime itself instead, which still works regardless of how close pseudo-dom's document gets to a real one.
+  if (isNode) {
     const form = jsonDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
     const submitBtn = jsonDom.getChildrenFromAttribute('type', 'submit', form)
     submitBtn[0].element.click()

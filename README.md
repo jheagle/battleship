@@ -41,8 +41,8 @@ A reference to all functions to be used globally / exported
     * [~defaultFleet](#module_game/setup..defaultFleet) ⇒ <code>Array</code>
     * [~buildShip(shipInfo, line, matrix, view)](#module_game/setup..buildShip) ⇒ <code>Object</code>
     * [~selectShipDirection(lengths, shipLength)](#module_game/setup..selectShipDirection)
-    * [~randomStartDir(lengths, shipLength, dir)](#module_game/setup..randomStartDir) ⇒ <code>Object</code>
-    * [~generateStartEnd(matrix, shipLength, lengths, startDir)](#module_game/setup..generateStartEnd) ⇒ <code>Array</code>
+    * [~randomStartDir(matrix, shipLength, dir)](#module_game/setup..randomStartDir)
+    * [~generateStartEnd(matrix, shipLength, startDir)](#module_game/setup..generateStartEnd) ⇒ <code>Array</code>
     * [~generateRandomFleet(ships, matrix, [view])](#module_game/setup..generateRandomFleet) ⇒ <code>Array</code>
     * [~buildPlayers(humans, robots, players)](#module_game/setup..buildPlayers) ⇒ <code>Array</code>
     * [~beginRound(e, mainForm)](#module_game/setup..beginRound) ⇒ <code>boolean</code>
@@ -64,7 +64,8 @@ Create a default fleet using the standard battleship lengths.
 <a name="module_game/setup..buildShip"></a>
 
 ### game/setup~buildShip(shipInfo, line, matrix, view) ⇒ <code>Object</code>
-Generate a ship with the provided line of points.The visibility of the ship on the board is determined by the view parameter.
+Generate a ship with the provided line of points.
+The visibility of the ship on the board is determined by the view parameter.
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
@@ -87,19 +88,20 @@ Generate a ship with the provided line of points.The visibility of the ship on 
 
 <a name="module_game/setup..randomStartDir"></a>
 
-### game/setup~randomStartDir(lengths, shipLength, dir) ⇒ <code>Object</code>
+### game/setup~randomStartDir(matrix, shipLength, dir)
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
 | Param |
 | --- |
-| lengths | 
+| matrix | 
 | shipLength | 
 | dir | 
 
 <a name="module_game/setup..generateStartEnd"></a>
 
-### game/setup~generateStartEnd(matrix, shipLength, lengths, startDir) ⇒ <code>Array</code>
-Get a qualifying start and direction point for a ship of specified lengthWARNING: This is a recursive function.
+### game/setup~generateStartEnd(matrix, shipLength, startDir) ⇒ <code>Array</code>
+Get a qualifying start and direction point for a ship of specified length
+WARNING: This is a recursive function.
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
@@ -107,13 +109,13 @@ Get a qualifying start and direction point for a ship of specified lengthWARNIN
 | --- |
 | matrix | 
 | shipLength | 
-| lengths | 
 | startDir | 
 
 <a name="module_game/setup..generateRandomFleet"></a>
 
 ### game/setup~generateRandomFleet(ships, matrix, [view]) ⇒ <code>Array</code>
-Create a series of randomly placed ships based on the provided shipLengths.The optional parameter view will set the visibility of the ships.
+Create a series of randomly placed ships based on the provided shipLengths.
+The optional parameter view will set the visibility of the ships.
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
@@ -126,7 +128,10 @@ Create a series of randomly placed ships based on the provided shipLengths.The 
 <a name="module_game/setup..buildPlayers"></a>
 
 ### game/setup~buildPlayers(humans, robots, players) ⇒ <code>Array</code>
-Create players and associated properties.Takes an integer for the number of players to generate.Returns an array of players.WARNING: This is a recursive function.
+Create players and associated properties.
+Takes an integer for the number of players to generate.
+Returns an array of players.
+WARNING: This is a recursive function.
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
@@ -139,7 +144,8 @@ Create players and associated properties.Takes an integer for the number of pla
 <a name="module_game/setup..beginRound"></a>
 
 ### game/setup~beginRound(e, mainForm) ⇒ <code>boolean</code>
-Logic for setting up and starting a new round(selects random start player and calls computer attack if it is AI starting)
+Logic for setting up and starting a new round
+(selects random start player and calls computer attack if it is AI starting)
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 

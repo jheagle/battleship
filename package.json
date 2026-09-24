@@ -24,9 +24,11 @@
     "test-filesystem": "^1.5.1"
   },
   "dependencies": {
+    "browser-or-node": "^3.0.0",
     "collect-your-stuff": "^2.1.2",
     "json-dom": "github:jheagle/JSON-DOM",
     "matrix-dom": "github:jheagle/matrix-DOM",
+    "pseudo-dom": "^0.14.0",
     "si-funciona": "^2.6.1"
   },
   "repository": {
