@@ -48,6 +48,12 @@ describe('playerSet', () => {
     })
   })
 
+  test('with nothing given it is an unnamed player with an empty board', () => {
+    const player = gamePieces.playerSet()
+    expect(player.name).toBe('')
+    expect(player.board).toEqual({})
+  })
+
   test('the board is the first child, and players do not share their attack counts', () => {
     const board = { is: 'matrix' }
     const [one, two] = [gamePieces.playerSet(board, 'a'), gamePieces.playerSet(board, 'b')]

@@ -149,3 +149,15 @@ describe('filterAdjacentPoints (the checkerboard the computer searches with)', (
     }
   })
 })
+
+describe('filterAdjacentPoints on a second layer', () => {
+  test('the checkerboard flips on every other layer, so cells above each other are never both chosen', () => {
+    for (let y = 0; y < 4; y++) {
+      for (let x = 0; x < 4; x++) {
+        expect(gameUtils.filterAdjacentPoints(pnt(x, y, 0))).not.toBe(gameUtils.filterAdjacentPoints(pnt(x, y, 1)))
+      }
+    }
+    expect(gameUtils.filterAdjacentPoints(pnt(1, 0, 1))).toBe(true)
+    expect(gameUtils.filterAdjacentPoints(pnt(0, 0, 1))).toBe(false)
+  })
+})

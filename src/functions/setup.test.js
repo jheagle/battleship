@@ -218,3 +218,16 @@ describe('setup: each board and fleet', () => {
     expect(layouts.size).toBeGreaterThan(20)
   })
 })
+
+describe('setup: beginRound', () => {
+  test('ignores a submit which is not aimed at the form itself (an event which only bubbled through)', () => {
+    const doc = gameStart.main(jsonDom.documentDomItem({ beginRound: gameStart.beginRound }))
+    const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]
+    const preventDefault = jest.fn()
+    expect(gameStart.beginRound({ eventPhase: 3, type: 'submit', preventDefault }, form)).toBe(false)
+    expect(gameStart.beginRound({ eventPhase: 1, type: 'submit', preventDefault }, form)).toBe(false)
+    expect(preventDefault).not.toHaveBeenCalled()
+    expect(jsonDom.getChildrenByClass('main-menu', doc.body)).toHaveLength(1)
+    expect(getPlayers(doc)).toHaveLength(0)
+  })
+})
