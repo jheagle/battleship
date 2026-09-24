@@ -1,8 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-import gameActions from './functions/actions'
-import gameUtils from './functions/functions'
+import * as attackFleetModule from './attack/attackFleet'
+import attackLock from './attack/attackLock'
+import filterAdjacentPoints from './utils/filterAdjacentPoints'
 import jsonDom from 'json-dom'
 import {
   startGame, settle, click, playToTheEnd, cells, unhitWaterCells, useGameLifecycle
@@ -61,8 +62,8 @@ describe('a human against a robot', () => {
 describe('robots playing each other', () => {
   const recordGame = async (options = { humans: 0, robots: 2 }) => {
     const attacks = []
-    const original = gameActions.attackFleet
-    jest.spyOn(gameActions, 'attackFleet').mockImplementation(function (target) {
+    const original = attackFleetModule.default
+    jest.spyOn(attackFleetModule, 'default').mockImplementation(function (target) {
       const victim = jsonDom.getParentsByClass('player', target)[0]
       const players = jsonDom.getParentsByClass('boards', target)[0].children
       const who = players.find(player => player.attacker)
@@ -75,7 +76,7 @@ describe('robots playing each other', () => {
         hitCells: cells(victim).filter(cell => cell.isHit)
       }
       const turnBefore = who && who.turnCnt
-      const result = original.call(gameActions.attackFleet, target)
+      const result = original(target)
       attacks.push({ ...before, counted: Boolean(target.isHit), hasShip: target.hasShip, turnBefore })
       return result
     })
@@ -91,7 +92,7 @@ describe('robots playing each other', () => {
     for (let i = 0; i < 4; i++) {
       jest.useFakeTimers()
       jest.spyOn(console, 'log').mockImplementation(() => {})
-      gameActions.attackFleet.isLocked = false
+      attackLock.isLocked = false
       games.push(await recordGame())
       await settle(60000)
       jest.restoreAllMocks()
@@ -156,9 +157,9 @@ describe('robots playing each other', () => {
   test('with no damaged ship to follow up, the robot searches in a checkerboard so every ship is found quickly', () => {
     games.forEach(({ attacks }) => {
       attacks.filter(attack => attack.damaged.length === 0).forEach(attack => {
-        const checkerboardLeft = cells(attack.victim).some(cell => !attack.hitCells.includes(cell) && gameUtils.filterAdjacentPoints(cell.point))
+        const checkerboardLeft = cells(attack.victim).some(cell => !attack.hitCells.includes(cell) && filterAdjacentPoints(cell.point))
         if (checkerboardLeft) {
-          expect(gameUtils.filterAdjacentPoints(attack.cell.point)).toBe(true)
+          expect(filterAdjacentPoints(attack.cell.point)).toBe(true)
         }
       })
     })
@@ -182,7 +183,7 @@ describe('robots playing each other', () => {
   test('the restart button after a robot game goes back to the menu', async () => {
     jest.useFakeTimers()
     jest.spyOn(console, 'log').mockImplementation(() => {})
-    gameActions.attackFleet.isLocked = false
+    attackLock.isLocked = false
     startGame({ humans: 0, robots: 2 })
     await playToTheEnd()
     document.querySelector('.final-scores input[type=button]').click()
