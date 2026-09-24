@@ -30,8 +30,8 @@ export default battleship
 
 if (this) {
   // @ts-ignore
-  this['battleship'] = battleship
+  this.battleship = battleship
 } else if (typeof window !== 'undefined') {
   // @ts-ignore
-  window['battleship'] = battleship
+  window.battleship = battleship
 }

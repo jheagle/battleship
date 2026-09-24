@@ -42,7 +42,7 @@ gamePieces.shipTile = () => ({
  * @returns {{name: string, status: number, parts: Array}}
  */
 gamePieces.ship = (name = '') => ({
-  name: name,
+  name,
   status: 100,
   parts: []
 })
@@ -64,13 +64,13 @@ gamePieces.hitTile = () => ({
  * @returns {Object}
  */
 gamePieces.playerSet = (board = {}, name = '') => ({
-  name: name,
+  name,
   isRobot: false,
   status: 100,
   turnCnt: 0,
   attacker: false,
   attacks: { hit: 0, miss: 0, sunk: 0 },
-  board: board,
+  board,
   shipFleet: [],
   playerStats: {},
   nodeName: 'div',
