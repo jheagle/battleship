@@ -15,6 +15,18 @@ const queueTimeout = siFunciona.queueTimeout()
 const gameActions = {}
 
 /**
+ * Colour a cell once it has been hit: red for a ship, white for water. Cells only have a style object once something
+ * has resized or highlighted them, so it is created here when it is missing.
+ * @param config
+ */
+const colourHitCell = config => {
+  if (config.isHit) {
+    config.attributes.style = config.attributes.style || {}
+    config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
+  }
+}
+
+/**
  * Update view based on actions performed
  * @param config
  * @param isRobot
@@ -26,17 +38,13 @@ const configureHtml = (config, isRobot) => {
   if (isRobot) {
     gameActions.attackFleet.isLocked = true
     queueTimeout(() => {
-      if (config.isHit) {
-        config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
-      }
+      colourHitCell(config)
       config = jsonDom.updateElement(config)
       gameActions.attackFleet.isLocked = false
       return config
     }, 0)
   } else {
-    if (config.isHit) {
-      config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
-    }
+    colourHitCell(config)
     config = jsonDom.updateElement(config)
   }
   return config
@@ -92,12 +100,12 @@ const updatePlayerStats = (player, status = `${Math.round(player.status * 100) /
  * Track player stats such as attacks and turns
  * @function updatePlayer
  * @param player
- * @param playAgain
+ * @param hitShip
  * @param sunkShip
  */
-gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
+gameActions.updatePlayer = (player, hitShip, sunkShip = 0) => {
   if (player.attacker) {
-    if (playAgain) {
+    if (hitShip) {
       ++player.attacks.hit
     } else {
       ++player.attacks.miss
@@ -106,37 +114,40 @@ gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
       ++player.attacks.sunk
     }
   }
-  if (!playAgain) {
-    player.attacker = !player.attacker
-    gameActions.attackFleet.isLocked = true
-    if (player.attacker) {
-      if (!player.isRobot) {
-        queueTimeout(() => {
-          gameActions.attackFleet.isLocked = false
-          return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjectsMutable(c, {
-            attributes: {
-              style: {
-                width: '17px',
-                height: '17px'
-              }
-            }
-          })))))
-        }, 400)
-      }
-      ++player.turnCnt
-    } else {
+  // If we add house rules options, enable replay on successful hit here
+  // if (hitShip) {
+  //   queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
+  //   return player
+  // }
+  player.attacker = !player.attacker
+  gameActions.attackFleet.isLocked = true
+  if (player.attacker) {
+    if (!player.isRobot) {
       queueTimeout(() => {
         gameActions.attackFleet.isLocked = false
         return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjectsMutable(c, {
           attributes: {
             style: {
-              width: '35px',
-              height: '35px'
+              width: '17px',
+              height: '17px'
             }
           }
         })))))
-      }, 0)
+      }, 400)
     }
+    ++player.turnCnt
+  } else {
+    queueTimeout(() => {
+      gameActions.attackFleet.isLocked = false
+      return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjectsMutable(c, {
+        attributes: {
+          style: {
+            width: '35px',
+            height: '35px'
+          }
+        }
+      })))))
+    }, 0)
   }
   queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
   return player
@@ -172,20 +183,26 @@ const findNextAttacker = (attacker, players, attackerIndex) => {
  * Based on the current attacker and list of players, return the next attacker.
  * @param attacker
  * @param players
- * @param playAgain
+ * @param hitShip
  * @returns {*}
  */
-const getNextAttacker = (attacker, players, playAgain) => playAgain ? attacker : gameActions.updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), playAgain)
+const getNextAttacker = (attacker, players, hitShip) => {
+  // This is a house-rule, playing again after successful hit. Hasbro official rules do not have this, and even discourage this rule.
+  // Maybe add as an optional house rule in the future.
+  // if (hitShip) {
+  //   return attacker
+  // }
+  return gameActions.updatePlayer(findNextAttacker(attacker, players, players.indexOf(attacker)), hitShip)
+}
 
 /**
  * Update all game stats after each player round
- * @param player
  * @param hitShip
  * @param sunkShip
  * @param players
  * @returns {*}
  */
-const updateScore = (player, hitShip, sunkShip, players) => {
+const updateScore = (hitShip, sunkShip, players) => {
   players = players.filter((p) => p.status > 0)
   let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
   attacker = gameActions.updatePlayer(attacker, hitShip, sunkShip)
@@ -210,8 +227,8 @@ gameActions.attackFleet = (target) => {
   gameActions.attackFleet.isLocked = gameActions.attackFleet.isLocked || false
   let player = jsonDom.getParentsByClass('player', target)[0]
   const players = jsonDom.getParentsByClass('boards', target)[0].children
-  // Player cannot attack themselves (current attacker) or if they have bad status
-  if (player.status <= 0 || player.attacker || gameActions.attackFleet.isLocked) {
+  // Player cannot attack themselves (current attacker), if they have bad status, or a cell which was already hit
+  if (player.status <= 0 || player.attacker || gameActions.attackFleet.isLocked || target.isHit) {
     return players
   }
   // Update cell to hit
@@ -243,7 +260,7 @@ gameActions.attackFleet = (target) => {
     // Check if the hit ship was sunk
     sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
   }
-  return updateScore(player, hitCell.hasShip, sunkShip, players)
+  return updateScore(hitCell.hasShip, sunkShip, players)
 }
 
 /**

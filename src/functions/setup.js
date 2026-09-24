@@ -105,12 +105,14 @@ const buildPlayers = (humans, robots = 0, players = []) => {
   }
   const player = gamePieces.playerSet({}, `Player ${players.length + 1}`)
   player.isRobot = humans <= 0
+  // square() takes single objects here (matrix-dom's JSDoc says arrays, but arrays get merged in under a '0' key)
   player.board = jDomMatrix.updateMatrixPoints(jDomMatrix.square({
-    x: [gamePieces.waterTile(player, players)], matrixProps: [{
+    x: gamePieces.waterTile(player, players),
+    matrix: {
       eventListeners: {
-        click: { listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }
+        click: [{ listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }]
       }
-    }]
+    }
   }, 10))
   player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
   player.playerStats = gamePieces.playerStats(player, `${Math.round(player.status * 100) / 100}%`)

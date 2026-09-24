@@ -292,15 +292,16 @@ All methods exported from this module are encapsulated within gameActions.
     * [~setViewShip](#module_game/actions..setViewShip)
     * [~setHiddenShip](#module_game/actions..setHiddenShip)
     * [~setHit](#module_game/actions..setHit)
+    * [~colourHitCell(config)](#module_game/actions..colourHitCell)
     * [~configureHtml(config, isRobot)](#module_game/actions..configureHtml) ⇒ <code>\*</code>
     * [~update3dCell(config, matrix, x, y, z, isRobot)](#module_game/actions..update3dCell)
     * [~setShip(matrix, point, view)](#module_game/actions..setShip)
     * [~updatePlayerStats(player, status)](#module_game/actions..updatePlayerStats) ⇒ <code>\*</code>
-    * [~updatePlayer(player, playAgain, sunkShip)](#module_game/actions..updatePlayer)
+    * [~updatePlayer(player, hitShip, sunkShip)](#module_game/actions..updatePlayer)
     * [~endGame(winner)](#module_game/actions..endGame) ⇒ <code>Array.&lt;\*&gt;</code>
     * [~findNextAttacker(attacker, players, attackerIndex)](#module_game/actions..findNextAttacker) ⇒ <code>\*</code>
-    * [~getNextAttacker(attacker, players, playAgain)](#module_game/actions..getNextAttacker) ⇒ <code>\*</code>
-    * [~updateScore(player, hitShip, sunkShip, players)](#module_game/actions..updateScore) ⇒ <code>\*</code>
+    * [~getNextAttacker(attacker, players, hitShip)](#module_game/actions..getNextAttacker) ⇒ <code>\*</code>
+    * [~updateScore(hitShip, sunkShip, players)](#module_game/actions..updateScore) ⇒ <code>\*</code>
     * [~attackFleet(target)](#module_game/actions..attackFleet) ⇒ <code>\*</code>
     * [~attackListener(e, target)](#module_game/actions..attackListener) ⇒ <code>\*</code>
     * [~selectTargetPlayer(players)](#module_game/actions..selectTargetPlayer) ⇒ <code>\*</code>
@@ -321,6 +322,17 @@ All methods exported from this module are encapsulated within gameActions.
 
 ### game/actions~setHit
 **Kind**: inner constant of [<code>game/actions</code>](#module_game/actions)  
+<a name="module_game/actions..colourHitCell"></a>
+
+### game/actions~colourHitCell(config)
+Colour a cell once it has been hit: red for a ship, white for water. Cells only have a style object once somethinghas resized or highlighted them, so it is created here when it is missing.
+
+**Kind**: inner method of [<code>game/actions</code>](#module_game/actions)  
+
+| Param |
+| --- |
+| config | 
+
 <a name="module_game/actions..configureHtml"></a>
 
 ### game/actions~configureHtml(config, isRobot) ⇒ <code>\*</code>
@@ -374,7 +386,7 @@ Set a specified point to be part of a ship
 
 <a name="module_game/actions..updatePlayer"></a>
 
-### game/actions~updatePlayer(player, playAgain, sunkShip)
+### game/actions~updatePlayer(player, hitShip, sunkShip)
 Track player stats such as attacks and turns
 
 **Kind**: inner method of [<code>game/actions</code>](#module_game/actions)  
@@ -382,7 +394,7 @@ Track player stats such as attacks and turns
 | Param |
 | --- |
 | player | 
-| playAgain | 
+| hitShip | 
 | sunkShip | 
 
 <a name="module_game/actions..endGame"></a>
@@ -409,7 +421,7 @@ Final state once a game is won (only one player remains)
 
 <a name="module_game/actions..getNextAttacker"></a>
 
-### game/actions~getNextAttacker(attacker, players, playAgain) ⇒ <code>\*</code>
+### game/actions~getNextAttacker(attacker, players, hitShip) ⇒ <code>\*</code>
 Based on the current attacker and list of players, return the next attacker.
 
 **Kind**: inner method of [<code>game/actions</code>](#module_game/actions)  
@@ -418,18 +430,17 @@ Based on the current attacker and list of players, return the next attacker.
 | --- |
 | attacker | 
 | players | 
-| playAgain | 
+| hitShip | 
 
 <a name="module_game/actions..updateScore"></a>
 
-### game/actions~updateScore(player, hitShip, sunkShip, players) ⇒ <code>\*</code>
+### game/actions~updateScore(hitShip, sunkShip, players) ⇒ <code>\*</code>
 Update all game stats after each player round
 
 **Kind**: inner method of [<code>game/actions</code>](#module_game/actions)  
 
 | Param |
 | --- |
-| player | 
 | hitShip | 
 | sunkShip | 
 | players | 
