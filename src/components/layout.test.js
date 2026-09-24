@@ -3,7 +3,6 @@
  */
 import jsonDom from 'json-dom'
 import jDomLayout from './layout.js'
-import { logObject } from 'test-filesystem'
 
 describe('layout', () => {
   // mainMenu
