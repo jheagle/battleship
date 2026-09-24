@@ -1,4 +1,7 @@
 'use strict'
+import jsonDom from 'json-dom'
+import matrixDom from 'matrix-dom'
+import siFunciona from 'si-funciona'
 
 /**
  * A reference to all functions to be used globally / exported

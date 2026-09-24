@@ -64,8 +64,7 @@ Create a default fleet using the standard battleship lengths.
 <a name="module_game/setup..buildShip"></a>
 
 ### game/setup~buildShip(shipInfo, line, matrix, view) ⇒ <code>Object</code>
-Generate a ship with the provided line of points.
-The visibility of the ship on the board is determined by the view parameter.
+Generate a ship with the provided line of points.The visibility of the ship on the board is determined by the view parameter.
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
@@ -100,8 +99,7 @@ The visibility of the ship on the board is determined by the view parameter.
 <a name="module_game/setup..generateStartEnd"></a>
 
 ### game/setup~generateStartEnd(matrix, shipLength, startDir) ⇒ <code>Array</code>
-Get a qualifying start and direction point for a ship of specified length
-WARNING: This is a recursive function.
+Get a qualifying start and direction point for a ship of specified lengthWARNING: This is a recursive function.
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
@@ -114,8 +112,7 @@ WARNING: This is a recursive function.
 <a name="module_game/setup..generateRandomFleet"></a>
 
 ### game/setup~generateRandomFleet(ships, matrix, [view]) ⇒ <code>Array</code>
-Create a series of randomly placed ships based on the provided shipLengths.
-The optional parameter view will set the visibility of the ships.
+Create a series of randomly placed ships based on the provided shipLengths.The optional parameter view will set the visibility of the ships.
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
@@ -128,10 +125,7 @@ The optional parameter view will set the visibility of the ships.
 <a name="module_game/setup..buildPlayers"></a>
 
 ### game/setup~buildPlayers(humans, robots, players) ⇒ <code>Array</code>
-Create players and associated properties.
-Takes an integer for the number of players to generate.
-Returns an array of players.
-WARNING: This is a recursive function.
+Create players and associated properties.Takes an integer for the number of players to generate.Returns an array of players.WARNING: This is a recursive function.
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 
@@ -144,8 +138,7 @@ WARNING: This is a recursive function.
 <a name="module_game/setup..beginRound"></a>
 
 ### game/setup~beginRound(e, mainForm) ⇒ <code>boolean</code>
-Logic for setting up and starting a new round
-(selects random start player and calls computer attack if it is AI starting)
+Logic for setting up and starting a new round(selects random start player and calls computer attack if it is AI starting)
 
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
 

@@ -1,4 +1,6 @@
 'use strict'
+import jsonDom from 'json-dom'
+
 /**
  * A reference to all functions to be used globally / exported
  * @typedef {Object} gameLayout

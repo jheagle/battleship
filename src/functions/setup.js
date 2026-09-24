@@ -3,6 +3,7 @@ import siFunciona from 'si-funciona'
 import gameLayout from '../components/layout'
 import gamePieces from '../components/pieces'
 import gameUtils from './functions'
+import gameActions from './actions'
 import jDomMatrix from 'matrix-dom'
 
 /**
@@ -22,7 +23,7 @@ const gameStart = {}
  * @returns {{name: string, status: number, parts: Array}}
  */
 const buildShip = (shipInfo, line, matrix, view = false) =>
-  siFunciona.mergeObjects(
+  Object.assign(
     gamePieces.ship(shipInfo.name),
     { parts: line.map(p => gameActions.setShip(matrix, p, view)) }
   )

@@ -28,8 +28,8 @@
     "collect-your-stuff": "^2.1.2",
     "json-dom": "github:jheagle/JSON-DOM",
     "matrix-dom": "github:jheagle/matrix-DOM",
-    "pseudo-dom": "^0.14.0",
-    "si-funciona": "^2.6.1"
+    "pseudo-dom": "^0.17.0",
+    "si-funciona": "^2.7.0"
   },
   "repository": {
     "type": "git",

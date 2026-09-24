@@ -1,4 +1,6 @@
 'use strict'
+import matrixDom from 'matrix-dom'
+
 /**
  * A reference to all functions to be used globally / exported
  * @typedef (Object) gameUtils

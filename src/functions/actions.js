@@ -1,7 +1,11 @@
 import gamePieces from '../components/pieces'
+import gameLayout from '../components/layout'
+import gameUtils from './functions'
 import jsonDom from 'json-dom'
 import matrixDom from 'matrix-dom'
 import siFunciona from 'si-funciona'
+
+const queueTimeout = siFunciona.queueTimeout()
 
 /**
  * All methods exported from this module are encapsulated within gameActions.
@@ -21,7 +25,7 @@ const configureHtml = (config, isRobot) => {
   // Add any other style changes to the cell
   if (isRobot) {
     gameActions.attackFleet.isLocked = true
-    siFunciona.queueTimeout(() => {
+    queueTimeout(() => {
       if (config.isHit) {
         config.attributes.style.backgroundColor = config.hasShip ? 'red' : 'white'
       }
@@ -80,7 +84,7 @@ gameActions.setShip = (matrix, point, view) => view ? setViewShip(matrix, point.
  * @returns {*}
  */
 const updatePlayerStats = (player, status = `${Math.round(player.status * 100) / 100}%`) => {
-  player.playerStats = jsonDom.updateElements(siFunciona.mergeObjects(player.playerStats, gamePieces.playerStats(player, status)))
+  player.playerStats = jsonDom.updateElements(siFunciona.mergeObjectsMutable(player.playerStats, gamePieces.playerStats(player, status)))
   return player
 }
 
@@ -107,9 +111,9 @@ gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
     gameActions.attackFleet.isLocked = true
     if (player.attacker) {
       if (!player.isRobot) {
-        siFunciona.queueTimeout(() => {
+        queueTimeout(() => {
           gameActions.attackFleet.isLocked = false
-          return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjects(c, {
+          return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjectsMutable(c, {
             attributes: {
               style: {
                 width: '17px',
@@ -121,9 +125,9 @@ gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
       }
       ++player.turnCnt
     } else {
-      siFunciona.queueTimeout(() => {
+      queueTimeout(() => {
         gameActions.attackFleet.isLocked = false
-        return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjects(c, {
+        return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjectsMutable(c, {
           attributes: {
             style: {
               width: '35px',
@@ -187,11 +191,12 @@ const updateScore = (player, hitShip, sunkShip, players) => {
   let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
   attacker = gameActions.updatePlayer(attacker, hitShip, sunkShip)
   if (players.length < 2) {
-    return siFunciona.queueTimeout(() => endGame(players[0]), 200)
+    queueTimeout(() => endGame(players[0]), 200)
+    return players
   }
   const nextAttacker = getNextAttacker(attacker, players, hitShip)
   if (nextAttacker.isRobot) {
-    siFunciona.queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
+    queueTimeout(gameActions.computerAttack, 0, nextAttacker, players)
   }
   return players
 }
@@ -318,8 +323,8 @@ const selectTargetCoordinate = (victim) => {
  */
 const displayTargets = (targets, target, victim) => {
   return [
-    siFunciona.queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
-    siFunciona.queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
+    queueTimeout(resetTargets, 0, { targets: targets, victim: victim }),
+    queueTimeout(resetTargets, 200, { targets: targets, target: target, victim: victim })
   ]
 }
 
@@ -329,11 +334,11 @@ const displayTargets = (targets, target, victim) => {
  * @returns {void|Array|Object|*}
  */
 const resetTargets = data => {
-  data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjects(l, { attributes: { style: { borderColor: '#333' } } })))
-  data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjects(matrixDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
+  data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjectsMutable(l, { attributes: { style: { borderColor: '#333' } } })))
+  data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjectsMutable(matrixDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: '#333' } } })))
   if (!data.target) {
-    data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjects(l, { attributes: { style: { borderColor: 'yellow' } } })))
-    data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjects(matrixDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
+    data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjectsMutable(l, { attributes: { style: { borderColor: 'yellow' } } })))
+    data.targets.forEach(t => jsonDom.updateElement(siFunciona.mergeObjectsMutable(matrixDom.getDomItemFromPoint(t, data.victim.board), { attributes: { style: { borderColor: 'yellow' } } })))
   }
   return data
 }
