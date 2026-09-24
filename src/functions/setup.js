@@ -136,7 +136,7 @@ gameStart.beginRound = (e, mainForm) => {
   console.log('beginRound', e.eventPhase, e.type)
   e.preventDefault()
   const parent = jsonDom.getTopParentItem(mainForm)
-  let humans = parseInt(jsonDom.getChildrenByName('human-players', mainForm)[0].element.value)
+  const humans = parseInt(jsonDom.getChildrenByName('human-players', mainForm)[0].element.value)
   let robots = parseInt(jsonDom.getChildrenByName('robot-players', mainForm)[0].element.value)
   if (humans < 0 || humans > 100 || robots < 0 || robots > 100) {
     return false
