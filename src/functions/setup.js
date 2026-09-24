@@ -142,7 +142,6 @@ gameStart.beginRound = (e, mainForm) => {
     return false
   }
   const firstGoesFirst = jsonDom.getChildrenByName('first-go-first', mainForm)[0].element.checked
-  humans = humans < 0 ? 0 : humans
   if (humans === 0) {
     robots = robots < 2 ? 2 : robots
   }
