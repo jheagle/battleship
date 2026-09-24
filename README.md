@@ -40,8 +40,7 @@ A reference to all functions to be used globally / exported
 * [game/setup](#module_game/setup)
     * [~defaultFleet](#module_game/setup..defaultFleet) ⇒ <code>Array</code>
     * [~buildShip(shipInfo, line, matrix, view)](#module_game/setup..buildShip) ⇒ <code>Object</code>
-    * [~selectShipDirection(lengths, shipLength)](#module_game/setup..selectShipDirection)
-    * [~randomStartDir(matrix, shipLength, dir)](#module_game/setup..randomStartDir)
+    * [~selectShipDirection()](#module_game/setup..selectShipDirection)
     * [~generateStartEnd(matrix, shipLength, startDir)](#module_game/setup..generateStartEnd) ⇒ <code>Array</code>
     * [~generateRandomFleet(ships, matrix, [view])](#module_game/setup..generateRandomFleet) ⇒ <code>Array</code>
     * [~buildPlayers(humans, robots, players)](#module_game/setup..buildPlayers) ⇒ <code>Array</code>
@@ -77,25 +76,8 @@ Generate a ship with the provided line of points.The visibility of the ship on 
 
 <a name="module_game/setup..selectShipDirection"></a>
 
-### game/setup~selectShipDirection(lengths, shipLength)
+### game/setup~selectShipDirection()
 **Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
-
-| Param |
-| --- |
-| lengths | 
-| shipLength | 
-
-<a name="module_game/setup..randomStartDir"></a>
-
-### game/setup~randomStartDir(matrix, shipLength, dir)
-**Kind**: inner method of [<code>game/setup</code>](#module_game/setup)  
-
-| Param |
-| --- |
-| matrix | 
-| shipLength | 
-| dir | 
-
 <a name="module_game/setup..generateStartEnd"></a>
 
 ### game/setup~generateStartEnd(matrix, shipLength, startDir) ⇒ <code>Array</code>

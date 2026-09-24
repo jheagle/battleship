@@ -1,7 +1,6 @@
 import gameActions from './functions/actions.js'
 import gameStart from './functions/setup.js'
 import jsonDom from 'json-dom'
-import { logObject } from 'test-filesystem'
 import { isNode } from 'browser-or-node'
 
 const battleship = () => {
@@ -14,8 +13,6 @@ const battleship = () => {
     attackListener: gameActions.attackListener,
     restart: gameStart.restart
   }))
-
-  logObject(documentItem, 'Document Item')
 
   // Trigger game to start if running as a Node module. This used to check
   // `!(document instanceof HTMLDocument)`, but pseudo-dom's installGlobal (which must already have run - see below -

@@ -29,11 +29,8 @@ const buildShip = (shipInfo, line, matrix, view = false) =>
   )
 
 /**
- *
- * @param lengths
- * @param shipLength
  */
-const selectShipDirection = (shipLength) => {
+const selectShipDirection = () => {
   // Since ships can only go along a single axis, just randomly pick the one that is 1, and use 0 for the other, z is always 0
   // Using the real random direction function gets diagonals, and even we can use z-axis
   // It might be interesting to have diagonal ships in a future version, or even ships on z axis for 3d locations (submarines?)
@@ -41,13 +38,6 @@ const selectShipDirection = (shipLength) => {
   const dirY = dirX === 0 ? 1 : 0
   return jDomMatrix.direction(dirX, dirY, 0)
 }
-/**
- *
- * @param matrix
- * @param shipLength
- * @param dir
- */
-const randomStartDir = (matrix, shipLength, dir) => jsonDom.randomStart(matrix, shipLength, dir)
 
 /**
  * Get a qualifying start and direction point for a ship of specified length

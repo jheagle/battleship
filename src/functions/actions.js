@@ -138,8 +138,8 @@ gameActions.updatePlayer = (player, playAgain, sunkShip = 0) => {
       }, 0)
     }
   }
-  const result = siFunciona.queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
-  return result.result || player
+  queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
+  return player
 }
 
 /**
@@ -152,8 +152,7 @@ const endGame = (winner) => {
   const players = winner.parentItem.children
   players.map(player => updatePlayerStats(player))
   winner = updatePlayerStats(winner, 'WINNER')
-  const finalScore = jsonDom.renderHtml(gameLayout.finalScore(players), parent.body)
-  finalScore.children[0].children.map(child => child.attributes.innerHTML)
+  jsonDom.renderHtml(gameLayout.finalScore(players), parent.body)
   return [winner]
 }
 
