@@ -74,6 +74,9 @@ export const playToTheEnd = async (limit = 600) => {
  * Call once at the top of a test file.
  */
 export const useGameLifecycle = () => {
+  // A whole robot game is played inside some of these tests: about 2-3 seconds, which is half of Jest's default 5 seconds
+  // even on an idle machine, so a busy one made them time out now and then.
+  jest.setTimeout(60000)
   beforeEach(() => {
     jest.useFakeTimers()
     jest.spyOn(console, 'log').mockImplementation(() => {})
