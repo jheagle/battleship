@@ -13,7 +13,7 @@ useGameLifecycle()
 
 describe('the entry point', () => {
   test('in Node the game starts by itself: the menu is submitted for you and two robots play', async () => {
-    const battleship = require('./main.js').default
+    const battleship = require('./main').default
     battleship()
     expect(document.querySelector('.main-menu')).toBeNull()
     expect(document.querySelectorAll('.player')).toHaveLength(2)
@@ -23,7 +23,7 @@ describe('the entry point', () => {
   test('in a browser the menu waits for the player', () => {
     jest.isolateModules(() => {
       jest.doMock('browser-or-node', () => ({ isNode: false }))
-      const battleship = require('./main.js').default
+      const battleship = require('./main').default
       battleship()
     })
     expect(document.querySelector('.main-menu')).not.toBeNull()

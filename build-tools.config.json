@@ -2,10 +2,17 @@
   "browser": {
     "name": "battleship"
   },
+  "readme": {
+    "from": "dist/**/!(*.min).js"
+  },
   "sass": {
     "enabled": true,
     "from": "sass/*.+(scss|sass)",
     "path": "sass",
     "to": "browser/css"
+  },
+  "typescript": {
+    "config": "tsconfig.json",
+    "enabled": true
   }
 }
