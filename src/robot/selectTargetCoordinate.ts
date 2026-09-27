@@ -8,16 +8,17 @@ import getAdjEdgeNonHitCells from '../utils/getAdjEdgeNonHitCells'
 import getAllNonHitCells from '../utils/getAllNonHitCells'
 import getBrokenItems from '../utils/getBrokenItems'
 import numDamagedParts from '../utils/numDamagedParts'
+import type { Point } from 'matrix-dom/dist/point/types'
+import type { Player, Tile } from '../types'
 
 /**
  * Choose which coordinate to attack.
  * @param victim
- * @returns {*}
  */
-const selectTargetCoordinate = (victim) => {
+const selectTargetCoordinate = (victim: Player): Tile | false => {
   // Try to get broken ships
   const brokenShips = getBrokenItems(victim.shipFleet)
-  let availTargets = []
+  let availTargets: Point[] = []
   if (brokenShips.length) {
     // If there are broken ships, target those first, select the most broken ships (more than one damaged part)
     const moreBrokenShips = brokenShips.filter(ship => numDamagedParts(ship.parts.length, ship.status) > 1)
@@ -31,7 +32,7 @@ const selectTargetCoordinate = (victim) => {
         const targetPoints = matrixDom.testPointsBetween(hitParts[0].point, hitParts[i].point, victim.board, checkIfHitCell, false)
         if (targetPoints.false.length) {
           displayTargets(targetPoints.false, targetPoints.false[0], victim)
-          return matrixDom.getDomItemFromPoint(targetPoints.false[0], victim.board)
+          return matrixDom.getDomItemFromPoint(targetPoints.false[0], victim.board) as Tile | false
         }
       }
       // If there are no points between, attack the outer points first.
@@ -41,7 +42,7 @@ const selectTargetCoordinate = (victim) => {
       const target = dirPnts.reduce((a, b) => checkIfHitCell(a, victim.board) ? b : a)
       if (target) {
         displayTargets(dirPnts, target, victim)
-        return matrixDom.getDomItemFromPoint(target, victim.board)
+        return matrixDom.getDomItemFromPoint(target, victim.board) as Tile | false
       }
     }
     // If there is only one hit part, then set that as the lastTarget for detecting adjacent parts.
@@ -50,9 +51,8 @@ const selectTargetCoordinate = (victim) => {
   const finalTargets = availTargets.length ? availTargets : getAllNonHitCells(victim.board).filter(t => filterAdjacentPoints(t))
   const target = finalTargets[siFunciona.randomInteger(finalTargets.length)]
   displayTargets(finalTargets, target, victim)
-
   // If there are available targets then hit one at random
-  return matrixDom.getDomItemFromPoint(target, victim.board)
+  return matrixDom.getDomItemFromPoint(target, victim.board) as Tile | false
 }
 
 export default selectTargetCoordinate
