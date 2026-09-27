@@ -1,12 +1,12 @@
 import jsonDom from 'json-dom'
+import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { Player } from '../../types'
 
 /**
  * Display the final scores after a game has ended and have a button to restart.
- * @function finalScore
- * @param {Array} players
- * @returns {module:jDom/core/dom/objects.DomItem}
+ * @param players
  */
-const finalScore = (players = []) => jsonDom.createDomItem({
+const finalScore = (players: Player[] = []): DomItem => jsonDom.createDomItem({
   nodeName: 'div',
   attributes: {
     className: 'final-scores'

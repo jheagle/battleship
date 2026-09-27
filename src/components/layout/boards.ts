@@ -1,12 +1,12 @@
 import jsonDom from 'json-dom'
+import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { Player } from '../../types'
 
 /**
  * Wrapper div for player data / boards
- * @function boards
- * @param {Array} [players=[]]
- * @returns {module:jDom/core/dom/objects.DomItem}
+ * @param players
  */
-const boards = (players = []) => jsonDom.createDomItem({
+const boards = (players: Player[] = []): DomItem => jsonDom.createDomItem({
   nodeName: 'div',
   attributes: {
     className: 'boards'

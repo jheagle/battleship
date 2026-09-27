@@ -1,11 +1,10 @@
 import jsonDom from 'json-dom'
+import type { DomItem } from 'json-dom/dist/domItem/types'
 
 /**
  * This will be the main menu for the game.
- * @function mainMenu
- * @returns {module:jDom/core/dom/objects.DomItem}
  */
-const mainMenu = () => jsonDom.createDomItem({
+const mainMenu = (): DomItem => jsonDom.createDomItem({
   nodeName: 'div',
   attributes: {
     className: 'main-menu'
