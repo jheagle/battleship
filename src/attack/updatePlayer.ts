@@ -3,15 +3,16 @@ import siFunciona from 'si-funciona'
 import attackLock from './attackLock'
 import queueTimeout from '../queue'
 import updatePlayerStats from './updatePlayerStats'
+import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { Player } from '../types'
 
 /**
  * Track player stats such as attacks and turns
- * @function updatePlayer
  * @param player
  * @param hitShip
  * @param sunkShip
  */
-const updatePlayer = (player, hitShip, sunkShip = 0) => {
+const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): Player => {
   if (player.attacker) {
     if (hitShip) {
       ++player.attacks.hit
@@ -40,7 +41,7 @@ const updatePlayer = (player, hitShip, sunkShip = 0) => {
               height: '17px'
             }
           }
-        })))))
+        }) as DomItem))))
       }, 400)
     }
     ++player.turnCnt
@@ -54,7 +55,7 @@ const updatePlayer = (player, hitShip, sunkShip = 0) => {
             height: '35px'
           }
         }
-      })))))
+      }) as DomItem))))
     }, 0)
   }
   queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)

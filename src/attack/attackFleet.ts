@@ -4,24 +4,23 @@ import attackLock from './attackLock'
 import setHit from '../cells/setHit'
 import updatePlayerStats from './updatePlayerStats'
 import updateScore from './updateScore'
+import type { Player, Ship, Tile } from '../types'
 
 /**
  * Perform attack on an enemy board / cell
- * @function attackFleet
  * @param target
- * @returns {*}
  */
-const attackFleet = (target) => {
+const attackFleet = (target: Tile): Player[] => {
   attackLock.isLocked = attackLock.isLocked || false
-  let player = jsonDom.getParentsByClass('player', target)[0]
-  const players = jsonDom.getParentsByClass('boards', target)[0].children
+  let player = jsonDom.getParentsByClass('player', target)[0] as Player
+  const players = jsonDom.getParentsByClass('boards', target)[0].children as Player[]
   // Player cannot attack themselves (current attacker), if they have bad status, or a cell which was already hit
   if (player.status <= 0 || player.attacker || attackLock.isLocked || target.isHit) {
     return players
   }
   // Update cell to hit
   const hitCell = setHit(player.board, target.point.x, target.point.y, target.point.z, players.reduce((p1, p2) => p1.attacker ? p1 : p2).isRobot)
-  let hitShip = false
+  let hitShip: Ship | false = false
   let sunkShip = 0
   if (hitCell.hasShip) {
     let status = 0
@@ -44,9 +43,11 @@ const attackFleet = (target) => {
     player.status = status / player.shipFleet.length
   }
   if (hitShip) {
+    // TS cannot track the reassignment inside the map() callback above, hitShip is really a Ship here
+    const theHitShip = hitShip as unknown as Ship
     player = updatePlayerStats(player, `${Math.round(player.status * 100) / 100}%`)
     // Check if the hit ship was sunk
-    sunkShip = hitShip.status <= 0 ? hitShip.parts.length : 0
+    sunkShip = theHitShip.status <= 0 ? theHitShip.parts.length : 0
   }
   return updateScore(hitCell.hasShip, sunkShip, players)
 }

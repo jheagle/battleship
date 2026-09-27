@@ -3,15 +3,15 @@ import endGame from './endGame'
 import getNextAttacker from './getNextAttacker'
 import queueTimeout from '../queue'
 import updatePlayer from './updatePlayer'
+import type { Player } from '../types'
 
 /**
  * Update all game stats after each player round
  * @param hitShip
  * @param sunkShip
  * @param players
- * @returns {*}
  */
-const updateScore = (hitShip, sunkShip, players) => {
+const updateScore = (hitShip: boolean, sunkShip: number, players: Player[]): Player[] => {
   players = players.filter((p) => p.status > 0)
   let attacker = players.reduce((p1, p2) => p1.attacker ? p1 : p2)
   attacker = updatePlayer(attacker, hitShip, sunkShip)
