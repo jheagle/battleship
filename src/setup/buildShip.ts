@@ -1,5 +1,7 @@
 import setShip from '../cells/setShip'
 import ship from '../components/pieces/ship'
+import type { Point } from 'matrix-dom/dist/point/types'
+import type { Board, Ship, ShipSpec } from '../types'
 
 /**
  * Generate a ship with the provided line of points.
@@ -8,9 +10,8 @@ import ship from '../components/pieces/ship'
  * @param line
  * @param matrix
  * @param view
- * @returns {{name: string, status: number, parts: Array}}
  */
-const buildShip = (shipInfo, line, matrix, view = false) =>
+const buildShip = (shipInfo: ShipSpec, line: Point[], matrix: Board, view: boolean = false): Ship =>
   Object.assign(
     ship(shipInfo.name),
     { parts: line.map(p => setShip(matrix, p, view)) }
