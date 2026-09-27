@@ -1,11 +1,10 @@
 import getBrokenItems from './getBrokenItems'
+import type { Player } from '../types'
 
 /**
  * Return all of the players which have broken ships.
- * @function getBrokenShipsPlayers
  * @param players
- * @returns {Array}
  */
-const getBrokenShipsPlayers = players => players.filter(p => getBrokenItems(p.shipFleet).length)
+const getBrokenShipsPlayers = (players: Player[]): Player[] => players.filter(p => getBrokenItems(p.shipFleet).length)
 
 export default getBrokenShipsPlayers
