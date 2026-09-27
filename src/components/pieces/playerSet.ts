@@ -1,11 +1,13 @@
+import type { Board, Player } from '../../types'
+
 /**
- * Store the player attributes.
- * @function playerSet
- * @param {Object} board
- * @param {string} name
- * @returns {Object}
+ * Store the player attributes. board and shipFleet start as placeholders (an empty object, an empty array); they are
+ * given their real values once the board is built (see buildPlayers).
+ * @param board
+ * @param name
  */
-const playerSet = (board = {}, name = '') => ({
+const playerSet = (board: Board | Record<string, never> = {}, name: string = ''): Player => ({
+  has: { 'battleship.player': true },
   name,
   isRobot: false,
   status: 100,
@@ -22,6 +24,6 @@ const playerSet = (board = {}, name = '') => ({
   children: [
     board
   ]
-})
+}) as unknown as Player
 
 export default playerSet

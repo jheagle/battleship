@@ -1,10 +1,10 @@
+import type { Ship } from '../../types'
+
 /**
  * Store properties of a ship which includes an array of all associated ship tiles.
- * @function ship
- * @param {string} name
- * @returns {{name: string, status: number, parts: Array}}
+ * @param name
  */
-const ship = (name = '') => ({
+const ship = (name: string = ''): Ship => ({
   name,
   status: 100,
   parts: []

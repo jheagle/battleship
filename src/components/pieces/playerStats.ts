@@ -1,11 +1,12 @@
+import type { DomItemConfig } from 'json-dom/dist/domItem/types'
+import type { Player } from '../../types'
+
 /**
  * The defined attributes for each player
- * @function playerStats
- * @param {Object} [player={}]
- * @param {Object} [status=]
- * @returns {Object}
+ * @param player
+ * @param status
  */
-const playerStats = (player = {}, status = '') => ({
+const playerStats = (player: Player, status: string = ''): DomItemConfig => ({
   nodeName: 'div',
   attributes: {},
   children: [

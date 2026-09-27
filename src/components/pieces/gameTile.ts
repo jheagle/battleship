@@ -1,12 +1,13 @@
 import jsonDom from 'json-dom'
+import type { Tile } from '../../types'
 
 /**
  * Default properties for a tile in the battleship game.
- * @returns {module:jDom/core/dom/objects.DomItem}
  */
-const gameTile = () => jsonDom.createDomItem({
+const gameTile = (): Tile => jsonDom.createDomItem({
+  has: { 'battleship.tile': true },
   hasShip: false,
   isHit: false
-})
+}) as unknown as Tile
 
 export default gameTile
