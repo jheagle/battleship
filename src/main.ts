@@ -5,11 +5,8 @@ import startMenu from './setup/startMenu'
 import jsonDom from 'json-dom'
 import { isNode } from 'browser-or-node'
 
-const battleship = () => {
-  /**
-   * Create new private reference to the document
-   * @typedef {module:jDom/core/dom/objects.documentItem} documentItem
-   */
+const battleship = (): void => {
+  // Create new private reference to the document
   const documentItem = startMenu(jsonDom.documentDomItem({
     beginRound,
     attackListener,
@@ -24,7 +21,7 @@ const battleship = () => {
   if (isNode) {
     const form = jsonDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
     const submitBtn = jsonDom.getChildrenFromAttribute('type', 'submit', form)
-    submitBtn[0].element.click()
+    ;(submitBtn[0].element as HTMLElement).click()
   }
 }
 
