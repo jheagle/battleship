@@ -1,6 +1,7 @@
 import 'core-js/stable'
 import jsonDom from 'json-dom'
 import type { DomItem, WithTraits } from 'json-dom/dist/domItem/types'
+import type hasTraitType from 'json-dom/dist/domItem/traits/hasTrait'
 import type { Matrix, MatrixColumn } from 'matrix-dom/dist/grid/types'
 
 /**
@@ -29,7 +30,7 @@ declare module 'json-dom/dist/domItem/types' {
 /**
  * The typed version of json-dom's hasTrait, it narrows an item to the trait it was checked for.
  */
-export const hasTrait: typeof jsonDom.hasTrait = jsonDom.hasTrait
+export const hasTrait: typeof hasTraitType = jsonDom.hasTrait
 
 jsonDom.defineTrait('battleship.tile', { keys: ['hasShip', 'isHit'] })
 jsonDom.defineTrait('battleship.player', { keys: ['name', 'isRobot', 'status', 'turnCnt', 'attacker', 'attacks', 'board', 'shipFleet', 'playerStats'] })
@@ -57,3 +58,9 @@ export interface Ship {
 
 /** A player: their board, fleet, stats panel and turn state, rendered as an item in the tree. */
 export type Player = DomItem & WithTraits<'battleship.player'>
+
+/** The name and length of a ship, before it has been placed on a board. */
+export interface ShipSpec {
+  name: string
+  size: number
+}
