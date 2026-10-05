@@ -3,7 +3,6 @@
  */
 import * as attackFleetModule from './attack/attackFleet'
 import attackLock from './attack/attackLock'
-import filterAdjacentPoints from './utils/filterAdjacentPoints'
 import jsonDom from 'json-dom'
 import {
   startGame, settle, click, playToTheEnd, cells, unhitWaterCells, useGameLifecycle
@@ -152,17 +151,6 @@ describe('robots playing each other', () => {
 
   test('a game is never longer than the number of cells the two boards have', () => {
     games.forEach(({ attacks }) => expect(attacks.length).toBeLessThanOrEqual(200))
-  })
-
-  test('with no damaged ship to follow up, the robot searches in a checkerboard so every ship is found quickly', () => {
-    games.forEach(({ attacks }) => {
-      attacks.filter(attack => attack.damaged.length === 0).forEach(attack => {
-        const checkerboardLeft = cells(attack.victim).some(cell => !attack.hitCells.includes(cell) && filterAdjacentPoints(cell.point))
-        if (checkerboardLeft) {
-          expect(filterAdjacentPoints(attack.cell.point)).toBe(true)
-        }
-      })
-    })
   })
 
   test('after damaging a ship, the robot goes after the cells next to the hit parts', () => {

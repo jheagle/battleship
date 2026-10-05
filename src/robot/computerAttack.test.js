@@ -5,6 +5,8 @@
 import { useGameLifecycle, startGame, settle, hitCells } from '../../tests/helpers/game'
 import attackLock from '../attack/attackLock'
 import computerAttack from './computerAttack'
+import { buildShotState } from './densityTargets'
+import { bestTargets, scoreTargets } from './densityScores'
 
 useGameLifecycle()
 
@@ -69,6 +71,19 @@ describe('the robot\'s targeting', () => {
       const [hit] = newlyHit(victim, before)
       const { x, y } = ship.parts[2].point
       expect(Math.abs(hit.point.x - x) + Math.abs(hit.point.y - y)).toBe(1)
+      await settle(20000)
+    }
+  })
+
+  test('with no damage, it attacks one of the cells the density model rates highest', async () => {
+    for (let game = 0; game < 12; game++) {
+      const { players, robot } = await setUp()
+      const victim = players.find(player => player !== robot)
+      const best = bestTargets(scoreTargets(buildShotState(victim))).map(key)
+      const before = hitCells(victim)
+      computerAttack(robot, players)
+      const [hit] = newlyHit(victim, before)
+      expect(best).toContain(key(hit.point))
       await settle(20000)
     }
   })
