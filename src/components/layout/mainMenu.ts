@@ -41,6 +41,7 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
             submit: listener('beginRound')
           },
           children: [
+            { nodeName: 'button', attributes: { className: 'lobby-back', type: 'button', innerHTML: 'Back' }, eventListeners: { click: listener('presetListener') } },
             {
               nodeName: 'h2',
               attributes: {
@@ -86,21 +87,28 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
               ]
             },
             {
-              nodeName: 'label',
+              nodeName: 'div',
               attributes: {
-                for: 'first-go-first',
-                innerText: 'First Player Starts'
-              }
+                className: 'form-group'
+              },
+              children: [
+                {
+                  nodeName: 'label',
+                  attributes: {
+                    for: 'first-go-first',
+                    innerText: 'First Player Starts'
+                  }
+                },
+                {
+                  nodeName: 'input',
+                  attributes: {
+                    id: 'first-go-first',
+                    name: 'first-go-first',
+                    type: 'checkbox'
+                  }
+                }
+              ]
             },
-            {
-              nodeName: 'input',
-              attributes: {
-                id: 'first-go-first',
-                name: 'first-go-first',
-                type: 'checkbox'
-              }
-            },
-            { nodeName: 'button', attributes: { className: 'lobby-back', type: 'button', innerHTML: 'Back' }, eventListeners: { click: listener('presetListener') } },
             {
               nodeName: 'input',
               attributes: {
