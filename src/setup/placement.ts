@@ -23,6 +23,7 @@ interface Session {
   start: Point | null
   panel: DomItem
   done: () => void
+  ready: boolean
 }
 
 let session: Session | null = null
@@ -56,8 +57,18 @@ export const startPlacement = (players: Player[], body: DomItem, done: () => voi
     return
   }
   const panel = jsonDom.renderHtml(jsonDom.createDomItem(placementPanel()), body) as unknown as DomItem
-  session = { players, humans, index: 0, pending: [], start: null, panel, done }
+  session = { players, humans, index: 0, pending: [], start: null, panel, done, ready: false }
+  setStatsShown(players, false)
   showHandoff()
+}
+
+/**
+ * Show or hide every player's stats (health, and the hint checkbox), which are not wanted during placement.
+ * @param players
+ * @param shown
+ */
+const setStatsShown = (players: Player[], shown: boolean): void => {
+  players.forEach(p => update(p.playerStats as DomItem, { style: { display: shown ? '' : 'none' } }))
 }
 
 const setMessage = (text: string): void => update(child(active().panel, 'placement-message'), { innerHTML: text })
@@ -87,8 +98,14 @@ const showPlacing = (): void => {
   setButtons({ continueShown: false, placingShown: true, doneEnabled: !active().pending.length })
 }
 
-/** Start placing for the current player: every ship still to go. */
+/**
+ * Continue: from a handoff it starts that player's placement; from the ready screen it starts the round.
+ */
 export const continueTurn = (): void => {
+  if (active().ready) {
+    startRound()
+    return
+  }
   active().pending = [...defaultShipSpecs]
   active().start = null
   showPlacing()
@@ -174,21 +191,42 @@ const hideShips = (player: Player): void => {
 }
 
 /**
- * The player is happy with their fleet: the next human places, or, after the last, the round starts.
+ * Every human has placed: hide every board (and so its ships), then ask all players to confirm they are ready. The
+ * ships are cleared only now, while no board is showing, so they cannot be seen fading out.
+ */
+const showReady = (): void => {
+  showOnly(null)
+  active().humans.forEach(hideShips)
+  active().ready = true
+  setMessage('All players are ready. Press Continue to start the round.')
+  setButtons({ continueShown: true, placingShown: false })
+}
+
+/**
+ * The round starts: every board and its stats are shown, and the placement panel goes.
+ */
+const startRound = (): void => {
+  const { done, players, panel } = active()
+  update(panel, { style: { display: 'none' } })
+  players.forEach(p => update(p as unknown as DomItem, { style: { display: '' } }))
+  setStatsShown(players, true)
+  session = null
+  done()
+}
+
+/**
+ * The player is happy with their fleet: the next human places, or, after the last, everyone is asked to confirm.
  */
 export const finishTurn = (): void => {
   if (active().pending.length) {
     return
   }
-  hideShips(current())
+  const finished = current()
   if (active().index + 1 < active().humans.length) {
     active().index++
     showHandoff()
+    hideShips(finished)
     return
   }
-  const { done, players, panel } = active()
-  update(panel, { style: { display: 'none' } })
-  players.forEach(p => update(p as unknown as DomItem, { style: { display: '' } }))
-  session = null
-  done()
+  showReady()
 }

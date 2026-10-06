@@ -92,7 +92,16 @@ describe('the placement phase', () => {
     expect(first.shipFleet).toHaveLength(0)
   })
 
-  test('after the last player is done, the placement panel goes and the round starts', async () => {
+  test('stats are hidden during placement', async () => {
+    const [first, second] = await setUp()
+    expect(first.playerStats.element.style.display).toBe('none')
+    expect(second.playerStats.element.style.display).toBe('none')
+    button('placement-continue').click()
+    button('placement-randomise').click()
+    expect(first.playerStats.element.style.display).toBe('none')
+  })
+
+  test('after the last player is done, everyone is asked to confirm, with no board or ship showing', async () => {
     const [first, second] = await setUp()
     button('placement-continue').click()
     button('placement-randomise').click()
@@ -100,9 +109,28 @@ describe('the placement phase', () => {
     button('placement-continue').click()
     button('placement-randomise').click()
     button('placement-done').click()
+    expect(panel().style.display).not.toBe('none')
+    expect(message()).toContain('All players are ready')
+    expect(first.element.style.display).toBe('none')
+    expect(second.element.style.display).toBe('none')
+    first.shipFleet.forEach(ship => ship.parts.forEach(part => {
+      expect(matrixDom.getDomItemFromPoint(part.point, first.board).element.style.backgroundColor).toBe('')
+    }))
+  })
+
+  test('Continue on the ready screen starts the round, with every board and stats shown', async () => {
+    const [first, second] = await setUp()
+    button('placement-continue').click()
+    button('placement-randomise').click()
+    button('placement-done').click()
+    button('placement-continue').click()
+    button('placement-randomise').click()
+    button('placement-done').click()
+    button('placement-continue').click()
     expect(panel().style.display).toBe('none')
     expect(first.element.style.display).toBe('')
     expect(second.element.style.display).toBe('')
+    expect(first.playerStats.element.style.display).toBe('')
     expect(first.attacker || second.attacker).toBe(true)
   })
 
