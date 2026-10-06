@@ -7,6 +7,7 @@ import playerStats from './playerStats'
 describe('playerStats', () => {
   const player = {
     name: 'Player 1',
+    colour: '#ff6b6b',
     shipFleet: [
       { name: 'Aircraft Carrier', status: 80, parts: [1, 2, 3, 4, 5] },
       { name: 'Destroyer', status: 100 / 3, parts: [1, 2] }
@@ -17,7 +18,7 @@ describe('playerStats', () => {
 
   test('shows the player name and status, then a line for every ship', () => {
     const stats = playerStats(player, '90%')
-    expect(stats.children[0].attributes.innerHTML).toBe('<strong>Player 1</strong>: 90%')
+    expect(stats.children[0].attributes.innerHTML).toBe('<strong style="color: #ff6b6b">Player 1</strong>: 90%')
     expect(shipList(stats).children).toHaveLength(2)
   })
 

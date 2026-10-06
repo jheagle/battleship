@@ -16,6 +16,8 @@ declare module 'json-dom/dist/domItem/types' {
     'battleship.player': {
       name: string
       isRobot: boolean
+      /** The colour this player is identified by on the boards. */
+      colour: string
       status: number
       turnCnt: number
       attacker: boolean

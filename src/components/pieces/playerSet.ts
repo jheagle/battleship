@@ -10,6 +10,7 @@ const playerSet = (board: Board | Record<string, never> = {}, name: string = '')
   has: { 'battleship.player': true },
   name,
   isRobot: false,
+  colour: '',
   status: 100,
   turnCnt: 0,
   attacker: false,

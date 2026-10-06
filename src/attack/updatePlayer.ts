@@ -43,8 +43,12 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
   } else {
     queueTimeout(() => { attackLock.isLocked = false }, 0)
   }
-  // Every board keeps its size. The player whose turn it is gets a highlight on their panel instead
-  queueTimeout(() => jsonDom.updateElement(siFunciona.mergeObjectsMutable(player, { attributes: { style: { borderColor: player.attacker ? 'yellow' : 'transparent' } } }) as DomItem), 0)
+  // Every board keeps its size. The player whose turn it is is marked with a yellow outline on their panel. The players
+  // they can attack glow in that player's colour, so the target is clear
+  queueTimeout(() => {
+    jsonDom.updateElement(siFunciona.mergeObjectsMutable(player, { attributes: { style: { outline: player.attacker ? '3px solid yellow' : 'none' } } }) as DomItem)
+    victimsOf(player).forEach(victim => jsonDom.updateElement(siFunciona.mergeObjectsMutable(victim, { attributes: { style: { 'box-shadow': player.attacker ? `0 0 0 6px ${player.colour}` : 'none' } } }) as DomItem))
+  }, 0)
   queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
   return player
 }
