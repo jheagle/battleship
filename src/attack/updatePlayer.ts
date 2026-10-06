@@ -3,6 +3,7 @@ import siFunciona from 'si-funciona'
 import attackLock from './attackLock'
 import queueTimeout from '../queue'
 import updatePlayerStats from './updatePlayerStats'
+import { clearHeatHint, showHeatHint, victimsOf } from './heatHint'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
 
@@ -30,6 +31,10 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
   // }
   player.attacker = !player.attacker
   attackLock.isLocked = true
+  // A human's heat-map hint shows on the boards they attack for the length of their turn
+  if (!player.isRobot && player.showHint) {
+    queueTimeout(() => victimsOf(player).forEach(victim => player.attacker ? showHeatHint(victim) : clearHeatHint(victim)), 0)
+  }
   if (player.attacker) {
     if (!player.isRobot) {
       queueTimeout(() => {

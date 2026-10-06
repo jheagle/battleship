@@ -1,4 +1,5 @@
 import attackListener from './attack/attackListener'
+import hintListener from './attack/hintListener'
 import beginRound from './setup/beginRound'
 import restart from './setup/restart'
 import startMenu from './setup/startMenu'
@@ -10,6 +11,7 @@ const battleship = (): void => {
   const documentItem = startMenu(jsonDom.documentDomItem({
     beginRound,
     attackListener,
+    hintListener,
     restart
   }))
 
