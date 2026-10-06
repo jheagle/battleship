@@ -7,7 +7,7 @@ import { densityChoices } from './densityTargets'
 import type { Player, Tile } from '../types'
 
 /**
- * Choose which coordinate to attack, in layers: the density model first, then the follow-up on broken ships, then the
+ * Choose which coordinate to attack, in layers: the density model first then the
  * checkerboard over every unattacked cell. The highest-rated density cells are what gets displayed, so the choice can
  * be seen before the checkerboard tie-break narrows it.
  * @param victim
