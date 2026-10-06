@@ -102,7 +102,7 @@ WARNING: This is a recursive function.</p>
 <dd><p>Choose which player to attack.</p>
 </dd>
 <dt><a href="#selectTargetCoordinate">selectTargetCoordinate(victim)</a></dt>
-<dd><p>Choose which coordinate to attack, in layers: the density model first, then the follow-up on broken ships, then the
+<dd><p>Choose which coordinate to attack, in layers: the density model first then the
 checkerboard over every unattacked cell. The highest-rated density cells are what gets displayed, so the choice can
 be seen before the checkerboard tie-break narrows it.</p>
 </dd>
@@ -470,7 +470,7 @@ Choose which player to attack.
 <a name="selectTargetCoordinate"></a>
 
 ## selectTargetCoordinate(victim)
-Choose which coordinate to attack, in layers: the density model first, then the follow-up on broken ships, then the
+Choose which coordinate to attack, in layers: the density model first then the
 checkerboard over every unattacked cell. The highest-rated density cells are what gets displayed, so the choice can
 be seen before the checkerboard tie-break narrows it.
 
