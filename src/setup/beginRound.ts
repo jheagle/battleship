@@ -4,6 +4,7 @@ import boards from '../components/layout/boards'
 import buildPlayers from './buildPlayers'
 import computerAttack from '../robot/computerAttack'
 import updatePlayer from '../attack/updatePlayer'
+import { startPlacement } from './placement'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
 
@@ -34,11 +35,20 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
   }
   jsonDom.removeChild(parent.body, jsonDom.getChildrenByClass('main-menu', parent.body)[0])
   const players = jsonDom.renderHtml(boards(buildPlayers(humans, robots)), parent.body).children as Player[]
+  startPlacement(players, parent.body, () => startRound(players, firstGoesFirst))
+  return false
+}
+
+/**
+ * Pick the first attacker, and let a robot start if it is one.
+ * @param players
+ * @param firstGoesFirst
+ */
+const startRound = (players: Player[], firstGoesFirst: boolean): void => {
   const firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[siFunciona.randomInteger(players.length)])
   if (firstAttacker.isRobot) {
     computerAttack(firstAttacker, players)
   }
-  return false
 }
 
 export default beginRound

@@ -4,6 +4,7 @@ import beginRound from '../../src/setup/beginRound'
 import restart from '../../src/setup/restart'
 import attackListener from '../../src/attack/attackListener'
 import hintListener from '../../src/attack/hintListener'
+import placementListener from '../../src/setup/placementListener'
 import attackLock from '../../src/attack/attackLock'
 import waterTile from '../../src/components/pieces/waterTile'
 import jDomMatrix from 'matrix-dom'
@@ -23,11 +24,12 @@ export const settle = (ms = 5000) => jest.advanceTimersByTimeAsync(ms)
  * @param {boolean} [options.firstGoesFirst=true] Player 1 attacks first instead of a random player
  * @returns {{doc: Object, players: Array}}
  */
-export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true } = {}) => {
+export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true, placing = false } = {}) => {
   const doc = startMenu(jsonDom.documentDomItem({
     beginRound,
     attackListener,
     hintListener,
+    placementListener,
     restart
   }))
   const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]
@@ -35,7 +37,30 @@ export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true } = {}
   jsonDom.getChildrenByName('robot-players', form)[0].element.value = String(robots)
   jsonDom.getChildrenByName('first-go-first', form)[0].element.checked = firstGoesFirst
   jsonDom.getChildrenFromAttribute('type', 'submit', form)[0].element.click()
+  if (!placing) {
+    randomlyPlaceAllHumans()
+  }
   return { doc, players: getPlayers(doc) }
+}
+
+/**
+ * Let every human's placement phase finish by randomising their fleet, as a player who does not want to place by hand
+ * would. Tests of the placement itself pass placing: true to startGame and drive the buttons themselves.
+ */
+export const randomlyPlaceAllHumans = () => {
+  for (let i = 0; i < 20; i++) {
+    const panel = document.querySelector('.placement')
+    if (!panel || panel.style.display === 'none') {
+      return
+    }
+    const next = name => document.querySelector(`.${name}`)
+    if (next('placement-continue').style.display !== 'none') {
+      next('placement-continue').click()
+    } else {
+      next('placement-randomise').click()
+      next('placement-done').click()
+    }
+  }
 }
 
 export const getPlayers = doc => (jsonDom.getChildrenByClass('boards', doc.body)[0] || { children: [] }).children

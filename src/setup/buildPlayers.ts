@@ -30,7 +30,8 @@ const buildPlayers = (humans: number, robots: number = 0, players: Player[] = []
       }
     }
   }, 10))
-  player.shipFleet = defaultFleet(player.board, false) // generate fleet of ships
+  // Robots get a random fleet now. Humans place their own during the placement phase (see placement.ts)
+  player.shipFleet = player.isRobot ? defaultFleet(player.board, false) : []
   // playerStats is a plain config at this point; it becomes a real item once the player is rendered (see beginRound)
   player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`) as unknown as DomItem
   player.children = [player.board, player.playerStats]
