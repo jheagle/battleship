@@ -30,7 +30,7 @@
       color: green
       border-bottom: .4rem solid green
 
-  .form-group
+  .form-group, .human-group
     width: 50%
     display: inline-block
     margin: 1rem auto
@@ -65,3 +65,44 @@
       margin: 1rem
       color: white
       font-size: 1.6rem
+
+.presets
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr))
+  gap: 2rem
+  max-width: 90rem
+  margin: 4rem auto 3rem
+  padding: 3rem 2rem 0
+
+  button
+    font-size: 1.8rem
+    font-weight: 700
+    min-height: 9rem
+    padding: 1.5rem 2rem
+    border: none
+    border-radius: .8rem
+    background-color: white
+    color: #333
+    cursor: pointer
+
+    &:hover
+      color: green
+
+.main-menu-form
+  h2
+    color: white
+    text-align: center
+
+  .lobby-back
+    float: left
+    font-size: 1.4rem
+    margin: 0 0 1rem
+    padding: .4rem 1.2rem
+    border: none
+    border-radius: .4rem
+    background-color: white
+    color: #333
+    cursor: pointer
+
+    &:hover
+      color: green

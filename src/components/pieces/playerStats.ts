@@ -1,3 +1,4 @@
+import { getHintSetting } from '../../setup/gameOptions'
 import type { DomItemConfig } from 'json-dom/dist/domItem/types'
 import type { Player } from '../../types'
 
@@ -16,7 +17,7 @@ const playerStats = (player: Player, status: string = ''): DomItemConfig => ({
         innerHTML: `<strong style="color: ${player.colour}">${player.name}</strong>: ${status}`
       }
     },
-    ...(player.isRobot ? [] : [{
+    ...(player.isRobot || getHintSetting() !== 'optional' ? [] : [{
       nodeName: 'label',
       attributes: {},
       children: [
