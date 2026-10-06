@@ -5,7 +5,7 @@ import buildPlayers from './buildPlayers'
 import computerAttack from '../robot/computerAttack'
 import updatePlayer from '../attack/updatePlayer'
 import { startPlacement } from './placement'
-import { setHintSetting } from './gameOptions'
+import { getGameMode, setHintSetting } from './gameOptions'
 import type { HintSetting } from './gameOptions'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
@@ -27,6 +27,11 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
   let robots = parseInt((jsonDom.getChildrenByName('robot-players', mainForm)[0].element as HTMLInputElement).value)
   // Up to four humans on one screen, up to four robots, and six players in all so the boards still fit
   if (humans < 0 || humans > 4 || robots < 0 || robots > 4 || humans + robots > 6) {
+    return false
+  }
+  // Each game type has its own limits: one human; two to four humans; or no humans
+  const mode = getGameMode()
+  if ((mode === 'solo' && humans !== 1) || (mode === 'multi' && (humans < 2 || humans > 4)) || (mode === 'robots' && humans !== 0)) {
     return false
   }
   const firstGoesFirst = (jsonDom.getChildrenByName('first-go-first', mainForm)[0].element as HTMLInputElement).checked

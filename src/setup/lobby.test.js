@@ -92,4 +92,23 @@ describe('the lobby', () => {
     await settle()
     expect(players).toHaveLength(0)
   })
+
+  test.each([
+    ['preset-solo', 'Lobby: Player vs Robots', 'none', '1', '1'],
+    ['preset-multi', 'Lobby: 2-4 Multiplayer', '', '2', '0'],
+    ['preset-robots', 'Lobby: Robot Battle', 'none', '0', '2']
+  ])('%s is titled %s, shows humans: %s, and has the limits for each', (preset, title, humansShown, humanMin, robotMin) => {
+    const doc = openMenu()
+    menuItem(doc, preset).element.click()
+    expect(menuItem(doc, 'lobby-title').element.innerHTML).toBe(title)
+    expect(menuItem(doc, 'human-group').element.style.display).toBe(humansShown)
+    expect(field(doc, 'human-players').min).toBe(humanMin)
+    expect(field(doc, 'robot-players').min).toBe(robotMin)
+  })
+
+  test('a one-player game cannot be started with no robots', async () => {
+    const { players } = startGame({ humans: 1, robots: 0 })
+    await settle()
+    expect(players).toHaveLength(0)
+  })
 })

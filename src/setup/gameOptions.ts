@@ -11,3 +11,17 @@ export const getHintSetting = (): HintSetting => options.hints
 export const setHintSetting = (hints: HintSetting): void => {
   options.hints = hints
 }
+
+/**
+ * The game type chosen on the entry screen: one player against robots, multiplayer with two to four humans, or a battle
+ * of robots only.
+ */
+export type GameMode = 'solo' | 'multi' | 'robots'
+
+const mode: { current: GameMode } = { current: 'robots' }
+
+export const getGameMode = (): GameMode => mode.current
+
+export const setGameMode = (current: GameMode): void => {
+  mode.current = current
+}

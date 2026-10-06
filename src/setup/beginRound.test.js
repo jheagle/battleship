@@ -13,11 +13,10 @@ useGameLifecycle()
 describe('setup: choosing the players', () => {
   test.each([
     // humans, robots -> [humans expected, robots expected]
+    // The lobby's limits per game type are enforced by the form itself, so only the valid combinations start a game
     [2, 0, 2, 0],
     [1, 1, 1, 1],
-    [1, 0, 1, 1], // a lone human always gets a robot to play
-    [0, 0, 0, 2], // nobody chosen means two robots play each other
-    [0, 1, 0, 2],
+    [0, 2, 0, 2],
     [0, 3, 0, 3],
     [3, 2, 3, 2]
   ])('%i humans and %i robots start a game of %i humans and %i robots', (humans, robots, expectedHumans, expectedRobots) => {

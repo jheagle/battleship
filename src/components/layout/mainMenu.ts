@@ -45,13 +45,14 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
             {
               nodeName: 'h2',
               attributes: {
+                className: 'lobby-title',
                 innerHTML: 'Lobby'
               }
             },
             {
               nodeName: 'div',
               attributes: {
-                className: 'form-group'
+                className: 'human-group'
               },
               children: [
                 { nodeName: 'label', attributes: { for: 'human-players', innerText: 'Humans' } },
