@@ -43,6 +43,9 @@ export const paint = (victim: Player, point: Point, color: string): void => {
 const resetTargets = (data: ResetTargetsData): ResetTargetsData => {
   data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjectsMutable(l, { attributes: { style: { borderColor: '#333' } } })))
   data.targets.forEach(t => paint(data.victim, t.point, '#333'))
+  if (data.target) {
+    paint(data.victim, data.target, 'red')
+  }
   if (!data.target) {
     data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjectsMutable(l, { attributes: { style: { borderColor: 'yellow' } } })))
     data.targets.forEach(t => paint(data.victim, t.point, shade(t.intensity)))

@@ -12,11 +12,11 @@ import type { Player, Tile } from '../types'
  * the choice.
  * @param victim
  */
-const selectTargetCoordinate = (victim: Player): Tile | false => {
+const selectTargetCoordinate = (victim: Player, opponents: Player[] = [victim]): Tile | false => {
   const { heat, targets } = densityChoices(victim)
   const finalTargets = targets.length ? targets : getAllNonHitCells(victim.board).filter(t => filterAdjacentPoints(t))
   const target = finalTargets[siFunciona.randomInteger(finalTargets.length)]
-  displayTargets(heat.length ? heat : finalTargets.map(point => ({ point, intensity: 1 })), target, victim)
+  displayTargets(heat.length ? heat : finalTargets.map(point => ({ point, intensity: 1 })), target, victim, opponents)
   // Hit one of the most likely cells at random
   return matrixDom.getDomItemFromPoint(target, victim.board) as Tile | false
 }
