@@ -1,34 +1,48 @@
 /**
  * @jest-environment jsdom
  */
+import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
 import selectTargetPlayer from './selectTargetPlayer'
 
+useGameLifecycle()
+
 describe('selectTargetPlayer', () => {
-  test('prefers easy target of broken ship instead of total status', () => {
-    const players = [
-      { name: 'healthy', status: 100, shipFleet: [{ status: 100 }, { status: 100 }] },
-      { name: 'damaged', status: 80, shipFleet: [{ status: 100 }, { status: 60 }] },
-      { name: 'sunk only', status: 50, shipFleet: [{ status: 0 }, { status: 100 }] }
-    ]
-    const result = selectTargetPlayer(players)
-    expect(result.name).toBe('damaged')
+  const setUp = async () => {
+    const { players } = startGame({ humans: 3, firstGoesFirst: true })
+    await settle()
+    return players
+  }
+  const sink = player => {
+    const ship = player.shipFleet[3]
+    ship.parts.forEach(part => { part.isHit = true })
+    ship.status = 0
+    player.status = player.shipFleet.reduce((total, item) => total + item.status, 0) / player.shipFleet.length
+  }
+
+  test('uses the elimination rule by default: fewer hits left to sink', async () => {
+    const players = await setUp()
+    sink(players[1])
+    for (let i = 0; i < 10; i++) {
+      expect(selectTargetPlayer(players)).toBe(players[1])
+    }
   })
-  test('no damaged ship, use lowest status', () => {
-    const players = [
-      { name: 'healthy', status: 100, shipFleet: [{ status: 100 }, { status: 100 }] },
-      { name: 'damaged', status: 66, shipFleet: [{ status: 100 }, { status: 0 }, { status: 100 }] },
-      { name: 'sunk several', status: 33, shipFleet: [{ status: 0 }, { status: 100 }, { status: 0 }] }
-    ]
-    const result = selectTargetPlayer(players)
-    expect(result.name).toBe('sunk several')
+
+  test('with nothing to tell them apart, any of them is chosen', async () => {
+    const players = await setUp()
+    expect(players).toContain(selectTargetPlayer(players))
   })
-  test('select any if all are the same', () => {
-    const players = [
-      { name: 'healthy', status: 100, shipFleet: [{ status: 100 }, { status: 100 }] },
-      { name: 'possible', status: 100, shipFleet: [{ status: 100 }, { status: 100 }, { status: 100 }] },
-      { name: 'other', status: 100, shipFleet: [{ status: 100 }, { status: 100 }, { status:100 }] }
-    ]
-    const result = selectTargetPlayer(players)
-    expect(['healthy', 'possible', 'other']).toContain(result.name)
+
+  test('a player with no ships left is not chosen while others are still afloat', async () => {
+    const players = await setUp()
+    players[0].status = 0
+    for (let i = 0; i < 10; i++) {
+      expect(selectTargetPlayer(players)).not.toBe(players[0])
+    }
+  })
+
+  test('a different rule can be passed in for another game style', async () => {
+    const players = await setUp()
+    const last = list => list[list.length - 1]
+    expect(selectTargetPlayer(players, last)).toBe(players[2])
   })
 })

@@ -1,6 +1,6 @@
 import matrixDom from 'matrix-dom'
 import checkIfHitCell from '../utils/checkIfHitCell'
-import { bestTargets, scoreTargets } from './densityScores'
+import { bestTargets, hitChances, scoreTargets } from './densityScores'
 import type { Cell, ShotState } from './densityScores'
 import filterAdjacentPoints from '../utils/filterAdjacentPoints'
 import type { Player } from '../types'
@@ -66,3 +66,9 @@ export const densityChoices = (victim: Player): { heat: HeatCell[], targets: Poi
 const densityTargets = (victim: Player): Point[] => densityChoices(victim).targets
 
 export default densityTargets
+
+/**
+ * The best chance that a shot at this player's board hits a ship: the highest per-cell hit chance.
+ * @param victim
+ */
+export const bestHitChance = (victim: Player): number => Math.max(0, ...hitChances(buildShotState(victim)).flat())

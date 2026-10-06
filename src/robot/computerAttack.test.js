@@ -102,11 +102,14 @@ describe('the robot\'s targeting', () => {
     }
   })
 
-  test('when nobody is damaged it goes for the player with the lowest health', async () => {
+  test('when nobody is damaged, it goes for the player with fewer hits left to sink, which has a sunk ship', async () => {
     for (let game = 0; game < 10; game++) {
       const { players, robot } = await setUp({ humans: 1, robots: 2 })
       const others = players.filter(player => player !== robot)
-      others[0].status = 50
+      const sunk = others[0].shipFleet[3]
+      sunk.parts.forEach(part => { part.isHit = true })
+      sunk.status = 0
+      others[0].status = others[0].shipFleet.reduce((total, item) => total + item.status, 0) / others[0].shipFleet.length
       const beforeFirst = hitCells(others[0])
       const beforeSecond = hitCells(others[1])
       computerAttack(robot, players)
