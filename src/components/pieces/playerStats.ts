@@ -13,7 +13,7 @@ const playerStats = (player: Player, status: string = ''): DomItemConfig => ({
     {
       nodeName: 'span',
       attributes: {
-        innerHTML: `<strong>${player.name}</strong>: ${status}`
+        innerHTML: `<strong style="color: ${player.colour}">${player.name}</strong>: ${status}`
       }
     },
     ...(player.isRobot ? [] : [{

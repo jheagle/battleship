@@ -1,5 +1,6 @@
 import jDomMatrix from 'matrix-dom'
 import defaultFleet from './defaultFleet'
+import playerColour from './playerColours'
 import playerSet from '../components/pieces/playerSet'
 import playerStats from '../components/pieces/playerStats'
 import waterTile from '../components/pieces/waterTile'
@@ -21,6 +22,8 @@ const buildPlayers = (humans: number, robots: number = 0, players: Player[] = []
   }
   const player = playerSet({}, `Player ${players.length + 1}`)
   player.isRobot = humans <= 0
+  player.colour = playerColour(players.length)
+  player.attributes = { ...player.attributes, style: { borderColor: player.colour } }
   // square() takes single objects here (matrix-dom's JSDoc says arrays, but arrays get merged in under a '0' key)
   player.board = jDomMatrix.updateMatrixPoints(jDomMatrix.square({
     x: waterTile(),
