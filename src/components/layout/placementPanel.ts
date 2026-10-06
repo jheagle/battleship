@@ -18,11 +18,16 @@ const placementPanel = (message: string = ''): DomItemConfig => ({
         innerHTML: message
       }
     },
-    ...['placement-continue', 'placement-randomise', 'placement-done'].map(action => ({
+    ...[
+      { action: 'placement-continue', label: 'Continue' },
+      { action: 'placement-randomise', label: 'Randomise' },
+      { action: 'placement-done', label: 'Done' }
+    ].map(({ action, label }) => ({
       nodeName: 'button',
       attributes: {
         className: action,
-        type: 'button'
+        type: 'button',
+        innerHTML: label
       },
       eventListeners: {
         click: [{ listenerFunc: 'placementListener', listenerArgs: {}, listenerOptions: false }]
