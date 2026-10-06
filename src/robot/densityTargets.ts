@@ -4,6 +4,7 @@ import { bestTargets, scoreTargets } from './densityScores'
 import type { Cell, ShotState } from './densityScores'
 import filterAdjacentPoints from '../utils/filterAdjacentPoints'
 import type { Player } from '../types'
+import type { HeatCell } from './resetTargets'
 import type { Point } from 'matrix-dom/dist/point/types'
 
 const toCell = (point: { x: number, y: number }): Cell => ({ x: point.x, y: point.y })
@@ -42,15 +43,19 @@ const refineTies = (cells: Cell[]): Cell[] => {
 }
 
 /**
- * The cells the density model rates highest, and the subset the robot chooses from (the checkerboard among them).
- * `top` is for display only, so the score can be seen before the tie-break. `targets` is never empty while a ship remains.
+ * The density model's picture of the board: every unattacked cell with a score, shaded by how far it is from the top
+ * score (`heat`, for display), and the cells the robot chooses from (`targets`: the highest, narrowed to the
+ * checkerboard among them). `targets` is never empty while a ship remains.
  * @param victim
  */
-export const densityChoices = (victim: Player): { top: Point[], targets: Point[] } => {
-  const top = bestTargets(scoreTargets(buildShotState(victim)))
+export const densityChoices = (victim: Player): { heat: HeatCell[], targets: Point[] } => {
+  const scores = scoreTargets(buildShotState(victim))
+  const best = bestTargets(scores)
+  const max = Math.max(0, ...scores.flat())
+  const heat = scores.flatMap((row, y) => row.flatMap((score, x) => score > 0 ? [{ point: matrixDom.point(x, y, 0), intensity: score / max }] : []))
   return {
-    top: top.map(c => matrixDom.point(c.x, c.y, 0)),
-    targets: (top.length ? refineTies(top) : top).map(c => matrixDom.point(c.x, c.y, 0))
+    heat,
+    targets: (best.length ? refineTies(best) : best).map(c => matrixDom.point(c.x, c.y, 0))
   }
 }
 
