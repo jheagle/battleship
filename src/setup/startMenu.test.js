@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import presetListener from './presetListener'
 import jsonDom from 'json-dom'
 import { useGameLifecycle, startGame } from '../../tests/helpers/game'
 import beginRound from './beginRound'
@@ -11,7 +12,7 @@ useGameLifecycle()
 
 describe('setup: main menu', () => {
   test('main puts the menu on an otherwise empty page and returns the document', () => {
-    const doc = jsonDom.documentDomItem({ beginRound })
+    const doc = jsonDom.documentDomItem({ beginRound, presetListener })
     doc.body.children.push()
     const result = startMenu(doc)
     expect(result).toBe(doc)
@@ -28,7 +29,7 @@ describe('setup: main menu', () => {
   })
 
   test('the form starts at 0 humans, 0 robots', () => {
-    const doc = startMenu(jsonDom.documentDomItem({ beginRound }))
+    const doc = startMenu(jsonDom.documentDomItem({ beginRound, presetListener }))
     const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]
     expect(jsonDom.getChildrenByName('human-players', form)[0].element.value).toBe('0')
     expect(jsonDom.getChildrenByName('robot-players', form)[0].element.value).toBe('0')

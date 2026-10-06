@@ -5,6 +5,8 @@ import buildPlayers from './buildPlayers'
 import computerAttack from '../robot/computerAttack'
 import updatePlayer from '../attack/updatePlayer'
 import { startPlacement } from './placement'
+import { setHintSetting } from './gameOptions'
+import type { HintSetting } from './gameOptions'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
 
@@ -23,10 +25,13 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
   const parent = jsonDom.getTopParentItem(mainForm)
   const humans = parseInt((jsonDom.getChildrenByName('human-players', mainForm)[0].element as HTMLInputElement).value)
   let robots = parseInt((jsonDom.getChildrenByName('robot-players', mainForm)[0].element as HTMLInputElement).value)
-  if (humans < 0 || humans > 100 || robots < 0 || robots > 100) {
+  // Up to four humans on one screen, up to four robots, and six players in all so the boards still fit
+  if (humans < 0 || humans > 4 || robots < 0 || robots > 4 || humans + robots > 6) {
     return false
   }
   const firstGoesFirst = (jsonDom.getChildrenByName('first-go-first', mainForm)[0].element as HTMLInputElement).checked
+  const hints = (jsonDom.getChildrenByName('hint-setting', mainForm)[0].element as HTMLSelectElement).value as HintSetting
+  setHintSetting(hints)
   if (humans === 0) {
     robots = robots < 2 ? 2 : robots
   }
@@ -35,6 +40,8 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
   }
   jsonDom.removeChild(parent.body, jsonDom.getChildrenByClass('main-menu', parent.body)[0])
   const players = jsonDom.renderHtml(boards(buildPlayers(humans, robots)), parent.body).children as Player[]
+  // With hints on for everyone, every human gets them on their turn; with them off or optional, nobody does by default
+  players.filter(player => !player.isRobot).forEach(player => { player.showHint = hints === 'on' })
   startPlacement(players, parent.body, () => startRound(players, firstGoesFirst))
   return false
 }

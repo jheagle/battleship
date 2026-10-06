@@ -5,6 +5,7 @@ import restart from '../../src/setup/restart'
 import attackListener from '../../src/attack/attackListener'
 import hintListener from '../../src/attack/hintListener'
 import placementListener from '../../src/setup/placementListener'
+import presetListener from '../../src/setup/presetListener'
 import attackLock from '../../src/attack/attackLock'
 import waterTile from '../../src/components/pieces/waterTile'
 import jDomMatrix from 'matrix-dom'
@@ -24,18 +25,23 @@ export const settle = (ms = 5000) => jest.advanceTimersByTimeAsync(ms)
  * @param {boolean} [options.firstGoesFirst=true] Player 1 attacks first instead of a random player
  * @returns {{doc: Object, players: Array}}
  */
-export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true, placing = false } = {}) => {
+export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true, placing = false, hints = 'optional' } = {}) => {
   const doc = startMenu(jsonDom.documentDomItem({
     beginRound,
     attackListener,
     hintListener,
     placementListener,
+    presetListener,
     restart
   }))
+  // Choose the game type that matches the humans, as a player would, which reveals the lobby form
+  const preset = humans === 1 ? 'preset-solo' : humans >= 2 ? 'preset-multi' : 'preset-robots'
+  jsonDom.getChildrenByClass(preset, doc.body)[0].element.click()
   const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]
   jsonDom.getChildrenByName('human-players', form)[0].element.value = String(humans)
   jsonDom.getChildrenByName('robot-players', form)[0].element.value = String(robots)
   jsonDom.getChildrenByName('first-go-first', form)[0].element.checked = firstGoesFirst
+  jsonDom.getChildrenByName('hint-setting', form)[0].element.value = hints
   jsonDom.getChildrenFromAttribute('type', 'submit', form)[0].element.click()
   if (!placing) {
     randomlyPlaceAllHumans()
