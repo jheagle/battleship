@@ -3,7 +3,6 @@ import siFunciona from 'si-funciona'
 import displayTargets from './displayTargets'
 import filterAdjacentPoints from '../utils/filterAdjacentPoints'
 import getAllNonHitCells from '../utils/getAllNonHitCells'
-import targetBrokenShips from './targetBrokenShips'
 import { densityChoices } from './densityTargets'
 import type { Player, Tile } from '../types'
 
@@ -15,8 +14,7 @@ import type { Player, Tile } from '../types'
  */
 const selectTargetCoordinate = (victim: Player): Tile | false => {
   const { top, targets } = densityChoices(victim)
-  const availTargets = targets.length ? targets : targetBrokenShips(victim)
-  const finalTargets = availTargets.length ? availTargets : getAllNonHitCells(victim.board).filter(t => filterAdjacentPoints(t))
+  const finalTargets = targets.length ? targets : getAllNonHitCells(victim.board).filter(t => filterAdjacentPoints(t))
   const target = finalTargets[siFunciona.randomInteger(finalTargets.length)]
   displayTargets(top.length ? top : finalTargets, target, victim)
   // Hit one of the most likely cells at random

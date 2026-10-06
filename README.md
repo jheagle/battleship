@@ -44,9 +44,6 @@ starts and ends a turn and the code which takes an attack.</p>
 ## Functions
 
 <dl>
-<dt><a href="#numDamagedParts">numDamagedParts(total, status)</a></dt>
-<dd><p>Return the number of damaged ship parts. Performs math on the number of parts vs the damaged status.</p>
-</dd>
 <dt><a href="#getLowStatusItems">getLowStatusItems(items)</a></dt>
 <dd><p>Given an array of items, return all items which have the lowest status property</p>
 </dd>
@@ -58,9 +55,6 @@ starts and ends a turn and the code which takes an attack.</p>
 </dd>
 <dt><a href="#getAllNonHitCells">getAllNonHitCells(matrix)</a></dt>
 <dd><p>Get all points which were not yet hit in the matrix.</p>
-</dd>
-<dt><a href="#getAdjEdgeNonHitCells">getAdjEdgeNonHitCells(pnt, matrix)</a></dt>
-<dd><p>Get the points which have same edges with the provided point and are not hit.</p>
 </dd>
 <dt><a href="#getALowStatusItem">getALowStatusItem(items)</a></dt>
 <dd><p>Given an array of items, return the item with the lowest status property (at the end of the array)</p>
@@ -103,11 +97,6 @@ WARNING: This is a recursive function.</p>
 <dt><a href="#beginRound">beginRound(e, mainForm)</a></dt>
 <dd><p>Logic for setting up and starting a new round
 (selects random start player and calls computer attack if it is AI starting)</p>
-</dd>
-<dt><a href="#targetBrokenShips">targetBrokenShips(victim)</a></dt>
-<dd><p>If there are existing broken ships, return the point(s) to target next: the cells adjacent to the hit parts, or,
-once a ship is damaged in more than one place, a single decisive point (the gap between two hits, or the point
-just past one end of a run of hits). Returns an empty array when there is nothing broken to follow up on.</p>
 </dd>
 <dt><a href="#selectTargetPlayer">selectTargetPlayer(players)</a></dt>
 <dd><p>Choose which player to attack.</p>
@@ -279,18 +268,6 @@ Whether attacks are being ignored right now: the board is locked while the turn 
 starts and ends a turn and the code which takes an attack.
 
 **Kind**: global constant  
-<a name="numDamagedParts"></a>
-
-## numDamagedParts(total, status)
-Return the number of damaged ship parts. Performs math on the number of parts vs the damaged status.
-
-**Kind**: global function  
-
-| Param |
-| --- |
-| total | 
-| status | 
-
 <a name="getLowStatusItems"></a>
 
 ## getLowStatusItems(items)
@@ -333,18 +310,6 @@ Get all points which were not yet hit in the matrix.
 
 | Param |
 | --- |
-| matrix | 
-
-<a name="getAdjEdgeNonHitCells"></a>
-
-## getAdjEdgeNonHitCells(pnt, matrix)
-Get the points which have same edges with the provided point and are not hit.
-
-**Kind**: global function  
-
-| Param |
-| --- |
-| pnt | 
 | matrix | 
 
 <a name="getALowStatusItem"></a>
@@ -490,19 +455,6 @@ Logic for setting up and starting a new round
 | --- |
 | e | 
 | mainForm | 
-
-<a name="targetBrokenShips"></a>
-
-## targetBrokenShips(victim)
-If there are existing broken ships, return the point(s) to target next: the cells adjacent to the hit parts, or,
-once a ship is damaged in more than one place, a single decisive point (the gap between two hits, or the point
-just past one end of a run of hits). Returns an empty array when there is nothing broken to follow up on.
-
-**Kind**: global function  
-
-| Param |
-| --- |
-| victim | 
 
 <a name="selectTargetPlayer"></a>
 
