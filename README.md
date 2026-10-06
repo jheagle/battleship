@@ -86,6 +86,9 @@ WARNING: This is a recursive function.</p>
 <dd><p>Logic for setting up and starting a new round
 (selects random start player and calls computer attack if it is AI starting)</p>
 </dd>
+<dt><a href="#targetBrokenShips">targetBrokenShips(victim)</a> ⇒ <code>*</code></dt>
+<dd><p>If there are existing broken target the adjacent tiles and return those.</p>
+</dd>
 <dt><a href="#selectTargetPlayer">selectTargetPlayer(players)</a> ⇒ <code>*</code></dt>
 <dd><p>Choose which player to attack.</p>
 </dd>
@@ -206,8 +209,7 @@ Create a default fleet using the standard battleship lengths.
 <a name="attackLock"></a>
 
 ## attackLock
-Whether attacks are being ignored right now: the board is locked while the turn changes over. Shared by the code which
-starts and ends a turn and the code which takes an attack.
+Whether attacks are being ignored right now: the board is locked while the turn changes over. Shared by the code whichstarts and ends a turn and the code which takes an attack.
 
 **Kind**: global constant  
 <a name="numDamagedParts"></a>
@@ -413,6 +415,17 @@ Logic for setting up and starting a new round(selects random start player and c
 | --- |
 | e | 
 | mainForm | 
+
+<a name="targetBrokenShips"></a>
+
+## targetBrokenShips(victim) ⇒ <code>\*</code>
+If there are existing broken target the adjacent tiles and return those.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| victim | 
 
 <a name="selectTargetPlayer"></a>
 

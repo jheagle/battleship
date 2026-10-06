@@ -9,7 +9,8 @@ import type { Player } from '../types'
  */
 const selectTargetPlayer = (players: Player[]): Player => {
   // Get a list of all players with broken ships or with lowest status.
-  const victims = getBrokenShipsPlayers(players).length ? getBrokenShipsPlayers(players) : getLowStatusItems(players)
+  const withBrokenShips = getBrokenShipsPlayers(players)
+  const victims = withBrokenShips.length ? withBrokenShips : getLowStatusItems(players)
   // If more than one possible victim, select a random target, otherwise return the lowest status player.
   return victims.length === 1 ? victims[0] : victims[siFunciona.randomInteger(victims.length)]
 }
