@@ -111,13 +111,34 @@ export const continueTurn = (): void => {
   showPlacing()
 }
 
-const highlightStart = (point: Point | null): void => {
+/**
+ * Show where a ship has started, and the cells it could end on: every cell in a straight line from the start which would
+ * be a valid placement. Clicking the start again, or any other cell which is not valid, cancels the start. With no start
+ * (null) every mark is removed.
+ * @param point
+ * @param size
+ */
+const showStart = (point: Point | null, size: number): void => {
   const board = current().board
   matrixDom.getAllPoints(board).filter(p => p.z === 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, board) as unknown as DomItem
-    update(tile, { style: { outline: point && p.x === point.x && p.y === point.y ? '3px solid yellow' : '' } })
+    const isStart = Boolean(point && p.x === point.x && p.y === point.y)
+    const isEnd = point !== null && !isStart && isValidPlacement(board, point, p, size)
+    update(tile, {
+      className: isEnd ? 'column valid-end' : 'column',
+      style: { outline: isStart ? '3px solid yellow' : '' }
+    })
   })
 }
+
+/**
+ * The number of cells a ship of this size could end on from the start, so the message can say when there are none.
+ * @param start
+ * @param size
+ */
+const endCount = (start: Point, size: number): number => matrixDom.getAllPoints(current().board)
+  .filter(p => p.z === 0 && !(p.x === start.x && p.y === start.y))
+  .filter(p => isValidPlacement(current().board, start, p, size)).length
 
 /**
  * A click on a board during placement: the first click sets where a ship starts, the second where it ends. An invalid
@@ -134,13 +155,15 @@ export const placeCell = (tile: Tile, board: Board): void => {
   }
   if (!active().start) {
     active().start = point
-    highlightStart(point)
-    setMessage(`${next.name}: now click where it ends.`)
+    showStart(point, next.size)
+    setMessage(endCount(point, next.size)
+      ? `${next.name}: click one of the dashed green cells where it should end. Click the start again to cancel.`
+      : `${next.name}: no room for it to go from here. Click the start again to choose another start.`)
     return
   }
   const start = active().start
   active().start = null
-  highlightStart(null)
+  showStart(null, next.size)
   if (!start) {
     return
   }
