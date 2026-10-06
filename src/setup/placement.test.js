@@ -146,4 +146,25 @@ describe('the placement phase', () => {
       expect(matrixDom.getDomItemFromPoint(point, first.board).element.style.backgroundColor).toBe('')
     })
   })
+
+  test('after a start is chosen, only the cells where the ship could end are marked, and the message says how to cancel', async () => {
+    const [first] = await setUp()
+    button('placement-continue').click()
+    await click(tile(first, 0, 0), 0)
+    const marked = matrixDom.getAllPoints(first.board).filter(p => p.z === 0)
+      .filter(p => tile(first, p.x, p.y).element.className.includes('valid-end')).map(p => `${p.x},${p.y}`)
+    expect(marked.sort()).toEqual(['0,4', '4,0'])
+    expect(message()).toContain('Click the start again to cancel')
+  })
+
+  test('clicking the start again cancels, and the marks go', async () => {
+    const [first] = await setUp()
+    button('placement-continue').click()
+    await click(tile(first, 0, 0), 0)
+    await click(tile(first, 0, 0), 0)
+    const marked = matrixDom.getAllPoints(first.board).filter(p => p.z === 0)
+      .filter(p => tile(first, p.x, p.y).element.className.includes('valid-end'))
+    expect(marked).toHaveLength(0)
+    expect(first.shipFleet).toHaveLength(0)
+  })
 })
