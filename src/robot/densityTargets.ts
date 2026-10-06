@@ -42,12 +42,22 @@ const refineTies = (cells: Cell[]): Cell[] => {
 }
 
 /**
+ * The cells the density model rates highest, and the subset the robot chooses from (the checkerboard among them).
+ * `top` is for display only, so the score can be seen before the tie-break. `targets` is never empty while a ship remains.
+ * @param victim
+ */
+export const densityChoices = (victim: Player): { top: Point[], targets: Point[] } => {
+  const top = bestTargets(scoreTargets(buildShotState(victim)))
+  return {
+    top: top.map(c => matrixDom.point(c.x, c.y, 0)),
+    targets: (top.length ? refineTies(top) : top).map(c => matrixDom.point(c.x, c.y, 0))
+  }
+}
+
+/**
  * The attack points the density model considers most likely to hold a ship part, or an empty array when there is none.
  * @param victim
  */
-const densityTargets = (victim: Player): Point[] => {
-  const cells = bestTargets(scoreTargets(buildShotState(victim)))
-  return (cells.length ? refineTies(cells) : cells).map(c => matrixDom.point(c.x, c.y, 0))
-}
+const densityTargets = (victim: Player): Point[] => densityChoices(victim).targets
 
 export default densityTargets

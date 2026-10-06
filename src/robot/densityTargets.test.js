@@ -3,7 +3,7 @@
  */
 
 import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
-import densityTargets from './densityTargets'
+import densityTargets, { densityChoices } from './densityTargets'
 import checkIfHitCell from '../utils/checkIfHitCell'
 import matrixDom from 'matrix-dom'
 
@@ -21,6 +21,14 @@ describe('densityTargets', () => {
     const targets = densityTargets(victim)
     expect(targets.length).toBeGreaterThan(0)
     targets.forEach(point => expect(checkIfHitCell(point, victim.board)).toBe(false))
+  })
+
+  test('on a fresh board, the highest-rated cells are the four in the centre, and the choice is among them', async () => {
+    const { victim } = await setUp()
+    const { top, targets } = densityChoices(victim)
+    const key = point => `${point.x},${point.y}`
+    expect(top.map(key).sort()).toEqual(['4,4', '4,5', '5,4', '5,5'])
+    targets.forEach(point => expect(top.map(key)).toContain(key(point)))
   })
 
   test('after a hit, offers the cells in line with that hit', async () => {
