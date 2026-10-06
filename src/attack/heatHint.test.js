@@ -53,7 +53,7 @@ describe('the heat-map hint for a human', () => {
     await settle(1000)
     expect(isShaded(borderOf(robot, 4, 4))).toBe(true)
     attackLock.isLocked = false
-    await click(unhitWaterCells(robot)[0], 0) // checked the moment the turn passes; the robot's turn then returns it
+    await click(unhitWaterCells(robot)[0], 100) // the queued turn-end steps run in order, so give them a moment; the robot's turn then returns it
     expect(human.attacker).toBe(false)
     expect(isShaded(borderOf(robot, 4, 4))).toBe(false)
   })

@@ -4,6 +4,7 @@ import attackLock from './attackLock'
 import queueTimeout from '../queue'
 import updatePlayerStats from './updatePlayerStats'
 import { clearHeatHint, showHeatHint, victimsOf } from './heatHint'
+import { clearValidTargets, showValidTargets } from './validTargets'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
 
@@ -32,6 +33,10 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
   player.attacker = !player.attacker
   attackLock.isLocked = true
   // A human's heat-map hint shows on the boards they attack for the length of their turn
+  // A human sees which cells of the boards they attack can still be hit
+  if (!player.isRobot) {
+    queueTimeout(() => victimsOf(player).forEach(victim => player.attacker ? showValidTargets(victim) : clearValidTargets(victim)), 0)
+  }
   if (!player.isRobot && player.showHint) {
     queueTimeout(() => victimsOf(player).forEach(victim => player.attacker ? showHeatHint(victim) : clearHeatHint(victim)), 0)
   }
