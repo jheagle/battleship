@@ -16,6 +16,28 @@ const playerStats = (player: Player, status: string = ''): DomItemConfig => ({
         innerHTML: `<strong>${player.name}</strong>: ${status}`
       }
     },
+    ...(player.isRobot ? [] : [{
+      nodeName: 'label',
+      attributes: {},
+      children: [
+        {
+          nodeName: 'input',
+          attributes: {
+            type: 'checkbox',
+            checked: Boolean(player.showHint)
+          },
+          eventListeners: {
+            change: [{ listenerFunc: 'hintListener', listenerArgs: {}, listenerOptions: false }]
+          }
+        },
+        {
+          nodeName: 'span',
+          attributes: {
+            innerHTML: ' Show heat hint on my turn'
+          }
+        }
+      ]
+    }]),
     {
       nodeName: 'ul',
       attributes: {},

@@ -3,6 +3,7 @@ import startMenu from '../../src/setup/startMenu'
 import beginRound from '../../src/setup/beginRound'
 import restart from '../../src/setup/restart'
 import attackListener from '../../src/attack/attackListener'
+import hintListener from '../../src/attack/hintListener'
 import attackLock from '../../src/attack/attackLock'
 import waterTile from '../../src/components/pieces/waterTile'
 import jDomMatrix from 'matrix-dom'
@@ -26,6 +27,7 @@ export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true } = {}
   const doc = startMenu(jsonDom.documentDomItem({
     beginRound,
     attackListener,
+    hintListener,
     restart
   }))
   const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]

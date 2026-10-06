@@ -19,6 +19,8 @@ declare module 'json-dom/dist/domItem/types' {
       status: number
       turnCnt: number
       attacker: boolean
+      /** The human has switched on the heat-map hint for their own turn. */
+      showHint: boolean
       attacks: Attacks
       board: Board
       shipFleet: Ship[]
@@ -33,7 +35,7 @@ declare module 'json-dom/dist/domItem/types' {
 export const hasTrait: typeof hasTraitType = jsonDom.hasTrait
 
 jsonDom.defineTrait('battleship.tile', { keys: ['hasShip', 'isHit'] })
-jsonDom.defineTrait('battleship.player', { keys: ['name', 'isRobot', 'status', 'turnCnt', 'attacker', 'attacks', 'board', 'shipFleet', 'playerStats'] })
+jsonDom.defineTrait('battleship.player', { keys: ['name', 'isRobot', 'status', 'turnCnt', 'attacker', 'showHint', 'attacks', 'board', 'shipFleet', 'playerStats'] })
 
 /** A cell of a player's board: a matrix-dom column which also carries whether it has a ship and has been hit. */
 export type Tile = MatrixColumn & WithTraits<'battleship.tile'>

@@ -26,14 +26,14 @@ export interface ResetTargetsData {
  * A faint yellow for the weakest cells up to a solid one for the strongest, so the spread of the robot's thinking shows.
  * @param intensity
  */
-const shade = (intensity: number): string => `rgba(255, 215, 0, ${0.15 + 0.85 * intensity})`
+export const shade = (intensity: number): string => `rgba(255, 215, 0, ${0.15 + 0.85 * intensity})`
 
 /**
  * @param victim
  * @param point
  * @param color
  */
-const paint = (victim: Player, point: Point, color: string): void => {
+export const paint = (victim: Player, point: Point, color: string): void => {
   jsonDom.updateElement(siFunciona.mergeObjectsMutable(matrixDom.getDomItemFromPoint(point, victim.board), { attributes: { style: { borderColor: color } } }))
 }
 
