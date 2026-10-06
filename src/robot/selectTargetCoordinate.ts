@@ -4,18 +4,22 @@ import displayTargets from './displayTargets'
 import filterAdjacentPoints from '../utils/filterAdjacentPoints'
 import getAllNonHitCells from '../utils/getAllNonHitCells'
 import targetBrokenShips from './targetBrokenShips'
+import { densityChoices } from './densityTargets'
 import type { Player, Tile } from '../types'
 
 /**
- * Choose which coordinate to attack.
+ * Choose which coordinate to attack, in layers: the density model first, then the follow-up on broken ships, then the
+ * checkerboard over every unattacked cell. The highest-rated density cells are what gets displayed, so the choice can
+ * be seen before the checkerboard tie-break narrows it.
  * @param victim
  */
 const selectTargetCoordinate = (victim: Player): Tile | false => {
-  const availTargets = targetBrokenShips(victim)
+  const { top, targets } = densityChoices(victim)
+  const availTargets = targets.length ? targets : targetBrokenShips(victim)
   const finalTargets = availTargets.length ? availTargets : getAllNonHitCells(victim.board).filter(t => filterAdjacentPoints(t))
   const target = finalTargets[siFunciona.randomInteger(finalTargets.length)]
-  displayTargets(finalTargets, target, victim)
-  // If there are available targets then hit one at random
+  displayTargets(top.length ? top : finalTargets, target, victim)
+  // Hit one of the most likely cells at random
   return matrixDom.getDomItemFromPoint(target, victim.board) as Tile | false
 }
 
