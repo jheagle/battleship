@@ -1,18 +1,12 @@
-import siFunciona from 'si-funciona'
-import getBrokenShipsPlayers from '../utils/getBrokenShipsPlayers'
-import getLowStatusItems from '../utils/getLowStatusItems'
+import { eliminationRule } from './victimRules'
+import type { VictimRule } from './victimRules'
 import type { Player } from '../types'
 
 /**
- * Choose which player to attack.
+ * Choose which player to attack, using the rule for the game style (elimination for now).
  * @param players
+ * @param rule
  */
-const selectTargetPlayer = (players: Player[]): Player => {
-  // Get a list of all players with broken ships or with lowest status.
-  const withBrokenShips = getBrokenShipsPlayers(players)
-  const victims = withBrokenShips.length ? withBrokenShips : getLowStatusItems(players)
-  // If more than one possible victim, select a random target, otherwise return the lowest status player.
-  return victims.length === 1 ? victims[0] : victims[siFunciona.randomInteger(victims.length)]
-}
+const selectTargetPlayer = (players: Player[], rule: VictimRule = eliminationRule): Player => rule(players)
 
 export default selectTargetPlayer

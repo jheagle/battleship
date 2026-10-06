@@ -45,6 +45,21 @@ const placementsOf = (size: number, length: number): Cell[][] => {
 }
 
 /**
+ * Whether a placement could be where a ship really is: it avoids misses, covers all of the ship's own known hits, and
+ * touches no other ship's hit.
+ * @param placement
+ * @param shipHitKeys
+ * @param missKeys
+ * @param hitKeys
+ */
+const consistent = (placement: Cell[], shipHitKeys: Set<string>, missKeys: Set<string>, hitKeys: Set<string>): boolean => {
+  const keys = placement.map(keyOf)
+  if (keys.some(key => missKeys.has(key))) return false
+  if (keys.some(key => hitKeys.has(key) && !shipHitKeys.has(key))) return false
+  return [...shipHitKeys].every(key => keys.includes(key))
+}
+
+/**
  * Score every cell by how many ways the remaining ships could still cover it. Each ship contributes every placement
  * consistent with what is known: it avoids misses, covers all of its own known hits, and touches no other ship's hit.
  * Cells already attacked score zero. Unattacked cells next to a hit on an unsunk ship then get the adjacent weight on top.
@@ -60,10 +75,7 @@ export const scoreTargets = (state: ShotState, damagedWeight: number = DAMAGED_W
     const shipHitKeys = new Set(ship.hits.map(keyOf))
     const weight = ship.hits.length ? damagedWeight : 1
     for (const placement of placementsOf(state.size, ship.length)) {
-      const keys = placement.map(keyOf)
-      if (keys.some(key => missKeys.has(key))) continue
-      if (keys.some(key => hitKeys.has(key) && !shipHitKeys.has(key))) continue
-      if ([...shipHitKeys].some(key => !keys.includes(key))) continue
+      if (!consistent(placement, shipHitKeys, missKeys, hitKeys)) continue
       for (const cell of placement) {
         if (!hitKeys.has(keyOf(cell)) && !missKeys.has(keyOf(cell))) {
           scores[cell.y][cell.x] += weight
@@ -97,3 +109,36 @@ export const bestTargets = (scores: number[][]): Cell[] => {
   }))
   return cells
 }
+
+/**
+ * The chance that each unattacked cell holds a part of some remaining ship. Each ship's placements are weighted as in
+ * scoreTargets, then turned into a share of that ship's total, so a ship counts once however many placements it has.
+ * Not used by the game's robot yet: it is kept for game styles where the chance of a hit matters more than elimination.
+ * @param state
+ * @param damagedWeight
+ */
+export const hitChances = (state: ShotState, damagedWeight: number = DAMAGED_WEIGHT): number[][] => {
+  const chances = Array.from({ length: state.size }, () => Array(state.size).fill(0))
+  const missKeys = new Set(state.misses.map(keyOf))
+  const hitKeys = new Set(state.hits.map(keyOf))
+  for (const ship of state.remaining) {
+    const shipHitKeys = new Set(ship.hits.map(keyOf))
+    const weight = ship.hits.length ? damagedWeight : 1
+    const counts = Array.from({ length: state.size }, () => Array(state.size).fill(0))
+    let total = 0
+    for (const placement of placementsOf(state.size, ship.length)) {
+      if (!consistent(placement, shipHitKeys, missKeys, hitKeys)) continue
+      total += weight
+      for (const cell of placement) {
+        if (!hitKeys.has(keyOf(cell)) && !missKeys.has(keyOf(cell))) {
+          counts[cell.y][cell.x] += weight
+        }
+      }
+    }
+    if (total > 0) {
+      counts.forEach((row, y) => row.forEach((count, x) => { chances[y][x] += count / total }))
+    }
+  }
+  return chances
+}
+
