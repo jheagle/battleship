@@ -48,4 +48,26 @@ describe('setup: generateStartEnd', () => {
       points.forEach(point => expect(board.children[0].children[point.y].children[point.x].hasShip).toBe(false))
     }
   })
+
+  test('finds the only place left on the board, rather than guessing until one turns up', () => {
+    const board = makeBoard()
+    // Every row except the last is taken, and the last row has room for exactly one ship of length 5, at the left
+    for (let y = 0; y < 9; y++) {
+      for (let x = 0; x < 10; x++) {
+        board.children[0].children[y].children[x].hasShip = true
+      }
+    }
+    board.children[0].children[9].children[5].hasShip = true
+    for (let i = 0; i < 20; i++) {
+      const [start, end] = generateStartEnd(board, 5)
+      expect(start).toEqual(expect.objectContaining({ x: 0, y: 9 }))
+      expect(end).toEqual(expect.objectContaining({ x: 4, y: 9 }))
+    }
+  })
+
+  test('throws, rather than searching forever, when no ship of that length fits', () => {
+    const board = makeBoard()
+    board.children[0].children.forEach(row => row.children.forEach(tile => { tile.hasShip = true }))
+    expect(() => generateStartEnd(board, 2)).toThrow('No room on the board for a ship of length 2')
+  })
 })
