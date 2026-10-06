@@ -37,32 +37,14 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
   }
   if (player.attacker) {
     if (!player.isRobot) {
-      queueTimeout(() => {
-        attackLock.isLocked = false
-        return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjectsMutable(c, {
-          attributes: {
-            style: {
-              width: '17px',
-              height: '17px'
-            }
-          }
-        }) as DomItem))))
-      }, 400)
+      queueTimeout(() => { attackLock.isLocked = false }, 400)
     }
     ++player.turnCnt
   } else {
-    queueTimeout(() => {
-      attackLock.isLocked = false
-      return player.board.children.map(l => l.children.map(r => r.children.map(c => jsonDom.updateElement(siFunciona.mergeObjectsMutable(c, {
-        attributes: {
-          style: {
-            width: '35px',
-            height: '35px'
-          }
-        }
-      }) as DomItem))))
-    }, 0)
+    queueTimeout(() => { attackLock.isLocked = false }, 0)
   }
+  // Every board keeps its size. The player whose turn it is gets a highlight on their panel instead
+  queueTimeout(() => jsonDom.updateElement(siFunciona.mergeObjectsMutable(player, { attributes: { style: { borderColor: player.attacker ? 'yellow' : 'transparent' } } }) as DomItem), 0)
   queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
   return player
 }
