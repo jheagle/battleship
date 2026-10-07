@@ -52,7 +52,7 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
   // they can attack glow in that player's colour, so the target is clear
   queueTimeout(() => {
     jsonDom.updateElement(siFunciona.mergeObjectsMutable(player, { attributes: { style: { outline: player.attacker ? '3px solid yellow' : 'none' } } }) as DomItem)
-    victimsOf(player).forEach(victim => jsonDom.updateElement(siFunciona.mergeObjectsMutable(victim, { attributes: { style: { 'box-shadow': player.attacker ? `0 0 0 6px ${player.colour}` : 'none' } } }) as DomItem))
+    victimsOf(player).forEach(victim => jsonDom.updateElement(siFunciona.mergeObjectsMutable(victim, { attributes: { style: { boxShadow: player.attacker ? `0 0 0 6px ${player.colour}` : 'none' } } }) as DomItem))
   }, 0)
   queueTimeout(() => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
   return player

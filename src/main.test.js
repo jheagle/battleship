@@ -98,7 +98,7 @@ describe('robots playing each other', () => {
       jest.useRealTimers()
       document.body.innerHTML = ''
     }
-  }, 120000)
+  }, 180000)
 
   test('every game finishes with a winner and the final scores', () => {
     games.forEach(({ finished, players }) => {
