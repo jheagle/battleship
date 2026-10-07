@@ -55,6 +55,28 @@ const update = (item: DomItem, attributes: object): void => {
   jsonDom.updateElement(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem)
 }
 
+/**
+ * The label above a player's board, which shows their place in the order.
+ * @param player
+ * @param text
+ */
+const setBadge = (player: Player, text: string): void => update(child(player as unknown as DomItem, 'turn-badge'), { innerHTML: text })
+
+/** The name field on the placement panel. */
+const nameInput = (): HTMLInputElement => child(active().panel, 'placement-name').element as HTMLInputElement
+
+/**
+ * Save the name typed for a player, if one was typed. The default name (Player N) is kept otherwise.
+ * @param player
+ */
+const readName = (player: Player): void => {
+  const name = nameInput().value.trim()
+  if (name) {
+    player.name = name
+    updatePlayerStats(player)
+  }
+}
+
 /** Whether a placement phase is running, so board clicks are placements rather than attacks. */
 export const isPlacing = (): boolean => session !== null
 
@@ -74,6 +96,14 @@ export const startPlacement = (players: Player[], body: DomItem, done: (order: P
   const panel = jsonDom.renderHtml(jsonDom.createDomItem(placementPanel()), body) as unknown as DomItem
   session = { players, humans, index: 0, pending: [], start: null, panel, stage: 'handoff', order: [], done }
   setStatsShown(players, false)
+  if (humans.length === 1) {
+    // One human has no one to hand over to, so they place straight away
+    session.stage = 'placing'
+    session.pending = [...defaultShipSpecs]
+    nameInput().value = humans[0].name
+    showPlacing()
+    return
+  }
   showHandoff()
 }
 
@@ -94,10 +124,12 @@ interface Buttons {
   doneEnabled?: boolean
   randomShown?: boolean
   orderShown?: boolean
+  nameShown?: boolean
 }
 
-const setButtons = ({ continueShown = false, placingShown = false, doneEnabled = false, randomShown = false, orderShown = false }: Buttons): void => {
+const setButtons = ({ continueShown = false, placingShown = false, doneEnabled = false, randomShown = false, orderShown = false, nameShown = false }: Buttons): void => {
   const shown = (on: boolean) => ({ style: { display: on ? '' : 'none' } })
+  update(child(active().panel, 'placement-name'), shown(nameShown))
   update(child(active().panel, 'placement-continue'), shown(continueShown))
   update(child(active().panel, 'placement-randomise'), shown(placingShown))
   update(child(active().panel, 'placement-done'), { ...shown(placingShown), disabled: !doneEnabled })
@@ -126,14 +158,16 @@ const showHandoff = (): void => {
   active().stage = 'handoff'
   showOnly(null)
   setMessage(`${current().name}: the other players look away. Press Continue when you are ready to place your ships.`)
-  setButtons({ continueShown: true })
+  // Filled in once for this player; it is not reset while they place, so a name typed there is kept
+  nameInput().value = current().name
+  setButtons({ continueShown: true, nameShown: true })
 }
 
 const showPlacing = (): void => {
   showOnly(current())
   const next = active().pending[0]
   setMessage(next ? `Place your ${next.name} (${next.size} cells): click where it starts, then where it ends.` : 'All placed. Press Done to continue.')
-  setButtons({ placingShown: true, doneEnabled: !active().pending.length })
+  setButtons({ placingShown: true, doneEnabled: !active().pending.length, nameShown: true })
 }
 
 /**
@@ -255,7 +289,9 @@ const hideShips = (player: Player): void => {
   matrixDom.getAllPoints(player.board).filter(p => p.z === 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
     if (checkIfShipCell(p, player.board)) {
-      update(tile, { style: { backgroundColor: '' } })
+      // Switch the transition off for this change only, so the shading goes at once rather than fading out
+      update(tile, { style: { transition: 'none', backgroundColor: '' } })
+      update(tile, { style: { transition: '' } })
     }
   })
 }
@@ -291,9 +327,8 @@ export const chooseOrder = (): void => {
   session.order = []
   showAll()
   session.players.forEach(p => {
-    p.turnLabel = ''
+    setBadge(p, '')
     update(p as unknown as DomItem, { 'data-pickable': 'true' })
-    updatePlayerStats(p)
   })
   setMessage(`Click each player's board in turn. The first one you click goes first.`)
   setButtons({ orderShown: true })
@@ -319,8 +354,7 @@ const pickPlayer = (board: Board): void => {
     return
   }
   session.order.push(player)
-  player.turnLabel = ordinal(session.order.length)
-  updatePlayerStats(player)
+  setBadge(player, ordinal(session.order.length))
   if (session.order.length < session.players.length) {
     setMessage(`${session.order.map(p => p.name).join(', ')} so far. Click the next player in turn.`)
     return
@@ -357,8 +391,7 @@ export const randomOrder = (): void => {
   queueTimeout(() => {
     session.players.forEach(p => update(p as unknown as DomItem, { style: { outline: 'none' } }))
     session.order = shuffled
-    session.order.forEach((p, i) => { p.turnLabel = ordinal(i + 1) })
-    session.players.forEach(p => updatePlayerStats(p))
+    session.order.forEach((p, i) => setBadge(p, ordinal(i + 1)))
     showOrder()
   }, 120)
 }
@@ -405,7 +438,10 @@ const startRound = (order: Player[]): void => {
   if (order.length > 1 && order !== players) {
     reorderBoards(order)
   }
-  players.forEach(p => update(p as unknown as DomItem, { style: { display: '', outline: 'none' } }))
+  players.forEach(p => {
+    setBadge(p, '')
+    update(p as unknown as DomItem, { style: { display: '', outline: 'none' } })
+  })
   setStatsShown(players, true)
   session = null
   done(order)
@@ -419,10 +455,16 @@ export const finishTurn = (): void => {
     return
   }
   const finished = current()
+  readName(finished)
   if (active().index + 1 < active().humans.length) {
     active().index++
     showHandoff()
     hideShips(finished)
+    return
+  }
+  if (active().humans.length === 1) {
+    hideShips(finished)
+    startRound(active().players)
     return
   }
   showReady()

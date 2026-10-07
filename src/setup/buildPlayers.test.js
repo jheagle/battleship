@@ -80,10 +80,11 @@ describe('setup: each board and fleet', () => {
     })
   })
 
-  test('each player has a board and a stats panel, and the stats list every ship', () => {
+  test('each player has a turn label, a board and a stats panel, and the stats list every ship', () => {
     games.flat().forEach(player => {
-      expect(player.children).toHaveLength(2)
-      expect(player.children[0]).toBe(player.board)
+      // The turn label above the board, then the board, then the stats
+      expect(player.children).toHaveLength(3)
+      expect(player.children[1]).toBe(player.board)
       const text = player.playerStats.element.textContent
       expect(text).toContain(player.name)
       fleetNames.forEach((name, i) => expect(text).toContain(`${name} (${fleetSizes[i]}): 100%`))

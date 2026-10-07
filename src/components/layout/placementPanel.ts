@@ -18,6 +18,15 @@ const placementPanel = (message: string = ''): DomItemConfig => ({
         innerHTML: message
       }
     },
+    {
+      nodeName: 'input',
+      attributes: {
+        className: 'placement-name',
+        type: 'text',
+        maxLength: 20,
+        placeholder: 'Your name'
+      }
+    },
     ...[
       { action: 'placement-continue', label: 'Continue' },
       { action: 'placement-randomise', label: 'Randomise' },

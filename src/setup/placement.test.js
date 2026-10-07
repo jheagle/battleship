@@ -199,4 +199,50 @@ describe('the placement phase', () => {
     button('placement-continue').click()
     expect(first.attacker !== second.attacker).toBe(true)
   })
+
+  test('a single player places straight away: no handoff, and the round starts when they are done', async () => {
+    const { players: [human] } = startGame({ humans: 1, robots: 1, placing: true })
+    await settle()
+    expect(shown('placement-continue')).toBe(false)
+    expect(shown('placement-randomise')).toBe(true)
+    button('placement-randomise').click()
+    button('placement-done').click()
+    expect(panel().style.display).toBe('none')
+    expect(human.element.style.display).toBe('')
+  })
+
+  test('a name typed on the placement screen is kept, and shown in the stats', async () => {
+    const [first] = await setUp()
+    expect(document.querySelector('.placement-name').value).toBe('Player 1')
+    button('placement-continue').click()
+    document.querySelector('.placement-name').value = 'Ada'
+    button('placement-randomise').click()
+    button('placement-done').click()
+    expect(first.name).toBe('Ada')
+    expect(first.playerStats.element.textContent).toContain('Ada')
+  })
+
+  test('an empty name keeps the default', async () => {
+    const [first] = await setUp()
+    button('placement-continue').click()
+    document.querySelector('.placement-name').value = '   '
+    button('placement-randomise').click()
+    button('placement-done').click()
+    expect(first.name).toBe('Player 1')
+  })
+
+  test('the order shows above each board, as 1st, then 2nd', async () => {
+    const [first, second] = await setUp()
+    button('placement-continue').click()
+    button('placement-randomise').click()
+    button('placement-done').click()
+    button('placement-continue').click()
+    button('placement-randomise').click()
+    button('placement-done').click()
+    button('begin-order').click()
+    tile(second, 0, 0).element.click()
+    tile(first, 0, 0).element.click()
+    expect(jsonDom.getChildrenByClass('turn-badge', second)[0].element.textContent).toBe('1st')
+    expect(jsonDom.getChildrenByClass('turn-badge', first)[0].element.textContent).toBe('2nd')
+  })
 })
