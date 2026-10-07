@@ -1,5 +1,5 @@
 import attackFleet from '../attack/attackFleet'
-import attackLock from '../attack/attackLock'
+import getAttackLock from '../attack/attackLock'
 import queueTimeout from '../queue'
 import { STAGE_MS, clearTargets } from './displayTargets'
 import selectTargetCoordinate from './selectTargetCoordinate'
@@ -15,9 +15,10 @@ const computerAttack = (player: Player, players: Player[]): Player[] => {
   const opponents = players.filter(p => !p.attacker)
   const victim = selectTargetPlayer(opponents)
   // The lock stays on while the robot's thinking is shown, so nothing can be attacked in the meantime
+  const attackLock = getAttackLock(player)
   attackLock.isLocked = true
   const target = selectTargetCoordinate(victim, opponents) as Tile
-  queueTimeout(() => {
+  queueTimeout(player, () => {
     clearTargets(victim, opponents)
     attackLock.isLocked = false
     return attackFleet(target)

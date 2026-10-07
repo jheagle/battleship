@@ -13,7 +13,7 @@ import type { Board, Player, Tile } from '../types'
 const attackListener = (e: Event, target: DomItem): Player[] => {
   const board = target as unknown as Board
   const tile = matrixDom.getDomItemFromElement(e.target as Node, board) as Tile
-  if (isPlacing()) {
+  if (isPlacing(target)) {
     placeCell(tile, board)
     return []
   }

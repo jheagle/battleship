@@ -3,7 +3,7 @@
  */
 
 import { useGameLifecycle, startGame, settle, hitCells } from '../../tests/helpers/game'
-import attackLock from '../attack/attackLock'
+import getAttackLock from '../attack/attackLock'
 import computerAttack from './computerAttack'
 import { buildShotState } from './densityTargets'
 import { bestTargets, scoreTargets } from './densityScores'
@@ -19,7 +19,7 @@ describe('the robot\'s targeting', () => {
     players.forEach(player => { player.attacker = false })
     const robot = players.find(player => player.isRobot)
     robot.attacker = true
-    attackLock.isLocked = false
+    getAttackLock(robot).isLocked = false
     return { players, robot }
   }
   const damage = (victim, ship, indexes) => {

@@ -12,8 +12,8 @@ import type { DomItem } from 'json-dom/dist/domItem/types'
  */
 const playAgain = (e: Event, button: DomItem): void => {
   const parent = jsonDom.getTopParentItem(button)
-  const { humans, robots, firstGoesFirst } = getGameSettings()
-  startNewGame(parent, humans, robots, firstGoesFirst, getHintSetting())
+  const { humans, robots, firstGoesFirst } = getGameSettings(parent)
+  startNewGame(parent, humans, robots, firstGoesFirst, getHintSetting(parent))
 }
 
 export default playAgain

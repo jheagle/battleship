@@ -1,15 +1,16 @@
+import { getSession } from './gameSession'
+import type { DomItem } from 'json-dom/dist/domItem/types'
+
 /**
  * The heat-map hint setting chosen in the lobby. Off hides it, Optional gives each human a checkbox in their panel, and
  * On shows it to every human on their turn.
  */
 export type HintSetting = 'off' | 'optional' | 'on'
 
-const options: { hints: HintSetting } = { hints: 'optional' }
+export const getHintSetting = (item: DomItem): HintSetting => getSession(item).hints
 
-export const getHintSetting = (): HintSetting => options.hints
-
-export const setHintSetting = (hints: HintSetting): void => {
-  options.hints = hints
+export const setHintSetting = (item: DomItem, hints: HintSetting): void => {
+  getSession(item).hints = hints
 }
 
 /**
@@ -18,12 +19,10 @@ export const setHintSetting = (hints: HintSetting): void => {
  */
 export type GameMode = 'solo' | 'multi' | 'robots'
 
-const mode: { current: GameMode } = { current: 'robots' }
+export const getGameMode = (item: DomItem): GameMode => getSession(item).mode
 
-export const getGameMode = (): GameMode => mode.current
-
-export const setGameMode = (current: GameMode): void => {
-  mode.current = current
+export const setGameMode = (item: DomItem, mode: GameMode): void => {
+  getSession(item).mode = mode
 }
 
 /**
@@ -37,10 +36,8 @@ export interface GameSettings {
   firstGoesFirst: boolean
 }
 
-const settings: { current: GameSettings } = { current: { humans: 0, robots: 2, firstGoesFirst: true } }
+export const getGameSettings = (item: DomItem): GameSettings => getSession(item).settings
 
-export const getGameSettings = (): GameSettings => settings.current
-
-export const setGameSettings = (current: GameSettings): void => {
-  settings.current = current
+export const setGameSettings = (item: DomItem, settings: GameSettings): void => {
+  getSession(item).settings = settings
 }

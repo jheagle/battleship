@@ -4,7 +4,7 @@
 
 import matrixDom from 'matrix-dom'
 import { useGameLifecycle, startGame, settle, click } from '../../tests/helpers/game'
-import attackLock from './attackLock'
+import getAttackLock from './attackLock'
 
 useGameLifecycle()
 
@@ -24,7 +24,7 @@ describe('valid targets for a human', () => {
   test('after a hit, that cell is no longer marked, and when the turn passes the marks are cleared', async () => {
     const { players: [human, robot] } = startGame({ humans: 1, robots: 1, firstGoesFirst: true })
     await settle()
-    attackLock.isLocked = false
+    getAttackLock(robot).isLocked = false
     await click(matrixDom.getDomItemFromPoint(matrixDom.point(0, 0, 0), robot.board), 100)
     expect(human.attacker).toBe(false)
     expect(marked(robot)).toBe(0)
