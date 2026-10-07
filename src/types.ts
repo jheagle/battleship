@@ -23,6 +23,8 @@ declare module 'json-dom/dist/domItem/types' {
       attacker: boolean
       /** The human has switched on the heat-map hint for their own turn. */
       showHint: boolean
+      /** The player has chosen to see their own ships during play (one-player game). */
+      showShips: boolean
       attacks: Attacks
       board: Board
       shipFleet: Ship[]

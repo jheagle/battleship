@@ -13,7 +13,7 @@ describe('the heat-map hint for a human', () => {
     const { players } = startGame({ humans: 1, robots: 1, firstGoesFirst: true })
     await settle()
     const [human, robot] = players
-    const checkbox = document.querySelector('input[type=checkbox]')
+    const checkbox = document.querySelector('input[type=checkbox]:not(.own-ships):not(.all-ships)')
     return { human, robot, checkbox }
   }
   const borderOf = (player, x, y) => matrixDom.getDomItemFromPoint(matrixDom.point(x, y, 0), player.board).element.style.borderColor
@@ -25,7 +25,7 @@ describe('the heat-map hint for a human', () => {
 
   test('only the human\'s panel has the hint checkbox', async () => {
     await setUp()
-    expect(document.querySelectorAll('input[type=checkbox]')).toHaveLength(1)
+    expect(document.querySelectorAll('input[type=checkbox]:not(.own-ships):not(.all-ships)')).toHaveLength(1)
   })
 
   test('switched on during their turn, it shades the cells of the board they attack', async () => {

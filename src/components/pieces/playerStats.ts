@@ -1,4 +1,4 @@
-import { getHintSetting } from '../../setup/gameOptions'
+import { getGameMode, getHintSetting } from '../../setup/gameOptions'
 import type { DomItemConfig } from 'json-dom/dist/domItem/types'
 import type { Player } from '../../types'
 
@@ -35,6 +35,29 @@ const playerStats = (player: Player, status: string = ''): DomItemConfig => ({
           nodeName: 'span',
           attributes: {
             innerHTML: ' Show heat hint on my turn'
+          }
+        }
+      ]
+    }]),
+    ...(player.isRobot || getGameMode() !== 'solo' ? [] : [{
+      nodeName: 'label',
+      attributes: {},
+      children: [
+        {
+          nodeName: 'input',
+          attributes: {
+            className: 'own-ships',
+            type: 'checkbox',
+            checked: Boolean(player.showShips)
+          },
+          eventListeners: {
+            change: [{ listenerFunc: 'shipsListener', listenerArgs: {}, listenerOptions: false }]
+          }
+        },
+        {
+          nodeName: 'span',
+          attributes: {
+            innerHTML: ' Show my ships'
           }
         }
       ]
