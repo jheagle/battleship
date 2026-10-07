@@ -1,6 +1,6 @@
 {
-  "include": ["src/**/*.ts"],
-  "exclude": ["src/**/*.test.*"],
+  "include": ["src/**/*.ts", "server/**/*.ts"],
+  "exclude": ["src/**/*.test.*", "server/**/*.test.*"],
   "compilerOptions": {
     "strict": true,
     "target": "es2020",
