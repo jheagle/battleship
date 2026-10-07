@@ -18,6 +18,8 @@ declare module 'json-dom/dist/domItem/types' {
       isRobot: boolean
       /** The colour this player is identified by on the boards. */
       colour: string
+      /** Their place in the turn order (1st, 2nd, ...) while it is being set at begin-play. */
+      turnLabel: string
       status: number
       turnCnt: number
       attacker: boolean

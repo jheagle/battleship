@@ -271,6 +271,7 @@ const showReady = (): void => {
   if (session.humans.length > 1) {
     session.stage = 'choosing'
     showAll()
+    setStatsShown(session.players, true)
     setMessage('All players are ready. Choose who goes first: Random, or set the order by clicking each player\'s board in turn.')
     setButtons({ randomShown: true, orderShown: true })
     return
@@ -289,8 +290,22 @@ export const chooseOrder = (): void => {
   session.stage = 'ordering'
   session.order = []
   showAll()
+  session.players.forEach(p => {
+    p.turnLabel = ''
+    update(p as unknown as DomItem, { 'data-pickable': 'true' })
+    updatePlayerStats(p)
+  })
   setMessage(`Click each player's board in turn. The first one you click goes first.`)
   setButtons({ orderShown: true })
+}
+
+/**
+ * The word for a place in the order: 1st, 2nd, 3rd, then 4th and so on.
+ * @param place
+ */
+const ordinal = (place: number): string => {
+  const suffix = place % 10 === 1 && place % 100 !== 11 ? 'st' : place % 10 === 2 && place % 100 !== 12 ? 'nd' : place % 10 === 3 && place % 100 !== 13 ? 'rd' : 'th'
+  return `${place}${suffix}`
 }
 
 /**
@@ -304,6 +319,8 @@ const pickPlayer = (board: Board): void => {
     return
   }
   session.order.push(player)
+  player.turnLabel = ordinal(session.order.length)
+  updatePlayerStats(player)
   if (session.order.length < session.players.length) {
     setMessage(`${session.order.map(p => p.name).join(', ')} so far. Click the next player in turn.`)
     return
@@ -318,6 +335,7 @@ const showOrder = (): void => {
   const session = active()
   session.stage = 'chosen'
   showAll()
+  session.players.forEach(p => update(p as unknown as DomItem, { 'data-pickable': 'false' }))
   setMessage(`${session.order.map(p => p.name).join(', then ')} will take turns, in that order. Press Continue to start.`)
   setButtons({ continueShown: true, orderShown: true })
 }
@@ -328,6 +346,7 @@ const showOrder = (): void => {
 export const randomOrder = (): void => {
   const session = active()
   session.stage = 'shuffling'
+  session.players.forEach(p => update(p as unknown as DomItem, { 'data-pickable': 'false' }))
   setButtons({})
   setMessage('Choosing at random...')
   const shuffled = shuffle(session.players)
@@ -338,6 +357,8 @@ export const randomOrder = (): void => {
   queueTimeout(() => {
     session.players.forEach(p => update(p as unknown as DomItem, { style: { outline: 'none' } }))
     session.order = shuffled
+    session.order.forEach((p, i) => { p.turnLabel = ordinal(i + 1) })
+    session.players.forEach(p => updatePlayerStats(p))
     showOrder()
   }, 120)
 }
@@ -364,15 +385,14 @@ const highlightOnly = (chosen: Player): void => {
 }
 
 /**
- * Put the boards in turn order, so the page reads in the order play will go in, and turns follow it.
+ * Put the boards in turn order, so the page reads in the order play will go in, and turns follow it. The game's tree and
+ * the page are both reordered: moving a panel with json-dom would detach it from the page.
  * @param order
  */
 const reorderBoards = (order: Player[]): void => {
   const boards = jsonDom.getParentsByClass('boards', order[0])[0]
-  order.forEach(player => {
-    jsonDom.removeChild(boards, player as unknown as DomItem)
-    boards.appendChild(player as unknown as DomItem)
-  })
+  boards.children = [...order]
+  order.forEach(player => boards.element.appendChild(player.element))
 }
 
 /**

@@ -11,6 +11,7 @@ const playerSet = (board: Board | Record<string, never> = {}, name: string = '')
   name,
   isRobot: false,
   colour: '',
+  turnLabel: '',
   status: 100,
   turnCnt: 0,
   attacker: false,

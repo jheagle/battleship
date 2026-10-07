@@ -130,9 +130,13 @@ describe('the placement phase', () => {
     button('placement-randomise').click()
     button('placement-done').click()
     button('begin-order').click()
+    expect(second.element.getAttribute('data-pickable')).toBe('true')
     tile(second, 0, 0).element.click()
+    expect(second.element.textContent).toContain('1st')
     tile(first, 0, 0).element.click()
+    expect(first.element.textContent).toContain('2nd')
     expect(message()).toContain('Player 2, then Player 1')
+    expect(first.element.getAttribute('data-pickable')).toBe('false')
     button('placement-continue').click()
     expect(panel().style.display).toBe('none')
     expect(first.element.style.display).toBe('')
@@ -140,6 +144,8 @@ describe('the placement phase', () => {
     expect(second.attacker).toBe(true)
     expect(first.attacker).toBe(false)
     expect(jsonDom.getParentsByClass('boards', first)[0].children.map(p => p.name)).toEqual(['Player 2', 'Player 1'])
+    expect(Array.from(document.querySelectorAll('.player')).map(panel => panel.querySelector('strong').textContent)).toEqual(['Player 2', 'Player 1'])
+    expect(document.querySelectorAll('.player').length).toBe(2)
   })
 
   test('once a player is done, their ships are no longer shown', async () => {

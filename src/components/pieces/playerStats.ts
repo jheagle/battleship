@@ -14,7 +14,7 @@ const playerStats = (player: Player, status: string = ''): DomItemConfig => ({
     {
       nodeName: 'span',
       attributes: {
-        innerHTML: `<strong style="color: ${player.colour}">${player.name}</strong>: ${status}`
+        innerHTML: `<strong style="color: ${player.colour}">${player.name}</strong>: ${status}${player.turnLabel ? ` <em>${player.turnLabel}</em>` : ''}`
       }
     },
     ...(player.isRobot || getHintSetting() !== 'optional' ? [] : [{
