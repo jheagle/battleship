@@ -1,19 +1,11 @@
 import jsonDom from 'json-dom'
-import siFunciona from 'si-funciona'
-import boards from '../components/layout/boards'
-import buildPlayers from './buildPlayers'
-import computerAttack from '../robot/computerAttack'
-import updatePlayer from '../attack/updatePlayer'
-import { startPlacement } from './placement'
-import { getGameMode, setHintSetting } from './gameOptions'
-import showShipsControl from '../components/layout/showShipsControl'
+import { startNewGame } from './startNewGame'
+import { getGameMode, setGameSettings } from './gameOptions'
 import type { HintSetting } from './gameOptions'
 import type { DomItem } from 'json-dom/dist/domItem/types'
-import type { Player } from '../types'
 
 /**
- * Logic for setting up and starting a new round
- * (selects random start player and calls computer attack if it is AI starting)
+ * Logic for setting up and starting a new round from the lobby form.
  * @param e
  * @param mainForm
  */
@@ -37,36 +29,15 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
   }
   const firstGoesFirst = (jsonDom.getChildrenByName('first-go-first', mainForm)[0].element as HTMLInputElement).checked
   const hints = (jsonDom.getChildrenByName('hint-setting', mainForm)[0].element as HTMLSelectElement).value as HintSetting
-  setHintSetting(hints)
   if (humans === 0) {
     robots = robots < 2 ? 2 : robots
   }
   if (humans === 1) {
     robots = robots < 1 ? 1 : robots
   }
-  jsonDom.removeChild(parent.body, jsonDom.getChildrenByClass('main-menu', parent.body)[0])
-  // Robots only: one control above the boards shows every ship at once
-  if (getGameMode() === 'robots') {
-    jsonDom.renderHtml(jsonDom.createDomItem(showShipsControl()), parent.body)
-  }
-  const players = jsonDom.renderHtml(boards(buildPlayers(humans, robots)), parent.body).children as Player[]
-  // With hints on for everyone, every human gets them on their turn; with them off or optional, nobody does by default
-  players.filter(player => !player.isRobot).forEach(player => { player.showHint = hints === 'on' })
-  startPlacement(players, parent.body, order => startRound(order, humans > 1 ? undefined : firstGoesFirst))
+  setGameSettings({ humans, robots, firstGoesFirst })
+  startNewGame(parent, humans, robots, firstGoesFirst, hints)
   return false
-}
-
-/**
- * Start the round. With several humans the chosen order decides who goes first. Otherwise the first attacker is the first
- * player, or a random one, as the lobby's first-player choice says.
- * @param order
- * @param firstGoesFirst undefined when the order was chosen, so the first player of it goes first
- */
-const startRound = (order: Player[], firstGoesFirst: boolean | undefined): void => {
-  const firstAttacker = updatePlayer(firstGoesFirst === false ? order[siFunciona.randomInteger(order.length)] : order[0])
-  if (firstAttacker.isRobot) {
-    computerAttack(firstAttacker, order)
-  }
 }
 
 export default beginRound

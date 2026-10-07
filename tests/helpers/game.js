@@ -2,6 +2,8 @@ import jsonDom from 'json-dom'
 import startMenu from '../../src/setup/startMenu'
 import beginRound from '../../src/setup/beginRound'
 import restart from '../../src/setup/restart'
+import playAgain from '../../src/setup/playAgain'
+import returnToLobby from '../../src/setup/returnToLobby'
 import attackListener from '../../src/attack/attackListener'
 import hintListener from '../../src/attack/hintListener'
 import placementListener from '../../src/setup/placementListener'
@@ -34,7 +36,9 @@ export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true, placi
     placementListener,
     presetListener,
     shipsListener,
-    restart
+    restart,
+    playAgain,
+    returnToLobby
   }))
   // Choose the game type that matches the humans, as a player would, which reveals the lobby form
   const preset = humans === 1 ? 'preset-solo' : humans >= 2 ? 'preset-multi' : 'preset-robots'

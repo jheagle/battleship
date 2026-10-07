@@ -174,7 +174,7 @@ describe('robots playing each other', () => {
     attackLock.isLocked = false
     startGame({ humans: 0, robots: 2 })
     await playToTheEnd()
-    document.querySelector('.final-scores input[type=button]').click()
+    document.querySelector('.final-scores .new-game').click()
     await settle()
     expect(document.querySelector('.main-menu')).not.toBeNull()
   }, 60000)

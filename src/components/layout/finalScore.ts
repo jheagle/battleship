@@ -3,7 +3,9 @@ import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../../types'
 
 /**
- * Display the final scores after a game has ended and have a button to restart.
+ * Display the final scores after a game has ended, with three ways to go on: Play Again (same settings,
+ * places ships again), Change Settings (back to the lobby, pre-filled with this game's settings), and Main Menu
+ * (back to choosing the game type).
  * @param players
  */
 const finalScore = (players: Player[] = []): DomItem => jsonDom.createDomItem({
@@ -26,16 +28,51 @@ const finalScore = (players: Player[] = []): DomItem => jsonDom.createDomItem({
       }))
     },
     {
-      nodeName: 'input',
+      nodeName: 'div',
       attributes: {
-        type: 'button',
-        value: 'Restart'
+        className: 'final-scores-actions'
       },
-      eventListeners: {
-        click: [
-          { listenerFunc: 'restart', listenerArgs: {}, listenerOptions: false }
-        ]
-      }
+      children: [
+        {
+          nodeName: 'input',
+          attributes: {
+            className: 'play-again',
+            type: 'button',
+            value: 'Play Again'
+          },
+          eventListeners: {
+            click: [
+              { listenerFunc: 'playAgain', listenerArgs: {}, listenerOptions: false }
+            ]
+          }
+        },
+        {
+          nodeName: 'input',
+          attributes: {
+            className: 'return-to-lobby',
+            type: 'button',
+            value: 'Change Settings'
+          },
+          eventListeners: {
+            click: [
+              { listenerFunc: 'returnToLobby', listenerArgs: {}, listenerOptions: false }
+            ]
+          }
+        },
+        {
+          nodeName: 'input',
+          attributes: {
+            className: 'new-game',
+            type: 'button',
+            value: 'Main Menu'
+          },
+          eventListeners: {
+            click: [
+              { listenerFunc: 'restart', listenerArgs: {}, listenerOptions: false }
+            ]
+          }
+        }
+      ]
     }
   ]
 })

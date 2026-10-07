@@ -5,6 +5,8 @@ import shipsListener from './attack/shipsListener'
 import hintListener from './attack/hintListener'
 import beginRound from './setup/beginRound'
 import restart from './setup/restart'
+import playAgain from './setup/playAgain'
+import returnToLobby from './setup/returnToLobby'
 import startMenu from './setup/startMenu'
 import jsonDom from 'json-dom'
 import { isNode } from 'browser-or-node'
@@ -18,7 +20,9 @@ const battleship = (): void => {
     placementListener,
     presetListener,
     shipsListener,
-    restart
+    restart,
+    playAgain,
+    returnToLobby
   }))
 
   // Trigger game to start if running as a Node module. This used to check
