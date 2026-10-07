@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { useGameLifecycle, click, unhitShipCells, unhitWaterCells, settle, twoHumans } from '../../tests/helpers/game'
+import { useGameLifecycle, click, getPlayers, playToTheEnd, startGame, unhitShipCells, unhitWaterCells, settle, twoHumans } from '../../tests/helpers/game'
 
 useGameLifecycle()
 
@@ -52,10 +52,10 @@ describe('ending the game', () => {
     expect(cell.isHit).toBeFalsy()
   })
 
-  test('the restart button goes back to the menu', async () => {
+  test('the Main Menu button goes back to choosing a game type', async () => {
     const game = await twoHumans()
     await winAsPlayerOne(game)
-    const restart = document.querySelector('.final-scores input[type=button]')
+    const restart = document.querySelector('.final-scores .new-game')
     expect(restart).not.toBeNull()
     restart.click()
     await settle()
@@ -63,4 +63,41 @@ describe('ending the game', () => {
     expect(document.querySelector('.final-scores')).toBeNull()
     expect(document.querySelector('.boards')).toBeNull()
   })
+
+  test('Play Again starts a new multiplayer game with the same settings: it still places ships', async () => {
+    const game = await twoHumans()
+    await winAsPlayerOne(game)
+    document.querySelector('.final-scores .play-again').click()
+    await settle()
+    expect(document.querySelector('.final-scores')).toBeNull()
+    expect(document.querySelector('.main-menu')).toBeNull()
+    // multiplayer still places ships, even with the same settings as last time
+    expect(document.querySelector('.placement')).not.toBeNull()
+    const newPlayers = getPlayers(game.doc)
+    expect(newPlayers).toHaveLength(2)
+    expect(newPlayers.every(player => player.status === 100)).toBe(true)
+  })
+
+  test('Change Settings shows the lobby pre-filled with the game just played, not a fresh preset', async () => {
+    const game = await twoHumans()
+    await winAsPlayerOne(game)
+    document.querySelector('.final-scores .return-to-lobby').click()
+    expect(document.querySelector('.main-menu')).not.toBeNull()
+    expect(document.querySelector('.presets').style.display).toBe('none')
+    const lobby = document.querySelector('.main-menu-form')
+    expect(lobby.style.display).not.toBe('none')
+    expect(document.querySelector('.lobby-title').innerHTML).toBe('Lobby: 2-4 Multiplayer')
+    expect(document.querySelector('input[name=human-players]').value).toBe('2')
+  })
+  test('Play Again starts a new robots-only game straight away: no placement needed', async () => {
+    const game = startGame({ humans: 0, robots: 2 })
+    await playToTheEnd()
+    document.querySelector('.final-scores .play-again').click()
+    await settle(2000)
+    expect(document.querySelector('.final-scores')).toBeNull()
+    expect(document.querySelector('.placement')).toBeNull()
+    expect(document.querySelector('.boards')).not.toBeNull()
+    expect(getPlayers(game.doc)).toHaveLength(2)
+  }, 120000)
+
 })
