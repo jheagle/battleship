@@ -8,6 +8,7 @@ import attackListener from '../../src/attack/attackListener'
 import hintListener from '../../src/attack/hintListener'
 import placementListener from '../../src/setup/placementListener'
 import presetListener from '../../src/setup/presetListener'
+import remoteListener from '../../src/setup/remoteListener'
 import shipsListener from '../../src/attack/shipsListener'
 import attackLock from '../../src/attack/attackLock'
 import waterTile from '../../src/components/pieces/waterTile'
@@ -35,6 +36,7 @@ export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true, placi
     hintListener,
     placementListener,
     presetListener,
+    remoteListener,
     shipsListener,
     restart,
     playAgain,

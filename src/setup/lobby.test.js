@@ -7,6 +7,7 @@ import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
 import startMenu from './startMenu'
 import beginRound from './beginRound'
 import presetListener from './presetListener'
+import remoteListener from './remoteListener'
 import attackListener from '../attack/attackListener'
 import hintListener from '../attack/hintListener'
 import placementListener from './placementListener'
@@ -15,7 +16,7 @@ import restart from './restart'
 useGameLifecycle()
 
 describe('the lobby', () => {
-  const openMenu = () => startMenu(jsonDom.documentDomItem({ beginRound, presetListener, attackListener, hintListener, placementListener, restart }))
+  const openMenu = () => startMenu(jsonDom.documentDomItem({ beginRound, presetListener, remoteListener, attackListener, hintListener, placementListener, restart }))
   const menuItem = (doc, name) => jsonDom.getChildrenByClass(name, doc.body)[0]
   const lobby = doc => menuItem(doc, 'main-menu-form')
   const field = (doc, name) => jsonDom.getChildrenByName(name, lobby(doc))[0].element

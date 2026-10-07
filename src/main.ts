@@ -1,6 +1,7 @@
 import attackListener from './attack/attackListener'
 import placementListener from './setup/placementListener'
 import presetListener from './setup/presetListener'
+import remoteListener from './setup/remoteListener'
 import shipsListener from './attack/shipsListener'
 import hintListener from './attack/hintListener'
 import beginRound from './setup/beginRound'
@@ -19,6 +20,7 @@ const battleship = (): void => {
     hintListener,
     placementListener,
     presetListener,
+    remoteListener,
     shipsListener,
     restart,
     playAgain,

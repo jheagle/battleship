@@ -3,6 +3,7 @@
  */
 
 import presetListener from './presetListener'
+import remoteListener from './remoteListener'
 import jsonDom from 'json-dom'
 import { useGameLifecycle, startGame, getPlayers, attacker } from '../../tests/helpers/game'
 import beginRound from './beginRound'
@@ -62,7 +63,7 @@ describe('setup: who goes first', () => {
 
 describe('setup: beginRound', () => {
   test('ignores a submit which is not aimed at the form itself (an event which only bubbled through)', () => {
-    const doc = startMenu(jsonDom.documentDomItem({ beginRound, presetListener }))
+    const doc = startMenu(jsonDom.documentDomItem({ beginRound, presetListener, remoteListener }))
     const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]
     const preventDefault = jest.fn()
     expect(beginRound({ eventPhase: 3, type: 'submit', preventDefault }, form)).toBe(false)
