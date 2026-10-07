@@ -45,13 +45,13 @@ const startRound = (order: Player[], firstGoesFirst: boolean | undefined): void 
  * @param hints
  */
 export const startNewGame = (parent: DomItemRoot, humans: number, robots: number, firstGoesFirst: boolean, hints: HintSetting): void => {
-  setHintSetting(hints)
+  setHintSetting(parent, hints)
   clearBody(parent)
   // Robots only: one control above the boards shows every ship at once
-  if (getGameMode() === 'robots') {
+  if (getGameMode(parent) === 'robots') {
     jsonDom.renderHtml(jsonDom.createDomItem(showShipsControl()), parent.body)
   }
-  const players = jsonDom.renderHtml(boards(buildPlayers(humans, robots)), parent.body).children as Player[]
+  const players = jsonDom.renderHtml(boards(buildPlayers(humans, parent.body, robots)), parent.body).children as Player[]
   // With hints on for everyone, every human gets them on their turn; with them off or optional, nobody does by default
   players.filter(player => !player.isRobot).forEach(player => { player.showHint = hints === 'on' })
   startPlacement(players, parent.body, order => startRound(order, humans > 1 ? undefined : firstGoesFirst))

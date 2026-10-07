@@ -4,7 +4,7 @@
 
 import matrixDom from 'matrix-dom'
 import { useGameLifecycle, startGame, settle, click, unhitWaterCells } from '../../tests/helpers/game'
-import attackLock from './attackLock'
+import getAttackLock from './attackLock'
 
 useGameLifecycle()
 
@@ -52,7 +52,7 @@ describe('the heat-map hint for a human', () => {
     tick(checkbox)
     await settle(1000)
     expect(isShaded(borderOf(robot, 4, 4))).toBe(true)
-    attackLock.isLocked = false
+    getAttackLock(robot).isLocked = false
     await click(unhitWaterCells(robot)[0], 100) // the queued turn-end steps run in order, so give them a moment; the robot's turn then returns it
     expect(human.attacker).toBe(false)
     expect(isShaded(borderOf(robot, 4, 4))).toBe(false)

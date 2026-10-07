@@ -1,6 +1,6 @@
 import jsonDom from 'json-dom'
 import matrixDom from 'matrix-dom'
-import attackLock from './attackLock'
+import getAttackLock from './attackLock'
 import setHit from '../cells/setHit'
 import updatePlayerStats from './updatePlayerStats'
 import updateScore from './updateScore'
@@ -11,7 +11,7 @@ import type { Player, Ship, Tile } from '../types'
  * @param target
  */
 const attackFleet = (target: Tile): Player[] => {
-  attackLock.isLocked = attackLock.isLocked || false
+  const attackLock = getAttackLock(target)
   let player = jsonDom.getParentsByClass('player', target)[0] as Player
   const players = jsonDom.getParentsByClass('boards', target)[0].children as Player[]
   // Player cannot attack themselves (current attacker), if they have bad status, or a cell which was already hit

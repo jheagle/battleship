@@ -13,10 +13,11 @@ import type { Player } from '../types'
  * Returns an array of players.
  * WARNING: This is a recursive function.
  * @param humans
+ * @param root the game's own root, since a player isn't attached to it yet at this point - see playerStats
  * @param robots
  * @param players
  */
-const buildPlayers = (humans: number, robots: number = 0, players: Player[] = []): Player[] => {
+const buildPlayers = (humans: number, root: DomItem, robots: number = 0, players: Player[] = []): Player[] => {
   if (humans < 1 && robots < 1) {
     return players
   }
@@ -35,11 +36,12 @@ const buildPlayers = (humans: number, robots: number = 0, players: Player[] = []
   }, 10))
   // Robots get a random fleet now. Humans place their own during the placement phase (see placement.ts)
   player.shipFleet = player.isRobot ? defaultFleet(player.board, false) : []
-  // playerStats is a plain config at this point; it becomes a real item once the player is rendered (see beginRound)
-  player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`) as unknown as DomItem
+  // playerStats is a plain config at this point; it becomes a real item once the player is rendered (see beginRound).
+  // It is not attached to root yet either, so root is passed in for it to read the game's settings from instead.
+  player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`, root) as unknown as DomItem
   player.children = [{ nodeName: 'div', attributes: { className: 'turn-badge' } } as unknown as DomItem, player.board, player.playerStats]
   players.push(player)
-  return buildPlayers(--humans, humans < 0 ? --robots : robots, players)
+  return buildPlayers(--humans, root, humans < 0 ? --robots : robots, players)
 }
 
 export default buildPlayers

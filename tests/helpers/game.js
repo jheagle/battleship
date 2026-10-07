@@ -10,7 +10,6 @@ import placementListener from '../../src/setup/placementListener'
 import presetListener from '../../src/setup/presetListener'
 import remoteListener from '../../src/setup/remoteListener'
 import shipsListener from '../../src/attack/shipsListener'
-import attackLock from '../../src/attack/attackLock'
 import waterTile from '../../src/components/pieces/waterTile'
 import jDomMatrix from 'matrix-dom'
 
@@ -125,7 +124,6 @@ export const useGameLifecycle = () => {
   beforeEach(() => {
     jest.useFakeTimers()
     jest.spyOn(console, 'log').mockImplementation(() => {})
-    attackLock.isLocked = false
   })
   afterEach(async () => {
     await settle(60000)

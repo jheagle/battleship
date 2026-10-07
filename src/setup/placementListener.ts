@@ -9,15 +9,15 @@ import type { DomItem } from 'json-dom/dist/domItem/types'
 const placementListener = (e: Event, target: DomItem): void => {
   const className = (e.target as HTMLElement).className
   if (className.includes('placement-continue')) {
-    continueTurn()
+    continueTurn(target)
   } else if (className.includes('placement-randomise')) {
-    randomise()
+    randomise(target)
   } else if (className.includes('placement-done')) {
-    finishTurn()
+    finishTurn(target)
   } else if (className.includes('begin-random')) {
-    randomOrder()
+    randomOrder(target)
   } else if (className.includes('begin-order')) {
-    chooseOrder()
+    chooseOrder(target)
   }
 }
 

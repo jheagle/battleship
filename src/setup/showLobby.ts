@@ -39,7 +39,7 @@ export interface LobbyValues {
 export const showLobby = (menu: DomItem, preset: GamePreset, values: LobbyValues = {}): void => {
   const form = jsonDom.getChildrenByClass('main-menu-form', menu)[0]
   const presets = jsonDom.getChildrenByClass('presets', menu)[0]
-  setGameMode(preset.mode)
+  setGameMode(menu, preset.mode)
   const humanInput = jsonDom.getChildrenByName('human-players', form)[0]
   const robotInput = jsonDom.getChildrenByName('robot-players', form)[0]
   // Limits first: updating an input re-applies its stored value, so the values are set after them

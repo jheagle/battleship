@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 import * as attackFleetModule from './attack/attackFleet'
-import attackLock from './attack/attackLock'
 import jsonDom from 'json-dom'
 import {
   startGame, settle, click, playToTheEnd, cells, unhitWaterCells, useGameLifecycle
@@ -91,7 +90,6 @@ describe('robots playing each other', () => {
     for (let i = 0; i < 4; i++) {
       jest.useFakeTimers()
       jest.spyOn(console, 'log').mockImplementation(() => {})
-      attackLock.isLocked = false
       games.push(await recordGame())
       await settle(60000)
       jest.restoreAllMocks()
@@ -171,7 +169,6 @@ describe('robots playing each other', () => {
   test('the restart button after a robot game goes back to the menu', async () => {
     jest.useFakeTimers()
     jest.spyOn(console, 'log').mockImplementation(() => {})
-    attackLock.isLocked = false
     startGame({ humans: 0, robots: 2 })
     await playToTheEnd()
     document.querySelector('.final-scores .new-game').click()

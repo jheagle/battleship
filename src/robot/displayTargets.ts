@@ -29,12 +29,12 @@ export const outlineBoard = (player: Player, color: string): void => {
  */
 const displayTargets = (cells: HeatCell[], target: Point | undefined, victim: Player, opponents: Player[]): Array<Promise<any>> => {
   return [
-    queueTimeout(() => {
+    queueTimeout(victim, () => {
       opponents.filter(p => p !== victim).forEach(p => outlineBoard(p, '#777'))
       return resetTargets({ targets: cells, victim })
     }, 0),
-    queueTimeout(() => outlineBoard(victim, 'red'), STAGE_MS),
-    queueTimeout(resetTargets, STAGE_MS, { targets: cells, target, victim })
+    queueTimeout(victim, () => outlineBoard(victim, 'red'), STAGE_MS),
+    queueTimeout(victim, resetTargets, STAGE_MS, { targets: cells, target, victim })
   ]
 }
 

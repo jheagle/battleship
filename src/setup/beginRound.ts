@@ -23,7 +23,7 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
     return false
   }
   // Each game type has its own limits: one human; two to four humans; or no humans
-  const mode = getGameMode()
+  const mode = getGameMode(parent)
   if ((mode === 'solo' && humans !== 1) || (mode === 'multi' && (humans < 2 || humans > 4)) || (mode === 'robots' && humans !== 0)) {
     return false
   }
@@ -35,7 +35,7 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
   if (humans === 1) {
     robots = robots < 1 ? 1 : robots
   }
-  setGameSettings({ humans, robots, firstGoesFirst })
+  setGameSettings(parent, { humans, robots, firstGoesFirst })
   startNewGame(parent, humans, robots, firstGoesFirst, hints)
   return false
 }

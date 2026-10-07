@@ -1,5 +1,5 @@
 import { getGameMode, getHintSetting } from '../../setup/gameOptions'
-import type { DomItemConfig } from 'json-dom/dist/domItem/types'
+import type { DomItem, DomItemConfig } from 'json-dom/dist/domItem/types'
 import type { Player } from '../../types'
 
 /**
@@ -7,9 +7,11 @@ import type { Player } from '../../types'
  * on the left, and the ship list is on the right.
  * @param player
  * @param status
+ * @param item any item already attached to the game's root, to read its settings from - defaults to player, which
+ * works once the player is rendered, but not for the first call from buildPlayers (before anything is attached)
  */
-const playerStats = (player: Player, status: string = ''): DomItemConfig => {
-  const hintControl = player.isRobot || getHintSetting() !== 'optional' ? [] : [{
+const playerStats = (player: Player, status: string = '', item: DomItem = player as unknown as DomItem): DomItemConfig => {
+  const hintControl = player.isRobot || getHintSetting(item) !== 'optional' ? [] : [{
     nodeName: 'label',
     attributes: { className: 'stats-control' },
     children: [
@@ -31,7 +33,7 @@ const playerStats = (player: Player, status: string = ''): DomItemConfig => {
       }
     ]
   }]
-  const ownShipsControl = player.isRobot || getGameMode() !== 'solo' ? [] : [{
+  const ownShipsControl = player.isRobot || getGameMode(item) !== 'solo' ? [] : [{
     nodeName: 'label',
     attributes: { className: 'stats-control' },
     children: [

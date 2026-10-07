@@ -15,7 +15,7 @@ import type { DomItem } from 'json-dom/dist/domItem/types'
 const returnToLobby = (e: Event, button: DomItem): DomItemRoot => {
   const root = startMenu(jsonDom.getTopParentItem(button))
   const menu = jsonDom.getChildrenByClass('main-menu', root.body)[0]
-  showLobby(menu, presetForMode(getGameMode()), { ...getGameSettings(), hints: getHintSetting() })
+  showLobby(menu, presetForMode(getGameMode(root)), { ...getGameSettings(root), hints: getHintSetting(root) })
   return root
 }
 

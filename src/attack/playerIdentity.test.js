@@ -3,7 +3,7 @@
  */
 
 import { useGameLifecycle, startGame, settle, click, unhitWaterCells } from '../../tests/helpers/game'
-import attackLock from './attackLock'
+import getAttackLock from './attackLock'
 
 useGameLifecycle()
 
@@ -27,7 +27,7 @@ describe('telling the players apart', () => {
   test('when the turn passes, the outline and the glow are removed', async () => {
     const { players: [human, robot] } = startGame({ humans: 1, robots: 1, firstGoesFirst: true })
     await settle()
-    attackLock.isLocked = false
+    getAttackLock(robot).isLocked = false
     await click(unhitWaterCells(robot)[0], 100)
     expect(human.attacker).toBe(false)
     expect(human.element.style.outline).toBe('none')
