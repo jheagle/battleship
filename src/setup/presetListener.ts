@@ -20,10 +20,11 @@ const presetListener = (e: Event, target: DomItem): void => {
     jsonDom.updateElement(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem)
   }
   const show = (item: DomItem, shown: boolean): void => update(item, { style: { display: shown ? '' : 'none' } })
-  const presetValues: Record<string, { mode: GameMode, title: string, humans: number, robots: number, humansShown: boolean, humansRange: [number, number], robotsMin: number }> = {
-    'preset-solo': { mode: 'solo', title: 'Lobby: Player vs Robots', humans: 1, robots: 1, humansShown: false, humansRange: [1, 1], robotsMin: 1 },
-    'preset-multi': { mode: 'multi', title: 'Lobby: 2-4 Multiplayer', humans: 2, robots: 0, humansShown: true, humansRange: [2, 4], robotsMin: 0 },
-    'preset-robots': { mode: 'robots', title: 'Lobby: Robot Battle', humans: 0, robots: 2, humansShown: false, humansRange: [0, 0], robotsMin: 2 }
+  // With several humans the first player is chosen at begin-play, so the first-player choice is only for the other games
+  const presetValues: Record<string, { mode: GameMode, title: string, humans: number, robots: number, humansShown: boolean, humansRange: [number, number], robotsMin: number, firstShown: boolean }> = {
+    'preset-solo': { mode: 'solo', title: 'Lobby: Player vs Robots', humans: 1, robots: 1, humansShown: false, humansRange: [1, 1], robotsMin: 1, firstShown: true },
+    'preset-multi': { mode: 'multi', title: 'Lobby: 2-4 Multiplayer', humans: 2, robots: 0, humansShown: true, humansRange: [2, 4], robotsMin: 0, firstShown: false },
+    'preset-robots': { mode: 'robots', title: 'Lobby: Robot Battle', humans: 0, robots: 2, humansShown: false, humansRange: [0, 0], robotsMin: 2, firstShown: true }
   }
   const preset = Object.keys(presetValues).find(name => className.includes(name))
   if (preset) {
@@ -38,6 +39,7 @@ const presetListener = (e: Event, target: DomItem): void => {
     ;(robotInput.element as HTMLInputElement).value = String(choice.robots)
     update(jsonDom.getChildrenByClass('human-group', form)[0], { style: { display: choice.humansShown ? '' : 'none' } })
     update(jsonDom.getChildrenByClass('lobby-title', menu)[0], { innerHTML: choice.title })
+    update(jsonDom.getChildrenByClass('first-group', form)[0], { style: { display: choice.firstShown ? '' : 'none' } })
     show(presets, false)
     show(form, true)
   } else if (className.includes('lobby-back')) {

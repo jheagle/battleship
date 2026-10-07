@@ -1,4 +1,4 @@
-import { continueTurn, finishTurn, randomise } from './placement'
+import { chooseOrder, continueTurn, finishTurn, randomOrder, randomise } from './placement'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 
 /**
@@ -14,6 +14,10 @@ const placementListener = (e: Event, target: DomItem): void => {
     randomise()
   } else if (className.includes('placement-done')) {
     finishTurn()
+  } else if (className.includes('begin-random')) {
+    randomOrder()
+  } else if (className.includes('begin-order')) {
+    chooseOrder()
   }
 }
 

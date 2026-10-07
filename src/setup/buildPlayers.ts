@@ -37,7 +37,7 @@ const buildPlayers = (humans: number, robots: number = 0, players: Player[] = []
   player.shipFleet = player.isRobot ? defaultFleet(player.board, false) : []
   // playerStats is a plain config at this point; it becomes a real item once the player is rendered (see beginRound)
   player.playerStats = playerStats(player, `${Math.round(player.status * 100) / 100}%`) as unknown as DomItem
-  player.children = [player.board, player.playerStats]
+  player.children = [{ nodeName: 'div', attributes: { className: 'turn-badge' } } as unknown as DomItem, player.board, player.playerStats]
   players.push(player)
   return buildPlayers(--humans, humans < 0 ? --robots : robots, players)
 }

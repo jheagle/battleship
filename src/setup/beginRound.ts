@@ -47,19 +47,20 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
   const players = jsonDom.renderHtml(boards(buildPlayers(humans, robots)), parent.body).children as Player[]
   // With hints on for everyone, every human gets them on their turn; with them off or optional, nobody does by default
   players.filter(player => !player.isRobot).forEach(player => { player.showHint = hints === 'on' })
-  startPlacement(players, parent.body, () => startRound(players, firstGoesFirst))
+  startPlacement(players, parent.body, order => startRound(order, humans > 1 ? undefined : firstGoesFirst))
   return false
 }
 
 /**
- * Pick the first attacker, and let a robot start if it is one.
- * @param players
- * @param firstGoesFirst
+ * Start the round. With several humans the chosen order decides who goes first. Otherwise the first attacker is the first
+ * player, or a random one, as the lobby's first-player choice says.
+ * @param order
+ * @param firstGoesFirst undefined when the order was chosen, so the first player of it goes first
  */
-const startRound = (players: Player[], firstGoesFirst: boolean): void => {
-  const firstAttacker = updatePlayer(firstGoesFirst ? players[0] : players[siFunciona.randomInteger(players.length)])
+const startRound = (order: Player[], firstGoesFirst: boolean | undefined): void => {
+  const firstAttacker = updatePlayer(firstGoesFirst === false ? order[siFunciona.randomInteger(order.length)] : order[0])
   if (firstAttacker.isRobot) {
-    computerAttack(firstAttacker, players)
+    computerAttack(firstAttacker, order)
   }
 }
 

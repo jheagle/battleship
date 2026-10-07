@@ -90,7 +90,7 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
             {
               nodeName: 'div',
               attributes: {
-                className: 'form-group'
+                className: 'first-group'
               },
               children: [
                 {

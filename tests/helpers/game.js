@@ -62,6 +62,10 @@ export const randomlyPlaceAllHumans = () => {
     const next = name => document.querySelector(`.${name}`)
     if (next('placement-continue').style.display !== 'none') {
       next('placement-continue').click()
+    } else if (next('begin-order').style.display !== 'none') {
+      // Several players choose the order by clicking each board in turn, the first one goes first
+      next('begin-order').click()
+      document.querySelectorAll('.player').forEach(panel => panel.querySelector('.column').click())
     } else {
       next('placement-randomise').click()
       next('placement-done').click()
