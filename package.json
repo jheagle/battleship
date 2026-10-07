@@ -11,6 +11,7 @@
     "htmldocs": "jsdoc -R MAIN.md -c ./.jsdoc.conf.js -d docs",
     "readme": "gulp readme",
     "resolutions": "npx npm-force-resolutions",
+    "serve:lobby": "tsc server/lobbyServer.ts --ignoreConfig --outDir dist/server --module commonjs --target es2020 --moduleResolution node --esModuleInterop --skipLibCheck --ignoreDeprecations 6.0 && node dist/server/lobbyServer.js",
     "test": "gulp testFull",
     "test:quick": "gulp testQuick",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.type-tests.json",

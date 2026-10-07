@@ -1,4 +1,4 @@
-.main-menu-form
+.main-menu-form, .remote-entry, .waiting-room
   margin: 0 auto 3rem
   padding-top: 3rem
   max-width: 400px
@@ -20,11 +20,15 @@
       padding: .4rem .6rem
       width: 18rem
 
-  input[type='submit']
+  input[type='submit'], button.remote-host, button.remote-join
     font-weight: 700
     color: #777
     width: 12rem
+    border: none
     border-bottom: .4rem solid #777
+    background-color: white
+    font-size: 1.6rem
+    cursor: pointer
 
     &:hover
       color: green
@@ -88,12 +92,12 @@
     &:hover
       color: green
 
-.main-menu-form
+.main-menu-form, .remote-entry, .waiting-room
   h2
     color: white
     text-align: center
 
-  .lobby-back
+  .lobby-back, .remote-back, .waiting-room-leave
     float: left
     font-size: 1.4rem
     margin: 0 0 1rem
@@ -106,3 +110,34 @@
 
     &:hover
       color: green
+
+.waiting-room
+  text-align: center
+
+  .waiting-room-code
+    color: white
+    font-size: 1.8rem
+    font-weight: 700
+    clear: both
+
+  .waiting-room-players
+    list-style: none
+    padding: 0
+    margin: 1.5rem 0
+
+    li
+      color: white
+      font-size: 1.6rem
+      margin: .5rem 0
+
+  .waiting-room-status
+    color: #f4a742
+    font-size: 1.4rem
+    min-height: 1.4rem
+
+.remote-entry
+  .remote-status
+    color: #f4a742
+    font-size: 1.4rem
+    text-align: center
+    min-height: 1.4rem
