@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import jsonDom from 'json-dom'
 import matrixDom from 'matrix-dom'
 import { useGameLifecycle, startGame, settle, click } from '../../tests/helpers/game'
 
@@ -101,7 +102,7 @@ describe('the placement phase', () => {
     expect(first.playerStats.element.style.display).toBe('none')
   })
 
-  test('after the last player is done, everyone is asked to confirm, with no board or ship showing', async () => {
+  test('after the last player is done, everyone is asked to choose who goes first, with the boards shown and no ship showing', async () => {
     const [first, second] = await setUp()
     button('placement-continue').click()
     button('placement-randomise').click()
@@ -110,15 +111,17 @@ describe('the placement phase', () => {
     button('placement-randomise').click()
     button('placement-done').click()
     expect(panel().style.display).not.toBe('none')
-    expect(message()).toContain('All players are ready')
-    expect(first.element.style.display).toBe('none')
-    expect(second.element.style.display).toBe('none')
+    expect(message()).toContain('Choose who goes first')
+    expect(first.element.style.display).toBe('')
+    expect(second.element.style.display).toBe('')
+    expect(shown('begin-order')).toBe(true)
+    expect(shown('begin-random')).toBe(true)
     first.shipFleet.forEach(ship => ship.parts.forEach(part => {
       expect(matrixDom.getDomItemFromPoint(part.point, first.board).element.style.backgroundColor).toBe('')
     }))
   })
 
-  test('Continue on the ready screen starts the round, with every board and stats shown', async () => {
+  test('setting the order by clicking the boards, then Continue, starts the round with the first board clicked going first', async () => {
     const [first, second] = await setUp()
     button('placement-continue').click()
     button('placement-randomise').click()
@@ -126,12 +129,17 @@ describe('the placement phase', () => {
     button('placement-continue').click()
     button('placement-randomise').click()
     button('placement-done').click()
+    button('begin-order').click()
+    tile(second, 0, 0).element.click()
+    tile(first, 0, 0).element.click()
+    expect(message()).toContain('Player 2, then Player 1')
     button('placement-continue').click()
     expect(panel().style.display).toBe('none')
     expect(first.element.style.display).toBe('')
     expect(second.element.style.display).toBe('')
-    expect(first.playerStats.element.style.display).toBe('')
-    expect(first.attacker || second.attacker).toBe(true)
+    expect(second.attacker).toBe(true)
+    expect(first.attacker).toBe(false)
+    expect(jsonDom.getParentsByClass('boards', first)[0].children.map(p => p.name)).toEqual(['Player 2', 'Player 1'])
   })
 
   test('once a player is done, their ships are no longer shown', async () => {
@@ -166,5 +174,23 @@ describe('the placement phase', () => {
       .filter(p => tile(first, p.x, p.y).element.className.includes('valid-end'))
     expect(marked).toHaveLength(0)
     expect(first.shipFleet).toHaveLength(0)
+  })
+
+  test('Random animates over the players, then chooses a full order, and Continue starts the round with its first player', async () => {
+    const [first, second] = await setUp()
+    button('placement-continue').click()
+    button('placement-randomise').click()
+    button('placement-done').click()
+    button('placement-continue').click()
+    button('placement-randomise').click()
+    button('placement-done').click()
+    button('begin-random').click()
+    expect(message()).toContain('Choosing at random')
+    await settle(3000)
+    expect(message()).toContain('will take turns, in that order')
+    expect(message()).toContain('Player 1')
+    expect(message()).toContain('Player 2')
+    button('placement-continue').click()
+    expect(first.attacker !== second.attacker).toBe(true)
   })
 })

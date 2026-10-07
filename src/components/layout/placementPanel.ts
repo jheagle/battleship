@@ -21,7 +21,9 @@ const placementPanel = (message: string = ''): DomItemConfig => ({
     ...[
       { action: 'placement-continue', label: 'Continue' },
       { action: 'placement-randomise', label: 'Randomise' },
-      { action: 'placement-done', label: 'Done' }
+      { action: 'placement-done', label: 'Done' },
+      { action: 'begin-random', label: 'Random' },
+      { action: 'begin-order', label: 'Set order' }
     ].map(({ action, label }) => ({
       nodeName: 'button',
       attributes: {

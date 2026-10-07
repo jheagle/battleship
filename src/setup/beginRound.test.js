@@ -51,14 +51,12 @@ describe('setup: who goes first', () => {
     }
   })
 
-  test('otherwise exactly one player attacks first, and every player has a chance', () => {
-    const firsts = new Set()
-    for (let i = 0; i < 60; i++) {
+  test('with several players, the order they set decides: the first player picked goes first, and only one does', () => {
+    for (let i = 0; i < 10; i++) {
       const { players } = startGame({ humans: 3, firstGoesFirst: false })
       expect(players.filter(player => player.attacker)).toHaveLength(1)
-      firsts.add(attacker(players).name)
+      expect(players[0].attacker).toBe(true)
     }
-    expect(firsts.size).toBe(3)
   })
 })
 
