@@ -15,6 +15,7 @@ const playerSet = (board: Board | Record<string, never> = {}, name: string = '')
   turnCnt: 0,
   attacker: false,
   showHint: false,
+  showShips: false,
   attacks: { hit: 0, miss: 0, sunk: 0 },
   board,
   shipFleet: [],

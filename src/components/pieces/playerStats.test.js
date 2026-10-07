@@ -31,7 +31,7 @@ describe('playerStats', () => {
   })
 
   test('a human has the heat-hint checkbox, a robot does not', () => {
-    const hasCheckbox = stats => stats.children.some(child => child.nodeName === 'label')
+    const hasCheckbox = stats => (stats.children.find(child => child.attributes.className === 'player-controls') || { children: [] }).children.some(child => child.nodeName === 'label')
     expect(hasCheckbox(playerStats({ ...player, isRobot: false }, ''))).toBe(true)
     expect(hasCheckbox(playerStats({ ...player, isRobot: true }, ''))).toBe(false)
   })

@@ -6,6 +6,7 @@ import attackListener from '../../src/attack/attackListener'
 import hintListener from '../../src/attack/hintListener'
 import placementListener from '../../src/setup/placementListener'
 import presetListener from '../../src/setup/presetListener'
+import shipsListener from '../../src/attack/shipsListener'
 import attackLock from '../../src/attack/attackLock'
 import waterTile from '../../src/components/pieces/waterTile'
 import jDomMatrix from 'matrix-dom'
@@ -32,6 +33,7 @@ export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true, placi
     hintListener,
     placementListener,
     presetListener,
+    shipsListener,
     restart
   }))
   // Choose the game type that matches the humans, as a player would, which reveals the lobby form

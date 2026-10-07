@@ -6,6 +6,7 @@ import computerAttack from '../robot/computerAttack'
 import updatePlayer from '../attack/updatePlayer'
 import { startPlacement } from './placement'
 import { getGameMode, setHintSetting } from './gameOptions'
+import showShipsControl from '../components/layout/showShipsControl'
 import type { HintSetting } from './gameOptions'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
@@ -44,6 +45,10 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
     robots = robots < 1 ? 1 : robots
   }
   jsonDom.removeChild(parent.body, jsonDom.getChildrenByClass('main-menu', parent.body)[0])
+  // Robots only: one control above the boards shows every ship at once
+  if (getGameMode() === 'robots') {
+    jsonDom.renderHtml(jsonDom.createDomItem(showShipsControl()), parent.body)
+  }
   const players = jsonDom.renderHtml(boards(buildPlayers(humans, robots)), parent.body).children as Player[]
   // With hints on for everyone, every human gets them on their turn; with them off or optional, nobody does by default
   players.filter(player => !player.isRobot).forEach(player => { player.showHint = hints === 'on' })
