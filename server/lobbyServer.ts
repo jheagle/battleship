@@ -4,18 +4,22 @@ import jsonDom from 'json-dom'
 import { Server, Socket } from 'socket.io'
 import { startRoomGame, watchRoomGame } from './gameplay'
 import type { Server as HttpServer } from 'http'
-import type { Player } from '../src/types'
+import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { ForwardedEvent } from 'json-dom/dist/events/types'
 import type { HintSetting } from '../src/setup/gameOptions'
 import type { RoomGame } from './gameplay'
 
+/** The fewest players a game can start with - nobody to attack otherwise. */
+const MIN_PLAYERS_TO_START = 2
+
 /**
- * A redacted player, as sent over the wire: still circularly linked in memory (parentItem, matrix-dom's own
+ * A redacted body, as sent over the wire: still circularly linked in memory (parentItem, matrix-dom's own
  * internal references) like any live DomItem, which socket.io's own payload encoding cannot walk directly - this
  * strips exactly what domItemToJson already strips for any other json-dom consumer (element/parentItem/...), then
  * parses it straight back to a plain object, since socket.io does its own JSON encoding over the wire.
- * @param players
+ * @param body
  */
-const forTransport = (players: Player[]): object[] => players.map(player => JSON.parse(jsonDom.domItemToJson(player)))
+const forTransport = (body: DomItem): object => JSON.parse(jsonDom.domItemToJson(body))
 
 /** Up to four players in a room, the same limit as a local multiplayer game. */
 const MAX_PLAYERS = 4
@@ -40,6 +44,7 @@ interface Room {
   hostId: string
   players: Map<string, string>
   game?: RoomGame
+  broadcastGame?: () => void
 }
 
 /**
@@ -120,9 +125,26 @@ export const createLobbyServer = (): HttpServer => {
         ack({ error: 'The game has already started' })
         return
       }
-      room.game = startRoomGame([...room.players.keys()], hints, firstGoesFirst)
-      watchRoomGame(room.game, (socketId, redacted) => io.to(socketId).emit('gameUpdate', forTransport(redacted)))
+      if (room.players.size < MIN_PLAYERS_TO_START) {
+        ack({ error: `Need at least ${MIN_PLAYERS_TO_START} players to start` })
+        return
+      }
+      room.game = startRoomGame([...room.players.entries()], hints, firstGoesFirst)
+      room.broadcastGame = watchRoomGame(room.game, (socketId, redactedBody) => io.to(socketId).emit('gameUpdate', forTransport(redactedBody)))
       ack({ started: true })
+    })
+
+    socket.on('gameAction', (envelope: ForwardedEvent) => {
+      const room = currentRoom ? rooms.get(currentRoom) : undefined
+      if (!room?.game) {
+        return
+      }
+      // Plenty of real actions run entirely synchronously (continueTurn, placeCell, finishTurn...), queuing
+      // nothing at all - watchRoomGame's own queue hook alone would never see them, so broadcast again
+      // unconditionally here too; a queued action's own later pushes (robot turns, animations) still happen
+      // on top of this via that hook, unaffected.
+      jsonDom.receiveForwardedEvent(room.game.root, envelope)
+      room.broadcastGame?.()
     })
 
     socket.on('disconnect', () => {

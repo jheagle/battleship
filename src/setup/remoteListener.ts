@@ -1,10 +1,12 @@
 import jsonDom from 'json-dom'
-import { createRoom, joinRoom, onRoomUpdate, onRoomClosed, disconnectLobbySocket } from '../network/lobbySocket'
+import { connectLobbySocket, createRoom, joinRoom, onRoomUpdate, onRoomClosed, disconnectLobbySocket, getSocketId, startGame } from '../network/lobbySocket'
+import { enterRemoteGame } from '../network/remoteGame'
 import { show, update } from './showLobby'
 import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { HintSetting } from './gameOptions'
 import type { RoomState } from '../../server/lobbyServer'
 
-/** Replace the waiting room's player list and room code with a freshly-received room state. */
+/** Replace the waiting room's player list, room code and host controls with a freshly-received room state. */
 const renderRoomState = (menu: DomItem, state: RoomState): void => {
   const list = jsonDom.getChildrenByClass('waiting-room-players', menu)[0]
   list.children.slice().forEach((child: DomItem) => jsonDom.removeChild(list, child))
@@ -15,6 +17,7 @@ const renderRoomState = (menu: DomItem, state: RoomState): void => {
     }), list)
   })
   update(jsonDom.getChildrenByClass('waiting-room-code', menu)[0], { innerHTML: `Room Code: ${state.roomCode}` })
+  show(jsonDom.getChildrenByClass('waiting-room-host-controls', menu)[0], state.hostId === getSocketId())
 }
 
 /** Leave whatever room is open and show the game types again, clearing any status message. */
@@ -60,6 +63,22 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
   }
   if (className.includes('waiting-room-leave')) {
     leaveToPresets(menu)
+    return
+  }
+  if (className.includes('waiting-room-start')) {
+    const waitingRoom = jsonDom.getChildrenByClass('waiting-room', menu)[0]
+    const hints = (jsonDom.getChildrenByName('waiting-room-hints', waitingRoom)[0].element as HTMLSelectElement).value as HintSetting
+    const firstGoesFirst = (jsonDom.getChildrenByName('waiting-room-first', waitingRoom)[0].element as HTMLInputElement).checked
+    const root = jsonDom.getTopParentItem(target)
+    // Registered before starting the game, not after, so it cannot miss the first gameUpdate - the server pushes
+    // it as soon as the game is built, which can beat a listener registered only once the ack comes back.
+    const firstUpdate = new Promise<object>(resolve => connectLobbySocket().once('gameUpdate', resolve))
+    const ack = await startGame(hints, firstGoesFirst)
+    if ('error' in ack) {
+      update(jsonDom.getChildrenByClass('waiting-room-status', waitingRoom)[0], { innerHTML: ack.error })
+      return
+    }
+    enterRemoteGame(root, await firstUpdate)
     return
   }
 
