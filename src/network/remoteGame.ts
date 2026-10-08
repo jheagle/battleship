@@ -2,11 +2,84 @@ import jsonDom from 'json-dom'
 import { onGameUpdate, sendGameAction } from './lobbySocket'
 import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
 
+/** A pushed body carries the placement deadline as a plain attribute - see remotePlacement.ts's startRemotePlacement. */
+interface RedactedBody {
+  attributes?: { 'data-placement-deadline'?: string }
+  children: object[]
+}
+
 /** Remove every one of a parent's children - the same pattern startNewGame's clearBody uses locally. */
 const clearChildren = (parent: DomItem): void => {
   for (let i = parent.children.length - 1; i >= 0; --i) {
     jsonDom.removeChild(parent, parent.children[i])
   }
+}
+
+/** The placement deadline a pushed body carries, if placement is still running. */
+const deadlineOf = (redactedBody: RedactedBody): number | null => {
+  const raw = redactedBody.attributes?.['data-placement-deadline']
+  return raw ? Number(raw) : null
+}
+
+// The countdown is cosmetic only (the server's own timer is the one that actually fires - see
+// PLACEMENT_TIMEOUT_MS), so it is kept entirely outside json-dom's own tree: renderInto below wipes and rebuilds
+// root.body's children on every single update, which would reset a ticking display right as it ticks. Plain DOM
+// state module-wide is safe because the app only ever has one remote game active (its one real root) at a time -
+// see enterRemoteGame's own comment on reusing the app's existing root instead of a second one.
+let countdownElement: HTMLElement | null = null
+let countdownInterval: ReturnType<typeof setInterval> | null = null
+let countdownDeadline: number | null = null
+
+const renderCountdown = (): void => {
+  if (!countdownElement) {
+    return
+  }
+  if (countdownDeadline === null) {
+    countdownElement.style.display = 'none'
+    return
+  }
+  const secondsLeft = Math.max(0, Math.ceil((countdownDeadline - Date.now()) / 1000))
+  countdownElement.style.display = ''
+  countdownElement.textContent = `Placing ships - ${secondsLeft}s left`
+}
+
+/** Create the countdown element if there is not already a live one in the page - not just a non-null reference:
+ * something else clearing the page for a fresh game (without going through leaveRemoteGame) can detach the old
+ * one from the document while this module's own reference to it lives on. */
+const ensureCountdownElement = (): void => {
+  if (countdownElement?.isConnected) {
+    return
+  }
+  countdownElement = document.createElement('div')
+  countdownElement.className = 'remote-placement-countdown'
+  countdownElement.style.cssText = 'position: fixed; top: 0.5em; right: 0.5em; padding: 0.4em 0.8em; ' +
+    'background: #222; color: #fff; border-radius: 4px; font: 14px sans-serif; z-index: 1000;'
+  document.body.appendChild(countdownElement)
+}
+
+/** Start, update, or stop the visual countdown, as each new deadline (or its absence) comes in. */
+const setCountdownDeadline = (deadline: number | null): void => {
+  countdownDeadline = deadline
+  if (deadline === null) {
+    renderCountdown()
+    return
+  }
+  ensureCountdownElement()
+  if (countdownInterval === null) {
+    countdownInterval = setInterval(renderCountdown, 250)
+  }
+  renderCountdown()
+}
+
+/** Remove the countdown entirely - called once the remote game is left. */
+const stopCountdown = (): void => {
+  if (countdownInterval !== null) {
+    clearInterval(countdownInterval)
+    countdownInterval = null
+  }
+  countdownElement?.remove()
+  countdownElement = null
+  countdownDeadline = null
 }
 
 /**
@@ -41,14 +114,19 @@ const renderInto = (root: DomItemRoot, redactedBody: object): void => {
  * @param root
  * @param firstUpdate the redacted body already received (the game has already started by the time this is called)
  */
-export const enterRemoteGame = (root: DomItemRoot, firstUpdate: object): void => {
+export const enterRemoteGame = (root: DomItemRoot, firstUpdate: RedactedBody): void => {
   jsonDom.setForwardEvents(sendGameAction, root)
   renderInto(root, firstUpdate)
-  onGameUpdate(redactedBody => renderInto(root, redactedBody))
+  setCountdownDeadline(deadlineOf(firstUpdate))
+  onGameUpdate(redactedBody => {
+    renderInto(root, redactedBody as RedactedBody)
+    setCountdownDeadline(deadlineOf(redactedBody as RedactedBody))
+  })
 }
 
 /** Stop forwarding and clear whatever the remote game last rendered, so the root can go back to running locally. */
 export const leaveRemoteGame = (root: DomItemRoot): void => {
   delete root.forwardEvents
   clearChildren(root.body)
+  stopCountdown()
 }

@@ -172,25 +172,73 @@ describe('the lobby server', () => {
 
     test('a forwarded action actually runs on the server and both players see the result', async () => {
       const { host, initialView } = await setUpStartedGame()
-      // Two humans start at the handoff screen ("Alice: the other players look away..."), where Continue is the
-      // only shown button - the panel is the body's second child (boards is rendered first).
-      const panel = initialView.children[1]
+      // Both humans place simultaneously, each on their own board - there is no shared handoff panel any more.
+      // Alice is players[0] (the host), with her own placement panel as one of her own subtree's children.
+      const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
+      const alice = initialView.children[boardsIndex].children[0]
+      const panelIndex = alice.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
+      const panel = alice.children[panelIndex]
       const buttonIndex = (className: string): number => panel.children.findIndex((child: any) => child.attributes?.className === className)
-      const continueIndex = buttonIndex('placement-continue')
-      expect(panel.children[buttonIndex('placement-randomise')].attributes.style.display).toBe('none')
+      const randomiseIndex = buttonIndex('remote-placement-randomise')
+      expect(panel.children[buttonIndex('remote-placement-ready')].attributes.disabled).toBe(true)
 
       const nextUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
       // The path is relative to the server's real root (#document), not the pushed body directly: root.children[1]
-      // is the body itself, so the body's own children (boards, placement) sit one level deeper than they do when
-      // just looking at the pushed payload (which IS the body already).
-      host.emit('gameAction', { itemPath: [1, 1, continueIndex], eventType: 'click', listenerFunc: 'placementListener', data: [] })
+      // is the body itself, so the body's own children (boards, remote-ordering) sit one level deeper than they
+      // do when just looking at the pushed payload (which IS the body already).
+      host.emit('gameAction', { itemPath: [1, boardsIndex, 0, panelIndex, randomiseIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       const updatedView = await nextUpdate
 
-      // Continue moved the real session from handoff to placing - only observable, from the outside, through the
-      // panel's own buttons changing which of them are shown.
-      const updatedPanel = updatedView.children[1]
-      expect(updatedPanel.children[buttonIndex('placement-randomise')].attributes.style.display).not.toBe('none')
+      // Randomise fully placed Alice's fleet - nothing left pending, so Ready is no longer disabled.
+      const updatedAlice = updatedView.children[boardsIndex].children[0]
+      const updatedPanel = updatedAlice.children[panelIndex]
+      expect(updatedPanel.children[buttonIndex('remote-placement-ready')].attributes.disabled).toBeFalsy()
     })
+
+    // A longer budget than the suite's default: several real round trips in sequence (two ready-ups, a 150ms
+    // negative-result race, then a final confirming click), which can run past 5000ms under load.
+    test('only the host can choose the turn order, once everyone has placed', async () => {
+      const { host, joiner, initialView } = await setUpStartedGame()
+      const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
+      const panelIndex = initialView.children[boardsIndex].children[0].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
+      const panel = initialView.children[boardsIndex].children[0].children[panelIndex]
+      const randomiseIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
+      const readyIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-ready')
+      // Every change broadcasts to every player, so host always sees a fresh gameUpdate after either player's
+      // action - awaiting that each step keeps the two players' actions from racing each other over the wire.
+      const readyUp = async (socket: ClientSocket, playerIndex: number): Promise<any> => {
+        const path = (buttonIndex: number): number[] => [1, boardsIndex, playerIndex, panelIndex, buttonIndex]
+        const afterRandomise = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+        socket.emit('gameAction', { itemPath: path(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        await afterRandomise
+        const afterReady = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+        socket.emit('gameAction', { itemPath: path(readyIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        return afterReady
+      }
+
+      await readyUp(host, 0)
+      const choosingView = await readyUp(joiner, 1)
+
+      const orderingIndex = choosingView.children.findIndex((child: any) => child.attributes?.className === 'remote-ordering')
+      const orderingPanel = choosingView.children[orderingIndex]
+      // Set order (not Random) on purpose - it transitions synchronously with no queued animation steps of its
+      // own, so nothing is left running past this test's end to interfere with whichever test runs next.
+      const setOrderIndex = orderingPanel.children.findIndex((child: any) => child.attributes?.className === 'remote-order-set')
+      expect(orderingPanel.children.find((child: any) => child.attributes?.className === 'remote-ordering-message').attributes.innerHTML).toMatch(/choose how/i)
+
+      // A non-host's attempt is silently ignored - nothing gets pushed as a result of it at all.
+      const sawUpdateFromJoiner = new Promise<string>(resolve => host.once('gameUpdate', () => resolve('update')))
+      joiner.emit('gameAction', { itemPath: [1, orderingIndex, setOrderIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      const raceResult = await Promise.race([sawUpdateFromJoiner, new Promise<string>(resolve => setTimeout(() => resolve('timeout'), 150))])
+      expect(raceResult).toBe('timeout')
+
+      // The host's own click, right after, really does work - proving the harness itself is sound, not just quiet.
+      const hostChose = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      host.emit('gameAction', { itemPath: [1, orderingIndex, setOrderIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      const orderingView = await hostChose
+      const orderingMessage = orderingView.children[orderingIndex].children.find((child: any) => child.attributes?.className === 'remote-ordering-message')
+      expect(orderingMessage.attributes.innerHTML).toMatch(/click each player/i)
+    }, 15000)
 
     test('an action for a room with no started game is silently ignored', async () => {
       const lonelyHost = connect()
