@@ -37,6 +37,7 @@ interface RemotePlacementState {
   playerState: Map<Player, RemotePlayerState>
   order: Player[]
   done: (order: Player[]) => void
+  onTimerChange: () => void
 }
 
 const sessions = new WeakMap<DomItemRoot, RemotePlacementState>()
@@ -115,11 +116,17 @@ const updateOrderingPanel = (session: RemotePlacementState, root: DomItemRoot): 
 /**
  * Begin a remote game's placement phase: every human places their own ships on their own board at the same
  * time - no handoff, no "look away". `done` runs once the order is set, with the order play will take.
+ * `onTimerChange` runs whenever the deadline below actually fires and changes state on its own - every other
+ * state change in this module happens inside a function a dispatched/forwarded click calls directly, which the
+ * server's own broadcast-after-dispatch already covers; the deadline is the one change that happens on a raw
+ * timer with nothing else watching for it, so without this hook a client that lets it expire sees nothing at
+ * all, even though the server's own state has already moved on.
  * @param players
  * @param body
  * @param done
+ * @param onTimerChange
  */
-export const startRemotePlacement = (players: Player[], body: DomItem, done: (order: Player[]) => void): void => {
+export const startRemotePlacement = (players: Player[], body: DomItem, done: (order: Player[]) => void, onTimerChange: () => void = () => {}): void => {
   const root = jsonDom.getTopParentItem(body) as DomItemRoot
   const playerState = new Map(players.map(player => [player, { pending: [...defaultShipSpecs], start: null, ready: false }]))
   // unref so an unfinished placement (an abandoned room, or just a test that never lets this fire) never keeps
@@ -134,7 +141,8 @@ export const startRemotePlacement = (players: Player[], body: DomItem, done: (or
     players,
     playerState,
     order: [],
-    done
+    done,
+    onTimerChange
   }
   sessions.set(root, session)
   update(root.body, { 'data-placement-deadline': String(session.deadline) })
@@ -254,6 +262,7 @@ const autoFinishPlacement = (root: DomItemRoot): void => {
     renderPanel(session, player)
   })
   beginOrdering(session, root)
+  session.onTimerChange()
 }
 
 /** The Ready button: locks a player's own fleet in once nothing is left pending. */

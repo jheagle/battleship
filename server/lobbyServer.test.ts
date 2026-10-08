@@ -240,6 +240,84 @@ describe('the lobby server', () => {
       expect(orderingMessage.attributes.innerHTML).toMatch(/click each player/i)
     }, 15000)
 
+    // Every independent remote client renders both boards, live and clickable - nothing but this guard stops a
+    // click from resolving against any board regardless of whose turn it actually is or which socket sent it.
+    test('only the current attacker\'s own socket can act once real gameplay begins', async () => {
+      const { host, joiner, initialView } = await setUpStartedGame()
+      const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
+      const panelIndex = initialView.children[boardsIndex].children[0].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
+      const panel = initialView.children[boardsIndex].children[0].children[panelIndex]
+      const randomiseIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
+      const readyIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-ready')
+      const readyUp = async (socket: ClientSocket, playerIndex: number): Promise<any> => {
+        const path = (buttonIndex: number): number[] => [1, boardsIndex, playerIndex, panelIndex, buttonIndex]
+        const afterRandomise = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+        socket.emit('gameAction', { itemPath: path(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        await afterRandomise
+        const afterReady = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+        socket.emit('gameAction', { itemPath: path(readyIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        return afterReady
+      }
+      await readyUp(host, 0)
+      const choosingView = await readyUp(joiner, 1)
+
+      const orderingIndex = choosingView.children.findIndex((child: any) => child.attributes?.className === 'remote-ordering')
+      const setOrderIndex = choosingView.children[orderingIndex].children.findIndex((child: any) => child.attributes?.className === 'remote-order-set')
+      const afterBeginOrderSet = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      host.emit('gameAction', { itemPath: [1, orderingIndex, setOrderIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      await afterBeginOrderSet
+
+      // Host (the only one allowed to during ordering) clicks Alice's board, then Bob's - Alice goes first.
+      const boardIndexOf = (playerIndex: number): number => initialView.children[boardsIndex].children[playerIndex].children.findIndex((child: any) => child.attributes?.className === 'matrix')
+      const tilePath = (playerIndex: number): number[] => [1, boardsIndex, playerIndex, boardIndexOf(playerIndex), 0, 0, 0]
+      const afterFirstPick = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      host.emit('gameAction', { itemPath: tilePath(0), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      await afterFirstPick
+      const afterSecondPick = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      host.emit('gameAction', { itemPath: tilePath(1), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      const gameView = await afterSecondPick
+
+      const attackerIndex = gameView.children[boardsIndex].children.findIndex((player: any) => player.attacker)
+      expect(attackerIndex).toBeGreaterThanOrEqual(0)
+      const attackerSocket = attackerIndex === 0 ? host : joiner
+      const nonAttackerSocket = attackerIndex === 0 ? joiner : host
+      const victimIndex = attackerIndex === 0 ? 1 : 0
+
+      // updatePlayer (the shared engine, unrelated to this fix) queues several of its own follow-up updates on
+      // every turn change - valid-target highlighting, the attacker's outline, stats, a 400ms attack-lock
+      // release - each resolving through the same session queue watchRoomGame's own broadcast hook wraps, so
+      // each one triggers its own gameUpdate push well after this handler's own immediate one, on no fixed
+      // schedule under test-suite load. Waiting for a quiet stretch (no gameUpdate for 300ms) rather than a
+      // fixed delay keeps the next check honest - racing a short window while one of these is still in flight
+      // would catch one of those instead of whatever joiner's own blocked click did or didn't do.
+      await new Promise<void>(resolve => {
+        let quietTimer: ReturnType<typeof setTimeout>
+        const onUpdate = (): void => {
+          clearTimeout(quietTimer)
+          quietTimer = setTimeout(finish, 300)
+        }
+        const finish = (): void => {
+          host.off('gameUpdate', onUpdate)
+          resolve()
+        }
+        host.on('gameUpdate', onUpdate)
+        quietTimer = setTimeout(finish, 300)
+      })
+
+      // The non-attacker's own socket, attacking the real victim's board: silently ignored - not their turn.
+      const sawUpdateFromNonAttacker = new Promise<string>(resolve => host.once('gameUpdate', () => resolve('update')))
+      nonAttackerSocket.emit('gameAction', { itemPath: tilePath(victimIndex), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      const raceResult = await Promise.race([sawUpdateFromNonAttacker, new Promise<string>(resolve => setTimeout(() => resolve('timeout'), 150))])
+      expect(raceResult).toBe('timeout')
+
+      // The real attacker's own socket, attacking the same cell, right after: this one actually lands.
+      const afterRealAttack = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      attackerSocket.emit('gameAction', { itemPath: tilePath(victimIndex), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      const attackedView = await afterRealAttack
+      const victimTile = attackedView.children[boardsIndex].children[victimIndex].children[boardIndexOf(victimIndex)].children[0].children[0].children[0]
+      expect(victimTile.isHit).toBe(true)
+    }, 15000)
+
     test('an action for a room with no started game is silently ignored', async () => {
       const lonelyHost = connect()
       await emit<RoomState>(lonelyHost, 'createRoom', { name: 'Carol' })

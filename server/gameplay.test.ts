@@ -4,6 +4,8 @@
 import './installPseudoDom'
 import matrixDom from 'matrix-dom'
 import { startRoomGame, watchRoomGame } from './gameplay'
+import { PLACEMENT_TIMEOUT_MS } from '../src/setup/remotePlacement'
+import endGame from '../src/attack/endGame'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 
 /** The redacted players, out of a pushed redacted body (see redactGameBody). */
@@ -21,6 +23,21 @@ describe('starting a room\'s game', () => {
   test('every seat is a connected human - no robots', () => {
     const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob'], ['carol-socket', 'Carol']], 'optional', true)
     expect(game.players.every(player => !player.isRobot)).toBe(true)
+  })
+
+  test('a room\'s game ends with a real, button-less final score screen - not local hot-seat\'s own', () => {
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true)
+    // Local hot-seat's own finalScore screen wires Play Again/Change Settings/Main Menu to listener names never
+    // registered on a room's own isolated root (buildIsolatedRoot) - rendering it here used to throw
+    // "Undefined listener function" deep inside a queued callback, silently swallowing the game ending at all.
+    expect(() => endGame(game.players[0])).not.toThrow()
+
+    const classNames = game.root.body.children.map((child: any) => child.attributes?.className)
+    expect(classNames).toContain('final-scores')
+    const finalScores = game.root.body.children.find((child: any) => child.attributes?.className === 'final-scores')
+    const finalScoreChildClasses = finalScores.children.map((child: any) => child.attributes?.className)
+    expect(finalScoreChildClasses).not.toContain('final-scores-actions')
+    expect(finalScoreChildClasses).toContain('remote-final-score-message')
   })
 })
 
@@ -78,5 +95,22 @@ describe('watching a room\'s game for changes', () => {
     await (await import('../src/setup/gameSession')).getSession(game.root).queue(() => 'done', 0)
 
     expect(pushCount).toBeGreaterThan(afterWatching)
+  })
+
+  test('the placement deadline firing on its own triggers a fresh broadcast too, not just dispatched actions', () => {
+    jest.useFakeTimers()
+    // The real wiring (see lobbyServer.ts's startGame handler): startRoomGame's own onTimerChange callback is
+    // created before watchRoomGame returns the real broadcast function, so it is captured by reference here too,
+    // exactly like the real fix - the deadline is still two minutes away by the time broadcast is reassigned.
+    let broadcast: () => void = () => {}
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true, () => broadcast())
+    let pushCount = 0
+    broadcast = watchRoomGame(game, () => { pushCount++ })
+    const afterWatching = pushCount
+
+    jest.advanceTimersByTime(PLACEMENT_TIMEOUT_MS)
+
+    expect(pushCount).toBeGreaterThan(afterWatching)
+    jest.useRealTimers()
   })
 })

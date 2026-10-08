@@ -11,6 +11,13 @@ import type { Board, Player, Ship, Tile } from '../types'
  * rule the robot's own targeting already follows (see robot/densityTargets.ts's buildShotState), generalized
  * from "what the AI may read" to "what a remote viewer may be sent" - only the hidden tiles' hasShip is mutated
  * on the clone.
+ *
+ * setViewShip (src/cells/setViewShip.ts) also bakes a grey `backgroundColor` directly onto a ship tile's own
+ * `attributes.style` the moment it is placed - meant for local play, where seeing your own ship as you place it
+ * is the point. That baked style survives this clone untouched unless cleared here too, which would leak every
+ * unhit ship's exact position through the rendered colour even with hasShip correctly hidden - clearing it only
+ * for the same cells hasShip is cleared for keeps a legitimate hit's own red/white colouring (set afterwards by
+ * colourHitCell, both colours equally public) untouched.
  * @param board
  * @param ownBoard whether the viewer this is being redacted for owns this board
  */
@@ -20,7 +27,12 @@ export const redactBoard = (board: Board, ownBoard: boolean): Board => {
     if (ownBoard || checkIfHitCell(point, board)) {
       return
     }
-    ;(matrixDom.getDomItemFromPoint(point, clone) as Tile).hasShip = false
+    const tile = matrixDom.getDomItemFromPoint(point, clone) as Tile
+    tile.hasShip = false
+    const style = (tile.attributes as { style?: { backgroundColor?: string } } | undefined)?.style
+    if (style) {
+      delete style.backgroundColor
+    }
   })
   return clone
 }
