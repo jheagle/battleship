@@ -1,6 +1,21 @@
+import './installPseudoDom'
 import { createServer } from 'http'
+import jsonDom from 'json-dom'
 import { Server, Socket } from 'socket.io'
+import { startRoomGame, watchRoomGame } from './gameplay'
 import type { Server as HttpServer } from 'http'
+import type { Player } from '../src/types'
+import type { HintSetting } from '../src/setup/gameOptions'
+import type { RoomGame } from './gameplay'
+
+/**
+ * A redacted player, as sent over the wire: still circularly linked in memory (parentItem, matrix-dom's own
+ * internal references) like any live DomItem, which socket.io's own payload encoding cannot walk directly - this
+ * strips exactly what domItemToJson already strips for any other json-dom consumer (element/parentItem/...), then
+ * parses it straight back to a plain object, since socket.io does its own JSON encoding over the wire.
+ * @param players
+ */
+const forTransport = (players: Player[]): object[] => players.map(player => JSON.parse(jsonDom.domItemToJson(player)))
 
 /** Up to four players in a room, the same limit as a local multiplayer game. */
 const MAX_PLAYERS = 4
@@ -24,6 +39,7 @@ export interface RoomState {
 interface Room {
   hostId: string
   players: Map<string, string>
+  game?: RoomGame
 }
 
 /**
@@ -88,6 +104,25 @@ export const createLobbyServer = (): HttpServer => {
       const state = roomState(rooms, roomCode)
       ack(state)
       socket.to(roomCode).emit('roomUpdate', state)
+    })
+
+    socket.on('startGame', ({ hints, firstGoesFirst }: { hints: HintSetting, firstGoesFirst: boolean }, ack: (result: { started: true } | { error: string }) => void) => {
+      const room = currentRoom ? rooms.get(currentRoom) : undefined
+      if (!room) {
+        ack({ error: 'No room to start a game in' })
+        return
+      }
+      if (socket.id !== room.hostId) {
+        ack({ error: 'Only the host can start the game' })
+        return
+      }
+      if (room.game) {
+        ack({ error: 'The game has already started' })
+        return
+      }
+      room.game = startRoomGame([...room.players.keys()], hints, firstGoesFirst)
+      watchRoomGame(room.game, (socketId, redacted) => io.to(socketId).emit('gameUpdate', forTransport(redacted)))
+      ack({ started: true })
     })
 
     socket.on('disconnect', () => {
