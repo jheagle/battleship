@@ -34,6 +34,10 @@ const leaveToPresets = (menu: DomItem, message: string = ''): void => {
 const enterWaitingRoom = (menu: DomItem, state: RoomState): void => {
   onRoomUpdate(newState => renderRoomState(menu, newState))
   onRoomClosed(() => leaveToPresets(menu, 'The host left - room closed.'))
+  // Every player registers this the moment they enter the waiting room, host included - whichever one of them
+  // starts the game, everyone (including whoever started it) gets this same first gameUpdate push, so everyone
+  // enters the rendered game the same way instead of only the one who clicked Start.
+  connectLobbySocket().once('gameUpdate', firstUpdate => enterRemoteGame(jsonDom.getTopParentItem(menu), firstUpdate))
   renderRoomState(menu, state)
   show(jsonDom.getChildrenByClass('remote-entry', menu)[0], false)
   show(jsonDom.getChildrenByClass('waiting-room', menu)[0], true)
@@ -69,22 +73,27 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
     const waitingRoom = jsonDom.getChildrenByClass('waiting-room', menu)[0]
     const hints = (jsonDom.getChildrenByName('waiting-room-hints', waitingRoom)[0].element as HTMLSelectElement).value as HintSetting
     const firstGoesFirst = (jsonDom.getChildrenByName('waiting-room-first', waitingRoom)[0].element as HTMLInputElement).checked
-    const root = jsonDom.getTopParentItem(target)
-    // Registered before starting the game, not after, so it cannot miss the first gameUpdate - the server pushes
-    // it as soon as the game is built, which can beat a listener registered only once the ack comes back.
-    const firstUpdate = new Promise<object>(resolve => connectLobbySocket().once('gameUpdate', resolve))
+    // No need to wait for or enter the game here - enterWaitingRoom already registered the same first-gameUpdate
+    // listener every player (host included) gets, which this call's own resulting push will satisfy too.
     const ack = await startGame(hints, firstGoesFirst)
     if ('error' in ack) {
       update(jsonDom.getChildrenByClass('waiting-room-status', waitingRoom)[0], { innerHTML: ack.error })
-      return
     }
-    enterRemoteGame(root, await firstUpdate)
     return
   }
 
-  const name = (jsonDom.getChildrenByName('remote-name', entry)[0].element as HTMLInputElement).value
+  const name = (jsonDom.getChildrenByName('remote-name', entry)[0].element as HTMLInputElement).value.trim()
+  if ((className.includes('remote-host') || className.includes('remote-join')) && !name) {
+    update(jsonDom.getChildrenByClass('remote-status', entry)[0], { innerHTML: 'Enter your name first' })
+    return
+  }
   if (className.includes('remote-host')) {
-    enterWaitingRoom(menu, await createRoom(name))
+    const result = await createRoom(name)
+    if ('error' in result) {
+      update(jsonDom.getChildrenByClass('remote-status', entry)[0], { innerHTML: result.error })
+      return
+    }
+    enterWaitingRoom(menu, result)
     return
   }
   if (className.includes('remote-join')) {

@@ -61,6 +61,18 @@ describe('the lobby server', () => {
     expect(response.error).toMatch(/no room/i)
   })
 
+  test('creating a room with a blank name is refused', async () => {
+    const response = await emit<{ error: string }>(connect(), 'createRoom', { name: '   ' })
+    expect(response.error).toMatch(/name/i)
+  })
+
+  test('joining a room with a blank name is refused', async () => {
+    const host = connect()
+    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+    const response = await emit<{ error: string }>(connect(), 'joinRoom', { roomCode, name: '' })
+    expect(response.error).toMatch(/name/i)
+  })
+
   test('a fifth player cannot join a room that already has four', async () => {
     const host = connect()
     const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Player 1' })
