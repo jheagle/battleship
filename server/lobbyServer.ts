@@ -3,7 +3,7 @@ import { createServer } from 'http'
 import jsonDom from 'json-dom'
 import { Server, Socket } from 'socket.io'
 import { startRoomGame, watchRoomGame } from './gameplay'
-import { isHostOnlyStage } from '../src/setup/remotePlacement'
+import { isHostOnlyStage, isRemoteSessionActive } from '../src/setup/remotePlacement'
 import type { Server as HttpServer } from 'http'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { ForwardedEvent } from 'json-dom/dist/events/types'
@@ -138,7 +138,10 @@ export const createLobbyServer = (): HttpServer => {
         ack({ error: `Need at least ${MIN_PLAYERS_TO_START} players to start` })
         return
       }
-      room.game = startRoomGame([...room.players.entries()], hints, firstGoesFirst)
+      // room.broadcastGame does not exist yet at this exact line - startRoomGame's own placement timer will not
+      // fire for a good two minutes, long after the very next line assigns it, so the closure below still reads
+      // the real function by the time it's ever actually called.
+      room.game = startRoomGame([...room.players.entries()], hints, firstGoesFirst, () => room.broadcastGame?.())
       room.broadcastGame = watchRoomGame(room.game, (socketId, redactedBody) => io.to(socketId).emit('gameUpdate', forTransport(redactedBody)))
       ack({ started: true })
     })
@@ -154,6 +157,19 @@ export const createLobbyServer = (): HttpServer => {
       // placement itself needs no such check: a client can only ever act on its own board either way.
       if (isHostOnlyStage(room.game.root) && socket.id !== room.hostId) {
         return
+      }
+      // Once real gameplay begins (placement/ordering both over), only the current attacker's own socket may
+      // act at all - every independent remote client renders every board, live and clickable, with nothing
+      // else stopping a click from resolving against any board regardless of whose turn it actually is or
+      // which socket sent it. attackFleet.ts's own player.attacker check already refuses the attacker hitting
+      // their *own* board, but has no notion of sockets at all - it only ever sees whichever board a click
+      // happened to target, never who sent the click. This is the socket-identity half that check cannot do on
+      // its own.
+      if (!isRemoteSessionActive(room.game.root)) {
+        const attacker = room.game.players.find(player => player.attacker)
+        if (room.game.playerBySocket.get(socket.id) !== attacker) {
+          return
+        }
       }
       // Plenty of real actions run entirely synchronously (continueTurn, placeCell, finishTurn...), queuing
       // nothing at all - watchRoomGame's own queue hook alone would never see them, so broadcast again

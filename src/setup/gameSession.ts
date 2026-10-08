@@ -3,6 +3,7 @@ import siFunciona from 'si-funciona'
 import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
 import type { GameMode, GameSettings, HintSetting } from './gameOptions'
 import type { PlacementSession } from './placement'
+import type { Player } from '../types'
 
 /**
  * Everything one game needs that used to live in a handful of module-level singletons: the lobby settings, the
@@ -16,6 +17,10 @@ export interface GameSession {
   attackLock: { isLocked: boolean }
   queue: (fn: Function, time?: number, ...args: any[]) => Promise<any>
   placement: PlacementSession | null
+  /** Overrides how endGame.ts shows the final score, for a remote room's game - see gameplay.ts's startRoomGame.
+   * null (the default) keeps local hot-seat's own finalScore screen and its Play Again/Change Settings/Main Menu
+   * buttons, which only make sense for one physical screen controlling the whole game. */
+  onGameOver: ((players: Player[], parent: DomItemRoot) => void) | null
 }
 
 const sessions = new WeakMap<DomItemRoot, GameSession>()
@@ -26,7 +31,8 @@ const defaultSession = (): GameSession => ({
   settings: { humans: 0, robots: 2, firstGoesFirst: true },
   attackLock: { isLocked: false },
   queue: siFunciona.queueTimeout(),
-  placement: null
+  placement: null,
+  onGameOver: null
 })
 
 /**

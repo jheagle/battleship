@@ -56,6 +56,29 @@ describe('redacting the game state for a remote viewer', () => {
     expect(hasShipAt(redacted, miss.x, miss.y)).toBe(false)
   })
 
+  test('an unhit ship\'s baked-in colour is cleared too - not just hasShip, so position never leaks through colour', async () => {
+    const [viewer, other] = await setUp()
+    // setViewShip bakes a grey backgroundColor onto a ship tile's own attributes the moment it is placed by
+    // hand (src/cells/setViewShip.ts) - set directly here, the same way the existing isHit-based tests above set
+    // their own scenario directly rather than driving the whole placement UI just to reach one specific state.
+    const part = other.shipFleet[0].parts[0]
+    const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
+    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: '#777' }
+
+    const redacted = redactBoard(other.board, false)
+    expect(matrixDom.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBeUndefined()
+  })
+
+  test('a hit cell keeps its own colour untouched when redacted for someone else', async () => {
+    const [viewer, other] = await setUp()
+    const part = other.shipFleet[0].parts[0]
+    const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
+    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: 'red' }
+    realTile.isHit = true
+    const redacted = redactBoard(other.board, false)
+    expect(matrixDom.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBe('red')
+  })
+
   test('redacting a board does not change the real board it was redacted from', async () => {
     const [viewer, other] = await setUp()
     redactBoard(other.board, false)

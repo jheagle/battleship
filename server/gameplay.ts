@@ -10,6 +10,7 @@ import { startRemotePlacement } from '../src/setup/remotePlacement'
 import { setGameMode } from '../src/setup/gameOptions'
 import { getSession } from '../src/setup/gameSession'
 import { redactGameBody } from '../src/network/redactGameState'
+import remoteFinalScore from '../src/components/layout/remoteFinalScore'
 import updatePlayerStats from '../src/attack/updatePlayerStats'
 import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
 import type { ListenerFunction } from 'json-dom/dist/events/types'
@@ -50,15 +51,26 @@ const buildIsolatedRoot = (listeners: Record<string, ListenerFunction>): DomItem
  * name, in their own stats panel) showing the default "Player N" instead.
  * @param hints
  * @param firstGoesFirst
+ * @param onTimerChange called whenever remote placement's own server-side deadline fires and changes state on
+ * its own (auto-placing a not-yet-ready player, moving everyone into ordering) - the one state change in the
+ * whole game that happens on a raw timer rather than in response to a dispatched/forwarded action, so it is the
+ * one case watchRoomGame's own broadcast hooks (wrapping the session queue, and the gameAction handler's own
+ * post-dispatch broadcast) can never see on their own. See remotePlacement.ts's startRemotePlacement.
  */
-export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string]>, hints: HintSetting, firstGoesFirst: boolean): RoomGame => {
+export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string]>, hints: HintSetting, firstGoesFirst: boolean, onTimerChange: () => void = () => {}): RoomGame => {
   const root = buildIsolatedRoot({ attackListener, hintListener, placementListener, remotePlacementListener, shipsListener })
   // Every seat is a connected human, so this is always the multiplayer game mode - startNewGame itself reads this
   // (its own robots-only branch would otherwise fire, since a fresh session's mode defaults to 'robots').
   setGameMode(root, 'multi')
+  // Local hot-seat's own final-score screen (Play Again/Change Settings/Main Menu) assumes one physical screen
+  // controlling the whole game - none of those make sense yet for several independent remote clients, and
+  // registering their listeners here would wire them to local-only flows (starting hot-seat placement again,
+  // wiping this room's own root back to a menu) that would corrupt the room for everyone. Show the real result
+  // with no buttons instead - see endGame.ts and remoteFinalScore.ts.
+  getSession(root).onGameOver = (players, parent) => jsonDom.renderHtml(remoteFinalScore(players), parent.body)
   let players: Player[] = []
   const playerBySocket = new Map<string, Player>()
-  startNewGame(root, roomPlayers.length, 0, firstGoesFirst, hints, startRemotePlacement, builtPlayers => {
+  startNewGame(root, roomPlayers.length, 0, firstGoesFirst, hints, (p, body, done) => startRemotePlacement(p, body, done, onTimerChange), builtPlayers => {
     players = builtPlayers
     builtPlayers.forEach((player, i) => {
       player.name = roomPlayers[i][1]

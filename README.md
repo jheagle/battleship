@@ -129,9 +129,14 @@ routed here instead of to a normal attack (see attackListener.ts).</p>
 <dt><a href="#showStart">showStart()</a></dt>
 <dd><p>Mark which cells a ship-in-progress could end on, same visual as local placement&#39;s own showStart.</p>
 </dd>
-<dt><a href="#startRemotePlacement">startRemotePlacement(players, body, done)</a></dt>
+<dt><a href="#startRemotePlacement">startRemotePlacement(players, body, done, onTimerChange)</a></dt>
 <dd><p>Begin a remote game&#39;s placement phase: every human places their own ships on their own board at the same
-time - no handoff, no &quot;look away&quot;. <code>done</code> runs once the order is set, with the order play will take.</p>
+time - no handoff, no &quot;look away&quot;. <code>done</code> runs once the order is set, with the order play will take.
+<code>onTimerChange</code> runs whenever the deadline below actually fires and changes state on its own - every other
+state change in this module happens inside a function a dispatched/forwarded click calls directly, which the
+server&#39;s own broadcast-after-dispatch already covers; the deadline is the one change that happens on a raw
+timer with nothing else watching for it, so without this hook a client that lets it expire sees nothing at
+all, even though the server&#39;s own state has already moved on.</p>
 </dd>
 <dt><a href="#placeRemoteShip">placeRemoteShip(tile, board)</a></dt>
 <dd><p>A click on a player&#39;s own board during placement: the first click sets where a ship starts, the second where
@@ -447,6 +452,12 @@ neither hit nor on the viewer&#39;s own board. Which cells to redact is read fro
 rule the robot&#39;s own targeting already follows (see robot/densityTargets.ts&#39;s buildShotState), generalized
 from &quot;what the AI may read&quot; to &quot;what a remote viewer may be sent&quot; - only the hidden tiles&#39; hasShip is mutated
 on the clone.</p>
+<p>setViewShip (src/cells/setViewShip.ts) also bakes a grey <code>backgroundColor</code> directly onto a ship tile&#39;s own
+<code>attributes.style</code> the moment it is placed - meant for local play, where seeing your own ship as you place it
+is the point. That baked style survives this clone untouched unless cleared here too, which would leak every
+unhit ship&#39;s exact position through the rendered colour even with hasShip correctly hidden - clearing it only
+for the same cells hasShip is cleared for keeps a legitimate hit&#39;s own red/white colouring (set afterwards by
+colourHitCell, both colours equally public) untouched.</p>
 </dd>
 <dt><a href="#redactShip">redactShip(ship)</a></dt>
 <dd><p>A ship, reduced to what is always public: its name, length and status - never its parts&#39; positions. parts is
@@ -560,6 +571,13 @@ player&#39;s board in turn); everyone else sees the exact same status message, w
 Enforced server-side (see server/lobbyServer.ts&#39;s gameAction handler, which rejects a non-host&#39;s action during
 any stage but placing), not just by these buttons being disabled on a non-host&#39;s own redacted copy.</p>
 </dd>
+<dt><a href="#remoteFinalScore">remoteFinalScore(players)</a></dt>
+<dd><p>The final score screen for a remote room&#39;s game: the same public score cards local hot-seat shows (see
+finalScore.ts), with no buttons of its own - Play Again, Change Settings and Main Menu all assume one
+physical screen controlling the whole shared game, which does not hold for several independent remote
+clients. Leaving/restarting a remote room is its own, not-yet-built feature; for now the game simply ends
+and shows the real result to everyone.</p>
+</dd>
 <dt><a href="#placementPanel">placementPanel(message)</a></dt>
 <dd><p>The panel shown during the placement phase: a message for whoever is placing, and their buttons. Each button has one
 class name, which is how the layer finds it and how one listener tells them apart (see placementListener).</p>
@@ -634,7 +652,10 @@ uses what a player can already see: attacked cells, hit parts and the lengths of
 <dt><a href="#findNextAttacker">findNextAttacker(attacker, players, attackerIndex)</a></dt>
 <dd></dd>
 <dt><a href="#endGame">endGame(winner)</a></dt>
-<dd><p>Final state once a game is won (only one player remains)</p>
+<dd><p>Final state once a game is won (only one player remains). Local hot-seat&#39;s own finalScore screen (Play Again,
+Change Settings, Main Menu) assumes one physical screen controlling the whole game - a remote room&#39;s own game
+session overrides this via onGameOver (see gameSession.ts, server/gameplay.ts) with something that makes
+sense for several independent, already-forwarding clients instead.</p>
 </dd>
 <dt><a href="#getAttackLock">getAttackLock(item)</a></dt>
 <dd><p>Whether attacks are being ignored right now for the given item&#39;s game: the board is locked while the turn changes
@@ -988,9 +1009,14 @@ Mark which cells a ship-in-progress could end on, same visual as local placement
 **Kind**: global function  
 <a name="startRemotePlacement"></a>
 
-## startRemotePlacement(players, body, done)
+## startRemotePlacement(players, body, done, onTimerChange)
 Begin a remote game's placement phase: every human places their own ships on their own board at the same
 time - no handoff, no "look away". `done` runs once the order is set, with the order play will take.
+`onTimerChange` runs whenever the deadline below actually fires and changes state on its own - every other
+state change in this module happens inside a function a dispatched/forwarded click calls directly, which the
+server's own broadcast-after-dispatch already covers; the deadline is the one change that happens on a raw
+timer with nothing else watching for it, so without this hook a client that lets it expire sees nothing at
+all, even though the server's own state has already moved on.
 
 **Kind**: global function  
 
@@ -999,6 +1025,7 @@ time - no handoff, no "look away". `done` runs once the order is set, with the o
 | players | 
 | body | 
 | done | 
+| onTimerChange | 
 
 <a name="placeRemoteShip"></a>
 
@@ -1944,6 +1971,13 @@ rule the robot's own targeting already follows (see robot/densityTargets.ts's bu
 from "what the AI may read" to "what a remote viewer may be sent" - only the hidden tiles' hasShip is mutated
 on the clone.
 
+setViewShip (src/cells/setViewShip.ts) also bakes a grey `backgroundColor` directly onto a ship tile's own
+`attributes.style` the moment it is placed - meant for local play, where seeing your own ship as you place it
+is the point. That baked style survives this clone untouched unless cleared here too, which would leak every
+unhit ship's exact position through the rendered colour even with hasShip correctly hidden - clearing it only
+for the same cells hasShip is cleared for keeps a legitimate hit's own red/white colouring (set afterwards by
+colourHitCell, both colours equally public) untouched.
+
 **Kind**: global function  
 
 | Param | Description |
@@ -2193,6 +2227,21 @@ Enforced server-side (see server/lobbyServer.ts's gameAction handler, which reje
 any stage but placing), not just by these buttons being disabled on a non-host's own redacted copy.
 
 **Kind**: global function  
+<a name="remoteFinalScore"></a>
+
+## remoteFinalScore(players)
+The final score screen for a remote room's game: the same public score cards local hot-seat shows (see
+finalScore.ts), with no buttons of its own - Play Again, Change Settings and Main Menu all assume one
+physical screen controlling the whole shared game, which does not hold for several independent remote
+clients. Leaving/restarting a remote room is its own, not-yet-built feature; for now the game simply ends
+and shows the real result to everyone.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| players | 
+
 <a name="placementPanel"></a>
 
 ## placementPanel(message)
@@ -2459,7 +2508,10 @@ Based on the current attacker and list of players, return the next attacker.
 <a name="endGame"></a>
 
 ## endGame(winner)
-Final state once a game is won (only one player remains)
+Final state once a game is won (only one player remains). Local hot-seat's own finalScore screen (Play Again,
+Change Settings, Main Menu) assumes one physical screen controlling the whole game - a remote room's own game
+session overrides this via onGameOver (see gameSession.ts, server/gameplay.ts) with something that makes
+sense for several independent, already-forwarding clients instead.
 
 **Kind**: global function  
 
