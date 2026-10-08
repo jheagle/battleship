@@ -95,4 +95,43 @@ describe('the lobby server', () => {
     const response = await emit<{ error: string }>(connect(), 'joinRoom', { roomCode, name: 'Carol' })
     expect(response.error).toMatch(/no room/i)
   })
+
+  describe('starting a game', () => {
+    const setUpRoom = async () => {
+      const host = connect()
+      const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+      const joiner = connect()
+      await emit<RoomState>(joiner, 'joinRoom', { roomCode, name: 'Bob' })
+      return { host, joiner, roomCode }
+    }
+
+    test('the host starting a game sends every connected player their own redacted view', async () => {
+      const { host, joiner } = await setUpRoom()
+      const hostUpdate = new Promise(resolve => host.once('gameUpdate', resolve))
+      const joinerUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
+      const ack = await emit<{ started: true } | { error: string }>(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      expect(ack).toEqual({ started: true })
+      const [hostView, joinerView] = await Promise.all([hostUpdate, joinerUpdate])
+      expect(Array.isArray(hostView)).toBe(true)
+      expect(Array.isArray(joinerView)).toBe(true)
+    })
+
+    test('only the host can start the game', async () => {
+      const { joiner } = await setUpRoom()
+      const response = await emit<{ error: string }>(joiner, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      expect(response.error).toMatch(/only the host/i)
+    })
+
+    test('the game cannot be started twice', async () => {
+      const { host } = await setUpRoom()
+      await emit(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      const response = await emit<{ error: string }>(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      expect(response.error).toMatch(/already started/i)
+    })
+
+    test('starting a game with no room to start it in is refused', async () => {
+      const response = await emit<{ error: string }>(connect(), 'startGame', { hints: 'optional', firstGoesFirst: true })
+      expect(response.error).toMatch(/no room/i)
+    })
+  })
 })
