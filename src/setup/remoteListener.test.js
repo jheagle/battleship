@@ -193,10 +193,7 @@ describe('the Online Multiplayer tile and its lobby', () => {
     expect(joinerView.children.find(child => child.attributes.className === 'boards').children).toHaveLength(2)
   })
 
-  // Blocked on pseudo-dom PR #27 (https://github.com/jheagle/pseudo-dom/pull/27), same as lobbyServer.test.ts's own
-  // skipped test - dispatching a forwarded click on the server needs that fix. Confirmed passing with it linked
-  // locally. Once #27 is merged and published, bump the pseudo-dom dependency and remove this .skip.
-  test.skip('clicking something in the rendered game forwards it, and both players see the real result', async () => {
+  test('clicking something in the rendered game forwards it, and both players see the real result', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
     byClass(doc, 'preset-remote').element.click()

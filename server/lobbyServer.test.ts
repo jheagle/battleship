@@ -158,11 +158,7 @@ describe('the lobby server', () => {
       return { host, joiner, initialView }
     }
 
-    // Blocked on pseudo-dom PR #27 (https://github.com/jheagle/pseudo-dom/pull/27): dispatching a real event on a
-    // pseudo-dom element needs a real Event instance from this module (installGlobal's own job, which currently
-    // leaves Node's own incompatible native Event in place instead), confirmed with the fix linked locally. Once
-    // #27 is merged and published, bump the pseudo-dom dependency and remove this .skip.
-    test.skip('a forwarded action actually runs on the server and both players see the result', async () => {
+    test('a forwarded action actually runs on the server and both players see the result', async () => {
       const { host, initialView } = await setUpStartedGame()
       // Two humans start at the handoff screen ("Alice: the other players look away..."), where Continue is the
       // only shown button - the panel is the body's second child (boards is rendered first).
