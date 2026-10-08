@@ -26,8 +26,8 @@ export const disconnectLobbySocket = (): void => {
   socket = null
 }
 
-/** Create a room as its host, resolving with the room's state once the server acknowledges it. */
-export const createRoom = (name: string): Promise<RoomState> =>
+/** Create a room as its host, resolving with the room's state once the server acknowledges it, or an error. */
+export const createRoom = (name: string): Promise<RoomState | { error: string }> =>
   new Promise(resolve => connectLobbySocket().emit('createRoom', { name }, resolve))
 
 /** Join an existing room by its code, resolving with the room's state, or an error if it could not be joined. */

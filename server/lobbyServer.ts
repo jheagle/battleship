@@ -85,15 +85,23 @@ export const createLobbyServer = (): HttpServer => {
   io.on('connection', (socket: Socket) => {
     let currentRoom: string | null = null
 
-    socket.on('createRoom', ({ name }: { name: string }, ack: (state: RoomState) => void) => {
+    socket.on('createRoom', ({ name }: { name: string }, ack: (state: RoomState | { error: string }) => void) => {
+      if (!name?.trim()) {
+        ack({ error: 'A name is required' })
+        return
+      }
       const roomCode = generateRoomCode(rooms)
-      rooms.set(roomCode, { hostId: socket.id, players: new Map([[socket.id, name]]) })
+      rooms.set(roomCode, { hostId: socket.id, players: new Map([[socket.id, name.trim()]]) })
       currentRoom = roomCode
       socket.join(roomCode)
       ack(roomState(rooms, roomCode))
     })
 
     socket.on('joinRoom', ({ roomCode, name }: { roomCode: string, name: string }, ack: (state: RoomState | { error: string }) => void) => {
+      if (!name?.trim()) {
+        ack({ error: 'A name is required' })
+        return
+      }
       const room = rooms.get(roomCode)
       if (!room) {
         ack({ error: 'No room with that code' })
@@ -103,7 +111,7 @@ export const createLobbyServer = (): HttpServer => {
         ack({ error: 'That room is full' })
         return
       }
-      room.players.set(socket.id, name)
+      room.players.set(socket.id, name.trim())
       currentRoom = roomCode
       socket.join(roomCode)
       const state = roomState(rooms, roomCode)

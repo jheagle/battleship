@@ -116,6 +116,31 @@ describe('the Online Multiplayer tile and its lobby', () => {
     expect(byClass(doc, 'remote-entry').element.style.display).not.toBe('none')
   })
 
+  test('hosting with an empty name is refused without even contacting the server', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byClass(doc, 'remote-host').element.click()
+    await waitFor(() => byClass(doc, 'remote-status').element.textContent !== '')
+    expect(byClass(doc, 'remote-status').element.textContent).toMatch(/name/i)
+    expect(byClass(doc, 'waiting-room').element.style.display).toBe('none')
+  })
+
+  test('joining with a blank (whitespace-only) name is refused', async () => {
+    const host = rawPlayer()
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice' })
+
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byName(doc, 'remote-name').element.value = '   '
+    byName(doc, 'remote-code').element.value = roomCode
+    byClass(doc, 'remote-join').element.click()
+    await waitFor(() => byClass(doc, 'remote-status').element.textContent !== '')
+    expect(byClass(doc, 'remote-status').element.textContent).toMatch(/name/i)
+    expect(byClass(doc, 'waiting-room').element.style.display).toBe('none')
+  })
+
   test('a second player joining updates the host\'s own waiting room live', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
@@ -191,6 +216,32 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
     const joinerView = await joinerSawUpdate
     expect(joinerView.children.find(child => child.attributes.className === 'boards').children).toHaveLength(2)
+  })
+
+  // The real bug this covers: only the client that clicked Start ever rendered the game - a joiner who never
+  // clicked anything (the host is the one who starts it) was left stuck on the waiting room forever, even though
+  // the server was already pushing it gameUpdates. Here the joiner is the real UI under test, and the host is a
+  // raw socket starting the game from outside it - the one place the earlier test's "doc is always the host"
+  // setup could never have caught this.
+  test('a joiner who never clicked Start still sees the real game once the host starts it', async () => {
+    const host = rawPlayer()
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice' })
+
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byName(doc, 'remote-name').element.value = 'Bob'
+    byName(doc, 'remote-code').element.value = roomCode
+    byClass(doc, 'remote-join').element.click()
+    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    expect(byClass(doc, 'waiting-room-host-controls').element.style.display).toBe('none')
+
+    await rawEmit(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+
+    await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
+    expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
+    expect(jsonDom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(2)
+    expect(jsonDom.getChildrenByClass('placement', doc.body)).toHaveLength(1)
   })
 
   test('clicking something in the rendered game forwards it, and both players see the real result', async () => {
