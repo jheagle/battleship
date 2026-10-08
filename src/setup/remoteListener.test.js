@@ -19,6 +19,7 @@ import remoteListener from './remoteListener'
 import beginRound from './beginRound'
 import { createLobbyServer } from '../../server/lobbyServer'
 import { connectLobbySocket, disconnectLobbySocket } from '../network/lobbySocket'
+import { leaveRemoteGame } from '../network/remoteGame'
 
 let server
 let baseUrl
@@ -211,11 +212,42 @@ describe('the Online Multiplayer tile and its lobby', () => {
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     // The whole lobby is gone - this is the real game's own markup now, not the waiting room any more.
     expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
-    expect(jsonDom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(2)
-    expect(jsonDom.getChildrenByClass('placement', doc.body)).toHaveLength(1)
+    const players = jsonDom.getChildrenByClass('boards', doc.body)[0].children
+    expect(players).toHaveLength(2)
+    // Each player has their own placement panel - nobody waits on a shared handoff screen any more.
+    expect(players.every(player => jsonDom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
 
     const joinerView = await joinerSawUpdate
     expect(joinerView.children.find(child => child.attributes.className === 'boards').children).toHaveLength(2)
+  })
+
+  // The real timer that ends placement runs on the server (see remotePlacement.ts's PLACEMENT_TIMEOUT_MS) -
+  // this only covers the client's own cosmetic countdown, which must never be mistaken for that real deadline.
+  test('a visual countdown shows once placement starts, ticking down on its own between server pushes', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byName(doc, 'remote-name').element.value = 'Alice'
+    byClass(doc, 'remote-host').element.click()
+    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
+
+    const joiner = rawPlayer()
+    await rawEmit(joiner, 'joinRoom', { roomCode, name: 'Bob' })
+    await waitFor(() => byClass(doc, 'waiting-room-players').element.textContent.includes('Bob'))
+    byClass(doc, 'waiting-room-start').element.click()
+
+    await waitFor(() => document.querySelector('.remote-placement-countdown') !== null)
+    const firstReading = Number(document.querySelector('.remote-placement-countdown').textContent.match(/(\d+)s left/)[1])
+    expect(firstReading).toBeGreaterThan(0)
+
+    // No server action happens in between - the display only ticks down because of its own local interval.
+    await new Promise(resolve => setTimeout(resolve, 600))
+    const secondReading = Number(document.querySelector('.remote-placement-countdown').textContent.match(/(\d+)s left/)[1])
+    expect(secondReading).toBeLessThanOrEqual(firstReading)
+
+    leaveRemoteGame(doc)
+    expect(document.querySelector('.remote-placement-countdown')).toBeNull()
   })
 
   // The real bug this covers: only the client that clicked Start ever rendered the game - a joiner who never
@@ -240,8 +272,9 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
-    expect(jsonDom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(2)
-    expect(jsonDom.getChildrenByClass('placement', doc.body)).toHaveLength(1)
+    const players = jsonDom.getChildrenByClass('boards', doc.body)[0].children
+    expect(players).toHaveLength(2)
+    expect(players.every(player => jsonDom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
   })
 
   test('clicking something in the rendered game forwards it, and both players see the real result', async () => {
@@ -262,21 +295,22 @@ describe('the Online Multiplayer tile and its lobby', () => {
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     await joinerSawFirstUpdate
 
-    // Two humans start at the handoff screen, where Continue is the only shown button.
-    const continueButton = jsonDom.getChildrenByClass('placement-continue', doc.body)[0]
-    expect(jsonDom.getChildrenByClass('placement-randomise', doc.body)[0].element.style.display).toBe('none')
+    // Both players place simultaneously, each on their own board - no shared handoff screen for either of them.
+    // Alice's own copy of her own panel is the one with enabled controls; Bob's copy of his own panel (rendered
+    // in Alice's own doc too, redacted) is always disabled, since Alice can't act on Bob's behalf.
+    const aliceRandomise = jsonDom.getChildrenByClass('remote-placement-randomise', doc.body).find(button => !button.attributes.disabled)
+    expect(aliceRandomise).toBeDefined()
 
     const joinerSawSecondUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
-    continueButton.element.click()
+    aliceRandomise.element.click()
     const joinerView = await joinerSawSecondUpdate
 
-    // Continue moved the real session from handoff to placing. The host's own click triggers the host's own
-    // gameUpdate too, which re-renders this whole tree fresh - so the button has to be re-queried, not the one
-    // captured before the click, which the re-render has already discarded.
-    await waitFor(() => jsonDom.getChildrenByClass('placement-randomise', doc.body)[0].element.style.display !== 'none')
-    const joinerPanel = joinerView.children.find(child => child.attributes.className === 'placement')
-    const joinerRandomise = joinerPanel.children.find(child => child.attributes.className === 'placement-randomise')
-    expect(joinerRandomise.attributes.style.display).not.toBe('none')
+    // Alice's fleet is now fully placed - the real result is visible in Bob's own (independent) view too, since
+    // the panel's message text is never secret, only the ship positions themselves.
+    const alicePlayer = joinerView.children.find(child => child.attributes.className === 'boards').children[0]
+    const alicePanel = alicePlayer.children.find(child => child.attributes.className === 'remote-placement-panel')
+    const aliceMessage = alicePanel.children.find(child => child.attributes.className === 'remote-placement-message')
+    expect(aliceMessage.attributes.innerHTML).toContain('All placed')
   })
 
   test('leaving the waiting room returns to the game types and lets a fresh room be hosted', async () => {

@@ -48,15 +48,22 @@ describe('watching a room\'s game for changes', () => {
     expect(matrixDom.getAllPoints(aliceView[1].board).filter((p: { z: number }) => p.z === 0)).toHaveLength(100)
   })
 
-  test('the redacted body still has the placement panel, unredacted - it carries nothing secret', () => {
+  test('each player gets their own placement panel, carrying the deadline and interactive only for its owner', () => {
     const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true)
     const pushes = new Map<string, DomItem>()
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
     const aliceBody = pushes.get('alice-socket') as DomItem
-    const classNames = aliceBody.children.map(child => (child.attributes as { className?: string }).className)
-    expect(classNames).toContain('boards')
-    expect(classNames.some(name => name?.includes('placement'))).toBe(true)
+    expect((aliceBody.attributes as { 'data-placement-deadline'?: string })['data-placement-deadline']).toBeDefined()
+
+    const aliceView = playersOf(aliceBody)
+    const panelOf = (player: any): any => player.children.find((child: any) => child.attributes.className === 'remote-placement-panel')
+    const randomiseOf = (panel: any): any => panel.children.find((child: any) => child.attributes.className === 'remote-placement-randomise')
+
+    // Alice's own panel, in Alice's own push, is interactive - nobody has readied up yet.
+    expect(randomiseOf(panelOf(aliceView[0])).attributes.disabled).toBeFalsy()
+    // Bob's panel, as seen in Alice's own push, is always disabled - Alice can't act on Bob's behalf.
+    expect(randomiseOf(panelOf(aliceView[1])).attributes.disabled).toBe(true)
   })
 
   test('pushes again once a queued engine step resolves', async () => {

@@ -3,6 +3,7 @@ import { createServer } from 'http'
 import jsonDom from 'json-dom'
 import { Server, Socket } from 'socket.io'
 import { startRoomGame, watchRoomGame } from './gameplay'
+import { isHostOnlyStage } from '../src/setup/remotePlacement'
 import type { Server as HttpServer } from 'http'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { ForwardedEvent } from 'json-dom/dist/events/types'
@@ -145,6 +146,13 @@ export const createLobbyServer = (): HttpServer => {
     socket.on('gameAction', (envelope: ForwardedEvent) => {
       const room = currentRoom ? rooms.get(currentRoom) : undefined
       if (!room?.game) {
+        return
+      }
+      // Choosing the turn order (Random, or Set order's own board clicks) is host-only - enforced here, not just
+      // by those controls being disabled on a non-host's own redacted copy, since receiveForwardedEvent dispatches
+      // a bare DOM event with no socket identity attached once it reaches whatever listener actually runs. Ship
+      // placement itself needs no such check: a client can only ever act on its own board either way.
+      if (isHostOnlyStage(room.game.root) && socket.id !== room.hostId) {
         return
       }
       // Plenty of real actions run entirely synchronously (continueTurn, placeCell, finishTurn...), queuing

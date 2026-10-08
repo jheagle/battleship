@@ -37,14 +37,27 @@ const startRound = (order: Player[], firstGoesFirst: boolean | undefined): void 
 /**
  * Build the players, place their ships, and start the round. Shared by beginRound (reading these settings from the
  * lobby form) and playAgain (reading them from the settings the last game was started with) - either way, this is
- * the one place a round actually begins.
+ * the one place a round actually begins. A remote game passes startRemotePlacement (simultaneous per-player
+ * placement, no handoff) in place of the default, and onPlayersBuilt to set each player's real name before
+ * anything is ever rendered or pushed - see server/gameplay.ts. Local play needs neither: a human types their own
+ * name during their own handoff screen (see placement.ts's nameInput), since there is nothing to know upfront.
  * @param parent
  * @param humans
  * @param robots
  * @param firstGoesFirst
  * @param hints
+ * @param placementStarter
+ * @param onPlayersBuilt
  */
-export const startNewGame = (parent: DomItemRoot, humans: number, robots: number, firstGoesFirst: boolean, hints: HintSetting): void => {
+export const startNewGame = (
+  parent: DomItemRoot,
+  humans: number,
+  robots: number,
+  firstGoesFirst: boolean,
+  hints: HintSetting,
+  placementStarter: typeof startPlacement = startPlacement,
+  onPlayersBuilt: (players: Player[]) => void = () => {}
+): void => {
   setHintSetting(parent, hints)
   clearBody(parent)
   // Robots only: one control above the boards shows every ship at once
@@ -54,5 +67,6 @@ export const startNewGame = (parent: DomItemRoot, humans: number, robots: number
   const players = jsonDom.renderHtml(boards(buildPlayers(humans, parent.body, robots)), parent.body).children as Player[]
   // With hints on for everyone, every human gets them on their turn; with them off or optional, nobody does by default
   players.filter(player => !player.isRobot).forEach(player => { player.showHint = hints === 'on' })
-  startPlacement(players, parent.body, order => startRound(order, humans > 1 ? undefined : firstGoesFirst))
+  onPlayersBuilt(players)
+  placementStarter(players, parent.body, order => startRound(order, humans > 1 ? undefined : firstGoesFirst))
 }

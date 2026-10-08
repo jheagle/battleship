@@ -3,8 +3,10 @@ import jsonDom from 'json-dom'
 import attackListener from '../src/attack/attackListener'
 import hintListener from '../src/attack/hintListener'
 import placementListener from '../src/setup/placementListener'
+import remotePlacementListener from '../src/setup/remotePlacementListener'
 import shipsListener from '../src/attack/shipsListener'
 import { startNewGame } from '../src/setup/startNewGame'
+import { startRemotePlacement } from '../src/setup/remotePlacement'
 import { setGameMode } from '../src/setup/gameOptions'
 import { getSession } from '../src/setup/gameSession'
 import { redactGameBody } from '../src/network/redactGameState'
@@ -38,27 +40,32 @@ const buildIsolatedRoot = (listeners: Record<string, ListenerFunction>): DomItem
 /**
  * Build and start a real game for a room's connected players, reusing the engine entirely unmodified - the same
  * startNewGame local play uses, just handed a pseudo-dom-backed root instead of a real browser one (the engine
- * already runs headless this way, see battleship's own Node self-start path and its whole test suite). Every
- * seat is a connected human, so robots are always 0.
+ * already runs headless this way, see battleship's own Node self-start path and its whole test suite), with
+ * startRemotePlacement in place of local hot-seat's own handoff-based placement. Every seat is a connected
+ * human, so robots are always 0.
  * @param roomPlayers the room's players, in join order - buildPlayers generates players in this same order, so
- * this is what maps a socket to the player it owns. buildPlayers has no way to take the real names in at build
- * time (the default "Player N" names are all it knows there), so they are set, and the stats panel they are
- * already baked into refreshed, right after.
+ * this is what maps a socket to the player it owns. Real names are set as soon as the players exist (via
+ * startNewGame's onPlayersBuilt hook), before placement ever renders anything - buildPlayers itself has no way
+ * to take them in at build time, and setting them any later left the very first thing a player sees (their own
+ * name, in their own stats panel) showing the default "Player N" instead.
  * @param hints
  * @param firstGoesFirst
  */
 export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string]>, hints: HintSetting, firstGoesFirst: boolean): RoomGame => {
-  const root = buildIsolatedRoot({ attackListener, hintListener, placementListener, shipsListener })
+  const root = buildIsolatedRoot({ attackListener, hintListener, placementListener, remotePlacementListener, shipsListener })
   // Every seat is a connected human, so this is always the multiplayer game mode - startNewGame itself reads this
   // (its own robots-only branch would otherwise fire, since a fresh session's mode defaults to 'robots').
   setGameMode(root, 'multi')
-  startNewGame(root, roomPlayers.length, 0, firstGoesFirst, hints)
-  const players = jsonDom.getChildrenByClass('boards', root.body)[0].children as Player[]
-  players.forEach((player, i) => {
-    player.name = roomPlayers[i][1]
-    updatePlayerStats(player)
+  let players: Player[] = []
+  const playerBySocket = new Map<string, Player>()
+  startNewGame(root, roomPlayers.length, 0, firstGoesFirst, hints, startRemotePlacement, builtPlayers => {
+    players = builtPlayers
+    builtPlayers.forEach((player, i) => {
+      player.name = roomPlayers[i][1]
+      updatePlayerStats(player)
+      playerBySocket.set(roomPlayers[i][0], player)
+    })
   })
-  const playerBySocket = new Map(roomPlayers.map(([socketId], i) => [socketId, players[i]]))
   return { root, players, playerBySocket }
 }
 

@@ -9,6 +9,9 @@ A relatively recent version is running at https: //joshuaheagle.com/battleship/
 <dt><a href="#hasTrait">hasTrait</a></dt>
 <dd><p>The typed version of json-dom&#39;s hasTrait, it narrows an item to the trait it was checked for.</p>
 </dd>
+<dt><a href="#PLACEMENT_TIMEOUT_MS">PLACEMENT_TIMEOUT_MS</a></dt>
+<dd><p>How long players have to finish placing before any still-pending ships are placed at random for them.</p>
+</dd>
 <dt><a href="#playerColours">playerColours</a></dt>
 <dd><p>The colour each player is identified by, in the order they are created. They are bright enough to read on the dark
 background, and distinct from one another.</p>
@@ -82,10 +85,13 @@ in progress), so a new one can be built on a blank page.</p>
 <dt><a href="#startRound">startRound(order, firstGoesFirst)</a></dt>
 <dd><p>Pick the first attacker, and let a robot start if it is one.</p>
 </dd>
-<dt><a href="#startNewGame">startNewGame(parent, humans, robots, firstGoesFirst, hints)</a></dt>
+<dt><a href="#startNewGame">startNewGame(parent, humans, robots, firstGoesFirst, hints, placementStarter, onPlayersBuilt)</a></dt>
 <dd><p>Build the players, place their ships, and start the round. Shared by beginRound (reading these settings from the
 lobby form) and playAgain (reading them from the settings the last game was started with) - either way, this is
-the one place a round actually begins.</p>
+the one place a round actually begins. A remote game passes startRemotePlacement (simultaneous per-player
+placement, no handoff) in place of the default, and onPlayersBuilt to set each player&#39;s real name before
+anything is ever rendered or pushed - see server/gameplay.ts. Local play needs neither: a human types their own
+name during their own handoff screen (see placement.ts&#39;s nameInput), since there is nothing to know upfront.</p>
 </dd>
 <dt><a href="#startMenu">startMenu(parent)</a></dt>
 <dd><p>The entry function</p>
@@ -106,6 +112,65 @@ before playing again - unlike the main menu button, which goes all the way back 
 </dd>
 <dt><a href="#restart">restart(e, button)</a></dt>
 <dd></dd>
+<dt><a href="#remotePlacementListener">remotePlacementListener(e, target)</a></dt>
+<dd><p>The remote placement/ordering panels&#39; own buttons - each player&#39;s Randomise/Ready, and the host-only Random/
+Set order. Told apart by class name, same pattern as local placement&#39;s own placementListener.</p>
+</dd>
+<dt><a href="#isRemoteSessionActive">isRemoteSessionActive()</a></dt>
+<dd><p>Whether a remote placement/ordering phase is running for this item&#39;s game - so a board click during it is
+routed here instead of to a normal attack (see attackListener.ts).</p>
+</dd>
+<dt><a href="#isHostOnlyStage">isHostOnlyStage()</a></dt>
+<dd><p>Whether only the host may act right now - every stage except placing itself (see server/lobbyServer.ts).</p>
+</dd>
+<dt><a href="#renderPanel">renderPanel()</a></dt>
+<dd><p>Refresh one player&#39;s own placement panel to match their current state.</p>
+</dd>
+<dt><a href="#showStart">showStart()</a></dt>
+<dd><p>Mark which cells a ship-in-progress could end on, same visual as local placement&#39;s own showStart.</p>
+</dd>
+<dt><a href="#startRemotePlacement">startRemotePlacement(players, body, done)</a></dt>
+<dd><p>Begin a remote game&#39;s placement phase: every human places their own ships on their own board at the same
+time - no handoff, no &quot;look away&quot;. <code>done</code> runs once the order is set, with the order play will take.</p>
+</dd>
+<dt><a href="#placeRemoteShip">placeRemoteShip(tile, board)</a></dt>
+<dd><p>A click on a player&#39;s own board during placement: the first click sets where a ship starts, the second where
+it ends (an invalid second click is refused and the start is forgotten) - exactly local placement&#39;s own
+two-click mechanic, just resolved from the clicked board&#39;s own owner instead of a shared &quot;current player&quot;.</p>
+</dd>
+<dt><a href="#pickOrderPlayer">pickOrderPlayer()</a></dt>
+<dd><p>A click on a player&#39;s own board while the order is being set (see beginOrderSet) - adds them to the order.</p>
+</dd>
+<dt><a href="#handleRemoteBoardClick">handleRemoteBoardClick()</a></dt>
+<dd><p>A board click while a remote placement/ordering phase is running - routed by the current stage.</p>
+</dd>
+<dt><a href="#beginOrdering">beginOrdering()</a></dt>
+<dd><p>Once every player is ready (or the timer below fires), hide their panels and show the ordering choice.</p>
+</dd>
+<dt><a href="#autoFinishPlacement">autoFinishPlacement()</a></dt>
+<dd><p>Any player still not ready when the deadline passes has their remaining ships placed for them at random.</p>
+</dd>
+<dt><a href="#readyRemotePlayer">readyRemotePlayer()</a></dt>
+<dd><p>The Ready button: locks a player&#39;s own fleet in once nothing is left pending.</p>
+</dd>
+<dt><a href="#randomiseRemoteShips">randomiseRemoteShips()</a></dt>
+<dd><p>The Randomise button: re-rolls just this player&#39;s own remaining fleet, same as local placement&#39;s own version.</p>
+</dd>
+<dt><a href="#beginOrderSet">beginOrderSet()</a></dt>
+<dd><p>The Set order button: from here, clicking each player&#39;s board in turn (see pickOrderPlayer) sets the order.</p>
+</dd>
+<dt><a href="#highlightOnly">highlightOnly()</a></dt>
+<dd><p>Outline one player&#39;s panel, and clear the outline from the others - the random order&#39;s own shuffle animation.</p>
+</dd>
+<dt><a href="#shuffle">shuffle()</a></dt>
+<dd><p>A shuffled copy of the players, in a random order - identical to local placement&#39;s own version.</p>
+</dd>
+<dt><a href="#chooseOrderRandom">chooseOrderRandom()</a></dt>
+<dd><p>The Random button: a short highlight passes over the players, then lands on a full random order.</p>
+</dd>
+<dt><a href="#finishOrdering">finishOrdering()</a></dt>
+<dd><p>The order is set (either way) - show it briefly, then begin the round.</p>
+</dd>
 <dt><a href="#renderRoomState">renderRoomState()</a></dt>
 <dd><p>Replace the waiting room&#39;s player list, room code and host controls with a freshly-received room state.</p>
 </dd>
@@ -343,6 +408,20 @@ Not used by the game&#39;s robot yet: it is kept for game styles where the chanc
 <dt><a href="#clearChildren">clearChildren()</a></dt>
 <dd><p>Remove every one of a parent&#39;s children - the same pattern startNewGame&#39;s clearBody uses locally.</p>
 </dd>
+<dt><a href="#deadlineOf">deadlineOf()</a></dt>
+<dd><p>The placement deadline a pushed body carries, if placement is still running.</p>
+</dd>
+<dt><a href="#ensureCountdownElement">ensureCountdownElement()</a></dt>
+<dd><p>Create the countdown element if there is not already a live one in the page - not just a non-null reference:
+something else clearing the page for a fresh game (without going through leaveRemoteGame) can detach the old
+one from the document while this module&#39;s own reference to it lives on.</p>
+</dd>
+<dt><a href="#setCountdownDeadline">setCountdownDeadline()</a></dt>
+<dd><p>Start, update, or stop the visual countdown, as each new deadline (or its absence) comes in.</p>
+</dd>
+<dt><a href="#stopCountdown">stopCountdown()</a></dt>
+<dd><p>Remove the countdown entirely - called once the remote game is left.</p>
+</dd>
 <dt><a href="#renderInto">renderInto(root, redactedBody)</a></dt>
 <dd><p>Replace the root&#39;s own body content with a freshly-inflated redacted body&#39;s children, rendered directly as the
 body&#39;s own children - not nested one level deeper under some other wrapper - so a path captured from this tree
@@ -375,10 +454,23 @@ kept as an array of the right length (playerStats reads parts.length), but its e
 ship&#39;s parts are the same Tile objects the board holds, so leaving them as-is on a redacted clone would leak
 exact ship position through this second path even with the board&#39;s own tiles correctly redacted.</p>
 </dd>
+<dt><a href="#classNameOf">classNameOf()</a></dt>
+<dd><p>The class name of an item, if it has one - the same lightweight check used throughout this file.</p>
+</dd>
+<dt><a href="#disableControls">disableControls(panel)</a></dt>
+<dd><p>A clone of a panel with every one of its own controls (anything but its message, which is never secret - ship
+sizes are public fleet knowledge, only position is hidden) disabled - used for a remote placement/ordering
+panel that is not this viewer&#39;s own to interact with. Builds a new object rather than mutating the given one,
+since it is already part of an outer clone (redactPlayer/redactGameBody) that must stay independent of the
+real tree.</p>
+</dd>
 <dt><a href="#redactPlayer">redactPlayer(player, viewer)</a></dt>
 <dd><p>One player, redacted for a given viewer: a clone of the real player, with its board and fleet redacted per
-redactBoard/redactShip. Everything else (name, colour, robot/human, overall status, whose turn it is,
-playerStats - already public, see redactShip) passes through unchanged.</p>
+redactBoard/redactShip, and (for a remote game) its own placement panel disabled unless this is that player&#39;s
+own viewer. Everything else (name, colour, robot/human, overall status, whose turn it is, playerStats -
+already public, see redactShip) passes through unchanged. children is kept in step with whichever of its own
+entries changed, by index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote
+game&#39;s own fourth child (its placement panel) would otherwise silently be dropped.</p>
 </dd>
 <dt><a href="#redactGameState">redactGameState(players, viewer)</a></dt>
 <dd><p>The whole game, redacted for one viewer: every player, each with their own board redacted according to whether
@@ -389,9 +481,13 @@ exact same components local play already uses, and forward its clicks the same w
 </dd>
 <dt><a href="#redactGameBody">redactGameBody(body, players, viewer)</a></dt>
 <dd><p>A whole screen&#39;s worth of game state, redacted for one viewer - the boards wrapper&#39;s own children replaced with
-redactGameState&#39;s result, everything else (the placement panel, the robots-only show-all-ships control, if
-present) kept as is, since none of it carries anything secret. This is what a remote client actually renders
-and interacts with: the exact same markup local play already uses, inflated from this instead of built fresh.</p>
+redactGameState&#39;s result, and (for a remote game) the global ordering panel&#39;s own Random/Set order controls
+disabled for anyone but the host - players[0] is always the room&#39;s host for as long as any game of theirs is
+running (the host is always the first to join a room, and the whole room closes if they ever leave, so this
+holds without needing to thread a separate host id through here). Everything else (the robots-only
+show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
+remote client actually renders and interacts with: the exact same markup local play already uses, inflated
+from this instead of built fresh.</p>
 </dd>
 <dt><a href="#connectLobbySocket">connectLobbySocket(url)</a></dt>
 <dd><p>The lobby socket, connecting on first use. A test can connect it to its own ephemeral server before triggering any
@@ -401,7 +497,7 @@ UI action, by calling this directly with that server&#39;s URL - the UI&#39;s ow
 <dd><p>Close the lobby socket and forget it, so the next connectLobbySocket call starts fresh.</p>
 </dd>
 <dt><a href="#createRoom">createRoom()</a></dt>
-<dd><p>Create a room as its host, resolving with the room&#39;s state once the server acknowledges it.</p>
+<dd><p>Create a room as its host, resolving with the room&#39;s state once the server acknowledges it, or an error.</p>
 </dd>
 <dt><a href="#joinRoom">joinRoom()</a></dt>
 <dd><p>Join an existing room by its code, resolving with the room&#39;s state, or an error if it could not be joined.</p>
@@ -451,6 +547,18 @@ given their real values once the board is built (see buildPlayers).</p>
 <dt><a href="#showShipsControl">showShipsControl()</a></dt>
 <dd><p>The one control for the robots-only game: a single checkbox to show every ship on every board, rather than one per
 board. It sits above the boards.</p>
+</dd>
+<dt><a href="#remotePlacementPanel">remotePlacementPanel()</a></dt>
+<dd><p>Each player&#39;s own placement controls, rendered as part of their own subtree (not one shared panel at the body
+level, like local hot-seat&#39;s placementPanel) - so every connected player places their own ships on their own
+board whenever they want, with no &quot;look away&quot; handoff. Redacted per viewer (see redactGameState.ts): only the
+owning player&#39;s own copy is ever enabled - everyone else&#39;s is always disabled, showing only ready/not-ready.</p>
+</dd>
+<dt><a href="#remoteOrderingPanel">remoteOrderingPanel()</a></dt>
+<dd><p>How the turn order is decided once every player has placed: the host picks Random or Set order (clicking each
+player&#39;s board in turn); everyone else sees the exact same status message, with no controls of their own.
+Enforced server-side (see server/lobbyServer.ts&#39;s gameAction handler, which rejects a non-host&#39;s action during
+any stage but placing), not just by these buttons being disabled on a non-host&#39;s own redacted copy.</p>
 </dd>
 <dt><a href="#placementPanel">placementPanel(message)</a></dt>
 <dd><p>The panel shown during the placement phase: a message for whoever is placing, and their buttons. Each button has one
@@ -535,7 +643,9 @@ lock (see gameSession), so one game&#39;s turn change never blocks another&#39;s
 </dd>
 <dt><a href="#attackListener">attackListener(e, target)</a></dt>
 <dd><p>target is the board the listener was attached to (see buildPlayers): a DomItem here, like every listener&#39;s target,
-but really always a Board. During the placement phase a click places a ship rather than attacking.</p>
+but really always a Board. During the placement phase a click places a ship rather than attacking - local
+hot-seat&#39;s own handoff-based placement, or (for a remote game) simultaneous per-player placement/ordering;
+exactly one of the two is ever active for a given game, never both.</p>
 </dd>
 <dt><a href="#attackFleet">attackFleet(target)</a></dt>
 <dd><p>Perform attack on an enemy board / cell</p>
@@ -546,6 +656,12 @@ but really always a Board. During the placement phase a click places a ship rath
 
 ## hasTrait
 The typed version of json-dom's hasTrait, it narrows an item to the trait it was checked for.
+
+**Kind**: global variable  
+<a name="PLACEMENT_TIMEOUT_MS"></a>
+
+## PLACEMENT\_TIMEOUT\_MS
+How long players have to finish placing before any still-pending ships are placed at random for them.
 
 **Kind**: global variable  
 <a name="playerColours"></a>
@@ -740,10 +856,13 @@ Pick the first attacker, and let a robot start if it is one.
 
 <a name="startNewGame"></a>
 
-## startNewGame(parent, humans, robots, firstGoesFirst, hints)
+## startNewGame(parent, humans, robots, firstGoesFirst, hints, placementStarter, onPlayersBuilt)
 Build the players, place their ships, and start the round. Shared by beginRound (reading these settings from the
 lobby form) and playAgain (reading them from the settings the last game was started with) - either way, this is
-the one place a round actually begins.
+the one place a round actually begins. A remote game passes startRemotePlacement (simultaneous per-player
+placement, no handoff) in place of the default, and onPlayersBuilt to set each player's real name before
+anything is ever rendered or pushed - see server/gameplay.ts. Local play needs neither: a human types their own
+name during their own handoff screen (see placement.ts's nameInput), since there is nothing to know upfront.
 
 **Kind**: global function  
 
@@ -754,6 +873,8 @@ the one place a round actually begins.
 | robots | 
 | firstGoesFirst | 
 | hints | 
+| placementStarter | 
+| onPlayersBuilt | 
 
 <a name="startMenu"></a>
 
@@ -827,6 +948,138 @@ before playing again - unlike the main menu button, which goes all the way back 
 | e | 
 | button | 
 
+<a name="remotePlacementListener"></a>
+
+## remotePlacementListener(e, target)
+The remote placement/ordering panels' own buttons - each player's Randomise/Ready, and the host-only Random/
+Set order. Told apart by class name, same pattern as local placement's own placementListener.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| e | 
+| target | 
+
+<a name="isRemoteSessionActive"></a>
+
+## isRemoteSessionActive()
+Whether a remote placement/ordering phase is running for this item's game - so a board click during it is
+routed here instead of to a normal attack (see attackListener.ts).
+
+**Kind**: global function  
+<a name="isHostOnlyStage"></a>
+
+## isHostOnlyStage()
+Whether only the host may act right now - every stage except placing itself (see server/lobbyServer.ts).
+
+**Kind**: global function  
+<a name="renderPanel"></a>
+
+## renderPanel()
+Refresh one player's own placement panel to match their current state.
+
+**Kind**: global function  
+<a name="showStart"></a>
+
+## showStart()
+Mark which cells a ship-in-progress could end on, same visual as local placement's own showStart.
+
+**Kind**: global function  
+<a name="startRemotePlacement"></a>
+
+## startRemotePlacement(players, body, done)
+Begin a remote game's placement phase: every human places their own ships on their own board at the same
+time - no handoff, no "look away". `done` runs once the order is set, with the order play will take.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| players | 
+| body | 
+| done | 
+
+<a name="placeRemoteShip"></a>
+
+## placeRemoteShip(tile, board)
+A click on a player's own board during placement: the first click sets where a ship starts, the second where
+it ends (an invalid second click is refused and the start is forgotten) - exactly local placement's own
+two-click mechanic, just resolved from the clicked board's own owner instead of a shared "current player".
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| tile | 
+| board | 
+
+<a name="pickOrderPlayer"></a>
+
+## pickOrderPlayer()
+A click on a player's own board while the order is being set (see beginOrderSet) - adds them to the order.
+
+**Kind**: global function  
+<a name="handleRemoteBoardClick"></a>
+
+## handleRemoteBoardClick()
+A board click while a remote placement/ordering phase is running - routed by the current stage.
+
+**Kind**: global function  
+<a name="beginOrdering"></a>
+
+## beginOrdering()
+Once every player is ready (or the timer below fires), hide their panels and show the ordering choice.
+
+**Kind**: global function  
+<a name="autoFinishPlacement"></a>
+
+## autoFinishPlacement()
+Any player still not ready when the deadline passes has their remaining ships placed for them at random.
+
+**Kind**: global function  
+<a name="readyRemotePlayer"></a>
+
+## readyRemotePlayer()
+The Ready button: locks a player's own fleet in once nothing is left pending.
+
+**Kind**: global function  
+<a name="randomiseRemoteShips"></a>
+
+## randomiseRemoteShips()
+The Randomise button: re-rolls just this player's own remaining fleet, same as local placement's own version.
+
+**Kind**: global function  
+<a name="beginOrderSet"></a>
+
+## beginOrderSet()
+The Set order button: from here, clicking each player's board in turn (see pickOrderPlayer) sets the order.
+
+**Kind**: global function  
+<a name="highlightOnly"></a>
+
+## highlightOnly()
+Outline one player's panel, and clear the outline from the others - the random order's own shuffle animation.
+
+**Kind**: global function  
+<a name="shuffle"></a>
+
+## shuffle()
+A shuffled copy of the players, in a random order - identical to local placement's own version.
+
+**Kind**: global function  
+<a name="chooseOrderRandom"></a>
+
+## chooseOrderRandom()
+The Random button: a short highlight passes over the players, then lands on a full random order.
+
+**Kind**: global function  
+<a name="finishOrdering"></a>
+
+## finishOrdering()
+The order is set (either way) - show it briefly, then begin the round.
+
+**Kind**: global function  
 <a name="renderRoomState"></a>
 
 ## renderRoomState()
@@ -1616,6 +1869,32 @@ Main AI logic for computer to attack, selects a target then performs attack func
 Remove every one of a parent's children - the same pattern startNewGame's clearBody uses locally.
 
 **Kind**: global function  
+<a name="deadlineOf"></a>
+
+## deadlineOf()
+The placement deadline a pushed body carries, if placement is still running.
+
+**Kind**: global function  
+<a name="ensureCountdownElement"></a>
+
+## ensureCountdownElement()
+Create the countdown element if there is not already a live one in the page - not just a non-null reference:
+something else clearing the page for a fresh game (without going through leaveRemoteGame) can detach the old
+one from the document while this module's own reference to it lives on.
+
+**Kind**: global function  
+<a name="setCountdownDeadline"></a>
+
+## setCountdownDeadline()
+Start, update, or stop the visual countdown, as each new deadline (or its absence) comes in.
+
+**Kind**: global function  
+<a name="stopCountdown"></a>
+
+## stopCountdown()
+Remove the countdown entirely - called once the remote game is left.
+
+**Kind**: global function  
 <a name="renderInto"></a>
 
 ## renderInto(root, redactedBody)
@@ -1686,12 +1965,36 @@ exact ship position through this second path even with the board's own tiles cor
 | --- |
 | ship | 
 
+<a name="classNameOf"></a>
+
+## classNameOf()
+The class name of an item, if it has one - the same lightweight check used throughout this file.
+
+**Kind**: global function  
+<a name="disableControls"></a>
+
+## disableControls(panel)
+A clone of a panel with every one of its own controls (anything but its message, which is never secret - ship
+sizes are public fleet knowledge, only position is hidden) disabled - used for a remote placement/ordering
+panel that is not this viewer's own to interact with. Builds a new object rather than mutating the given one,
+since it is already part of an outer clone (redactPlayer/redactGameBody) that must stay independent of the
+real tree.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| panel | 
+
 <a name="redactPlayer"></a>
 
 ## redactPlayer(player, viewer)
 One player, redacted for a given viewer: a clone of the real player, with its board and fleet redacted per
-redactBoard/redactShip. Everything else (name, colour, robot/human, overall status, whose turn it is,
-playerStats - already public, see redactShip) passes through unchanged.
+redactBoard/redactShip, and (for a remote game) its own placement panel disabled unless this is that player's
+own viewer. Everything else (name, colour, robot/human, overall status, whose turn it is, playerStats -
+already public, see redactShip) passes through unchanged. children is kept in step with whichever of its own
+entries changed, by index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote
+game's own fourth child (its placement panel) would otherwise silently be dropped.
 
 **Kind**: global function  
 
@@ -1720,9 +2023,13 @@ exact same components local play already uses, and forward its clicks the same w
 
 ## redactGameBody(body, players, viewer)
 A whole screen's worth of game state, redacted for one viewer - the boards wrapper's own children replaced with
-redactGameState's result, everything else (the placement panel, the robots-only show-all-ships control, if
-present) kept as is, since none of it carries anything secret. This is what a remote client actually renders
-and interacts with: the exact same markup local play already uses, inflated from this instead of built fresh.
+redactGameState's result, and (for a remote game) the global ordering panel's own Random/Set order controls
+disabled for anyone but the host - players[0] is always the room's host for as long as any game of theirs is
+running (the host is always the first to join a room, and the whole room closes if they ever leave, so this
+holds without needing to thread a separate host id through here). Everything else (the robots-only
+show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
+remote client actually renders and interacts with: the exact same markup local play already uses, inflated
+from this instead of built fresh.
 
 **Kind**: global function  
 
@@ -1753,7 +2060,7 @@ Close the lobby socket and forget it, so the next connectLobbySocket call starts
 <a name="createRoom"></a>
 
 ## createRoom()
-Create a room as its host, resolving with the room's state once the server acknowledges it.
+Create a room as its host, resolving with the room's state once the server acknowledges it, or an error.
 
 **Kind**: global function  
 <a name="joinRoom"></a>
@@ -1866,6 +2173,24 @@ Default properties for a tile in the battleship game.
 ## showShipsControl()
 The one control for the robots-only game: a single checkbox to show every ship on every board, rather than one per
 board. It sits above the boards.
+
+**Kind**: global function  
+<a name="remotePlacementPanel"></a>
+
+## remotePlacementPanel()
+Each player's own placement controls, rendered as part of their own subtree (not one shared panel at the body
+level, like local hot-seat's placementPanel) - so every connected player places their own ships on their own
+board whenever they want, with no "look away" handoff. Redacted per viewer (see redactGameState.ts): only the
+owning player's own copy is ever enabled - everyone else's is always disabled, showing only ready/not-ready.
+
+**Kind**: global function  
+<a name="remoteOrderingPanel"></a>
+
+## remoteOrderingPanel()
+How the turn order is decided once every player has placed: the host picks Random or Set order (clicking each
+player's board in turn); everyone else sees the exact same status message, with no controls of their own.
+Enforced server-side (see server/lobbyServer.ts's gameAction handler, which rejects a non-host's action during
+any stage but placing), not just by these buttons being disabled on a non-host's own redacted copy.
 
 **Kind**: global function  
 <a name="placementPanel"></a>
@@ -2159,7 +2484,9 @@ lock (see gameSession), so one game's turn change never blocks another's.
 
 ## attackListener(e, target)
 target is the board the listener was attached to (see buildPlayers): a DomItem here, like every listener's target,
-but really always a Board. During the placement phase a click places a ship rather than attacking.
+but really always a Board. During the placement phase a click places a ship rather than attacking - local
+hot-seat's own handoff-based placement, or (for a remote game) simultaneous per-player placement/ordering;
+exactly one of the two is ever active for a given game, never both.
 
 **Kind**: global function  
 

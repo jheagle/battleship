@@ -38,18 +38,48 @@ const redactShip = (ship: Ship): Ship => ({
   parts: ship.parts.map(() => ({} as Tile))
 })
 
+/** The class name of an item, if it has one - the same lightweight check used throughout this file. */
+const classNameOf = (item: DomItem): string | undefined => (item.attributes as { className?: string } | undefined)?.className
+
+/**
+ * A clone of a panel with every one of its own controls (anything but its message, which is never secret - ship
+ * sizes are public fleet knowledge, only position is hidden) disabled - used for a remote placement/ordering
+ * panel that is not this viewer's own to interact with. Builds a new object rather than mutating the given one,
+ * since it is already part of an outer clone (redactPlayer/redactGameBody) that must stay independent of the
+ * real tree.
+ * @param panel
+ */
+const disableControls = (panel: DomItem): DomItem => ({
+  ...panel,
+  children: panel.children.map(child => classNameOf(child) === 'remote-placement-message' || classNameOf(child) === 'remote-ordering-message'
+    ? child
+    : { ...child, attributes: { ...child.attributes, disabled: true } } as DomItem)
+}) as DomItem
+
 /**
  * One player, redacted for a given viewer: a clone of the real player, with its board and fleet redacted per
- * redactBoard/redactShip. Everything else (name, colour, robot/human, overall status, whose turn it is,
- * playerStats - already public, see redactShip) passes through unchanged.
+ * redactBoard/redactShip, and (for a remote game) its own placement panel disabled unless this is that player's
+ * own viewer. Everything else (name, colour, robot/human, overall status, whose turn it is, playerStats -
+ * already public, see redactShip) passes through unchanged. children is kept in step with whichever of its own
+ * entries changed, by index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote
+ * game's own fourth child (its placement panel) would otherwise silently be dropped.
  * @param player
  * @param viewer
  */
 export const redactPlayer = (player: Player, viewer: Player): Player => {
   const clone = siFunciona.cloneObject(player) as Player
+  const boardIndex = clone.children.indexOf(clone.board)
   clone.board = redactBoard(player.board, player === viewer)
+  if (boardIndex !== -1) {
+    clone.children[boardIndex] = clone.board
+  }
   clone.shipFleet = player.shipFleet.map(redactShip)
-  clone.children = [clone.children[0], clone.board, clone.children[2]]
+  if (player !== viewer) {
+    const panelIndex = clone.children.findIndex(child => classNameOf(child) === 'remote-placement-panel')
+    if (panelIndex !== -1) {
+      clone.children[panelIndex] = disableControls(clone.children[panelIndex])
+    }
+  }
   return clone
 }
 
@@ -66,18 +96,26 @@ export const redactGameState = (players: Player[], viewer: Player): Player[] => 
 
 /**
  * A whole screen's worth of game state, redacted for one viewer - the boards wrapper's own children replaced with
- * redactGameState's result, everything else (the placement panel, the robots-only show-all-ships control, if
- * present) kept as is, since none of it carries anything secret. This is what a remote client actually renders
- * and interacts with: the exact same markup local play already uses, inflated from this instead of built fresh.
+ * redactGameState's result, and (for a remote game) the global ordering panel's own Random/Set order controls
+ * disabled for anyone but the host - players[0] is always the room's host for as long as any game of theirs is
+ * running (the host is always the first to join a room, and the whole room closes if they ever leave, so this
+ * holds without needing to thread a separate host id through here). Everything else (the robots-only
+ * show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
+ * remote client actually renders and interacts with: the exact same markup local play already uses, inflated
+ * from this instead of built fresh.
  * @param body
  * @param players
  * @param viewer
  */
 export const redactGameBody = (body: DomItem, players: Player[], viewer: Player): DomItem => {
   const clone = siFunciona.cloneObject(body) as DomItem
-  const boardsIndex = clone.children.findIndex(child => (child.attributes as { className?: string } | undefined)?.className === 'boards')
+  const boardsIndex = clone.children.findIndex(child => classNameOf(child) === 'boards')
   if (boardsIndex !== -1) {
     clone.children[boardsIndex] = { ...clone.children[boardsIndex], children: redactGameState(players, viewer) } as unknown as DomItem
+  }
+  const orderingIndex = clone.children.findIndex(child => classNameOf(child) === 'remote-ordering')
+  if (orderingIndex !== -1 && viewer !== players[0]) {
+    clone.children[orderingIndex] = disableControls(clone.children[orderingIndex])
   }
   return clone
 }
