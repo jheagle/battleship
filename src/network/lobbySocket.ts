@@ -1,4 +1,6 @@
 import { io, Socket } from 'socket.io-client'
+import type { ForwardedEvent } from 'json-dom/dist/events/types'
+import type { HintSetting } from '../setup/gameOptions'
 import type { RoomState } from '../../server/lobbyServer'
 
 /** No server is deployed yet - this only works against a locally-run lobby server (npm run dev:lobby). */
@@ -40,4 +42,21 @@ export const onRoomUpdate = (callback: (state: RoomState) => void): void => {
 /** Be told if the host leaves, closing the room for everyone still in it. */
 export const onRoomClosed = (callback: () => void): void => {
   connectLobbySocket().on('roomClosed', callback)
+}
+
+/** This connection's own socket id, once connected - used to tell whether this player is the room's host. */
+export const getSocketId = (): string | undefined => connectLobbySocket().id
+
+/** The host starts the game: every connected player becomes a human player, in the room's own join order. */
+export const startGame = (hints: HintSetting, firstGoesFirst: boolean): Promise<{ started: true } | { error: string }> =>
+  new Promise(resolve => connectLobbySocket().emit('startGame', { hints, firstGoesFirst }, resolve))
+
+/** Be told whenever the game's state changes - the redacted view of the whole screen, for this connection alone. */
+export const onGameUpdate = (callback: (redactedBody: object) => void): void => {
+  connectLobbySocket().on('gameUpdate', callback)
+}
+
+/** Forward a user interaction to the server instead of running its listener locally - see setForwardEvents. */
+export const sendGameAction = (envelope: ForwardedEvent): void => {
+  connectLobbySocket().emit('gameAction', envelope)
 }

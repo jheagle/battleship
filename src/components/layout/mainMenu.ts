@@ -77,6 +77,37 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
             { nodeName: 'h2', attributes: { className: 'lobby-title', innerHTML: 'Waiting Room' } },
             { nodeName: 'div', attributes: { className: 'waiting-room-code' } },
             { nodeName: 'ul', attributes: { className: 'waiting-room-players' } },
+            {
+              nodeName: 'div',
+              attributes: { className: 'waiting-room-host-controls', style: { display: 'none' } },
+              children: [
+                {
+                  nodeName: 'div',
+                  attributes: { className: 'form-group' },
+                  children: [
+                    { nodeName: 'label', attributes: { for: 'waiting-room-hints', innerText: 'Heat-map hints' } },
+                    {
+                      nodeName: 'select',
+                      attributes: { id: 'waiting-room-hints', name: 'waiting-room-hints' },
+                      children: [
+                        { nodeName: 'option', attributes: { value: 'off', innerHTML: 'Off' } },
+                        { nodeName: 'option', attributes: { value: 'optional', selected: true, innerHTML: 'Optional (each player chooses)' } },
+                        { nodeName: 'option', attributes: { value: 'on', innerHTML: 'On for everyone' } }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  nodeName: 'div',
+                  attributes: { className: 'first-group' },
+                  children: [
+                    { nodeName: 'label', attributes: { for: 'waiting-room-first', innerText: 'First Player Starts' } },
+                    { nodeName: 'input', attributes: { id: 'waiting-room-first', name: 'waiting-room-first', type: 'checkbox', checked: true } }
+                  ]
+                },
+                { nodeName: 'button', attributes: { className: 'waiting-room-start', type: 'button', innerHTML: 'Start Game' }, eventListeners: { click: listener('remoteListener') } }
+              ]
+            },
             { nodeName: 'div', attributes: { className: 'waiting-room-status' } },
             { nodeName: 'button', attributes: { className: 'waiting-room-leave', type: 'button', innerHTML: 'Leave' }, eventListeners: { click: listener('remoteListener') } }
           ]

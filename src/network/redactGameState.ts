@@ -1,6 +1,7 @@
 import matrixDom from 'matrix-dom'
 import siFunciona from 'si-funciona'
 import checkIfHitCell from '../utils/checkIfHitCell'
+import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Board, Player, Ship, Tile } from '../types'
 
 /**
@@ -62,3 +63,21 @@ export const redactPlayer = (player: Player, viewer: Player): Player => {
  * @param viewer
  */
 export const redactGameState = (players: Player[], viewer: Player): Player[] => players.map(player => redactPlayer(player, viewer))
+
+/**
+ * A whole screen's worth of game state, redacted for one viewer - the boards wrapper's own children replaced with
+ * redactGameState's result, everything else (the placement panel, the robots-only show-all-ships control, if
+ * present) kept as is, since none of it carries anything secret. This is what a remote client actually renders
+ * and interacts with: the exact same markup local play already uses, inflated from this instead of built fresh.
+ * @param body
+ * @param players
+ * @param viewer
+ */
+export const redactGameBody = (body: DomItem, players: Player[], viewer: Player): DomItem => {
+  const clone = siFunciona.cloneObject(body) as DomItem
+  const boardsIndex = clone.children.findIndex(child => (child.attributes as { className?: string } | undefined)?.className === 'boards')
+  if (boardsIndex !== -1) {
+    clone.children[boardsIndex] = { ...clone.children[boardsIndex], children: redactGameState(players, viewer) } as unknown as DomItem
+  }
+  return clone
+}

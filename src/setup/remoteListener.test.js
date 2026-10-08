@@ -151,6 +151,86 @@ describe('the Online Multiplayer tile and its lobby', () => {
     expect(byClass(doc, 'remote-status').element.textContent).toMatch(/host left/i)
   })
 
+  test('the host sees the Start Game controls, a joiner does not', async () => {
+    const host = rawPlayer()
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice' })
+
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byName(doc, 'remote-name').element.value = 'Bob'
+    byName(doc, 'remote-code').element.value = roomCode
+    byClass(doc, 'remote-join').element.click()
+    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+
+    expect(byClass(doc, 'waiting-room-host-controls').element.style.display).toBe('none')
+  })
+
+  test('the host starting the game renders the real game for both the host and a joiner', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byName(doc, 'remote-name').element.value = 'Alice'
+    byClass(doc, 'remote-host').element.click()
+    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    expect(byClass(doc, 'waiting-room-host-controls').element.style.display).not.toBe('none')
+    const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
+
+    const joiner = rawPlayer()
+    await rawEmit(joiner, 'joinRoom', { roomCode, name: 'Bob' })
+    await waitFor(() => byClass(doc, 'waiting-room-players').element.textContent.includes('Bob'))
+
+    const joinerSawUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
+    byClass(doc, 'waiting-room-start').element.click()
+
+    await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
+    // The whole lobby is gone - this is the real game's own markup now, not the waiting room any more.
+    expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
+    expect(jsonDom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(2)
+    expect(jsonDom.getChildrenByClass('placement', doc.body)).toHaveLength(1)
+
+    const joinerView = await joinerSawUpdate
+    expect(joinerView.children.find(child => child.attributes.className === 'boards').children).toHaveLength(2)
+  })
+
+  // Blocked on pseudo-dom PR #27 (https://github.com/jheagle/pseudo-dom/pull/27), same as lobbyServer.test.ts's own
+  // skipped test - dispatching a forwarded click on the server needs that fix. Confirmed passing with it linked
+  // locally. Once #27 is merged and published, bump the pseudo-dom dependency and remove this .skip.
+  test.skip('clicking something in the rendered game forwards it, and both players see the real result', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byName(doc, 'remote-name').element.value = 'Alice'
+    byClass(doc, 'remote-host').element.click()
+    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
+
+    const joiner = rawPlayer()
+    await rawEmit(joiner, 'joinRoom', { roomCode, name: 'Bob' })
+    await waitFor(() => byClass(doc, 'waiting-room-players').element.textContent.includes('Bob'))
+
+    const joinerSawFirstUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
+    byClass(doc, 'waiting-room-start').element.click()
+    await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
+    await joinerSawFirstUpdate
+
+    // Two humans start at the handoff screen, where Continue is the only shown button.
+    const continueButton = jsonDom.getChildrenByClass('placement-continue', doc.body)[0]
+    expect(jsonDom.getChildrenByClass('placement-randomise', doc.body)[0].element.style.display).toBe('none')
+
+    const joinerSawSecondUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
+    continueButton.element.click()
+    const joinerView = await joinerSawSecondUpdate
+
+    // Continue moved the real session from handoff to placing. The host's own click triggers the host's own
+    // gameUpdate too, which re-renders this whole tree fresh - so the button has to be re-queried, not the one
+    // captured before the click, which the re-render has already discarded.
+    await waitFor(() => jsonDom.getChildrenByClass('placement-randomise', doc.body)[0].element.style.display !== 'none')
+    const joinerPanel = joinerView.children.find(child => child.attributes.className === 'placement')
+    const joinerRandomise = joinerPanel.children.find(child => child.attributes.className === 'placement-randomise')
+    expect(joinerRandomise.attributes.style.display).not.toBe('none')
+  })
+
   test('leaving the waiting room returns to the game types and lets a fresh room be hosted', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()

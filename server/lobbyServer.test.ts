@@ -105,15 +105,19 @@ describe('the lobby server', () => {
       return { host, joiner, roomCode }
     }
 
+    const boardsOf = (redactedBody: any): any[] =>
+      redactedBody.children.find((child: any) => child.attributes?.className === 'boards').children
+
     test('the host starting a game sends every connected player their own redacted view', async () => {
       const { host, joiner } = await setUpRoom()
-      const hostUpdate = new Promise(resolve => host.once('gameUpdate', resolve))
-      const joinerUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
+      const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      const joinerUpdate = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
       const ack = await emit<{ started: true } | { error: string }>(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
       expect(ack).toEqual({ started: true })
       const [hostView, joinerView] = await Promise.all([hostUpdate, joinerUpdate])
-      expect(Array.isArray(hostView)).toBe(true)
-      expect(Array.isArray(joinerView)).toBe(true)
+      expect(boardsOf(hostView)).toHaveLength(2)
+      expect(boardsOf(joinerView)).toHaveLength(2)
+      expect(boardsOf(hostView).map((p: any) => p.name).sort()).toEqual(['Alice', 'Bob'])
     })
 
     test('only the host can start the game', async () => {
@@ -132,6 +136,58 @@ describe('the lobby server', () => {
     test('starting a game with no room to start it in is refused', async () => {
       const response = await emit<{ error: string }>(connect(), 'startGame', { hints: 'optional', firstGoesFirst: true })
       expect(response.error).toMatch(/no room/i)
+    })
+
+    test('starting a game with only one player in the room is refused', async () => {
+      const host = connect()
+      await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+      const response = await emit<{ error: string }>(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      expect(response.error).toMatch(/at least 2 players/i)
+    })
+  })
+
+  describe('playing a started game', () => {
+    const setUpStartedGame = async () => {
+      const host = connect()
+      const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+      const joiner = connect()
+      await emit<RoomState>(joiner, 'joinRoom', { roomCode, name: 'Bob' })
+      const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      await emit(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      const initialView = await hostUpdate
+      return { host, joiner, initialView }
+    }
+
+    // Blocked on pseudo-dom PR #27 (https://github.com/jheagle/pseudo-dom/pull/27): dispatching a real event on a
+    // pseudo-dom element needs a real Event instance from this module (installGlobal's own job, which currently
+    // leaves Node's own incompatible native Event in place instead), confirmed with the fix linked locally. Once
+    // #27 is merged and published, bump the pseudo-dom dependency and remove this .skip.
+    test.skip('a forwarded action actually runs on the server and both players see the result', async () => {
+      const { host, initialView } = await setUpStartedGame()
+      // Two humans start at the handoff screen ("Alice: the other players look away..."), where Continue is the
+      // only shown button - the panel is the body's second child (boards is rendered first).
+      const panel = initialView.children[1]
+      const buttonIndex = (className: string): number => panel.children.findIndex((child: any) => child.attributes?.className === className)
+      const continueIndex = buttonIndex('placement-continue')
+      expect(panel.children[buttonIndex('placement-randomise')].attributes.style.display).toBe('none')
+
+      const nextUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      // The path is relative to the server's real root (#document), not the pushed body directly: root.children[1]
+      // is the body itself, so the body's own children (boards, placement) sit one level deeper than they do when
+      // just looking at the pushed payload (which IS the body already).
+      host.emit('gameAction', { itemPath: [1, 1, continueIndex], eventType: 'click', listenerFunc: 'placementListener', data: [] })
+      const updatedView = await nextUpdate
+
+      // Continue moved the real session from handoff to placing - only observable, from the outside, through the
+      // panel's own buttons changing which of them are shown.
+      const updatedPanel = updatedView.children[1]
+      expect(updatedPanel.children[buttonIndex('placement-randomise')].attributes.style.display).not.toBe('none')
+    })
+
+    test('an action for a room with no started game is silently ignored', async () => {
+      const lonelyHost = connect()
+      await emit<RoomState>(lonelyHost, 'createRoom', { name: 'Carol' })
+      expect(() => lonelyHost.emit('gameAction', { itemPath: [0], eventType: 'click', listenerFunc: 'whatever', data: [] })).not.toThrow()
     })
   })
 })
