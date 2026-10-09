@@ -129,6 +129,29 @@ export const redactPlayer = (player: Player, viewer: Player): Player => {
 export const redactGameState = (players: Player[], viewer: Player): Player[] => players.map(player => redactPlayer(player, viewer))
 
 /**
+ * Marks every player but `viewer` as `placing-hidden` while placement is actively running - the viewer's own
+ * player keeps its plain className, rendering exactly as it always has (full size, centred); the client's own
+ * CSS turns the `placing-hidden` ones into nothing on screen at all. This is deliberately a visibility-only
+ * change, never a structural one: an earlier version of this function (now fixed, see the PR this comment
+ * survives from) instead dropped everyone but the viewer from the array outright, which seemed like the more
+ * complete "divide player state" move but broke something more fundamental - json-dom's own itemPath-based
+ * forwarding (setForwardEvents/getItemByPath) resolves a click by the *index* a tile sits at in the tree, and
+ * assumes the client's own tree is shaped exactly like the server's real one. Trimming the array changed a
+ * joiner's own index (they are never player 0 on the server, but were always player 0 in their own trimmed
+ * view), so every click during placement resolved against the wrong real player's board on the server - a
+ * real, reported bug ("remote player was unable to click or update anything during placement"), not a guess.
+ * Keeping every player in the list, same order, same count, index for index, and only ever hiding the extra
+ * ones with a class is what keeps that correspondence intact while still only ever showing one board.
+ * @param players the real players, same order as redactedPlayers
+ * @param redactedPlayers
+ * @param viewer
+ */
+const applyPlacingView = (players: Player[], redactedPlayers: Player[], viewer: Player): Player[] => redactedPlayers.map((redacted, i) => ({
+  ...redacted,
+  attributes: { ...redacted.attributes, className: players[i] === viewer ? classNameOf(redacted) : `${classNameOf(redacted)} placing-hidden` }
+})) as Player[]
+
+/**
  * Marks each already-redacted player with which role they play in `viewer`'s own current view (see
  * playerView.ts's roleFor) - only ever adds a class, never touches the board/fleet data itself, which is
  * already correctly redacted either way. The new client-side CSS this enables is what actually turns a
@@ -159,12 +182,12 @@ const applyPlayerView = (players: Player[], redactedPlayers: Player[], viewer: P
  * remote client actually renders and interacts with: the exact same markup local play already uses, inflated
  * from this instead of built fresh.
  *
- * While placement is actively running (remotePlacementStage(body) === 'placing'), only `viewer`'s own player
- * is included at all - nobody else's board, fleet or placement panel needs to reach a still-placing viewer,
- * so they simply never do (see remotePlacement.ts's remotePlacementStage). Every other stage (choosing/
- * ordering/shuffling/chosen) still includes everyone, same as today - the host needs to see and click every
- * player's board to set the order. Once placement is over entirely (stage is null), applyPlayerView marks
- * each included player's role for this viewer, so the client's own CSS can style a `summary` player plainer.
+ * While placement is actively running (remotePlacementStage(body) === 'placing'), every player but `viewer`
+ * is marked placing-hidden (see applyPlacingView) - still present in the tree, same index as the server's own
+ * real one, just not shown. Every other stage (choosing/ordering/shuffling/chosen) still includes and shows
+ * everyone, same as today - the host needs to see and click every player's board to set the order. Once
+ * placement is over entirely (stage is null), applyPlayerView marks each player's role for this viewer, so the
+ * client's own CSS can style a `summary` player plainer.
  * @param body
  * @param players
  * @param viewer
@@ -174,9 +197,13 @@ export const redactGameBody = (body: DomItem, players: Player[], viewer: Player)
   const boardsIndex = clone.children.findIndex(child => classNameOf(child) === 'boards')
   if (boardsIndex !== -1) {
     const stage = remotePlacementStage(body)
-    const visiblePlayers = stage === 'placing' ? [viewer] : players
-    const redacted = redactGameState(visiblePlayers, viewer)
-    clone.children[boardsIndex] = { ...clone.children[boardsIndex], children: stage === null ? applyPlayerView(visiblePlayers, redacted, viewer) : redacted } as unknown as DomItem
+    const redacted = redactGameState(players, viewer)
+    const withView = stage === 'placing'
+      ? applyPlacingView(players, redacted, viewer)
+      : stage === null
+        ? applyPlayerView(players, redacted, viewer)
+        : redacted
+    clone.children[boardsIndex] = { ...clone.children[boardsIndex], children: withView } as unknown as DomItem
   }
   const orderingIndex = clone.children.findIndex(child => classNameOf(child) === 'remote-ordering')
   if (orderingIndex !== -1 && viewer !== players[0]) {

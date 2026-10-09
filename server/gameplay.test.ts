@@ -100,21 +100,26 @@ describe('watching a room\'s game for changes', () => {
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
     expect(pushes.size).toBe(2)
-    // While actively placing, a viewer's own push includes only themselves - nobody else's board, fleet or
-    // placement panel is needed yet (see redactGameState.ts's redactGameBody, keyed off remotePlacementStage).
+    // While actively placing, every player is still present in a viewer's own push, same shape as the
+    // server's own real tree (itemPath-based forwarding needs that correspondence to resolve a click against
+    // the right player at all) - only the viewer's own player stays visible on screen, everyone else is
+    // marked placing-hidden for the client's own CSS to hide (see redactGameState.ts's applyPlacingView).
     const aliceView = playersOf(pushes.get('alice-socket') as DomItem)
-    expect(aliceView).toHaveLength(1)
-    expect(aliceView[0].name).toBe('Alice')
+    expect(aliceView).toHaveLength(2)
+    const alice = aliceView.find((p: any) => p.name === 'Alice')
+    const bob = aliceView.find((p: any) => p.name === 'Bob')
+    expect(alice.attributes.className).toBe('player')
+    expect(bob.attributes.className).toBe('player placing-hidden')
   })
 
-  test('a player sees their own board in full while placing - nobody else\'s board is even present', () => {
+  test('a player sees their own board in full while placing, and theirs alone is ever visible', () => {
     const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
     const pushes = new Map<string, DomItem>()
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
     const aliceView = playersOf(pushes.get('alice-socket') as DomItem)
-    expect(aliceView).toHaveLength(1)
-    expect(matrixDom.getAllPoints(aliceView[0].board).filter((p: { z: number }) => p.z === 0)).toHaveLength(100)
+    const alice = aliceView.find((p: any) => p.name === 'Alice')
+    expect(matrixDom.getAllPoints(alice.board).filter((p: { z: number }) => p.z === 0)).toHaveLength(100)
   })
 
   test('once everyone has placed and ordering begins, every player is visible again, for every viewer', () => {
@@ -147,12 +152,11 @@ describe('watching a room\'s game for changes', () => {
     const panelOf = (player: any): any => player.children.find((child: any) => child.attributes.className === 'remote-placement-panel')
     const randomiseOf = (panel: any): any => panel.children.find((child: any) => child.attributes.className === 'remote-placement-randomise')
 
-    // Alice's own panel, in Alice's own push, is interactive - nobody has readied up yet. Bob is not even
-    // present in this push at all (still placing - see the trimming test above), so there is nothing of his
-    // to check here; once ordering begins (see the test above) he reappears, always disabled for Alice.
+    // Alice's own panel, in Alice's own push, is interactive - nobody has readied up yet. Bob's own panel is
+    // always disabled for Alice (she can't act on his behalf), whether he is visible to her or not.
     const aliceView = playersOf(aliceBody)
-    expect(aliceView).toHaveLength(1)
-    expect(randomiseOf(panelOf(aliceView[0])).attributes.disabled).toBeFalsy()
+    const alice = aliceView.find((p: any) => p.name === 'Alice')
+    expect(randomiseOf(panelOf(alice)).attributes.disabled).toBeFalsy()
 
     game.players.forEach(player => {
       placeFullFleet(player)

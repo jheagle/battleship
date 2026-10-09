@@ -166,12 +166,62 @@ describe('the lobby server', () => {
       const ack = await emit<{ started: true } | { error: string }>(host, 'startGame', { hints: 'optional' })
       expect(ack).toEqual({ started: true })
       const [hostView, joinerView] = await Promise.all([hostUpdate, joinerUpdate])
-      // Still placing - each socket's own push only ever includes their own player (see
-      // redactGameState.ts's redactGameBody), not the other one's board/fleet/placement panel.
-      expect(boardsOf(hostView)).toHaveLength(1)
-      expect(boardsOf(joinerView)).toHaveLength(1)
-      expect(boardsOf(hostView)[0].name).toBe('Alice')
-      expect(boardsOf(joinerView)[0].name).toBe('Bob')
+      // Still placing - both players are present either way (the client and server trees have to stay the
+      // same shape for itemPath-based forwarding to resolve a click against the right player), but only each
+      // socket's own player keeps the plain 'player' class; the other is marked placing-hidden for the
+      // client's own CSS to hide (see redactGameState.ts's applyPlacingView).
+      expect(boardsOf(hostView)).toHaveLength(2)
+      expect(boardsOf(joinerView)).toHaveLength(2)
+      // Same order, same index, in both pushes - not just "present somewhere": itemPath-based forwarding
+      // resolves a click by position against the server's own real tree (always [Alice, Bob], join order), so
+      // a joiner's own push has to keep that same position for every player, not just include them.
+      expect(boardsOf(hostView).map((p: any) => p.name)).toEqual(['Alice', 'Bob'])
+      expect(boardsOf(joinerView).map((p: any) => p.name)).toEqual(['Alice', 'Bob'])
+      expect(boardsOf(hostView).find((p: any) => p.name === 'Alice').attributes.className).toBe('player')
+      expect(boardsOf(hostView).find((p: any) => p.name === 'Bob').attributes.className).toBe('player placing-hidden')
+      expect(boardsOf(joinerView).find((p: any) => p.name === 'Bob').attributes.className).toBe('player')
+      expect(boardsOf(joinerView).find((p: any) => p.name === 'Alice').attributes.className).toBe('player placing-hidden')
+    })
+
+    // The real bug this guards against: an itemPath is resolved by index against the server's own real tree
+    // (getItemByPath), which always has every player, in real join order - a client-side tree that *drops*
+    // some players (an earlier version of applyPlacingView/redactGameBody did exactly that) shifts a joiner's
+    // own index relative to their real one, so a click they make during placement resolves against whichever
+    // player actually sits at that index on the server - in a 2-player room, the host. Reported directly by
+    // the user from a real two-browser test: "remote player was unable to click or update anything during
+    // placement." A real click only works at all here because both trees now stay the same shape throughout.
+    test('a joiner\'s own click during placement lands on the joiner\'s own fleet, not the host\'s', async () => {
+      const { host, joiner } = await setUpRoom()
+      const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      const joinerUpdate = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
+      await emit(host, 'startGame', { hints: 'optional' })
+      const [initialView] = await Promise.all([hostUpdate, joinerUpdate])
+
+      const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
+      const bobIndex = boardsOf(initialView).findIndex((p: any) => p.name === 'Bob')
+      const bob = boardsOf(initialView)[bobIndex]
+      const panelIndex = bob.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
+      const randomiseIndex = bob.children[panelIndex].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
+
+      // Read each one's own readiness from their *own* push, not the other's view of them - redactPlayer
+      // forces every control disabled on a panel that isn't the viewer's own (disableControls), so Bob's own
+      // Ready button would always look disabled from Alice's own view regardless of his real state, and vice
+      // versa; only each one's own push reflects their own real state.
+      const readyDisabled = (view: any, name: string): boolean => {
+        const player = boardsOf(view).find((p: any) => p.name === name)
+        const panel = player.children.find((child: any) => child.attributes?.className === 'remote-placement-panel')
+        return panel.children.find((child: any) => child.attributes?.className === 'remote-placement-ready').attributes.disabled
+      }
+
+      const hostSawIt = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      const joinerSawIt = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
+      joiner.emit('gameAction', { itemPath: [1, boardsIndex, bobIndex, panelIndex, randomiseIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      const [hostsOwnView, bobsOwnView] = await Promise.all([hostSawIt, joinerSawIt])
+
+      // Bob's own fleet is now fully placed (Ready enabled, from his own point of view) - his click landed on
+      // his own board. Alice's own placement (from her own point of view) is completely untouched by it.
+      expect(readyDisabled(bobsOwnView, 'Bob')).toBeFalsy()
+      expect(readyDisabled(hostsOwnView, 'Alice')).toBe(true)
     })
 
     test('only the host can start the game', async () => {

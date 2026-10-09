@@ -79,6 +79,12 @@
     outline: 4px solid yellow
     outline-offset: 6px
 
+// While a remote game is actively placing ships, every player but the viewer is marked placing-hidden (see
+// redactGameState.ts's applyPlacingView) - still really in the tree, same shape as the server's own, just
+// not shown, so the viewer only ever sees their own placement screen.
+.player.placing-hidden
+  display: none
+
 // Remote gameplay's own per-viewer roles (see redactGameState.ts's applyPlayerView) - which role a player has
 // only ever changes this styling, never what data they carry; a role-summary player's board is still their
 // real one, just plainer. Local hot-seat never sets a role class at all, so none of this ever applies there.
