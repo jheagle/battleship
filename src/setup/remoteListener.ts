@@ -66,6 +66,12 @@ export const enterWaitingRoom = (menu: DomItem, state: RoomState): void => {
   // enters the rendered game the same way instead of only the one who clicked Start.
   connectLobbySocket().once('gameUpdate', firstUpdate => enterRemoteGame(jsonDom.getTopParentItem(menu), firstUpdate))
   renderRoomState(menu, state)
+  // Hides both the game-type tiles and the host/join form - normally only the form is still showing by this
+  // point (showRemoteEntry already hid the tiles when this player first chose Online Multiplayer), but Play
+  // Again (see remotePlayAgainListener.ts) re-enters the waiting room straight from a freshly rendered menu,
+  // where the tiles are visible by default - showing the waiting room has to hide both regardless of how it
+  // got here, not rely on a different step somewhere else having already hidden one of them.
+  show(jsonDom.getChildrenByClass('presets', menu)[0], false)
   show(jsonDom.getChildrenByClass('remote-entry', menu)[0], false)
   show(jsonDom.getChildrenByClass('waiting-room', menu)[0], true)
 }

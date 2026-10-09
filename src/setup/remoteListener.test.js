@@ -387,4 +387,20 @@ describe('the Online Multiplayer tile and its lobby', () => {
     expect(socket.listeners('roomUpdate')).toHaveLength(1)
     expect(socket.listeners('roomClosed')).toHaveLength(1)
   })
+
+  // The real bug this covers: Play Again (remotePlayAgainListener.ts) renders a brand new main menu (startMenu)
+  // and calls enterWaitingRoom directly on it, skipping showRemoteEntry - the one place that normally hides
+  // the game-type tiles. On a freshly rendered menu the tiles are visible by default, so without this fix a
+  // player going through Play Again would see both the tiles and the waiting room at once.
+  test('entering the waiting room on a freshly rendered menu (as Play Again does) hides the game-type tiles too, not just the join form', () => {
+    const doc = openMenu()
+    const menu = byClass(doc, 'main-menu')
+    const state = { roomCode: 'ABCD', hostId: 'host-1', players: [{ id: 'host-1', name: 'Alice' }] }
+
+    enterWaitingRoom(menu, state)
+
+    expect(byClass(doc, 'presets').element.style.display).toBe('none')
+    expect(byClass(doc, 'remote-entry').element.style.display).toBe('none')
+    expect(byClass(doc, 'waiting-room').element.style.display).not.toBe('none')
+  })
 })
