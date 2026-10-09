@@ -3,7 +3,7 @@
  */
 import './installPseudoDom'
 import matrixDom from 'matrix-dom'
-import { startRoomGame, watchRoomGame } from './gameplay'
+import { startRoomGame, watchRoomGame, QUEUE_BROADCAST_DEBOUNCE_MS } from './gameplay'
 import { PLACEMENT_TIMEOUT_MS } from '../src/setup/remotePlacement'
 import endGame from '../src/attack/endGame'
 import type { DomItem } from 'json-dom/dist/domItem/types'
@@ -112,10 +112,30 @@ describe('watching a room\'s game for changes', () => {
     expect(afterWatching).toBeGreaterThan(0)
 
     // One human alone places straight away and reaches the ready screen, which queues nothing on its own, but
-    // calling the session's own queue directly (as any real engine action would) must trigger another push.
+    // calling the session's own queue directly (as any real engine action would) must trigger another push -
+    // debounced, so it lands slightly after the queued step itself resolves, not synchronously with it.
     await (await import('../src/setup/gameSession')).getSession(game.root).queue(() => 'done', 0)
+    await new Promise(resolve => setTimeout(resolve, QUEUE_BROADCAST_DEBOUNCE_MS * 2))
 
     expect(pushCount).toBeGreaterThan(afterWatching)
+  })
+
+  test('coalesces a burst of queued engine steps into a single debounced broadcast', async () => {
+    const game = startRoomGame([['alice-socket', 'Alice']], 'optional', true)
+    let pushCount = 0
+    watchRoomGame(game, () => { pushCount++ })
+    const afterWatching = pushCount
+
+    // Mirrors what a single real turn change does (see updatePlayer.ts): several queued steps resolve one
+    // right after another, well inside the debounce window - this must settle into exactly one more broadcast,
+    // not one per step.
+    const session = (await import('../src/setup/gameSession')).getSession(game.root)
+    await session.queue(() => 'one', 0)
+    await session.queue(() => 'two', 0)
+    await session.queue(() => 'three', 0)
+    await new Promise(resolve => setTimeout(resolve, QUEUE_BROADCAST_DEBOUNCE_MS * 2))
+
+    expect(pushCount).toBe(afterWatching + 1)
   })
 
   test('the placement deadline firing on its own triggers a fresh broadcast too, not just dispatched actions', () => {

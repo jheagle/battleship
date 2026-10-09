@@ -8,6 +8,16 @@ import { clearValidTargets, showValidTargets } from './validTargets'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
 
+/** How long a human attacker's own lock stays on once their turn starts. This used to be 400ms to match a
+ * board-resize animation (sass/game-pieces.sass's old per-turn `.matrix` resize, confirmed via git history -
+ * `d1be1695`); that resize was removed later and nothing on `.player` itself has ever had a CSS transition to
+ * wait out, so the original value outlived the thing it was timed to. It stays non-zero, just much shorter, for
+ * the one real job it still does in local hot-seat: attackFleet.ts's guard only blocks attacking the *current*
+ * attacker's own board, so without this lock a human could rapid-click several different victims inside what
+ * should be a single turn. Remote play already blocks the same thing independently, by socket identity
+ * (lobbyServer.ts's gameAction handler), so this is redundant there - but it costs nothing to keep uniform. */
+const ATTACKER_LOCK_MS = 100
+
 /**
  * Track player stats such as attacks and turns
  * @param player
@@ -43,7 +53,7 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
   }
   if (player.attacker) {
     if (!player.isRobot) {
-      queueTimeout(player, () => { attackLock.isLocked = false }, 400)
+      queueTimeout(player, () => { attackLock.isLocked = false }, ATTACKER_LOCK_MS)
     }
     ++player.turnCnt
   } else {
