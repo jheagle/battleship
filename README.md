@@ -563,13 +563,22 @@ panel that is not this viewer&#39;s own to interact with. Builds a new object ra
 since it is already part of an outer clone (redactPlayer/redactGameBody) that must stay independent of the
 real tree.</p>
 </dd>
+<dt><a href="#hidePlayerControls">hidePlayerControls(stats)</a></dt>
+<dd><p>A clone of a player&#39;s own stats panel with its player-controls entirely removed - used for anyone else&#39;s
+own panel, as rendered for a viewer who is not that player. The only control remote play ever puts there is
+the hint checkbox (the own-ships checkbox is solo-mode only, never present in a multiplayer game - see
+playerStats.ts), which toggles THAT player&#39;s own showHint preference: hintListener.ts resolves whichever
+player owns the clicked element, regardless of who actually clicked it, so left as-is a viewer could flip
+another player&#39;s own hint setting from their own screen, and would see a checkbox that is really none of
+their business in the first place. Name and ship list are never secret, so nothing else here needs touching.</p>
+</dd>
 <dt><a href="#redactPlayer">redactPlayer(player, viewer)</a></dt>
 <dd><p>One player, redacted for a given viewer: a clone of the real player, with its board and fleet redacted per
-redactBoard/redactShip, and (for a remote game) its own placement panel disabled unless this is that player&#39;s
-own viewer. Everything else (name, colour, robot/human, overall status, whose turn it is, playerStats -
-already public, see redactShip) passes through unchanged. children is kept in step with whichever of its own
-entries changed, by index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote
-game&#39;s own fourth child (its placement panel) would otherwise silently be dropped.</p>
+redactBoard/redactShip, its own placement panel disabled, and its own hint checkbox removed entirely, all
+unless this is that player&#39;s own viewer. Everything else (name, colour, robot/human, overall status, whose
+turn it is) passes through unchanged. children is kept in step with whichever of its own entries changed, by
+index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote game&#39;s own fourth
+child (its placement panel) would otherwise silently be dropped.</p>
 </dd>
 <dt><a href="#redactGameState">redactGameState(players, viewer)</a></dt>
 <dd><p>The whole game, redacted for one viewer: every player, each with their own board redacted according to whether
@@ -2260,15 +2269,32 @@ real tree.
 | --- |
 | panel | 
 
+<a name="hidePlayerControls"></a>
+
+## hidePlayerControls(stats)
+A clone of a player's own stats panel with its player-controls entirely removed - used for anyone else's
+own panel, as rendered for a viewer who is not that player. The only control remote play ever puts there is
+the hint checkbox (the own-ships checkbox is solo-mode only, never present in a multiplayer game - see
+playerStats.ts), which toggles THAT player's own showHint preference: hintListener.ts resolves whichever
+player owns the clicked element, regardless of who actually clicked it, so left as-is a viewer could flip
+another player's own hint setting from their own screen, and would see a checkbox that is really none of
+their business in the first place. Name and ship list are never secret, so nothing else here needs touching.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| stats | 
+
 <a name="redactPlayer"></a>
 
 ## redactPlayer(player, viewer)
 One player, redacted for a given viewer: a clone of the real player, with its board and fleet redacted per
-redactBoard/redactShip, and (for a remote game) its own placement panel disabled unless this is that player's
-own viewer. Everything else (name, colour, robot/human, overall status, whose turn it is, playerStats -
-already public, see redactShip) passes through unchanged. children is kept in step with whichever of its own
-entries changed, by index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote
-game's own fourth child (its placement panel) would otherwise silently be dropped.
+redactBoard/redactShip, its own placement panel disabled, and its own hint checkbox removed entirely, all
+unless this is that player's own viewer. Everything else (name, colour, robot/human, overall status, whose
+turn it is) passes through unchanged. children is kept in step with whichever of its own entries changed, by
+index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote game's own fourth
+child (its placement panel) would otherwise silently be dropped.
 
 **Kind**: global function  
 

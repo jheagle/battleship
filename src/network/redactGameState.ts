@@ -69,12 +69,27 @@ const disableControls = (panel: DomItem): DomItem => ({
 }) as DomItem
 
 /**
+ * A clone of a player's own stats panel with its player-controls entirely removed - used for anyone else's
+ * own panel, as rendered for a viewer who is not that player. The only control remote play ever puts there is
+ * the hint checkbox (the own-ships checkbox is solo-mode only, never present in a multiplayer game - see
+ * playerStats.ts), which toggles THAT player's own showHint preference: hintListener.ts resolves whichever
+ * player owns the clicked element, regardless of who actually clicked it, so left as-is a viewer could flip
+ * another player's own hint setting from their own screen, and would see a checkbox that is really none of
+ * their business in the first place. Name and ship list are never secret, so nothing else here needs touching.
+ * @param stats
+ */
+const hidePlayerControls = (stats: DomItem): DomItem => ({
+  ...stats,
+  children: stats.children.filter(child => classNameOf(child) !== 'player-controls')
+}) as DomItem
+
+/**
  * One player, redacted for a given viewer: a clone of the real player, with its board and fleet redacted per
- * redactBoard/redactShip, and (for a remote game) its own placement panel disabled unless this is that player's
- * own viewer. Everything else (name, colour, robot/human, overall status, whose turn it is, playerStats -
- * already public, see redactShip) passes through unchanged. children is kept in step with whichever of its own
- * entries changed, by index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote
- * game's own fourth child (its placement panel) would otherwise silently be dropped.
+ * redactBoard/redactShip, its own placement panel disabled, and its own hint checkbox removed entirely, all
+ * unless this is that player's own viewer. Everything else (name, colour, robot/human, overall status, whose
+ * turn it is) passes through unchanged. children is kept in step with whichever of its own entries changed, by
+ * index, rather than assumed to always be exactly [turn-badge, board, stats] - a remote game's own fourth
+ * child (its placement panel) would otherwise silently be dropped.
  * @param player
  * @param viewer
  */
@@ -90,6 +105,11 @@ export const redactPlayer = (player: Player, viewer: Player): Player => {
     const panelIndex = clone.children.findIndex(child => classNameOf(child) === 'remote-placement-panel')
     if (panelIndex !== -1) {
       clone.children[panelIndex] = disableControls(clone.children[panelIndex])
+    }
+    const statsIndex = clone.children.indexOf(clone.playerStats)
+    if (statsIndex !== -1) {
+      clone.playerStats = hidePlayerControls(clone.playerStats)
+      clone.children[statsIndex] = clone.playerStats
     }
   }
   return clone
