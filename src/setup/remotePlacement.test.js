@@ -182,3 +182,22 @@ describe('remote placement: player stats stay hidden until a round actually star
     players.forEach(player => expect(player.playerStats.attributes.style.display).toBe(''))
   })
 })
+
+describe('remote placement: the placement countdown\'s own deadline does not outlive placement', () => {
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => jest.useRealTimers())
+
+  // The real bug this covers: nothing ever cleared data-placement-deadline once placement/ordering ended, so
+  // remoteGame.ts's own countdown kept reading that same (now long past) timestamp for the rest of the game,
+  // showing a frozen "Placing ships - 0s left" banner throughout real gameplay instead of nothing at all.
+  test('data-placement-deadline is cleared once the order is set and the round is about to start', async () => {
+    const { root, players } = setUp(2)
+    expect(root.body.attributes['data-placement-deadline']).toBeTruthy()
+
+    players.forEach(player => { placeFullFleet(player); readyRemotePlayer(player) })
+    chooseOrderRandom(root)
+    await jest.advanceTimersByTimeAsync(13 * 120)
+
+    expect(root.body.attributes['data-placement-deadline']).toBeFalsy()
+  })
+})

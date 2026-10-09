@@ -2,11 +2,17 @@ import jsonDom from 'json-dom'
 import { onGameUpdate, sendGameAction } from './lobbySocket'
 import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
 
-/** A pushed body carries the placement deadline as a plain attribute - see remotePlacement.ts's startRemotePlacement. */
+/** A pushed body carries whichever deadline currently applies as a plain attribute - see remotePlacement.ts's
+ * startRemotePlacement (placement) and server/gameplay.ts's startRoomGame (turns). At most one is ever actually
+ * set at a time - placement/ordering and real turn-based gameplay never overlap - but both linger as empty
+ * strings once their own phase ends, rather than being removed outright (see finishOrdering and onGameOver). */
 interface RedactedBody {
-  attributes?: { 'data-placement-deadline'?: string }
+  attributes?: { 'data-placement-deadline'?: string, 'data-turn-deadline'?: string }
   children: Array<{ attributes?: { className?: string } }>
 }
+
+/** Which phase a deadline belongs to - decides the countdown's own label (see renderCountdown). */
+type DeadlineKind = 'placement' | 'turn'
 
 /** Remove every one of a parent's children - the same pattern startNewGame's clearBody uses locally. */
 const clearChildren = (parent: DomItem): void => {
@@ -15,10 +21,19 @@ const clearChildren = (parent: DomItem): void => {
   }
 }
 
-/** The placement deadline a pushed body carries, if placement is still running. */
-const deadlineOf = (redactedBody: RedactedBody): number | null => {
-  const raw = redactedBody.attributes?.['data-placement-deadline']
-  return raw ? Number(raw) : null
+/** Whichever deadline a pushed body actually carries right now, placement or turn - an empty string (the
+ * lingering, no-longer-relevant state left behind once that phase ends) is falsy, same as it being absent
+ * altogether, so both read the same way here. */
+const deadlineOf = (redactedBody: RedactedBody): { kind: DeadlineKind, deadline: number } | null => {
+  const placement = redactedBody.attributes?.['data-placement-deadline']
+  if (placement) {
+    return { kind: 'placement', deadline: Number(placement) }
+  }
+  const turn = redactedBody.attributes?.['data-turn-deadline']
+  if (turn) {
+    return { kind: 'turn', deadline: Number(turn) }
+  }
+  return null
 }
 
 /** Whether a pushed body is the final-score screen (see remoteFinalScore.ts) - the one point in a remote
@@ -45,18 +60,24 @@ const finalScoreOnly = (redactedBody: RedactedBody): RedactedBody => ({
 let countdownElement: HTMLElement | null = null
 let countdownInterval: ReturnType<typeof setInterval> | null = null
 let countdownDeadline: number | null = null
+let countdownKind: DeadlineKind | null = null
+
+const COUNTDOWN_LABEL: Record<DeadlineKind, string> = {
+  placement: 'Placing ships',
+  turn: 'Turn'
+}
 
 const renderCountdown = (): void => {
   if (!countdownElement) {
     return
   }
-  if (countdownDeadline === null) {
+  if (countdownDeadline === null || countdownKind === null) {
     countdownElement.style.display = 'none'
     return
   }
   const secondsLeft = Math.max(0, Math.ceil((countdownDeadline - Date.now()) / 1000))
   countdownElement.style.display = ''
-  countdownElement.textContent = `Placing ships - ${secondsLeft}s left`
+  countdownElement.textContent = `${COUNTDOWN_LABEL[countdownKind]} - ${secondsLeft}s left`
 }
 
 /** Create the countdown element if there is not already a live one in the page - not just a non-null reference:
@@ -67,16 +88,17 @@ const ensureCountdownElement = (): void => {
     return
   }
   countdownElement = document.createElement('div')
-  countdownElement.className = 'remote-placement-countdown'
+  countdownElement.className = 'remote-countdown'
   countdownElement.style.cssText = 'position: fixed; top: 0.5em; right: 0.5em; padding: 0.4em 0.8em; ' +
     'background: #222; color: #fff; border-radius: 4px; font: 14px sans-serif; z-index: 1000;'
   document.body.appendChild(countdownElement)
 }
 
 /** Start, update, or stop the visual countdown, as each new deadline (or its absence) comes in. */
-const setCountdownDeadline = (deadline: number | null): void => {
-  countdownDeadline = deadline
-  if (deadline === null) {
+const setCountdownDeadline = (info: { kind: DeadlineKind, deadline: number } | null): void => {
+  countdownKind = info?.kind ?? null
+  countdownDeadline = info?.deadline ?? null
+  if (info === null) {
     renderCountdown()
     return
   }
@@ -96,6 +118,7 @@ const stopCountdown = (): void => {
   countdownElement?.remove()
   countdownElement = null
   countdownDeadline = null
+  countdownKind = null
 }
 
 /**
