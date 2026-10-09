@@ -142,7 +142,13 @@ describe('redacting the game state for a remote viewer', () => {
   })
 
   describe('redactGameBody and the final-score screen\'s own Play Again button', () => {
+    // A stand-in for a game-over push's own body - not a real rendered root, but redactGameBody now also reads
+    // remotePlacementStage(body), which walks parentItem up to the root (see remotePlacement.ts) - parentItem:
+    // {} makes this object its own root for that walk, same as any real DomItemRoot's own body. No remote
+    // placement session is ever registered for it, so the stage correctly resolves to null either way - this
+    // is, after all, simulating the final-score screen, well past any placement/ordering stage.
     const bodyWith = (players, finalScore) => ({
+      parentItem: {},
       children: [{ attributes: { className: 'boards' }, children: players }, finalScore]
     })
 

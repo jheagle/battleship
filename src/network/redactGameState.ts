@@ -1,6 +1,8 @@
 import matrixDom from 'matrix-dom'
 import siFunciona from 'si-funciona'
 import checkIfHitCell from '../utils/checkIfHitCell'
+import { roleFor } from '../attack/playerView'
+import { remotePlacementStage } from '../setup/remotePlacement'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Board, Player, Ship, Tile } from '../types'
 
@@ -127,6 +129,48 @@ export const redactPlayer = (player: Player, viewer: Player): Player => {
 export const redactGameState = (players: Player[], viewer: Player): Player[] => players.map(player => redactPlayer(player, viewer))
 
 /**
+ * Marks every player but `viewer` as `placing-hidden` while placement is actively running - the viewer's own
+ * player keeps its plain className, rendering exactly as it always has (full size, centred); the client's own
+ * CSS turns the `placing-hidden` ones into nothing on screen at all. This is deliberately a visibility-only
+ * change, never a structural one: an earlier version of this function (now fixed, see the PR this comment
+ * survives from) instead dropped everyone but the viewer from the array outright, which seemed like the more
+ * complete "divide player state" move but broke something more fundamental - json-dom's own itemPath-based
+ * forwarding (setForwardEvents/getItemByPath) resolves a click by the *index* a tile sits at in the tree, and
+ * assumes the client's own tree is shaped exactly like the server's real one. Trimming the array changed a
+ * joiner's own index (they are never player 0 on the server, but were always player 0 in their own trimmed
+ * view), so every click during placement resolved against the wrong real player's board on the server - a
+ * real, reported bug ("remote player was unable to click or update anything during placement"), not a guess.
+ * Keeping every player in the list, same order, same count, index for index, and only ever hiding the extra
+ * ones with a class is what keeps that correspondence intact while still only ever showing one board.
+ * @param players the real players, same order as redactedPlayers
+ * @param redactedPlayers
+ * @param viewer
+ */
+const applyPlacingView = (players: Player[], redactedPlayers: Player[], viewer: Player): Player[] => redactedPlayers.map((redacted, i) => ({
+  ...redacted,
+  attributes: { ...redacted.attributes, className: players[i] === viewer ? classNameOf(redacted) : `${classNameOf(redacted)} placing-hidden` }
+})) as Player[]
+
+/**
+ * Marks each already-redacted player with which role they play in `viewer`'s own current view (see
+ * playerView.ts's roleFor) - only ever adds a class, never touches the board/fleet data itself, which is
+ * already correctly redacted either way. The new client-side CSS this enables is what actually turns a
+ * `summary` role plainer (no highlighting, no animation) - nothing here removes any content.
+ *
+ * Takes the real (pre-redaction) players alongside their already-redacted clones, in the same order, rather
+ * than deciding each role from the redacted list alone: redactPlayer's own siFunciona.cloneObject means a
+ * redacted entry is never === viewer any more, even for viewer's own - roleFor's identity check needs the
+ * real reference to ever resolve 'own' correctly.
+ * @param players the real players, same order as redactedPlayers
+ * @param redactedPlayers
+ * @param viewer
+ */
+const applyPlayerView = (players: Player[], redactedPlayers: Player[], viewer: Player): Player[] => redactedPlayers.map((redacted, i) => ({
+  ...redacted,
+  attributes: { ...redacted.attributes, className: `player role-${roleFor(players[i], viewer)}` }
+})) as Player[]
+
+/**
  * A whole screen's worth of game state, redacted for one viewer - the boards wrapper's own children replaced with
  * redactGameState's result, and (for a remote game) the global ordering panel's own Random/Set order controls
  * disabled for anyone but the host - players[0] is always the room's host for as long as any game of theirs is
@@ -137,6 +181,13 @@ export const redactGameState = (players: Player[], viewer: Player): Player[] => 
  * show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
  * remote client actually renders and interacts with: the exact same markup local play already uses, inflated
  * from this instead of built fresh.
+ *
+ * While placement is actively running (remotePlacementStage(body) === 'placing'), every player but `viewer`
+ * is marked placing-hidden (see applyPlacingView) - still present in the tree, same index as the server's own
+ * real one, just not shown. Every other stage (choosing/ordering/shuffling/chosen) still includes and shows
+ * everyone, same as today - the host needs to see and click every player's board to set the order. Once
+ * placement is over entirely (stage is null), applyPlayerView marks each player's role for this viewer, so the
+ * client's own CSS can style a `summary` player plainer.
  * @param body
  * @param players
  * @param viewer
@@ -145,7 +196,14 @@ export const redactGameBody = (body: DomItem, players: Player[], viewer: Player)
   const clone = siFunciona.cloneObject(body) as DomItem
   const boardsIndex = clone.children.findIndex(child => classNameOf(child) === 'boards')
   if (boardsIndex !== -1) {
-    clone.children[boardsIndex] = { ...clone.children[boardsIndex], children: redactGameState(players, viewer) } as unknown as DomItem
+    const stage = remotePlacementStage(body)
+    const redacted = redactGameState(players, viewer)
+    const withView = stage === 'placing'
+      ? applyPlacingView(players, redacted, viewer)
+      : stage === null
+        ? applyPlayerView(players, redacted, viewer)
+        : redacted
+    clone.children[boardsIndex] = { ...clone.children[boardsIndex], children: withView } as unknown as DomItem
   }
   const orderingIndex = clone.children.findIndex(child => classNameOf(child) === 'remote-ordering')
   if (orderingIndex !== -1 && viewer !== players[0]) {

@@ -155,6 +155,13 @@ routed here instead of to a normal attack (see attackListener.ts).</p>
 <dt><a href="#isHostOnlyStage">isHostOnlyStage()</a></dt>
 <dd><p>Whether only the host may act right now - every stage except placing itself (see server/lobbyServer.ts).</p>
 </dd>
+<dt><a href="#remotePlacementStage">remotePlacementStage()</a></dt>
+<dd><p>The current remote placement/ordering stage for this item&#39;s game, or null once the round has actually
+started (no session is running any more - see finishOrdering, which deletes it). redactGameState.ts&#39;s own
+redactGameBody reads this to decide whether a viewer&#39;s own push should include every player (ordering,
+where the host needs to see and click everyone) or only their own (placing itself, see the plan this
+served - every other player&#39;s board/fleet/placement panel never need to reach a still-placing viewer).</p>
+</dd>
 <dt><a href="#renderPanel">renderPanel()</a></dt>
 <dd><p>Refresh one player&#39;s own placement panel to match their current state.</p>
 </dd>
@@ -589,6 +596,31 @@ nothing about any board&#39;s hidden ship positions except the viewer&#39;s own,
 it is still a real, renderable, clickable DomItem tree: a remote client can inflate and render it with the
 exact same components local play already uses, and forward its clicks the same way.</p>
 </dd>
+<dt><a href="#applyPlacingView">applyPlacingView(players, redactedPlayers, viewer)</a></dt>
+<dd><p>Marks every player but <code>viewer</code> as <code>placing-hidden</code> while placement is actively running - the viewer&#39;s own
+player keeps its plain className, rendering exactly as it always has (full size, centred); the client&#39;s own
+CSS turns the <code>placing-hidden</code> ones into nothing on screen at all. This is deliberately a visibility-only
+change, never a structural one: an earlier version of this function (now fixed, see the PR this comment
+survives from) instead dropped everyone but the viewer from the array outright, which seemed like the more
+complete &quot;divide player state&quot; move but broke something more fundamental - json-dom&#39;s own itemPath-based
+forwarding (setForwardEvents/getItemByPath) resolves a click by the <em>index</em> a tile sits at in the tree, and
+assumes the client&#39;s own tree is shaped exactly like the server&#39;s real one. Trimming the array changed a
+joiner&#39;s own index (they are never player 0 on the server, but were always player 0 in their own trimmed
+view), so every click during placement resolved against the wrong real player&#39;s board on the server - a
+real, reported bug (&quot;remote player was unable to click or update anything during placement&quot;), not a guess.
+Keeping every player in the list, same order, same count, index for index, and only ever hiding the extra
+ones with a class is what keeps that correspondence intact while still only ever showing one board.</p>
+</dd>
+<dt><a href="#applyPlayerView">applyPlayerView(players, redactedPlayers, viewer)</a></dt>
+<dd><p>Marks each already-redacted player with which role they play in <code>viewer</code>&#39;s own current view (see
+playerView.ts&#39;s roleFor) - only ever adds a class, never touches the board/fleet data itself, which is
+already correctly redacted either way. The new client-side CSS this enables is what actually turns a
+<code>summary</code> role plainer (no highlighting, no animation) - nothing here removes any content.</p>
+<p>Takes the real (pre-redaction) players alongside their already-redacted clones, in the same order, rather
+than deciding each role from the redacted list alone: redactPlayer&#39;s own siFunciona.cloneObject means a
+redacted entry is never === viewer any more, even for viewer&#39;s own - roleFor&#39;s identity check needs the
+real reference to ever resolve &#39;own&#39; correctly.</p>
+</dd>
 <dt><a href="#redactGameBody">redactGameBody(body, players, viewer)</a></dt>
 <dd><p>A whole screen&#39;s worth of game state, redacted for one viewer - the boards wrapper&#39;s own children replaced with
 redactGameState&#39;s result, and (for a remote game) the global ordering panel&#39;s own Random/Set order controls
@@ -600,6 +632,12 @@ the room&#39;s own waiting room again, nothing that needs a host check. Everythi
 show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
 remote client actually renders and interacts with: the exact same markup local play already uses, inflated
 from this instead of built fresh.</p>
+<p>While placement is actively running (remotePlacementStage(body) === &#39;placing&#39;), every player but <code>viewer</code>
+is marked placing-hidden (see applyPlacingView) - still present in the tree, same index as the server&#39;s own
+real one, just not shown. Every other stage (choosing/ordering/shuffling/chosen) still includes and shows
+everyone, same as today - the host needs to see and click every player&#39;s board to set the order. Once
+placement is over entirely (stage is null), applyPlayerView marks each player&#39;s role for this viewer, so the
+client&#39;s own CSS can style a <code>summary</code> player plainer.</p>
 </dd>
 <dt><a href="#connectLobbySocket">connectLobbySocket(url)</a></dt>
 <dd><p>The lobby socket, connecting on first use. A test can connect it to its own ephemeral server before triggering any
@@ -750,6 +788,14 @@ show a target cursor and a highlight when hovered. Tiles keep their own class (&
 unlike computerAttack.ts&#39;s own density-based choice (this is deliberately the dumbest possible fallback, not
 a robot&#39;s turn). Used when a human player&#39;s own turn-timeout deadline expires in a remote game (see
 server/gameplay.ts) instead of leaving everyone else waiting on them indefinitely.</p>
+</dd>
+<dt><a href="#roleFor">roleFor(player, viewer)</a></dt>
+<dd><p>Which role <code>player</code> plays in <code>viewer</code>&#39;s own current view: their own board, a board they can actually
+attack right now, or everyone else (not their turn, or already eliminated) - still a real board, just
+styled plainer, no highlighting or animation (see redactGameState.ts&#39;s applyPlayerView, which is the one
+place this actually changes anything sent or rendered). Independent of local vs remote - whatever renders
+a player&#39;s own screen, remote today, local single-player later, decides what to draw for each role; this
+only decides which role applies.</p>
 </dd>
 <dt><a href="#hintListener">hintListener(e, target)</a></dt>
 <dd><p>The hint checkbox in a human&#39;s panel: switching it on shows the heat map at once if it is their turn.</p>
@@ -1162,6 +1208,16 @@ routed here instead of to a normal attack (see attackListener.ts).
 
 ## isHostOnlyStage()
 Whether only the host may act right now - every stage except placing itself (see server/lobbyServer.ts).
+
+**Kind**: global function  
+<a name="remotePlacementStage"></a>
+
+## remotePlacementStage()
+The current remote placement/ordering stage for this item's game, or null once the round has actually
+started (no session is running any more - see finishOrdering, which deletes it). redactGameState.ts's own
+redactGameBody reads this to decide whether a viewer's own push should include every player (ordering,
+where the host needs to see and click everyone) or only their own (placing itself, see the plan this
+served - every other player's board/fleet/placement panel never need to reach a still-placing viewer).
 
 **Kind**: global function  
 <a name="renderPanel"></a>
@@ -2329,6 +2385,52 @@ exact same components local play already uses, and forward its clicks the same w
 | players | 
 | viewer | 
 
+<a name="applyPlacingView"></a>
+
+## applyPlacingView(players, redactedPlayers, viewer)
+Marks every player but `viewer` as `placing-hidden` while placement is actively running - the viewer's own
+player keeps its plain className, rendering exactly as it always has (full size, centred); the client's own
+CSS turns the `placing-hidden` ones into nothing on screen at all. This is deliberately a visibility-only
+change, never a structural one: an earlier version of this function (now fixed, see the PR this comment
+survives from) instead dropped everyone but the viewer from the array outright, which seemed like the more
+complete "divide player state" move but broke something more fundamental - json-dom's own itemPath-based
+forwarding (setForwardEvents/getItemByPath) resolves a click by the *index* a tile sits at in the tree, and
+assumes the client's own tree is shaped exactly like the server's real one. Trimming the array changed a
+joiner's own index (they are never player 0 on the server, but were always player 0 in their own trimmed
+view), so every click during placement resolved against the wrong real player's board on the server - a
+real, reported bug ("remote player was unable to click or update anything during placement"), not a guess.
+Keeping every player in the list, same order, same count, index for index, and only ever hiding the extra
+ones with a class is what keeps that correspondence intact while still only ever showing one board.
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| players | the real players, same order as redactedPlayers |
+| redactedPlayers |  |
+| viewer |  |
+
+<a name="applyPlayerView"></a>
+
+## applyPlayerView(players, redactedPlayers, viewer)
+Marks each already-redacted player with which role they play in `viewer`'s own current view (see
+playerView.ts's roleFor) - only ever adds a class, never touches the board/fleet data itself, which is
+already correctly redacted either way. The new client-side CSS this enables is what actually turns a
+`summary` role plainer (no highlighting, no animation) - nothing here removes any content.
+
+Takes the real (pre-redaction) players alongside their already-redacted clones, in the same order, rather
+than deciding each role from the redacted list alone: redactPlayer's own siFunciona.cloneObject means a
+redacted entry is never === viewer any more, even for viewer's own - roleFor's identity check needs the
+real reference to ever resolve 'own' correctly.
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| players | the real players, same order as redactedPlayers |
+| redactedPlayers |  |
+| viewer |  |
+
 <a name="redactGameBody"></a>
 
 ## redactGameBody(body, players, viewer)
@@ -2342,6 +2444,13 @@ the room's own waiting room again, nothing that needs a host check. Everything e
 show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
 remote client actually renders and interacts with: the exact same markup local play already uses, inflated
 from this instead of built fresh.
+
+While placement is actively running (remotePlacementStage(body) === 'placing'), every player but `viewer`
+is marked placing-hidden (see applyPlacingView) - still present in the tree, same index as the server's own
+real one, just not shown. Every other stage (choosing/ordering/shuffling/chosen) still includes and shows
+everyone, same as today - the host needs to see and click every player's board to set the order. Once
+placement is over entirely (stage is null), applyPlayerView marks each player's role for this viewer, so the
+client's own CSS can style a `summary` player plainer.
 
 **Kind**: global function  
 
@@ -2741,6 +2850,23 @@ server/gameplay.ts) instead of leaving everyone else waiting on them indefinitel
 | --- |
 | attacker | 
 | players | 
+
+<a name="roleFor"></a>
+
+## roleFor(player, viewer)
+Which role `player` plays in `viewer`'s own current view: their own board, a board they can actually
+attack right now, or everyone else (not their turn, or already eliminated) - still a real board, just
+styled plainer, no highlighting or animation (see redactGameState.ts's applyPlayerView, which is the one
+place this actually changes anything sent or rendered). Independent of local vs remote - whatever renders
+a player's own screen, remote today, local single-player later, decides what to draw for each role; this
+only decides which role applies.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| player | 
+| viewer | 
 
 <a name="hintListener"></a>
 
