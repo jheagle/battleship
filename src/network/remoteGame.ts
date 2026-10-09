@@ -26,6 +26,17 @@ const deadlineOf = (redactedBody: RedactedBody): number | null => {
  * local listener instead of being forwarded into a game that is already over. */
 const isGameOver = (redactedBody: RedactedBody): boolean => redactedBody.children.some(child => child.attributes?.className === 'final-scores')
 
+/** A pushed body, reduced to just its final-scores child - server/gameplay.ts's own onGameOver hook already
+ * clears everything else before a game-over push ever goes out, but rendering only ever what this module
+ * itself has confirmed is the final-score screen, regardless of whatever else might be sitting alongside it,
+ * means a future regression upstream (something left in the body that still references a listener name the
+ * real client only ever registers as a forwarder, like remotePlacementListener) clears the whole page with
+ * nothing on it, instead of just failing to show the one thing that is actually safe to show. */
+const finalScoreOnly = (redactedBody: RedactedBody): RedactedBody => ({
+  ...redactedBody,
+  children: redactedBody.children.filter(child => child.attributes?.className === 'final-scores')
+})
+
 // The countdown is cosmetic only (the server's own timer is the one that actually fires - see
 // PLACEMENT_TIMEOUT_MS), so it is kept entirely outside json-dom's own tree: renderInto below wipes and rebuilds
 // root.body's children on every single update, which would reset a ticking display right as it ticks. Plain DOM
@@ -138,18 +149,20 @@ export const enterRemoteGame = (root: DomItemRoot, firstUpdate: RedactedBody): v
   // is decided once, right here, by json-dom's own activateListener/retrieveListener - at *bind* time, when
   // renderInto below actually attaches it to the real element. Toggling root.forwardEvents afterwards has no
   // effect on anything already bound, so it has to be settled before renderInto ever runs, not after.
-  if (isGameOver(firstUpdate)) {
+  const firstOver = isGameOver(firstUpdate)
+  if (firstOver) {
     stopForwarding(root)
   }
-  renderInto(root, firstUpdate)
+  renderInto(root, firstOver ? finalScoreOnly(firstUpdate) : firstUpdate)
   setCountdownDeadline(deadlineOf(firstUpdate))
   onGameUpdate(redactedBody => {
-    if (isGameOver(redactedBody as RedactedBody)) {
+    const over = isGameOver(redactedBody as RedactedBody)
+    if (over) {
       stopForwarding(root)
     } else if (!root.forwardEvents) {
       jsonDom.setForwardEvents(sendGameAction, root)
     }
-    renderInto(root, redactedBody as RedactedBody)
+    renderInto(root, over ? finalScoreOnly(redactedBody as RedactedBody) : (redactedBody as RedactedBody))
     setCountdownDeadline(deadlineOf(redactedBody as RedactedBody))
   })
 }

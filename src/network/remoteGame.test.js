@@ -96,6 +96,44 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
     expect(root.body.children).toHaveLength(0)
   })
 
+  // The real bug this covers: a game-over push is never *just* final-scores on its own - boards (still
+  // holding every placement panel) and remote-ordering (only ever hidden via style, never removed) used to
+  // stay in the body as stale siblings too, both still referencing remotePlacementListener - a name the real
+  // client never registers directly (see main.ts; forwarding being on is what normally makes that safe, since
+  // retrieveListener forwards *before* ever checking whether a name is really registered). Once forwarding
+  // turns off for the finished game, rendering that stale sibling threw "Undefined listener function" partway
+  // through renderInto's own loop - *before* final-scores itself ever rendered, clearing the whole page with
+  // nothing on it at all. Fixed server-side (server/gameplay.ts's onGameOver now clears the body first), but
+  // this is what a real client actually has to survive regardless of where else it gets fixed.
+  test('a game-over push with a stale boards sibling (the real shape, if anything upstream ever regresses) does not crash rendering', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    // Only the listeners main.ts actually registers - remotePlacementListener is deliberately missing, exactly
+    // like the real app, since it only ever needs to run as a forwarder during an active game.
+    const root = jsonDom.documentDomItem({ attackListener: jest.fn() })
+    const staleBoardsAndFinalScores = {
+      children: [
+        {
+          nodeName: 'div',
+          attributes: { className: 'boards' },
+          children: [{
+            nodeName: 'div',
+            attributes: { className: 'remote-placement-panel' },
+            children: [{
+              nodeName: 'button',
+              attributes: { className: 'remote-placement-ready' },
+              eventListeners: { click: [{ listenerFunc: 'remotePlacementListener', listenerArgs: {}, listenerOptions: false }] }
+            }]
+          }]
+        },
+        bodyWithClass('final-scores').children[0]
+      ]
+    }
+
+    expect(() => enterRemoteGame(root, staleBoardsAndFinalScores)).not.toThrow()
+    expect(document.querySelector('.final-scores')).not.toBeNull()
+  })
+
   // The real bug this covers: root.forwardEvents only decides whether a button forwards or runs a real local
   // listener once, at the moment renderInto actually binds it (json-dom's activateListener calls
   // retrieveListener right then) - toggling the flag afterwards does nothing to anything already bound. A

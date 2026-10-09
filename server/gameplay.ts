@@ -74,7 +74,21 @@ export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string
   // registering their listeners here would wire them to local-only flows (starting hot-seat placement again,
   // wiping this room's own root back to a menu) that would corrupt the room for everyone. Show the real result
   // with no buttons instead - see endGame.ts and remoteFinalScore.ts.
-  getSession(root).onGameOver = (players, parent) => jsonDom.renderHtml(remoteFinalScore(players), parent.body)
+  //
+  // Everything else already in the body (boards - still holding every player's own placement panel, and
+  // remote-ordering - only ever hidden via style, never removed) is cleared first, not left as a stale sibling:
+  // their own buttons still reference remotePlacementListener, which the real client only ever registers as a
+  // forwarder (see main.ts, which never registers it directly - forwarding is what makes that safe normally).
+  // Once forwarding turns off for the finished game (remoteGame.ts's own enterRemoteGame, for this exact
+  // button to run as a real local listener), rendering that stale sibling would throw "Undefined listener
+  // function" partway through - before the final-score screen itself ever rendered, clearing the whole page
+  // with nothing on it at all.
+  getSession(root).onGameOver = (players, parent) => {
+    for (let i = parent.body.children.length - 1; i >= 0; --i) {
+      jsonDom.removeChild(parent.body, parent.body.children[i])
+    }
+    jsonDom.renderHtml(remoteFinalScore(players), parent.body)
+  }
   let players: Player[] = []
   const playerBySocket = new Map<string, Player>()
   startNewGame(root, roomPlayers.length, 0, firstGoesFirst, hints, (p, body, done) => startRemotePlacement(p, body, done, onTimerChange), builtPlayers => {

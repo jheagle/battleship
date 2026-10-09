@@ -449,6 +449,14 @@ Not used by the game&#39;s robot yet: it is kept for game styles where the chanc
 game&#39;s own lifecycle where forwarding has to come back off, so its Play Again button&#39;s click runs as a real
 local listener instead of being forwarded into a game that is already over.</p>
 </dd>
+<dt><a href="#finalScoreOnly">finalScoreOnly()</a></dt>
+<dd><p>A pushed body, reduced to just its final-scores child - server/gameplay.ts&#39;s own onGameOver hook already
+clears everything else before a game-over push ever goes out, but rendering only ever what this module
+itself has confirmed is the final-score screen, regardless of whatever else might be sitting alongside it,
+means a future regression upstream (something left in the body that still references a listener name the
+real client only ever registers as a forwarder, like remotePlacementListener) clears the whole page with
+nothing on it, instead of just failing to show the one thing that is actually safe to show.</p>
+</dd>
 <dt><a href="#ensureCountdownElement">ensureCountdownElement()</a></dt>
 <dd><p>Create the countdown element if there is not already a live one in the page - not just a non-null reference:
 something else clearing the page for a fresh game (without going through leaveRemoteGame) can detach the old
@@ -2007,6 +2015,17 @@ The placement deadline a pushed body carries, if placement is still running.
 Whether a pushed body is the final-score screen (see remoteFinalScore.ts) - the one point in a remote
 game's own lifecycle where forwarding has to come back off, so its Play Again button's click runs as a real
 local listener instead of being forwarded into a game that is already over.
+
+**Kind**: global function  
+<a name="finalScoreOnly"></a>
+
+## finalScoreOnly()
+A pushed body, reduced to just its final-scores child - server/gameplay.ts's own onGameOver hook already
+clears everything else before a game-over push ever goes out, but rendering only ever what this module
+itself has confirmed is the final-score screen, regardless of whatever else might be sitting alongside it,
+means a future regression upstream (something left in the body that still references a listener name the
+real client only ever registers as a forwarder, like remotePlacementListener) clears the whole page with
+nothing on it, instead of just failing to show the one thing that is actually safe to show.
 
 **Kind**: global function  
 <a name="ensureCountdownElement"></a>
