@@ -39,14 +39,16 @@ export interface RoomPlayer {
   name: string
 }
 
-/** A room's state, as sent to clients: its code, who is hosting, and who has joined. */
+/** A room's state, as sent to clients: its code, its own host-chosen name, who is hosting, and who has joined. */
 export interface RoomState {
   roomCode: string
+  roomName: string
   hostId: string
   players: RoomPlayer[]
 }
 
 interface Room {
+  roomName: string
   hostId: string
   players: Map<string, string>
   game?: RoomGame
@@ -73,7 +75,7 @@ const generateRoomCode = (rooms: Map<string, Room>): string => {
  */
 const roomState = (rooms: Map<string, Room>, roomCode: string): RoomState => {
   const room = rooms.get(roomCode) as Room
-  return { roomCode, hostId: room.hostId, players: [...room.players].map(([id, name]) => ({ id, name })) }
+  return { roomCode, roomName: room.roomName, hostId: room.hostId, players: [...room.players].map(([id, name]) => ({ id, name })) }
 }
 
 /**
@@ -91,16 +93,31 @@ export const createLobbyServer = (): HttpServer => {
   io.on('connection', (socket: Socket) => {
     let currentRoom: string | null = null
 
-    socket.on('createRoom', ({ name }: { name: string }, ack: (state: RoomState | { error: string }) => void) => {
+    socket.on('createRoom', ({ name, roomName }: { name: string, roomName: string }, ack: (state: RoomState | { error: string }) => void) => {
       if (!name?.trim()) {
         ack({ error: 'A name is required' })
         return
       }
+      if (!roomName?.trim()) {
+        ack({ error: 'A lobby name is required' })
+        return
+      }
       const roomCode = generateRoomCode(rooms)
-      rooms.set(roomCode, { hostId: socket.id, players: new Map([[socket.id, name.trim()]]) })
+      rooms.set(roomCode, { roomName: roomName.trim(), hostId: socket.id, players: new Map([[socket.id, name.trim()]]) })
       currentRoom = roomCode
       socket.join(roomCode)
       ack(roomState(rooms, roomCode))
+    })
+
+    // A read-only lookup, callable before the caller has even entered their own name or joined anything - lets
+    // a joiner see whose lobby it is (see mainMenu.ts's remote-join-confirm) before they commit to anything.
+    socket.on('peekRoom', ({ roomCode }: { roomCode: string }, ack: (info: { roomName: string, hostName: string } | { error: string }) => void) => {
+      const room = rooms.get(roomCode)
+      if (!room) {
+        ack({ error: 'No room with that code' })
+        return
+      }
+      ack({ roomName: room.roomName, hostName: room.players.get(room.hostId) as string })
     })
 
     socket.on('joinRoom', ({ roomCode, name }: { roomCode: string, name: string }, ack: (state: RoomState | { error: string }) => void) => {
@@ -125,7 +142,7 @@ export const createLobbyServer = (): HttpServer => {
       socket.to(roomCode).emit('roomUpdate', state)
     })
 
-    socket.on('startGame', ({ hints, firstGoesFirst }: { hints: HintSetting, firstGoesFirst: boolean }, ack: (result: { started: true } | { error: string }) => void) => {
+    socket.on('startGame', ({ hints }: { hints: HintSetting }, ack: (result: { started: true } | { error: string }) => void) => {
       const room = currentRoom ? rooms.get(currentRoom) : undefined
       if (!room) {
         ack({ error: 'No room to start a game in' })
@@ -146,7 +163,7 @@ export const createLobbyServer = (): HttpServer => {
       // room.broadcastGame does not exist yet at this exact line - startRoomGame's own placement timer will not
       // fire for a good two minutes, long after the very next line assigns it, so the closure below still reads
       // the real function by the time it's ever actually called.
-      room.game = startRoomGame([...room.players.entries()], hints, firstGoesFirst, () => room.broadcastGame?.())
+      room.game = startRoomGame([...room.players.entries()], hints, () => room.broadcastGame?.())
       room.broadcastGame = watchRoomGame(room.game, (socketId, redactedBody) => io.to(socketId).emit('gameUpdate', forTransport(redactedBody)))
       ack({ started: true })
     })

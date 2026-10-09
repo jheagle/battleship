@@ -13,9 +13,13 @@ A relatively recent version is running at https: //joshuaheagle.com/battleship/
 <dd><p>How long players have to finish placing before any still-pending ships are placed at random for them.</p>
 </dd>
 <dt><a href="#lastRoomState">lastRoomState</a></dt>
-<dd><p>The room&#39;s own last known state (its code, host, and players) - kept up to date by renderRoomState below
-regardless of whether the waiting room is currently shown, so Play Again (see remotePlayAgainListener.ts)
+<dd><p>The room&#39;s own last known state (its code, name, host, and players) - kept up to date by renderRoomState
+below regardless of whether the waiting room is currently shown, so Play Again (see remotePlayAgainListener.ts)
 can show it again for everyone once a game ends, without a fresh server round trip to ask for it again.</p>
+</dd>
+<dt><a href="#pendingJoinCode">pendingJoinCode</a></dt>
+<dd><p>The room code a successful peek (see peekAndConfirm) found - remembered so the Join confirm panel&#39;s own
+submit can join it without needing its own room-code field.</p>
 </dd>
 <dt><a href="#playerColours">playerColours</a></dt>
 <dd><p>The colour each player is identified by, in the order they are created. They are bright enough to read on the dark
@@ -207,15 +211,27 @@ two-click mechanic, just resolved from the clicked board&#39;s own owner instead
 <dt><a href="#getLastRoomState">getLastRoomState()</a></dt>
 <dd><p>The current room&#39;s own last known state, if this connection has ever been in one.</p>
 </dd>
+<dt><a href="#showSubPanel">showSubPanel()</a></dt>
+<dd><p>Show exactly one of remote-entry&#39;s own four sub-panels (see mainMenu.ts), hiding the other three.</p>
+</dd>
+<dt><a href="#peekAndConfirm">peekAndConfirm()</a></dt>
+<dd><p>Look up a room by code (without joining it - see lobbySocket.ts&#39;s peekRoom) and move to the Join confirm
+panel showing whose game it is, or fall back to the code-entry panel with the error shown inline if it could
+not be found. The code-entry panel (with the code already filled in) shows immediately, before the lookup
+even resolves, so a direct link lands on something straight away rather than a blank wait.</p>
+</dd>
 <dt><a href="#showRemoteEntry">showRemoteEntry()</a></dt>
-<dd><p>Show the remote entry form in place of the game-type tiles, optionally with a room code already filled in -
-used both by clicking the Online Multiplayer tile and by a shared join link (see main.ts).</p>
+<dd><p>Show the remote entry area in place of the game-type tiles - either the Host/Join choice (no code yet, the
+Online Multiplayer tile itself), or (a shared join link - see main.ts) straight to the Join confirm panel
+once that code&#39;s own room has been found.</p>
 </dd>
 <dt><a href="#renderRoomState">renderRoomState()</a></dt>
-<dd><p>Replace the waiting room&#39;s player list, room code and host controls with a freshly-received room state.</p>
+<dd><p>Replace the waiting room&#39;s player list, lobby name, room code and host controls with a freshly-received
+room state.</p>
 </dd>
 <dt><a href="#leaveToPresets">leaveToPresets()</a></dt>
-<dd><p>Leave whatever room is open and show the game types again, clearing any status message.</p>
+<dd><p>Leave whatever room is open and show the game types again, clearing any status message - or, with a
+message (the room closed on its own), show it on the Host/Join choice panel instead of the tiles.</p>
 </dd>
 <dt><a href="#enterWaitingRoom">enterWaitingRoom()</a></dt>
 <dd><p>Once a room is created or joined (or a finished game&#39;s Play Again brings everyone back to it - see
@@ -224,8 +240,20 @@ the address bar too, so the host (or anyone else) can just copy the current URL 
 showRemoteEntry, which reads it back out on the receiving end.</p>
 </dd>
 <dt><a href="#remoteListener">remoteListener(e, target)</a></dt>
-<dd><p>The Online Multiplayer tile, its host/join form, and the waiting room it leads to. Room/presence only - actual
-gameplay over the socket is a separate, later piece.</p>
+<dd><p>The Online Multiplayer tile, its Host/Join choice and forms, and the waiting room it leads to. Room/presence
+only - actual gameplay over the socket is a separate, later piece.</p>
+</dd>
+<dt><a href="#remoteLeaveListener">remoteLeaveListener(e, target)</a></dt>
+<dd><p>The final-score screen&#39;s Leave button, for a remote game - any player can click it, same as Play Again
+(there is nothing destructive about leaving). Unlike Play Again, this takes just its own clicker all the way
+back to the main menu: leaves the finished game (stopping forwarding, clearing the rendered tree - see
+remoteGame.ts&#39;s leaveRemoteGame), disconnects this connection&#39;s own lobby socket and clears the shared <code>?room=</code>
+link from the address bar (the same cleanup remoteListener.ts&#39;s own leaveToPresets does for the waiting
+room&#39;s Leave button), and shows a freshly rendered menu - whose default screen is the game-type tiles, not
+the waiting room.</p>
+<p>This only ever runs client-side, with forwarding already turned off for this exact reason (see
+remoteGame.ts&#39;s enterRemoteGame) - the server&#39;s own copy of this listener name is a trivial stand-in, never
+meant to actually run (see server/gameplay.ts&#39;s buildIsolatedRoot).</p>
 </dd>
 <dt><a href="#presetListener">presetListener(e, target)</a></dt>
 <dd><p>The game types on the entry screen. Each reveals the lobby for that type (see showLobby). Back hides the lobby
@@ -572,6 +600,10 @@ UI action, by calling this directly with that server&#39;s URL - the UI&#39;s ow
 <dt><a href="#createRoom">createRoom()</a></dt>
 <dd><p>Create a room as its host, resolving with the room&#39;s state once the server acknowledges it, or an error.</p>
 </dd>
+<dt><a href="#peekRoom">peekRoom()</a></dt>
+<dd><p>Look up a room&#39;s own lobby name and host&#39;s name by its code, without joining it - lets a joiner see whose
+game it is before they commit their own name (see mainMenu.ts&#39;s remote-join-confirm).</p>
+</dd>
 <dt><a href="#joinRoom">joinRoom()</a></dt>
 <dd><p>Join an existing room by its code, resolving with the room&#39;s state, or an error if it could not be joined.</p>
 </dd>
@@ -641,12 +673,11 @@ any stage but placing), not just by these buttons being disabled on a non-host&#
 </dd>
 <dt><a href="#remoteFinalScore">remoteFinalScore(players)</a></dt>
 <dd><p>The final score screen for a remote room&#39;s game: the same public score cards local hot-seat shows (see
-finalScore.ts), plus a single Play Again button (see remotePlayAgainListener.ts), open to every player - it
-only ever takes its own clicker back to the room&#39;s own waiting room, same players, same host, nothing
-destructive about it, so there is no need to restrict who can press it. Change Settings and Main
-Menu/leave-the-room are still not built - both assume one physical screen controlling the whole shared game,
-which does not hold for several independent remote clients, and restarting with different settings or
-leaving the room are each their own, separate feature.</p>
+finalScore.ts), plus Play Again (see remotePlayAgainListener.ts) and Leave (see remoteLeaveListener.ts) -
+both open to every player, neither destructive, so there is no need to restrict who can press either one.
+Local hot-seat&#39;s own separate &quot;Change Settings&quot; button has no remote equivalent: Play Again already returns
+everyone to the waiting room, where the host can change the hint setting before starting again, so a second
+button offering the same trip would be redundant.</p>
 </dd>
 <dt><a href="#placementPanel">placementPanel(message)</a></dt>
 <dd><p>The panel shown during the placement phase: a message for whoever is placing, and their buttons. Each button has one
@@ -758,9 +789,16 @@ How long players have to finish placing before any still-pending ships are place
 <a name="lastRoomState"></a>
 
 ## lastRoomState
-The room's own last known state (its code, host, and players) - kept up to date by renderRoomState below
-regardless of whether the waiting room is currently shown, so Play Again (see remotePlayAgainListener.ts)
+The room's own last known state (its code, name, host, and players) - kept up to date by renderRoomState
+below regardless of whether the waiting room is currently shown, so Play Again (see remotePlayAgainListener.ts)
 can show it again for everyone once a game ends, without a fresh server round trip to ask for it again.
+
+**Kind**: global variable  
+<a name="pendingJoinCode"></a>
+
+## pendingJoinCode
+The room code a successful peek (see peekAndConfirm) found - remembered so the Join confirm panel's own
+submit can join it without needing its own room-code field.
 
 **Kind**: global variable  
 <a name="playerColours"></a>
@@ -1227,23 +1265,41 @@ The order is set (either way) - show it briefly, then begin the round.
 The current room's own last known state, if this connection has ever been in one.
 
 **Kind**: global function  
+<a name="showSubPanel"></a>
+
+## showSubPanel()
+Show exactly one of remote-entry's own four sub-panels (see mainMenu.ts), hiding the other three.
+
+**Kind**: global function  
+<a name="peekAndConfirm"></a>
+
+## peekAndConfirm()
+Look up a room by code (without joining it - see lobbySocket.ts's peekRoom) and move to the Join confirm
+panel showing whose game it is, or fall back to the code-entry panel with the error shown inline if it could
+not be found. The code-entry panel (with the code already filled in) shows immediately, before the lookup
+even resolves, so a direct link lands on something straight away rather than a blank wait.
+
+**Kind**: global function  
 <a name="showRemoteEntry"></a>
 
 ## showRemoteEntry()
-Show the remote entry form in place of the game-type tiles, optionally with a room code already filled in -
-used both by clicking the Online Multiplayer tile and by a shared join link (see main.ts).
+Show the remote entry area in place of the game-type tiles - either the Host/Join choice (no code yet, the
+Online Multiplayer tile itself), or (a shared join link - see main.ts) straight to the Join confirm panel
+once that code's own room has been found.
 
 **Kind**: global function  
 <a name="renderRoomState"></a>
 
 ## renderRoomState()
-Replace the waiting room's player list, room code and host controls with a freshly-received room state.
+Replace the waiting room's player list, lobby name, room code and host controls with a freshly-received
+room state.
 
 **Kind**: global function  
 <a name="leaveToPresets"></a>
 
 ## leaveToPresets()
-Leave whatever room is open and show the game types again, clearing any status message.
+Leave whatever room is open and show the game types again, clearing any status message - or, with a
+message (the room closed on its own), show it on the Host/Join choice panel instead of the tiles.
 
 **Kind**: global function  
 <a name="enterWaitingRoom"></a>
@@ -1258,8 +1314,30 @@ showRemoteEntry, which reads it back out on the receiving end.
 <a name="remoteListener"></a>
 
 ## remoteListener(e, target)
-The Online Multiplayer tile, its host/join form, and the waiting room it leads to. Room/presence only - actual
-gameplay over the socket is a separate, later piece.
+The Online Multiplayer tile, its Host/Join choice and forms, and the waiting room it leads to. Room/presence
+only - actual gameplay over the socket is a separate, later piece.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| e | 
+| target | 
+
+<a name="remoteLeaveListener"></a>
+
+## remoteLeaveListener(e, target)
+The final-score screen's Leave button, for a remote game - any player can click it, same as Play Again
+(there is nothing destructive about leaving). Unlike Play Again, this takes just its own clicker all the way
+back to the main menu: leaves the finished game (stopping forwarding, clearing the rendered tree - see
+remoteGame.ts's leaveRemoteGame), disconnects this connection's own lobby socket and clears the shared `?room=`
+link from the address bar (the same cleanup remoteListener.ts's own leaveToPresets does for the waiting
+room's Leave button), and shows a freshly rendered menu - whose default screen is the game-type tiles, not
+the waiting room.
+
+This only ever runs client-side, with forwarding already turned off for this exact reason (see
+remoteGame.ts's enterRemoteGame) - the server's own copy of this listener name is a trivial stand-in, never
+meant to actually run (see server/gameplay.ts's buildIsolatedRoot).
 
 **Kind**: global function  
 
@@ -2261,6 +2339,13 @@ Close the lobby socket and forget it, so the next connectLobbySocket call starts
 Create a room as its host, resolving with the room's state once the server acknowledges it, or an error.
 
 **Kind**: global function  
+<a name="peekRoom"></a>
+
+## peekRoom()
+Look up a room's own lobby name and host's name by its code, without joining it - lets a joiner see whose
+game it is before they commit their own name (see mainMenu.ts's remote-join-confirm).
+
+**Kind**: global function  
 <a name="joinRoom"></a>
 
 ## joinRoom()
@@ -2401,12 +2486,11 @@ any stage but placing), not just by these buttons being disabled on a non-host's
 
 ## remoteFinalScore(players)
 The final score screen for a remote room's game: the same public score cards local hot-seat shows (see
-finalScore.ts), plus a single Play Again button (see remotePlayAgainListener.ts), open to every player - it
-only ever takes its own clicker back to the room's own waiting room, same players, same host, nothing
-destructive about it, so there is no need to restrict who can press it. Change Settings and Main
-Menu/leave-the-room are still not built - both assume one physical screen controlling the whole shared game,
-which does not hold for several independent remote clients, and restarting with different settings or
-leaving the room are each their own, separate feature.
+finalScore.ts), plus Play Again (see remotePlayAgainListener.ts) and Leave (see remoteLeaveListener.ts) -
+both open to every player, neither destructive, so there is no need to restrict who can press either one.
+Local hot-seat's own separate "Change Settings" button has no remote equivalent: Play Again already returns
+everyone to the waiting room, where the host can change the hint setting before starting again, so a second
+button offering the same trip would be redundant.
 
 **Kind**: global function  
 

@@ -6,12 +6,11 @@ const listener = (listenerFunc: string) => [{ listenerFunc, listenerArgs: {}, li
 
 /**
  * The final score screen for a remote room's game: the same public score cards local hot-seat shows (see
- * finalScore.ts), plus a single Play Again button (see remotePlayAgainListener.ts), open to every player - it
- * only ever takes its own clicker back to the room's own waiting room, same players, same host, nothing
- * destructive about it, so there is no need to restrict who can press it. Change Settings and Main
- * Menu/leave-the-room are still not built - both assume one physical screen controlling the whole shared game,
- * which does not hold for several independent remote clients, and restarting with different settings or
- * leaving the room are each their own, separate feature.
+ * finalScore.ts), plus Play Again (see remotePlayAgainListener.ts) and Leave (see remoteLeaveListener.ts) -
+ * both open to every player, neither destructive, so there is no need to restrict who can press either one.
+ * Local hot-seat's own separate "Change Settings" button has no remote equivalent: Play Again already returns
+ * everyone to the waiting room, where the host can change the hint setting before starting again, so a second
+ * button offering the same trip would be redundant.
  * @param players
  */
 const remoteFinalScore = (players: Player[] = []): DomItem => jsonDom.createDomItem({
@@ -37,13 +36,24 @@ const remoteFinalScore = (players: Player[] = []): DomItem => jsonDom.createDomI
       nodeName: 'p',
       attributes: {
         className: 'remote-final-score-message',
-        innerHTML: 'Game over! Click Play Again to return to the room and start a new game with the same players.'
+        innerHTML: 'Game over! Click Play Again to return to the room and start a new game with the same players, or Leave to go back to the main menu.'
       }
     },
     {
-      nodeName: 'button',
-      attributes: { className: 'remote-play-again', type: 'button', innerHTML: 'Play Again' },
-      eventListeners: { click: listener('remotePlayAgainListener') }
+      nodeName: 'div',
+      attributes: { className: 'final-scores-actions' },
+      children: [
+        {
+          nodeName: 'button',
+          attributes: { className: 'remote-play-again', type: 'button', innerHTML: 'Play Again' },
+          eventListeners: { click: listener('remotePlayAgainListener') }
+        },
+        {
+          nodeName: 'button',
+          attributes: { className: 'remote-leave', type: 'button', innerHTML: 'Leave' },
+          eventListeners: { click: listener('remoteLeaveListener') }
+        }
+      ]
     }
   ]
 })

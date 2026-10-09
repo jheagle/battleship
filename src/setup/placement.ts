@@ -115,7 +115,7 @@ export const startPlacement = (players: Player[], body: DomItem, done: (order: P
  * @param players
  * @param shown
  */
-const setStatsShown = (players: Player[], shown: boolean): void => {
+export const setStatsShown = (players: Player[], shown: boolean): void => {
   players.forEach(p => update(p.playerStats as DomItem, { style: { display: shown ? '' : 'none' } }))
 }
 

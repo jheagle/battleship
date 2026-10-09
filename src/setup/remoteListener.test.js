@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-// Jest's jsdom environment resolves bare `require('ws')` to ws's browser stub (a function that just throws), via the
+// Jest's jsdom environment resolves bare `require('ws')` to ws's own browser stub (a function that just throws), via the
 // package's own "browser" export condition - fine for client code, but this file also runs the real lobby server
 // in-process, which needs ws's actual Node implementation. Force the real one by its absolute path, bypassing that
 // export condition (which only governs resolution by package specifier, not by direct file path).
@@ -63,11 +63,34 @@ const waitFor = async (check, timeoutMs = 2000) => {
   }
 }
 
+/** Host a room through the real UI: Online Multiplayer -> Host a Game -> fill both names -> Create. */
+const hostRoom = async (doc, roomName, name) => {
+  byClass(doc, 'preset-remote').element.click()
+  byClass(doc, 'remote-choice-host').element.click()
+  byName(doc, 'remote-room-name').element.value = roomName
+  byName(doc, 'remote-host-name').element.value = name
+  byClass(doc, 'remote-host-submit').element.click()
+  await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+}
+
+/** Join an existing room by its code through the real UI: Online Multiplayer -> Join a Game -> enter the code,
+ * find it -> confirm with a name. */
+const joinRoomByCode = async (doc, roomCode, name) => {
+  byClass(doc, 'preset-remote').element.click()
+  byClass(doc, 'remote-choice-join').element.click()
+  byName(doc, 'remote-code').element.value = roomCode
+  byClass(doc, 'remote-code-submit').element.click()
+  await waitFor(() => byClass(doc, 'remote-join-confirm').element.style.display !== 'none')
+  byName(doc, 'remote-join-name').element.value = name
+  byClass(doc, 'remote-join-submit').element.click()
+}
+
 describe('the Online Multiplayer tile and its lobby', () => {
-  test('choosing it shows the host/join form, and Back returns to the game types', () => {
+  test('choosing it shows the Host/Join choice, and Back returns to the game types', () => {
     const doc = openMenu()
     byClass(doc, 'preset-remote').element.click()
     expect(byClass(doc, 'remote-entry').element.style.display).not.toBe('none')
+    expect(byClass(doc, 'remote-choice').element.style.display).not.toBe('none')
     expect(byClass(doc, 'presets').element.style.display).toBe('none')
 
     byClass(doc, 'remote-back').element.click()
@@ -75,41 +98,62 @@ describe('the Online Multiplayer tile and its lobby', () => {
     expect(byClass(doc, 'presets').element.style.display).toBe('')
   })
 
-  test('hosting a room shows the waiting room with the host listed, tagged, and the room code shown', async () => {
-    connectLobbySocket(baseUrl)
+  test('choosing Host a Game, then Back, returns to the Host/Join choice (not the game types)', () => {
     const doc = openMenu()
     byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice'
-    byClass(doc, 'remote-host').element.click()
+    byClass(doc, 'remote-choice-host').element.click()
+    expect(byClass(doc, 'remote-host-form').element.style.display).not.toBe('none')
 
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    byClass(doc, 'remote-sub-back').element.click()
+    expect(byClass(doc, 'remote-host-form').element.style.display).toBe('none')
+    expect(byClass(doc, 'remote-choice').element.style.display).not.toBe('none')
+  })
+
+  test('hosting a room shows the waiting room with the host listed, tagged, and the lobby name and room code shown', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
+
     expect(byClass(doc, 'waiting-room-players').element.textContent).toContain('Alice (Host)')
+    expect(byClass(doc, 'waiting-room-name').element.textContent).toBe('Lobby: Pirate Battle')
     expect(byClass(doc, 'waiting-room-code').element.textContent).toMatch(/Room Code: [A-Z0-9]{4}/)
   })
 
-  test('showRemoteEntry (a shared join link landing on the join form) pre-fills the code and focuses the name field', () => {
+  test('showRemoteEntry (a shared join link landing on the join form) peeks the room and shows who it belongs to', async () => {
+    const host = rawPlayer()
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice', roomName: 'Pirate Battle' })
+
+    connectLobbySocket(baseUrl)
     const doc = openMenu()
-    showRemoteEntry(byClass(doc, 'main-menu'), 'ABCD')
+    showRemoteEntry(byClass(doc, 'main-menu'), roomCode)
+
+    await waitFor(() => byClass(doc, 'remote-join-confirm').element.style.display !== 'none')
     expect(byClass(doc, 'presets').element.style.display).toBe('none')
-    expect(byClass(doc, 'remote-entry').element.style.display).not.toBe('none')
-    expect(byName(doc, 'remote-code').element.value).toBe('ABCD')
-    expect(document.activeElement).toBe(byName(doc, 'remote-name').element)
+    expect(byClass(doc, 'remote-join-message').element.textContent).toBe(`You are joining Alice's Pirate Battle.`)
+    expect(document.activeElement).toBe(byName(doc, 'remote-join-name').element)
   })
 
-  test('showRemoteEntry with no code (the Online Multiplayer tile itself) leaves the code field untouched', () => {
+  test('showRemoteEntry with an unknown code falls back to the code-entry panel with the error shown, the code kept on screen', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    showRemoteEntry(byClass(doc, 'main-menu'), 'ZZZZ')
+
+    await waitFor(() => /no room/i.test(byClass(doc, 'remote-code-status').element.textContent))
+    expect(byClass(doc, 'remote-code-entry').element.style.display).not.toBe('none')
+    expect(byName(doc, 'remote-code').element.value).toBe('ZZZZ')
+  })
+
+  test('showRemoteEntry with no code (the Online Multiplayer tile itself) shows the Host/Join choice', () => {
     const doc = openMenu()
     showRemoteEntry(byClass(doc, 'main-menu'))
-    expect(byName(doc, 'remote-code').element.value).toBe('')
+    expect(byClass(doc, 'remote-choice').element.style.display).not.toBe('none')
   })
 
   test('hosting puts the room\'s own code in the address bar, so the current URL is a real shareable join link', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice'
-    byClass(doc, 'remote-host').element.click()
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
 
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
     const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
     expect(window.location.search).toBe(`?room=${roomCode}`)
 
@@ -119,14 +163,11 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
   test('joining an existing room by its code shows both players in the waiting room', async () => {
     const host = rawPlayer()
-    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice', roomName: 'Pirate Battle' })
 
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Bob'
-    byName(doc, 'remote-code').element.value = roomCode.toLowerCase()
-    byClass(doc, 'remote-join').element.click()
+    await joinRoomByCode(doc, roomCode.toLowerCase(), 'Bob')
 
     await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
     const players = byClass(doc, 'waiting-room-players').element.textContent
@@ -134,51 +175,64 @@ describe('the Online Multiplayer tile and its lobby', () => {
     expect(players).toContain('Bob')
   })
 
-  test('joining a room that does not exist shows an error and stays on the entry screen', async () => {
+  test('looking up a room that does not exist shows an error and stays on the code-entry screen', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
     byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Bob'
+    byClass(doc, 'remote-choice-join').element.click()
     byName(doc, 'remote-code').element.value = 'ZZZZ'
-    byClass(doc, 'remote-join').element.click()
+    byClass(doc, 'remote-code-submit').element.click()
 
-    await waitFor(() => byClass(doc, 'remote-status').element.textContent !== '')
-    expect(byClass(doc, 'remote-status').element.textContent).toMatch(/no room/i)
-    expect(byClass(doc, 'remote-entry').element.style.display).not.toBe('none')
+    await waitFor(() => /no room/i.test(byClass(doc, 'remote-code-status').element.textContent))
+    expect(byClass(doc, 'remote-code-entry').element.style.display).not.toBe('none')
+  })
+
+  test('hosting with an empty lobby name is refused without even contacting the server', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byClass(doc, 'remote-choice-host').element.click()
+    byName(doc, 'remote-host-name').element.value = 'Alice'
+    byClass(doc, 'remote-host-submit').element.click()
+    await waitFor(() => byClass(doc, 'remote-host-status').element.textContent !== '')
+    expect(byClass(doc, 'remote-host-status').element.textContent).toMatch(/lobby name/i)
+    expect(byClass(doc, 'waiting-room').element.style.display).toBe('none')
   })
 
   test('hosting with an empty name is refused without even contacting the server', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
     byClass(doc, 'preset-remote').element.click()
-    byClass(doc, 'remote-host').element.click()
-    await waitFor(() => byClass(doc, 'remote-status').element.textContent !== '')
-    expect(byClass(doc, 'remote-status').element.textContent).toMatch(/name/i)
+    byClass(doc, 'remote-choice-host').element.click()
+    byName(doc, 'remote-room-name').element.value = 'Pirate Battle'
+    byClass(doc, 'remote-host-submit').element.click()
+    await waitFor(() => byClass(doc, 'remote-host-status').element.textContent !== '')
+    expect(byClass(doc, 'remote-host-status').element.textContent).toMatch(/name/i)
     expect(byClass(doc, 'waiting-room').element.style.display).toBe('none')
   })
 
-  test('joining with a blank (whitespace-only) name is refused', async () => {
+  test('confirming a join with a blank (whitespace-only) name is refused', async () => {
     const host = rawPlayer()
-    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice', roomName: 'Pirate Battle' })
 
     connectLobbySocket(baseUrl)
     const doc = openMenu()
     byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = '   '
+    byClass(doc, 'remote-choice-join').element.click()
     byName(doc, 'remote-code').element.value = roomCode
-    byClass(doc, 'remote-join').element.click()
-    await waitFor(() => byClass(doc, 'remote-status').element.textContent !== '')
-    expect(byClass(doc, 'remote-status').element.textContent).toMatch(/name/i)
+    byClass(doc, 'remote-code-submit').element.click()
+    await waitFor(() => byClass(doc, 'remote-join-confirm').element.style.display !== 'none')
+    byName(doc, 'remote-join-name').element.value = '   '
+    byClass(doc, 'remote-join-submit').element.click()
+    await waitFor(() => byClass(doc, 'remote-join-status').element.textContent !== '')
+    expect(byClass(doc, 'remote-join-status').element.textContent).toMatch(/name/i)
     expect(byClass(doc, 'waiting-room').element.style.display).toBe('none')
   })
 
   test('a second player joining updates the host\'s own waiting room live', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice'
-    byClass(doc, 'remote-host').element.click()
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
     const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
 
     const joiner = rawPlayer()
@@ -190,33 +244,27 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
   test('the host leaving closes the room, and the joiner is told and returned to the entry screen', async () => {
     const host = rawPlayer()
-    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice', roomName: 'Pirate Battle' })
 
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Bob'
-    byName(doc, 'remote-code').element.value = roomCode
-    byClass(doc, 'remote-join').element.click()
+    await joinRoomByCode(doc, roomCode, 'Bob')
     await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
 
     host.close()
 
     await waitFor(() => byClass(doc, 'waiting-room').element.style.display === 'none')
     expect(byClass(doc, 'remote-entry').element.style.display).not.toBe('none')
-    expect(byClass(doc, 'remote-status').element.textContent).toMatch(/host left/i)
+    expect(byClass(doc, 'remote-choice-status').element.textContent).toMatch(/host left/i)
   })
 
   test('the host sees the Start Game controls, a joiner does not', async () => {
     const host = rawPlayer()
-    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice', roomName: 'Pirate Battle' })
 
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Bob'
-    byName(doc, 'remote-code').element.value = roomCode
-    byClass(doc, 'remote-join').element.click()
+    await joinRoomByCode(doc, roomCode, 'Bob')
     await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
 
     expect(byClass(doc, 'waiting-room-host-controls').element.style.display).toBe('none')
@@ -225,10 +273,7 @@ describe('the Online Multiplayer tile and its lobby', () => {
   test('the host starting the game renders the real game for both the host and a joiner', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice'
-    byClass(doc, 'remote-host').element.click()
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
     expect(byClass(doc, 'waiting-room-host-controls').element.style.display).not.toBe('none')
     const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
 
@@ -256,10 +301,7 @@ describe('the Online Multiplayer tile and its lobby', () => {
   test('a visual countdown shows once placement starts, ticking down on its own between server pushes', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice'
-    byClass(doc, 'remote-host').element.click()
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
     const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
 
     const joiner = rawPlayer()
@@ -287,18 +329,15 @@ describe('the Online Multiplayer tile and its lobby', () => {
   // setup could never have caught this.
   test('a joiner who never clicked Start still sees the real game once the host starts it', async () => {
     const host = rawPlayer()
-    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await rawEmit(host, 'createRoom', { name: 'Alice', roomName: 'Pirate Battle' })
 
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Bob'
-    byName(doc, 'remote-code').element.value = roomCode
-    byClass(doc, 'remote-join').element.click()
+    await joinRoomByCode(doc, roomCode, 'Bob')
     await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
     expect(byClass(doc, 'waiting-room-host-controls').element.style.display).toBe('none')
 
-    await rawEmit(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+    await rawEmit(host, 'startGame', { hints: 'optional' })
 
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
@@ -310,10 +349,7 @@ describe('the Online Multiplayer tile and its lobby', () => {
   test('clicking something in the rendered game forwards it, and both players see the real result', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice'
-    byClass(doc, 'remote-host').element.click()
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
     const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
 
     const joiner = rawPlayer()
@@ -346,10 +382,7 @@ describe('the Online Multiplayer tile and its lobby', () => {
   test('leaving the waiting room returns to the game types and lets a fresh room be hosted', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice'
-    byClass(doc, 'remote-host').element.click()
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
 
     byClass(doc, 'waiting-room-leave').element.click()
     expect(byClass(doc, 'waiting-room').element.style.display).toBe('none')
@@ -358,10 +391,7 @@ describe('the Online Multiplayer tile and its lobby', () => {
     // Leaving disconnects the socket; production always reconnects to the same fixed server, but the test server's
     // ephemeral port isn't that address, so it has to point the connection back at it explicitly, same as setup.
     connectLobbySocket(baseUrl)
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice again'
-    byClass(doc, 'remote-host').element.click()
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    await hostRoom(doc, 'Second Lobby', 'Alice again')
     expect(byClass(doc, 'waiting-room-players').element.textContent).toContain('Alice again (Host)')
   })
 
@@ -372,14 +402,11 @@ describe('the Online Multiplayer tile and its lobby', () => {
   test('entering the waiting room again (as Play Again does) replaces old roomUpdate/roomClosed listeners, not stacks them', async () => {
     connectLobbySocket(baseUrl)
     const doc = openMenu()
-    byClass(doc, 'preset-remote').element.click()
-    byName(doc, 'remote-name').element.value = 'Alice'
-    byClass(doc, 'remote-host').element.click()
-    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
     const menu = byClass(doc, 'main-menu')
     const socket = connectLobbySocket(baseUrl)
 
-    const state = { roomCode: 'ABCD', hostId: socket.id, players: [{ id: socket.id, name: 'Alice' }] }
+    const state = { roomCode: 'ABCD', roomName: 'Pirate Battle', hostId: socket.id, players: [{ id: socket.id, name: 'Alice' }] }
     enterWaitingRoom(menu, state)
     enterWaitingRoom(menu, state)
     enterWaitingRoom(menu, state)
@@ -392,10 +419,10 @@ describe('the Online Multiplayer tile and its lobby', () => {
   // and calls enterWaitingRoom directly on it, skipping showRemoteEntry - the one place that normally hides
   // the game-type tiles. On a freshly rendered menu the tiles are visible by default, so without this fix a
   // player going through Play Again would see both the tiles and the waiting room at once.
-  test('entering the waiting room on a freshly rendered menu (as Play Again does) hides the game-type tiles too, not just the join form', () => {
+  test('entering the waiting room on a freshly rendered menu (as Play Again does) hides the game-type tiles too, not just the entry form', () => {
     const doc = openMenu()
     const menu = byClass(doc, 'main-menu')
-    const state = { roomCode: 'ABCD', hostId: 'host-1', players: [{ id: 'host-1', name: 'Alice' }] }
+    const state = { roomCode: 'ABCD', roomName: 'Pirate Battle', hostId: 'host-1', players: [{ id: 'host-1', name: 'Alice' }] }
 
     enterWaitingRoom(menu, state)
 

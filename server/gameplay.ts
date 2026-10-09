@@ -45,6 +45,10 @@ const buildIsolatedRoot = (listeners: Record<string, ListenerFunction>): DomItem
  * should never reach here at all. */
 const remotePlayAgainListener: ListenerFunction = () => {}
 
+/** Same reasoning and the same stand-in as remotePlayAgainListener above, for the final-score screen's Leave
+ * button (see src/setup/remoteLeaveListener.ts) - never meant to actually run here. */
+const remoteLeaveListener: ListenerFunction = () => {}
+
 /**
  * Build and start a real game for a room's connected players, reusing the engine entirely unmodified - the same
  * startNewGame local play uses, just handed a pseudo-dom-backed root instead of a real browser one (the engine
@@ -57,15 +61,14 @@ const remotePlayAgainListener: ListenerFunction = () => {}
  * to take them in at build time, and setting them any later left the very first thing a player sees (their own
  * name, in their own stats panel) showing the default "Player N" instead.
  * @param hints
- * @param firstGoesFirst
  * @param onTimerChange called whenever remote placement's own server-side deadline fires and changes state on
  * its own (auto-placing a not-yet-ready player, moving everyone into ordering) - the one state change in the
  * whole game that happens on a raw timer rather than in response to a dispatched/forwarded action, so it is the
  * one case watchRoomGame's own broadcast hooks (wrapping the session queue, and the gameAction handler's own
  * post-dispatch broadcast) can never see on their own. See remotePlacement.ts's startRemotePlacement.
  */
-export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string]>, hints: HintSetting, firstGoesFirst: boolean, onTimerChange: () => void = () => {}): RoomGame => {
-  const root = buildIsolatedRoot({ attackListener, hintListener, placementListener, remotePlacementListener, remotePlayAgainListener, shipsListener })
+export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string]>, hints: HintSetting, onTimerChange: () => void = () => {}): RoomGame => {
+  const root = buildIsolatedRoot({ attackListener, hintListener, placementListener, remotePlacementListener, remotePlayAgainListener, remoteLeaveListener, shipsListener })
   // Every seat is a connected human, so this is always the multiplayer game mode - startNewGame itself reads this
   // (its own robots-only branch would otherwise fire, since a fresh session's mode defaults to 'robots').
   setGameMode(root, 'multi')
@@ -91,7 +94,10 @@ export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string
   }
   let players: Player[] = []
   const playerBySocket = new Map<string, Player>()
-  startNewGame(root, roomPlayers.length, 0, firstGoesFirst, hints, (p, body, done) => startRemotePlacement(p, body, done, onTimerChange), builtPlayers => {
+  // startNewGame's own firstGoesFirst only ever matters when humans <= 1 (see its own startRound) - every
+  // remote seat is a connected human, so this is always ignored in favour of the real order the host chooses
+  // afterward (see remotePlacement.ts's own ordering stage). The literal value passed here is never read.
+  startNewGame(root, roomPlayers.length, 0, true, hints, (p, body, done) => startRemotePlacement(p, body, done, onTimerChange), builtPlayers => {
     players = builtPlayers
     builtPlayers.forEach((player, i) => {
       player.name = roomPlayers[i][1]

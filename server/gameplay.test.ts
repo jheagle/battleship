@@ -14,19 +14,19 @@ const playersOf = (redactedBody: DomItem): any[] =>
 
 describe('starting a room\'s game', () => {
   test('builds one player per connected socket, in join order', () => {
-    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true)
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
     expect(game.players).toHaveLength(2)
     expect(game.playerBySocket.get('alice-socket')).toBe(game.players[0])
     expect(game.playerBySocket.get('bob-socket')).toBe(game.players[1])
   })
 
   test('every seat is a connected human - no robots', () => {
-    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob'], ['carol-socket', 'Carol']], 'optional', true)
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob'], ['carol-socket', 'Carol']], 'optional')
     expect(game.players.every(player => !player.isRobot)).toBe(true)
   })
 
   test('a room\'s game ends with a real final score screen - not local hot-seat\'s own, and nothing stale left over', () => {
-    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true)
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
     // Local hot-seat's own finalScore screen wires Play Again/Change Settings/Main Menu to listener names never
     // registered on a room's own isolated root (buildIsolatedRoot) - rendering it here used to throw
     // "Undefined listener function" deep inside a queued callback, silently swallowing the game ending at all.
@@ -41,17 +41,18 @@ describe('starting a room\'s game', () => {
     expect(classNames).toEqual(['final-scores'])
     const finalScores = game.root.body.children[0]
     const finalScoreChildClasses = finalScores.children.map((child: any) => child.attributes?.className)
-    expect(finalScoreChildClasses).not.toContain('final-scores-actions')
     expect(finalScoreChildClasses).toContain('remote-final-score-message')
-    expect(finalScoreChildClasses).toContain('remote-play-again')
+    const actions = finalScores.children.find((child: any) => child.attributes?.className === 'final-scores-actions')
+    const actionClasses = actions.children.map((child: any) => child.attributes?.className)
+    expect(actionClasses).toEqual(['remote-play-again', 'remote-leave'])
   })
 
   test('calling startRoomGame again with the same players (a rematch) produces a genuinely fresh, independent game', () => {
     const roomPlayers: Array<[string, string]> = [['alice-socket', 'Alice'], ['bob-socket', 'Bob']]
-    const firstGame = startRoomGame(roomPlayers, 'optional', true)
+    const firstGame = startRoomGame(roomPlayers, 'optional')
     firstGame.players[1].status = 0 // the real trigger lobbyServer.ts's isRoomGameOver checks for
 
-    const secondGame = startRoomGame(roomPlayers, 'optional', true)
+    const secondGame = startRoomGame(roomPlayers, 'optional')
 
     expect(secondGame.root).not.toBe(firstGame.root)
     expect(secondGame.players).not.toBe(firstGame.players)
@@ -64,7 +65,7 @@ describe('starting a room\'s game', () => {
 
 describe('watching a room\'s game for changes', () => {
   test('pushes each player their own redacted view as soon as watching starts', () => {
-    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true)
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
     const pushes = new Map<string, DomItem>()
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
@@ -75,7 +76,7 @@ describe('watching a room\'s game for changes', () => {
   })
 
   test('a player only sees their own board\'s unattacked ship positions in their own push', () => {
-    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true)
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
     const pushes = new Map<string, DomItem>()
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
@@ -87,7 +88,7 @@ describe('watching a room\'s game for changes', () => {
   })
 
   test('each player gets their own placement panel, carrying the deadline and interactive only for its owner', () => {
-    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true)
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
     const pushes = new Map<string, DomItem>()
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
@@ -105,7 +106,7 @@ describe('watching a room\'s game for changes', () => {
   })
 
   test('pushes again once a queued engine step resolves', async () => {
-    const game = startRoomGame([['alice-socket', 'Alice']], 'optional', true)
+    const game = startRoomGame([['alice-socket', 'Alice']], 'optional')
     let pushCount = 0
     watchRoomGame(game, () => { pushCount++ })
     const afterWatching = pushCount
@@ -121,7 +122,7 @@ describe('watching a room\'s game for changes', () => {
   })
 
   test('coalesces a burst of queued engine steps into a single debounced broadcast', async () => {
-    const game = startRoomGame([['alice-socket', 'Alice']], 'optional', true)
+    const game = startRoomGame([['alice-socket', 'Alice']], 'optional')
     let pushCount = 0
     watchRoomGame(game, () => { pushCount++ })
     const afterWatching = pushCount
@@ -144,7 +145,7 @@ describe('watching a room\'s game for changes', () => {
     // created before watchRoomGame returns the real broadcast function, so it is captured by reference here too,
     // exactly like the real fix - the deadline is still two minutes away by the time broadcast is reassigned.
     let broadcast: () => void = () => {}
-    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true, () => broadcast())
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', () => broadcast())
     let pushCount = 0
     broadcast = watchRoomGame(game, () => { pushCount++ })
     const afterWatching = pushCount

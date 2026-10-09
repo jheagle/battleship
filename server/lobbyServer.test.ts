@@ -53,15 +53,39 @@ describe('isRoomGameOver', () => {
 describe('the lobby server', () => {
   test('creating a room makes the creator its host and only player', async () => {
     const host = connect()
-    const state = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+    const state = await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Test Lobby' })
     expect(state.roomCode).toHaveLength(4)
+    expect(state.roomName).toBe('Test Lobby')
     expect(state.hostId).toBe(host.id)
     expect(state.players).toEqual([{ id: host.id, name: 'Alice' }])
   })
 
+  test('creating a room with a blank lobby name is refused', async () => {
+    const response = await emit<{ error: string }>(connect(), 'createRoom', { name: 'Alice', roomName: '   ' })
+    expect(response.error).toMatch(/lobby name/i)
+  })
+
+  describe('peekRoom', () => {
+    test('a known room\'s code resolves to its lobby name and host\'s name, without joining it', async () => {
+      const host = connect()
+      const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Pirate Battle' })
+      const peeker = connect()
+      const info = await emit<{ roomName: string, hostName: string }>(peeker, 'peekRoom', { roomCode })
+      expect(info).toEqual({ roomName: 'Pirate Battle', hostName: 'Alice' })
+      // Peeking must not have joined the room - a second, real join still sees only the host.
+      const state = await emit<RoomState>(peeker, 'joinRoom', { roomCode, name: 'Bob' })
+      expect(state.players.map(p => p.name)).toEqual(['Alice', 'Bob'])
+    })
+
+    test('an unknown code gets the same error joinRoom uses', async () => {
+      const response = await emit<{ error: string }>(connect(), 'peekRoom', { roomCode: 'ZZZZ' })
+      expect(response.error).toMatch(/no room/i)
+    })
+  })
+
   test('joining a room by its code adds the joiner, and both players see it', async () => {
     const host = connect()
-    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Test Lobby' })
     const joiner = connect()
     const joinedAck = emit<RoomState>(joiner, 'joinRoom', { roomCode, name: 'Bob' })
     const hostNotified = new Promise<RoomState>(resolve => host.on('roomUpdate', resolve))
@@ -77,20 +101,20 @@ describe('the lobby server', () => {
   })
 
   test('creating a room with a blank name is refused', async () => {
-    const response = await emit<{ error: string }>(connect(), 'createRoom', { name: '   ' })
+    const response = await emit<{ error: string }>(connect(), 'createRoom', { name: '   ', roomName: 'Test Lobby' })
     expect(response.error).toMatch(/name/i)
   })
 
   test('joining a room with a blank name is refused', async () => {
     const host = connect()
-    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Test Lobby' })
     const response = await emit<{ error: string }>(connect(), 'joinRoom', { roomCode, name: '' })
     expect(response.error).toMatch(/name/i)
   })
 
   test('a fifth player cannot join a room that already has four', async () => {
     const host = connect()
-    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Player 1' })
+    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Player 1', roomName: 'Test Lobby' })
     for (let i = 2; i <= 4; i++) {
       await emit<RoomState>(connect(), 'joinRoom', { roomCode, name: `Player ${i}` })
     }
@@ -100,7 +124,7 @@ describe('the lobby server', () => {
 
   test('a player leaving updates the room for whoever is left', async () => {
     const host = connect()
-    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Test Lobby' })
     const joiner = connect()
     const hostSawJoin = new Promise<RoomState>(resolve => host.once('roomUpdate', resolve))
     await emit<RoomState>(joiner, 'joinRoom', { roomCode, name: 'Bob' })
@@ -113,7 +137,7 @@ describe('the lobby server', () => {
 
   test('the host leaving closes the room for everyone', async () => {
     const host = connect()
-    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+    const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Test Lobby' })
     const joiner = connect()
     await emit<RoomState>(joiner, 'joinRoom', { roomCode, name: 'Bob' })
     const joinerSawClose = new Promise(resolve => joiner.on('roomClosed', resolve))
@@ -126,7 +150,7 @@ describe('the lobby server', () => {
   describe('starting a game', () => {
     const setUpRoom = async () => {
       const host = connect()
-      const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+      const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Test Lobby' })
       const joiner = connect()
       await emit<RoomState>(joiner, 'joinRoom', { roomCode, name: 'Bob' })
       return { host, joiner, roomCode }
@@ -139,7 +163,7 @@ describe('the lobby server', () => {
       const { host, joiner } = await setUpRoom()
       const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
       const joinerUpdate = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
-      const ack = await emit<{ started: true } | { error: string }>(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      const ack = await emit<{ started: true } | { error: string }>(host, 'startGame', { hints: 'optional' })
       expect(ack).toEqual({ started: true })
       const [hostView, joinerView] = await Promise.all([hostUpdate, joinerUpdate])
       expect(boardsOf(hostView)).toHaveLength(2)
@@ -149,7 +173,7 @@ describe('the lobby server', () => {
 
     test('only the host can start the game', async () => {
       const { joiner } = await setUpRoom()
-      const response = await emit<{ error: string }>(joiner, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      const response = await emit<{ error: string }>(joiner, 'startGame', { hints: 'optional' })
       expect(response.error).toMatch(/only the host/i)
     })
 
@@ -158,20 +182,20 @@ describe('the lobby server', () => {
     // a still-active game must keep refusing a second startGame exactly as before.
     test('the game cannot be started twice', async () => {
       const { host } = await setUpRoom()
-      await emit(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
-      const response = await emit<{ error: string }>(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      await emit(host, 'startGame', { hints: 'optional' })
+      const response = await emit<{ error: string }>(host, 'startGame', { hints: 'optional' })
       expect(response.error).toMatch(/already started/i)
     })
 
     test('starting a game with no room to start it in is refused', async () => {
-      const response = await emit<{ error: string }>(connect(), 'startGame', { hints: 'optional', firstGoesFirst: true })
+      const response = await emit<{ error: string }>(connect(), 'startGame', { hints: 'optional' })
       expect(response.error).toMatch(/no room/i)
     })
 
     test('starting a game with only one player in the room is refused', async () => {
       const host = connect()
-      await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
-      const response = await emit<{ error: string }>(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Test Lobby' })
+      const response = await emit<{ error: string }>(host, 'startGame', { hints: 'optional' })
       expect(response.error).toMatch(/at least 2 players/i)
     })
   })
@@ -179,11 +203,11 @@ describe('the lobby server', () => {
   describe('playing a started game', () => {
     const setUpStartedGame = async () => {
       const host = connect()
-      const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice' })
+      const { roomCode } = await emit<RoomState>(host, 'createRoom', { name: 'Alice', roomName: 'Test Lobby' })
       const joiner = connect()
       await emit<RoomState>(joiner, 'joinRoom', { roomCode, name: 'Bob' })
       const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      await emit(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
+      await emit(host, 'startGame', { hints: 'optional' })
       const initialView = await hostUpdate
       return { host, joiner, initialView }
     }
@@ -338,7 +362,7 @@ describe('the lobby server', () => {
 
     test('an action for a room with no started game is silently ignored', async () => {
       const lonelyHost = connect()
-      await emit<RoomState>(lonelyHost, 'createRoom', { name: 'Carol' })
+      await emit<RoomState>(lonelyHost, 'createRoom', { name: 'Carol', roomName: 'Test Lobby' })
       expect(() => lonelyHost.emit('gameAction', { itemPath: [0], eventType: 'click', listenerFunc: 'whatever', data: [] })).not.toThrow()
     })
 

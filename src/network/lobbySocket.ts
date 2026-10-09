@@ -27,8 +27,13 @@ export const disconnectLobbySocket = (): void => {
 }
 
 /** Create a room as its host, resolving with the room's state once the server acknowledges it, or an error. */
-export const createRoom = (name: string): Promise<RoomState | { error: string }> =>
-  new Promise(resolve => connectLobbySocket().emit('createRoom', { name }, resolve))
+export const createRoom = (name: string, roomName: string): Promise<RoomState | { error: string }> =>
+  new Promise(resolve => connectLobbySocket().emit('createRoom', { name, roomName }, resolve))
+
+/** Look up a room's own lobby name and host's name by its code, without joining it - lets a joiner see whose
+ * game it is before they commit their own name (see mainMenu.ts's remote-join-confirm). */
+export const peekRoom = (roomCode: string): Promise<{ roomName: string, hostName: string } | { error: string }> =>
+  new Promise(resolve => connectLobbySocket().emit('peekRoom', { roomCode }, resolve))
 
 /** Join an existing room by its code, resolving with the room's state, or an error if it could not be joined. */
 export const joinRoom = (roomCode: string, name: string): Promise<RoomState | { error: string }> =>
@@ -51,8 +56,8 @@ export const onRoomClosed = (callback: () => void): void => {
 export const getSocketId = (): string | undefined => connectLobbySocket().id
 
 /** The host starts the game: every connected player becomes a human player, in the room's own join order. */
-export const startGame = (hints: HintSetting, firstGoesFirst: boolean): Promise<{ started: true } | { error: string }> =>
-  new Promise(resolve => connectLobbySocket().emit('startGame', { hints, firstGoesFirst }, resolve))
+export const startGame = (hints: HintSetting): Promise<{ started: true } | { error: string }> =>
+  new Promise(resolve => connectLobbySocket().emit('startGame', { hints }, resolve))
 
 /** Be told whenever the game's state changes - the redacted view of the whole screen, for this connection alone.
  * Replaces any previous listener rather than adding another - a rematch (see remotePlayAgainListener.ts,

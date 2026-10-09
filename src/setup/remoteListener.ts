@@ -1,33 +1,68 @@
 import jsonDom from 'json-dom'
-import { connectLobbySocket, createRoom, joinRoom, onRoomUpdate, onRoomClosed, disconnectLobbySocket, getSocketId, startGame } from '../network/lobbySocket'
+import { connectLobbySocket, createRoom, joinRoom, peekRoom, onRoomUpdate, onRoomClosed, disconnectLobbySocket, getSocketId, startGame } from '../network/lobbySocket'
 import { enterRemoteGame } from '../network/remoteGame'
 import { show, update } from './showLobby'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { HintSetting } from './gameOptions'
 import type { RoomState } from '../../server/lobbyServer'
 
-/** The room's own last known state (its code, host, and players) - kept up to date by renderRoomState below
- * regardless of whether the waiting room is currently shown, so Play Again (see remotePlayAgainListener.ts)
+/** The room's own last known state (its code, name, host, and players) - kept up to date by renderRoomState
+ * below regardless of whether the waiting room is currently shown, so Play Again (see remotePlayAgainListener.ts)
  * can show it again for everyone once a game ends, without a fresh server round trip to ask for it again. */
 let lastRoomState: RoomState | null = null
 
 /** The current room's own last known state, if this connection has ever been in one. */
 export const getLastRoomState = (): RoomState | null => lastRoomState
 
-/** Show the remote entry form in place of the game-type tiles, optionally with a room code already filled in -
- * used both by clicking the Online Multiplayer tile and by a shared join link (see main.ts). */
+/** The room code a successful peek (see peekAndConfirm) found - remembered so the Join confirm panel's own
+ * submit can join it without needing its own room-code field. */
+let pendingJoinCode: string | null = null
+
+type RemoteSubPanel = 'remote-choice' | 'remote-host-form' | 'remote-code-entry' | 'remote-join-confirm'
+
+/** Show exactly one of remote-entry's own four sub-panels (see mainMenu.ts), hiding the other three. */
+const showSubPanel = (entry: DomItem, which: RemoteSubPanel): void => {
+  const panels: RemoteSubPanel[] = ['remote-choice', 'remote-host-form', 'remote-code-entry', 'remote-join-confirm']
+  panels.forEach(panel => show(jsonDom.getChildrenByClass(panel, entry)[0], panel === which))
+}
+
+/** Look up a room by code (without joining it - see lobbySocket.ts's peekRoom) and move to the Join confirm
+ * panel showing whose game it is, or fall back to the code-entry panel with the error shown inline if it could
+ * not be found. The code-entry panel (with the code already filled in) shows immediately, before the lookup
+ * even resolves, so a direct link lands on something straight away rather than a blank wait. */
+const peekAndConfirm = async (entry: DomItem, roomCode: string): Promise<void> => {
+  (jsonDom.getChildrenByName('remote-code', entry)[0].element as HTMLInputElement).value = roomCode
+  update(jsonDom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: 'Looking up room...' })
+  showSubPanel(entry, 'remote-code-entry')
+  const result = await peekRoom(roomCode)
+  if ('error' in result) {
+    update(jsonDom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: result.error })
+    return
+  }
+  update(jsonDom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: '' })
+  pendingJoinCode = roomCode
+  update(jsonDom.getChildrenByClass('remote-join-message', entry)[0], { innerHTML: `You are joining ${result.hostName}'s ${result.roomName}.` })
+  showSubPanel(entry, 'remote-join-confirm')
+  ;(jsonDom.getChildrenByName('remote-join-name', entry)[0].element as HTMLInputElement).focus()
+}
+
+/** Show the remote entry area in place of the game-type tiles - either the Host/Join choice (no code yet, the
+ * Online Multiplayer tile itself), or (a shared join link - see main.ts) straight to the Join confirm panel
+ * once that code's own room has been found. */
 export const showRemoteEntry = (menu: DomItem, roomCode: string = ''): void => {
   const entry = jsonDom.getChildrenByClass('remote-entry', menu)[0]
-  update(jsonDom.getChildrenByClass('remote-status', entry)[0], { innerHTML: '' })
   show(jsonDom.getChildrenByClass('presets', menu)[0], false)
   show(entry, true)
   if (roomCode) {
-    ;(jsonDom.getChildrenByName('remote-code', entry)[0].element as HTMLInputElement).value = roomCode
-    ;(jsonDom.getChildrenByName('remote-name', entry)[0].element as HTMLInputElement).focus()
+    void peekAndConfirm(entry, roomCode)
+    return
   }
+  pendingJoinCode = null
+  showSubPanel(entry, 'remote-choice')
 }
 
-/** Replace the waiting room's player list, room code and host controls with a freshly-received room state. */
+/** Replace the waiting room's player list, lobby name, room code and host controls with a freshly-received
+ * room state. */
 const renderRoomState = (menu: DomItem, state: RoomState): void => {
   lastRoomState = state
   const list = jsonDom.getChildrenByClass('waiting-room-players', menu)[0]
@@ -38,18 +73,24 @@ const renderRoomState = (menu: DomItem, state: RoomState): void => {
       attributes: { innerHTML: player.id === state.hostId ? `${player.name} (Host)` : player.name }
     }), list)
   })
+  update(jsonDom.getChildrenByClass('waiting-room-name', menu)[0], { innerHTML: `Lobby: ${state.roomName}` })
   update(jsonDom.getChildrenByClass('waiting-room-code', menu)[0], { innerHTML: `Room Code: ${state.roomCode}` })
   show(jsonDom.getChildrenByClass('waiting-room-host-controls', menu)[0], state.hostId === getSocketId())
 }
 
-/** Leave whatever room is open and show the game types again, clearing any status message. */
+/** Leave whatever room is open and show the game types again, clearing any status message - or, with a
+ * message (the room closed on its own), show it on the Host/Join choice panel instead of the tiles. */
 const leaveToPresets = (menu: DomItem, message: string = ''): void => {
   disconnectLobbySocket()
   history.replaceState(null, '', location.pathname)
+  pendingJoinCode = null
   show(jsonDom.getChildrenByClass('waiting-room', menu)[0], false)
   const entry = jsonDom.getChildrenByClass('remote-entry', menu)[0]
-  update(jsonDom.getChildrenByClass('remote-status', entry)[0], { innerHTML: message })
+  update(jsonDom.getChildrenByClass('remote-choice-status', entry)[0], { innerHTML: message })
   show(entry, Boolean(message))
+  if (message) {
+    showSubPanel(entry, 'remote-choice')
+  }
   show(jsonDom.getChildrenByClass('presets', menu)[0], !message)
 }
 
@@ -66,19 +107,18 @@ export const enterWaitingRoom = (menu: DomItem, state: RoomState): void => {
   // enters the rendered game the same way instead of only the one who clicked Start.
   connectLobbySocket().once('gameUpdate', firstUpdate => enterRemoteGame(jsonDom.getTopParentItem(menu), firstUpdate))
   renderRoomState(menu, state)
-  // Hides both the game-type tiles and the host/join form - normally only the form is still showing by this
-  // point (showRemoteEntry already hid the tiles when this player first chose Online Multiplayer), but Play
-  // Again (see remotePlayAgainListener.ts) re-enters the waiting room straight from a freshly rendered menu,
-  // where the tiles are visible by default - showing the waiting room has to hide both regardless of how it
-  // got here, not rely on a different step somewhere else having already hidden one of them.
+  // Hides both the game-type tiles and the whole remote-entry area - normally only remote-entry is still
+  // showing by this point, but Play Again (see remotePlayAgainListener.ts) re-enters the waiting room straight
+  // from a freshly rendered menu, where the tiles are visible by default - showing the waiting room has to hide
+  // both regardless of how it got here, not rely on a different step somewhere else having already hidden one.
   show(jsonDom.getChildrenByClass('presets', menu)[0], false)
   show(jsonDom.getChildrenByClass('remote-entry', menu)[0], false)
   show(jsonDom.getChildrenByClass('waiting-room', menu)[0], true)
 }
 
 /**
- * The Online Multiplayer tile, its host/join form, and the waiting room it leads to. Room/presence only - actual
- * gameplay over the socket is a separate, later piece.
+ * The Online Multiplayer tile, its Host/Join choice and forms, and the waiting room it leads to. Room/presence
+ * only - actual gameplay over the socket is a separate, later piece.
  * @param e
  * @param target
  */
@@ -96,6 +136,64 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
     show(jsonDom.getChildrenByClass('presets', menu)[0], true)
     return
   }
+  if (className.includes('remote-sub-back')) {
+    showSubPanel(entry, 'remote-choice')
+    return
+  }
+  if (className.includes('remote-choice-host')) {
+    showSubPanel(entry, 'remote-host-form')
+    return
+  }
+  if (className.includes('remote-choice-join')) {
+    showSubPanel(entry, 'remote-code-entry')
+    return
+  }
+  if (className.includes('remote-code-submit')) {
+    const roomCode = (jsonDom.getChildrenByName('remote-code', entry)[0].element as HTMLInputElement).value.trim().toUpperCase()
+    if (!roomCode) {
+      update(jsonDom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: 'Enter a room code' })
+      return
+    }
+    await peekAndConfirm(entry, roomCode)
+    return
+  }
+  if (className.includes('remote-host-submit')) {
+    const roomName = (jsonDom.getChildrenByName('remote-room-name', entry)[0].element as HTMLInputElement).value.trim()
+    const name = (jsonDom.getChildrenByName('remote-host-name', entry)[0].element as HTMLInputElement).value.trim()
+    if (!roomName) {
+      update(jsonDom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: 'A lobby name is required' })
+      return
+    }
+    if (!name) {
+      update(jsonDom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: 'Enter your name first' })
+      return
+    }
+    const result = await createRoom(name, roomName)
+    if ('error' in result) {
+      update(jsonDom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: result.error })
+      return
+    }
+    enterWaitingRoom(menu, result)
+    return
+  }
+  if (className.includes('remote-join-submit')) {
+    const name = (jsonDom.getChildrenByName('remote-join-name', entry)[0].element as HTMLInputElement).value.trim()
+    if (!name) {
+      update(jsonDom.getChildrenByClass('remote-join-status', entry)[0], { innerHTML: 'Enter your name first' })
+      return
+    }
+    if (!pendingJoinCode) {
+      return
+    }
+    const result = await joinRoom(pendingJoinCode, name)
+    if ('error' in result) {
+      update(jsonDom.getChildrenByClass('remote-join-status', entry)[0], { innerHTML: result.error })
+      return
+    }
+    pendingJoinCode = null
+    enterWaitingRoom(menu, result)
+    return
+  }
   if (className.includes('waiting-room-leave')) {
     leaveToPresets(menu)
     return
@@ -103,38 +201,10 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
   if (className.includes('waiting-room-start')) {
     const waitingRoom = jsonDom.getChildrenByClass('waiting-room', menu)[0]
     const hints = (jsonDom.getChildrenByName('waiting-room-hints', waitingRoom)[0].element as HTMLSelectElement).value as HintSetting
-    const firstGoesFirst = (jsonDom.getChildrenByName('waiting-room-first', waitingRoom)[0].element as HTMLInputElement).checked
-    // No need to wait for or enter the game here - enterWaitingRoom already registered the same first-gameUpdate
-    // listener every player (host included) gets, which this call's own resulting push will satisfy too.
-    const ack = await startGame(hints, firstGoesFirst)
+    const ack = await startGame(hints)
     if ('error' in ack) {
       update(jsonDom.getChildrenByClass('waiting-room-status', waitingRoom)[0], { innerHTML: ack.error })
     }
-    return
-  }
-
-  const name = (jsonDom.getChildrenByName('remote-name', entry)[0].element as HTMLInputElement).value.trim()
-  if ((className.includes('remote-host') || className.includes('remote-join')) && !name) {
-    update(jsonDom.getChildrenByClass('remote-status', entry)[0], { innerHTML: 'Enter your name first' })
-    return
-  }
-  if (className.includes('remote-host')) {
-    const result = await createRoom(name)
-    if ('error' in result) {
-      update(jsonDom.getChildrenByClass('remote-status', entry)[0], { innerHTML: result.error })
-      return
-    }
-    enterWaitingRoom(menu, result)
-    return
-  }
-  if (className.includes('remote-join')) {
-    const roomCode = (jsonDom.getChildrenByName('remote-code', entry)[0].element as HTMLInputElement).value.toUpperCase()
-    const result = await joinRoom(roomCode, name)
-    if ('error' in result) {
-      update(jsonDom.getChildrenByClass('remote-status', entry)[0], { innerHTML: result.error })
-      return
-    }
-    enterWaitingRoom(menu, result)
   }
 }
 

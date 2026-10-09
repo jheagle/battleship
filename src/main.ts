@@ -3,6 +3,7 @@ import placementListener from './setup/placementListener'
 import presetListener from './setup/presetListener'
 import remoteListener, { showRemoteEntry } from './setup/remoteListener'
 import remotePlayAgainListener from './setup/remotePlayAgainListener'
+import remoteLeaveListener from './setup/remoteLeaveListener'
 import shipsListener from './attack/shipsListener'
 import hintListener from './attack/hintListener'
 import beginRound from './setup/beginRound'
@@ -23,6 +24,7 @@ const battleship = (): void => {
     presetListener,
     remoteListener,
     remotePlayAgainListener,
+    remoteLeaveListener,
     shipsListener,
     restart,
     playAgain,
