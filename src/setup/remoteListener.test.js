@@ -15,7 +15,7 @@ import { io as ioClient } from 'socket.io-client'
 import jsonDom from 'json-dom'
 import startMenu from './startMenu'
 import presetListener from './presetListener'
-import remoteListener, { showRemoteEntry } from './remoteListener'
+import remoteListener, { showRemoteEntry, enterWaitingRoom } from './remoteListener'
 import beginRound from './beginRound'
 import { createLobbyServer } from '../../server/lobbyServer'
 import { connectLobbySocket, disconnectLobbySocket } from '../network/lobbySocket'
@@ -363,5 +363,28 @@ describe('the Online Multiplayer tile and its lobby', () => {
     byClass(doc, 'remote-host').element.click()
     await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
     expect(byClass(doc, 'waiting-room-players').element.textContent).toContain('Alice again (Host)')
+  })
+
+  // The real bug this covers: Play Again (see remotePlayAgainListener.ts) re-enters the same waiting room on
+  // the same still-open socket connection - calling enterWaitingRoom a second time without this fix would add
+  // a second 'roomUpdate'/'roomClosed' listener alongside the first, piling up one more duplicate render per
+  // call every time a room goes through a rematch.
+  test('entering the waiting room again (as Play Again does) replaces old roomUpdate/roomClosed listeners, not stacks them', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byName(doc, 'remote-name').element.value = 'Alice'
+    byClass(doc, 'remote-host').element.click()
+    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    const menu = byClass(doc, 'main-menu')
+    const socket = connectLobbySocket(baseUrl)
+
+    const state = { roomCode: 'ABCD', hostId: socket.id, players: [{ id: socket.id, name: 'Alice' }] }
+    enterWaitingRoom(menu, state)
+    enterWaitingRoom(menu, state)
+    enterWaitingRoom(menu, state)
+
+    expect(socket.listeners('roomUpdate')).toHaveLength(1)
+    expect(socket.listeners('roomClosed')).toHaveLength(1)
   })
 })

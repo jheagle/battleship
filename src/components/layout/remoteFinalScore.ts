@@ -6,8 +6,9 @@ const listener = (listenerFunc: string) => [{ listenerFunc, listenerArgs: {}, li
 
 /**
  * The final score screen for a remote room's game: the same public score cards local hot-seat shows (see
- * finalScore.ts), plus a single host-only Play Again button (see remotePlayAgainListener.ts) - disabled on a
- * non-host's own redacted copy, same as the ordering panel (see redactGameState.ts). Change Settings and Main
+ * finalScore.ts), plus a single Play Again button (see remotePlayAgainListener.ts), open to every player - it
+ * only ever takes its own clicker back to the room's own waiting room, same players, same host, nothing
+ * destructive about it, so there is no need to restrict who can press it. Change Settings and Main
  * Menu/leave-the-room are still not built - both assume one physical screen controlling the whole shared game,
  * which does not hold for several independent remote clients, and restarting with different settings or
  * leaving the room are each their own, separate feature.
@@ -36,7 +37,7 @@ const remoteFinalScore = (players: Player[] = []): DomItem => jsonDom.createDomI
       nodeName: 'p',
       attributes: {
         className: 'remote-final-score-message',
-        innerHTML: 'Game over! The host can start a new game with the same players below.'
+        innerHTML: 'Game over! Click Play Again to return to the room and start a new game with the same players.'
       }
     },
     {

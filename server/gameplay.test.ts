@@ -25,19 +25,25 @@ describe('starting a room\'s game', () => {
     expect(game.players.every(player => !player.isRobot)).toBe(true)
   })
 
-  test('a room\'s game ends with a real, button-less final score screen - not local hot-seat\'s own', () => {
+  test('a room\'s game ends with a real final score screen - not local hot-seat\'s own, and nothing stale left over', () => {
     const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', true)
     // Local hot-seat's own finalScore screen wires Play Again/Change Settings/Main Menu to listener names never
     // registered on a room's own isolated root (buildIsolatedRoot) - rendering it here used to throw
     // "Undefined listener function" deep inside a queued callback, silently swallowing the game ending at all.
     expect(() => endGame(game.players[0])).not.toThrow()
 
+    // boards (still holding every placement panel) and remote-ordering (only ever hidden via style, never
+    // removed) both have to be gone too, not just alongside final-scores - both still reference
+    // remotePlacementListener, which the real client never registers directly (see remoteGame.test.js's own
+    // "stale boards sibling" regression test for what rendering a body that still has them does once
+    // forwarding turns off for the finished game).
     const classNames = game.root.body.children.map((child: any) => child.attributes?.className)
-    expect(classNames).toContain('final-scores')
-    const finalScores = game.root.body.children.find((child: any) => child.attributes?.className === 'final-scores')
+    expect(classNames).toEqual(['final-scores'])
+    const finalScores = game.root.body.children[0]
     const finalScoreChildClasses = finalScores.children.map((child: any) => child.attributes?.className)
     expect(finalScoreChildClasses).not.toContain('final-scores-actions')
     expect(finalScoreChildClasses).toContain('remote-final-score-message')
+    expect(finalScoreChildClasses).toContain('remote-play-again')
   })
 
   test('calling startRoomGame again with the same players (a rematch) produces a genuinely fresh, independent game', () => {

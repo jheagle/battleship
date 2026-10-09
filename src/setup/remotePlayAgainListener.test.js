@@ -3,15 +3,20 @@
  */
 import jsonDom from 'json-dom'
 import remotePlayAgainListener from './remotePlayAgainListener'
-import * as lobbySocket from '../network/lobbySocket'
+import { leaveRemoteGame } from '../network/remoteGame'
 import * as remoteListenerModule from './remoteListener'
+import presetListener from './presetListener'
+import beginRound from './beginRound'
 
-jest.mock('../network/lobbySocket')
+jest.mock('../network/remoteGame')
 jest.mock('./remoteListener')
 
 describe('remotePlayAgainListener: the final-score screen\'s Play Again button', () => {
+  // remotePlayAgainListener re-renders the main menu for real (startMenu) before showing the waiting room -
+  // its own markup references presetListener/remoteListener/beginRound by name, so the root needs all three
+  // registered for real, the same as any other root the real app builds (see main.ts).
   const setUp = () => {
-    const root = jsonDom.documentDomItem({})
+    const root = jsonDom.documentDomItem({ presetListener, remoteListener: remoteListenerModule.default, beginRound })
     jsonDom.renderHtml(jsonDom.createDomItem({
       nodeName: 'div',
       attributes: { className: 'final-scores' },
@@ -23,26 +28,28 @@ describe('remotePlayAgainListener: the final-score screen\'s Play Again button',
 
   afterEach(() => jest.resetAllMocks())
 
-  test('does nothing if there are no remembered settings - should never happen in practice', async () => {
-    remoteListenerModule.getLastGameSettings.mockReturnValue(null)
+  test('does nothing if there is no remembered room state - should never happen in practice', () => {
+    remoteListenerModule.getLastRoomState.mockReturnValue(null)
     const { target } = setUp()
-    await remotePlayAgainListener({}, target)
-    expect(lobbySocket.startGame).not.toHaveBeenCalled()
+    remotePlayAgainListener({}, target)
+    expect(leaveRemoteGame).not.toHaveBeenCalled()
+    expect(remoteListenerModule.enterWaitingRoom).not.toHaveBeenCalled()
   })
 
-  test('starts a new game with whatever settings the last real game actually used', async () => {
-    remoteListenerModule.getLastGameSettings.mockReturnValue({ hints: 'on', firstGoesFirst: false })
-    lobbySocket.startGame.mockResolvedValue({ started: true })
-    const { target } = setUp()
-    await remotePlayAgainListener({}, target)
-    expect(lobbySocket.startGame).toHaveBeenCalledWith('on', false)
-  })
-
-  test('shows the server\'s own error in the final-score message if it refuses - e.g. someone left', async () => {
-    remoteListenerModule.getLastGameSettings.mockReturnValue({ hints: 'optional', firstGoesFirst: true })
-    lobbySocket.startGame.mockResolvedValue({ error: 'Need at least 2 players to start' })
+  test('leaves the finished game and shows the same room\'s own waiting room again, for whoever clicked it', () => {
+    const state = { roomCode: 'ABCD', hostId: 'host-1', players: [{ id: 'host-1', name: 'Alice' }, { id: 'p2', name: 'Bob' }] }
+    remoteListenerModule.getLastRoomState.mockReturnValue(state)
     const { root, target } = setUp()
-    await remotePlayAgainListener({}, target)
-    expect(jsonDom.getChildrenByClass('remote-final-score-message', root.body)[0].attributes.innerHTML).toBe('Need at least 2 players to start')
+
+    remotePlayAgainListener({}, target)
+
+    expect(leaveRemoteGame).toHaveBeenCalledWith(root)
+    expect(remoteListenerModule.enterWaitingRoom).toHaveBeenCalledTimes(1)
+    const [menuArg, stateArg] = remoteListenerModule.enterWaitingRoom.mock.calls[0]
+    // startMenu ran for real - the main menu genuinely exists by the time enterWaitingRoom is handed it, with
+    // the same room state getLastRoomState provided (same room, same players, same host).
+    expect(menuArg.attributes.className).toBe('main-menu')
+    expect(stateArg).toBe(state)
+    expect(document.querySelector('.main-menu')).not.toBeNull()
   })
 })
