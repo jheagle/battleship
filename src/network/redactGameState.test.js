@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import jsonDom from 'json-dom'
 import matrixDom from 'matrix-dom'
 import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
 import { redactBoard, redactGameBody, redactGameState, redactPlayer } from './redactGameState'
@@ -122,6 +123,22 @@ describe('redacting the game state for a remote viewer', () => {
     expect(redacted).toHaveLength(players.length)
     expect(shipCells(viewer).every(({ x, y }) => hasShipAt(redacted[0].board, x, y))).toBe(true)
     expect(shipCells(other).every(({ x, y }) => !hasShipAt(redacted[1].board, x, y))).toBe(true)
+  })
+
+  // The real bug this covers: hintListener.ts resolves whichever player owns the clicked checkbox, regardless
+  // of who actually clicked it - left alone, a viewer could see and toggle another player's own hint
+  // preference from their own screen, since playerStats was otherwise treated as entirely public.
+  test('a viewer keeps their own hint checkbox, but never sees another player\'s', async () => {
+    const players = await setUp()
+    const [viewer, other] = players
+
+    const ownStats = redactPlayer(viewer, viewer).playerStats
+    expect(jsonDom.getChildrenFromAttribute('type', 'checkbox', ownStats)).toHaveLength(1)
+
+    const otherStats = redactPlayer(other, viewer).playerStats
+    expect(jsonDom.getChildrenFromAttribute('type', 'checkbox', otherStats)).toHaveLength(0)
+    // Name and ship list are still there - only the control itself is gone, not the whole panel.
+    expect(otherStats.children.some(child => child.attributes?.className === 'player-name')).toBe(true)
   })
 
   describe('redactGameBody and the final-score screen\'s own Play Again button', () => {
