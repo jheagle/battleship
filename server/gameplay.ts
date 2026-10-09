@@ -38,6 +38,13 @@ const buildIsolatedRoot = (listeners: Record<string, ListenerFunction>): DomItem
   return jsonDom.documentDomItem(listeners, jsonDom.initRoot([head, body], listeners))
 }
 
+/** remoteFinalScore.ts's own Play Again button needs this name registered just for renderHtml's own binding
+ * step to succeed - it is never meant to actually run server-side. The real implementation
+ * (src/setup/remotePlayAgainListener.ts) only ever runs client-side, once forwarding has already been turned
+ * off for this exact reason (see remoteGame.ts's enterRemoteGame) - a forwarded click for this listener name
+ * should never reach here at all. */
+const remotePlayAgainListener: ListenerFunction = () => {}
+
 /**
  * Build and start a real game for a room's connected players, reusing the engine entirely unmodified - the same
  * startNewGame local play uses, just handed a pseudo-dom-backed root instead of a real browser one (the engine
@@ -58,7 +65,7 @@ const buildIsolatedRoot = (listeners: Record<string, ListenerFunction>): DomItem
  * post-dispatch broadcast) can never see on their own. See remotePlacement.ts's startRemotePlacement.
  */
 export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string]>, hints: HintSetting, firstGoesFirst: boolean, onTimerChange: () => void = () => {}): RoomGame => {
-  const root = buildIsolatedRoot({ attackListener, hintListener, placementListener, remotePlacementListener, shipsListener })
+  const root = buildIsolatedRoot({ attackListener, hintListener, placementListener, remotePlacementListener, remotePlayAgainListener, shipsListener })
   // Every seat is a connected human, so this is always the multiplayer game mode - startNewGame itself reads this
   // (its own robots-only branch would otherwise fire, since a fresh session's mode defaults to 'robots').
   setGameMode(root, 'multi')

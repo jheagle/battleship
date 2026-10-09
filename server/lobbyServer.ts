@@ -13,6 +13,11 @@ import type { RoomGame } from './gameplay'
 /** The fewest players a game can start with - nobody to attack otherwise. */
 const MIN_PLAYERS_TO_START = 2
 
+/** Whether a room's game has actually ended - the same condition updateScore.ts already uses to decide that
+ * itself, re-checked here so a finished room's own startGame event can double as "play again" (see the
+ * startGame handler below) without needing a separate, dedicated rematch event. */
+export const isRoomGameOver = (game: RoomGame): boolean => game.players.filter(player => player.status > 0).length < 2
+
 /**
  * A redacted body, as sent over the wire: still circularly linked in memory (parentItem, matrix-dom's own
  * internal references) like any live DomItem, which socket.io's own payload encoding cannot walk directly - this
@@ -130,7 +135,7 @@ export const createLobbyServer = (): HttpServer => {
         ack({ error: 'Only the host can start the game' })
         return
       }
-      if (room.game) {
+      if (room.game && !isRoomGameOver(room.game)) {
         ack({ error: 'The game has already started' })
         return
       }

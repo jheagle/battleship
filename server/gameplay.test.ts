@@ -39,6 +39,21 @@ describe('starting a room\'s game', () => {
     expect(finalScoreChildClasses).not.toContain('final-scores-actions')
     expect(finalScoreChildClasses).toContain('remote-final-score-message')
   })
+
+  test('calling startRoomGame again with the same players (a rematch) produces a genuinely fresh, independent game', () => {
+    const roomPlayers: Array<[string, string]> = [['alice-socket', 'Alice'], ['bob-socket', 'Bob']]
+    const firstGame = startRoomGame(roomPlayers, 'optional', true)
+    firstGame.players[1].status = 0 // the real trigger lobbyServer.ts's isRoomGameOver checks for
+
+    const secondGame = startRoomGame(roomPlayers, 'optional', true)
+
+    expect(secondGame.root).not.toBe(firstGame.root)
+    expect(secondGame.players).not.toBe(firstGame.players)
+    expect(secondGame.players.map(player => player.name)).toEqual(['Alice', 'Bob'])
+    // A fresh game's players have unplaced fleets again - nothing carried over from the finished one.
+    expect(secondGame.players.every(player => player.shipFleet.length === 0)).toBe(true)
+    expect(secondGame.players.every(player => player.status === 100)).toBe(true)
+  })
 })
 
 describe('watching a room\'s game for changes', () => {
