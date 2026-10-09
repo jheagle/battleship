@@ -34,14 +34,17 @@ export const createRoom = (name: string): Promise<RoomState | { error: string }>
 export const joinRoom = (roomCode: string, name: string): Promise<RoomState | { error: string }> =>
   new Promise(resolve => connectLobbySocket().emit('joinRoom', { roomCode, name }, resolve))
 
-/** Be told whenever the room's state changes (a player joins or leaves). */
+/** Be told whenever the room's state changes (a player joins or leaves). Replaces any previous listener rather
+ * than adding another - Play Again (see remotePlayAgainListener.ts) re-enters the same waiting room, which
+ * would otherwise register a fresh listener each time, piling up duplicate renders on every room update. */
 export const onRoomUpdate = (callback: (state: RoomState) => void): void => {
-  connectLobbySocket().on('roomUpdate', callback)
+  connectLobbySocket().off('roomUpdate').on('roomUpdate', callback)
 }
 
-/** Be told if the host leaves, closing the room for everyone still in it. */
+/** Be told if the host leaves, closing the room for everyone still in it. Replaces any previous listener, for
+ * the same reason as onRoomUpdate above. */
 export const onRoomClosed = (callback: () => void): void => {
-  connectLobbySocket().on('roomClosed', callback)
+  connectLobbySocket().off('roomClosed').on('roomClosed', callback)
 }
 
 /** This connection's own socket id, once connected - used to tell whether this player is the room's host. */
@@ -51,9 +54,12 @@ export const getSocketId = (): string | undefined => connectLobbySocket().id
 export const startGame = (hints: HintSetting, firstGoesFirst: boolean): Promise<{ started: true } | { error: string }> =>
   new Promise(resolve => connectLobbySocket().emit('startGame', { hints, firstGoesFirst }, resolve))
 
-/** Be told whenever the game's state changes - the redacted view of the whole screen, for this connection alone. */
+/** Be told whenever the game's state changes - the redacted view of the whole screen, for this connection alone.
+ * Replaces any previous listener rather than adding another - a rematch (see remotePlayAgainListener.ts,
+ * server/lobbyServer.ts's relaxed startGame guard) re-enters a second real game on the same connection, which
+ * would otherwise leave the first game's own render loop listening alongside the new one, forever. */
 export const onGameUpdate = (callback: (redactedBody: object) => void): void => {
-  connectLobbySocket().on('gameUpdate', callback)
+  connectLobbySocket().off('gameUpdate').on('gameUpdate', callback)
 }
 
 /** Forward a user interaction to the server instead of running its listener locally - see setForwardEvents. */

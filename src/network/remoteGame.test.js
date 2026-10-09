@@ -18,10 +18,16 @@ import { connectLobbySocket, disconnectLobbySocket } from './lobbySocket'
 let httpServer
 let io
 let baseUrl
+let gameActionReceived
 
 beforeEach(async () => {
   httpServer = createServer()
   io = new Server(httpServer, { cors: { origin: '*' } })
+  gameActionReceived = false
+  // Registered before any client ever connects - io.on('connection', ...) only ever catches connections that
+  // happen *after* it is registered, so doing this per-test after connectLobbySocket (which connects
+  // immediately) would silently miss the one and only connection a test makes.
+  io.on('connection', clientSocket => clientSocket.on('gameAction', () => { gameActionReceived = true }))
   await new Promise(resolve => httpServer.listen(0, resolve))
   baseUrl = `http://localhost:${httpServer.address().port}`
 })
@@ -35,6 +41,23 @@ afterEach(async () => {
  * server stands in for the real lobby server here, so no real room/game/placement is needed at all to prove
  * the forwarding toggle itself works. */
 const bodyWithClass = className => ({ children: [{ nodeName: 'div', attributes: { className }, children: [] }] })
+
+/** A fake push with one clickable button inside it, wired to the given listener name - used to prove which
+ * listener a real click actually resolves to (not just that root.forwardEvents itself ends up correct):
+ * json-dom decides forward-vs-real once, at render/bind time (activateListener calls retrieveListener there),
+ * so toggling root.forwardEvents after rendering has no effect on anything already bound - the real bug this
+ * covers, found by real testing after PR #124 merged. */
+const bodyWithButton = (className, listenerFunc) => ({
+  children: [{
+    nodeName: 'div',
+    attributes: { className },
+    children: [{
+      nodeName: 'button',
+      attributes: { className: 'the-button', type: 'button' },
+      eventListeners: { click: [{ listenerFunc, listenerArgs: {}, listenerOptions: false }] }
+    }]
+  }]
+})
 
 const waitFor = async (check, timeoutMs = 2000) => {
   const start = Date.now()
@@ -71,5 +94,52 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
     leaveRemoteGame(root)
     expect(root.forwardEvents).toBeUndefined()
     expect(root.body.children).toHaveLength(0)
+  })
+
+  // The real bug this covers: root.forwardEvents only decides whether a button forwards or runs a real local
+  // listener once, at the moment renderInto actually binds it (json-dom's activateListener calls
+  // retrieveListener right then) - toggling the flag afterwards does nothing to anything already bound. A
+  // final-scores push's own Play Again button was being rendered (and bound as a forwarder) before forwarding
+  // was turned off, so clicking it silently forwarded to a no-op on the server instead of running locally.
+  test('a final-scores push\'s own button really does run as a local listener, not a forwarded one', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const localListener = jest.fn()
+    const root = jsonDom.documentDomItem({ localListener })
+
+    enterRemoteGame(root, bodyWithButton('final-scores', 'localListener'))
+    document.querySelector('.the-button').click()
+
+    expect(localListener).toHaveBeenCalledTimes(1)
+    await new Promise(resolve => setTimeout(resolve, 100))
+    expect(gameActionReceived).toBe(false)
+  })
+
+  test('a normal (not final-scores) push\'s own button still forwards to the server, as always', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const localListener = jest.fn()
+    const root = jsonDom.documentDomItem({ localListener })
+
+    enterRemoteGame(root, bodyWithButton('boards', 'localListener'))
+    document.querySelector('.the-button').click()
+
+    await waitFor(() => gameActionReceived)
+    expect(localListener).not.toHaveBeenCalled()
+  })
+
+  test('after a final-scores push, a later normal push\'s own button forwards again - not stuck on local', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const localListener = jest.fn()
+    const root = jsonDom.documentDomItem({ localListener })
+
+    enterRemoteGame(root, bodyWithClass('final-scores'))
+    io.emit('gameUpdate', bodyWithButton('boards', 'localListener'))
+    await waitFor(() => document.querySelector('.the-button') !== null)
+    document.querySelector('.the-button').click()
+
+    await waitFor(() => gameActionReceived)
+    expect(localListener).not.toHaveBeenCalled()
   })
 })

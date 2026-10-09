@@ -129,25 +129,15 @@ describe('redacting the game state for a remote viewer', () => {
       children: [{ attributes: { className: 'boards' }, children: players }, finalScore]
     })
 
-    test('is enabled only for the host (players[0]), same as the ordering panel', async () => {
+    test('is left enabled for every viewer, host or not - clicking it is never destructive to anyone else', async () => {
       const players = await setUp()
       const body = bodyWith(players, remoteFinalScore(players))
 
-      const hostView = redactGameBody(body, players, players[0])
-      const hostButton = hostView.children.find(c => c.attributes?.className === 'final-scores').children.find(c => c.attributes?.className === 'remote-play-again')
+      const hostButton = redactGameBody(body, players, players[0]).children.find(c => c.attributes?.className === 'final-scores').children.find(c => c.attributes?.className === 'remote-play-again')
       expect(hostButton.attributes.disabled).toBeFalsy()
 
-      const nonHostView = redactGameBody(body, players, players[1])
-      const nonHostButton = nonHostView.children.find(c => c.attributes?.className === 'final-scores').children.find(c => c.attributes?.className === 'remote-play-again')
-      expect(nonHostButton.attributes.disabled).toBe(true)
-    })
-
-    test('the final-score message itself is never disabled, for anyone - it carries nothing secret', async () => {
-      const players = await setUp()
-      const body = bodyWith(players, remoteFinalScore(players))
-      const nonHostView = redactGameBody(body, players, players[1])
-      const message = nonHostView.children.find(c => c.attributes?.className === 'final-scores').children.find(c => c.attributes?.className === 'remote-final-score-message')
-      expect(message.attributes.disabled).toBeUndefined()
+      const nonHostButton = redactGameBody(body, players, players[1]).children.find(c => c.attributes?.className === 'final-scores').children.find(c => c.attributes?.className === 'remote-play-again')
+      expect(nonHostButton.attributes.disabled).toBeFalsy()
     })
   })
 })

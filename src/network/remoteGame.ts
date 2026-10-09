@@ -134,19 +134,23 @@ const stopForwarding = (root: DomItemRoot): void => {
  */
 export const enterRemoteGame = (root: DomItemRoot, firstUpdate: RedactedBody): void => {
   jsonDom.setForwardEvents(sendGameAction, root)
-  renderInto(root, firstUpdate)
-  setCountdownDeadline(deadlineOf(firstUpdate))
+  // Whether a click within the tree about to be rendered forwards to the server or runs a real local listener
+  // is decided once, right here, by json-dom's own activateListener/retrieveListener - at *bind* time, when
+  // renderInto below actually attaches it to the real element. Toggling root.forwardEvents afterwards has no
+  // effect on anything already bound, so it has to be settled before renderInto ever runs, not after.
   if (isGameOver(firstUpdate)) {
     stopForwarding(root)
   }
+  renderInto(root, firstUpdate)
+  setCountdownDeadline(deadlineOf(firstUpdate))
   onGameUpdate(redactedBody => {
-    renderInto(root, redactedBody as RedactedBody)
-    setCountdownDeadline(deadlineOf(redactedBody as RedactedBody))
     if (isGameOver(redactedBody as RedactedBody)) {
       stopForwarding(root)
     } else if (!root.forwardEvents) {
       jsonDom.setForwardEvents(sendGameAction, root)
     }
+    renderInto(root, redactedBody as RedactedBody)
+    setCountdownDeadline(deadlineOf(redactedBody as RedactedBody))
   })
 }
 
