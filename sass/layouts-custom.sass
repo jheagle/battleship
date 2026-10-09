@@ -20,7 +20,7 @@
       padding: .4rem .6rem
       width: 18rem
 
-  input[type='submit'], button.remote-host, button.remote-join
+  input[type='submit'], button.remote-choice-host, button.remote-choice-join, button.remote-host-submit, button.remote-code-submit, button.remote-join-submit
     font-weight: 700
     color: #777
     width: 12rem
@@ -97,7 +97,7 @@
     color: white
     text-align: center
 
-  .lobby-back, .remote-back, .waiting-room-leave
+  .lobby-back, .remote-back, .remote-sub-back, .waiting-room-leave
     float: left
     font-size: 1.4rem
     margin: 0 0 1rem
@@ -114,7 +114,7 @@
 .waiting-room
   text-align: center
 
-  .waiting-room-code
+  .waiting-room-name, .waiting-room-code
     color: white
     font-size: 1.8rem
     font-weight: 700
@@ -136,8 +136,13 @@
     min-height: 1.4rem
 
 .remote-entry
-  .remote-status
+  .remote-choice-status, .remote-host-status, .remote-code-status, .remote-join-status
     color: #f4a742
     font-size: 1.4rem
     text-align: center
     min-height: 1.4rem
+
+  .remote-join-message
+    color: white
+    font-size: 1.6rem
+    text-align: center

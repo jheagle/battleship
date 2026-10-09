@@ -129,15 +129,41 @@ describe('redacting the game state for a remote viewer', () => {
       children: [{ attributes: { className: 'boards' }, children: players }, finalScore]
     })
 
+    /** Find a descendant by className anywhere in the tree, regardless of nesting (remote-play-again sits
+     * inside its own final-scores-actions wrapper, alongside remote-leave - see remoteFinalScore.ts). */
+    const findByClass = (tree, className) => {
+      if (tree.attributes?.className === className) {
+        return tree
+      }
+      for (const child of tree.children ?? []) {
+        const found = findByClass(child, className)
+        if (found) {
+          return found
+        }
+      }
+      return undefined
+    }
+
     test('is left enabled for every viewer, host or not - clicking it is never destructive to anyone else', async () => {
       const players = await setUp()
       const body = bodyWith(players, remoteFinalScore(players))
 
-      const hostButton = redactGameBody(body, players, players[0]).children.find(c => c.attributes?.className === 'final-scores').children.find(c => c.attributes?.className === 'remote-play-again')
+      const hostButton = findByClass(redactGameBody(body, players, players[0]), 'remote-play-again')
       expect(hostButton.attributes.disabled).toBeFalsy()
 
-      const nonHostButton = redactGameBody(body, players, players[1]).children.find(c => c.attributes?.className === 'final-scores').children.find(c => c.attributes?.className === 'remote-play-again')
+      const nonHostButton = findByClass(redactGameBody(body, players, players[1]), 'remote-play-again')
       expect(nonHostButton.attributes.disabled).toBeFalsy()
+    })
+
+    test('the Leave button is left enabled for every viewer too', async () => {
+      const players = await setUp()
+      const body = bodyWith(players, remoteFinalScore(players))
+
+      const hostLeave = findByClass(redactGameBody(body, players, players[0]), 'remote-leave')
+      expect(hostLeave.attributes.disabled).toBeFalsy()
+
+      const nonHostLeave = findByClass(redactGameBody(body, players, players[1]), 'remote-leave')
+      expect(nonHostLeave.attributes.disabled).toBeFalsy()
     })
   })
 })

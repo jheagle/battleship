@@ -38,33 +38,80 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
             style: { display: 'none' }
           },
           children: [
-            { nodeName: 'button', attributes: { className: 'remote-back', type: 'button', innerHTML: 'Back' }, eventListeners: { click: listener('remoteListener') } },
-            { nodeName: 'h2', attributes: { className: 'lobby-title', innerHTML: 'Online Multiplayer' } },
             {
               nodeName: 'div',
-              attributes: { className: 'form-group' },
+              attributes: { className: 'remote-choice' },
               children: [
-                { nodeName: 'label', attributes: { for: 'remote-name', innerText: 'Your Name' } },
-                { nodeName: 'input', attributes: { id: 'remote-name', name: 'remote-name', type: 'text', required: '' } }
+                { nodeName: 'button', attributes: { className: 'remote-back', type: 'button', innerHTML: 'Back' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'h2', attributes: { className: 'lobby-title', innerHTML: 'Online Multiplayer' } },
+                { nodeName: 'button', attributes: { className: 'remote-choice-host', type: 'button', innerHTML: 'Host a Game' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'button', attributes: { className: 'remote-choice-join', type: 'button', innerHTML: 'Join a Game' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'div', attributes: { className: 'remote-choice-status' } }
               ]
             },
             {
               nodeName: 'div',
-              attributes: { className: 'form-group' },
+              attributes: { className: 'remote-host-form', style: { display: 'none' } },
               children: [
-                { nodeName: 'button', attributes: { className: 'remote-host', type: 'button', innerHTML: 'Host a Game' }, eventListeners: { click: listener('remoteListener') } }
+                { nodeName: 'button', attributes: { className: 'remote-sub-back', type: 'button', innerHTML: 'Back' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'h2', attributes: { className: 'lobby-title', innerHTML: 'Host a Game' } },
+                {
+                  nodeName: 'div',
+                  attributes: { className: 'form-group' },
+                  children: [
+                    { nodeName: 'label', attributes: { for: 'remote-room-name', innerText: 'Lobby Name' } },
+                    { nodeName: 'input', attributes: { id: 'remote-room-name', name: 'remote-room-name', type: 'text', required: '' } }
+                  ]
+                },
+                {
+                  nodeName: 'div',
+                  attributes: { className: 'form-group' },
+                  children: [
+                    { nodeName: 'label', attributes: { for: 'remote-host-name', innerText: 'Your Name' } },
+                    { nodeName: 'input', attributes: { id: 'remote-host-name', name: 'remote-host-name', type: 'text', required: '' } }
+                  ]
+                },
+                { nodeName: 'button', attributes: { className: 'remote-host-submit', type: 'button', innerHTML: 'Create' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'div', attributes: { className: 'remote-host-status' } }
               ]
             },
             {
               nodeName: 'div',
-              attributes: { className: 'form-group' },
+              attributes: { className: 'remote-code-entry', style: { display: 'none' } },
               children: [
-                { nodeName: 'label', attributes: { for: 'remote-code', innerText: 'Room Code' } },
-                { nodeName: 'input', attributes: { id: 'remote-code', name: 'remote-code', type: 'text', maxlength: 4 } },
-                { nodeName: 'button', attributes: { className: 'remote-join', type: 'button', innerHTML: 'Join a Game' }, eventListeners: { click: listener('remoteListener') } }
+                { nodeName: 'button', attributes: { className: 'remote-sub-back', type: 'button', innerHTML: 'Back' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'h2', attributes: { className: 'lobby-title', innerHTML: 'Join a Game' } },
+                {
+                  nodeName: 'div',
+                  attributes: { className: 'form-group' },
+                  children: [
+                    { nodeName: 'label', attributes: { for: 'remote-code', innerText: 'Room Code' } },
+                    { nodeName: 'input', attributes: { id: 'remote-code', name: 'remote-code', type: 'text', maxlength: 4 } }
+                  ]
+                },
+                { nodeName: 'button', attributes: { className: 'remote-code-submit', type: 'button', innerHTML: 'Find Room' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'div', attributes: { className: 'remote-code-status' } }
               ]
             },
-            { nodeName: 'div', attributes: { className: 'remote-status' } }
+            {
+              nodeName: 'div',
+              attributes: { className: 'remote-join-confirm', style: { display: 'none' } },
+              children: [
+                { nodeName: 'button', attributes: { className: 'remote-sub-back', type: 'button', innerHTML: 'Back' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'h2', attributes: { className: 'lobby-title', innerHTML: 'Join a Game' } },
+                { nodeName: 'p', attributes: { className: 'remote-join-message' } },
+                {
+                  nodeName: 'div',
+                  attributes: { className: 'form-group' },
+                  children: [
+                    { nodeName: 'label', attributes: { for: 'remote-join-name', innerText: 'Your Name' } },
+                    { nodeName: 'input', attributes: { id: 'remote-join-name', name: 'remote-join-name', type: 'text', required: '' } }
+                  ]
+                },
+                { nodeName: 'button', attributes: { className: 'remote-join-submit', type: 'button', innerHTML: 'Join' }, eventListeners: { click: listener('remoteListener') } },
+                { nodeName: 'div', attributes: { className: 'remote-join-status' } }
+              ]
+            }
           ]
         },
         {
@@ -75,6 +122,7 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
           },
           children: [
             { nodeName: 'h2', attributes: { className: 'lobby-title', innerHTML: 'Waiting Room' } },
+            { nodeName: 'div', attributes: { className: 'waiting-room-name' } },
             { nodeName: 'div', attributes: { className: 'waiting-room-code' } },
             { nodeName: 'ul', attributes: { className: 'waiting-room-players' } },
             {
@@ -95,14 +143,6 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
                         { nodeName: 'option', attributes: { value: 'on', innerHTML: 'On for everyone' } }
                       ]
                     }
-                  ]
-                },
-                {
-                  nodeName: 'div',
-                  attributes: { className: 'first-group' },
-                  children: [
-                    { nodeName: 'label', attributes: { for: 'waiting-room-first', innerText: 'First Player Starts' } },
-                    { nodeName: 'input', attributes: { id: 'waiting-room-first', name: 'waiting-room-first', type: 'checkbox', checked: true } }
                   ]
                 },
                 { nodeName: 'button', attributes: { className: 'waiting-room-start', type: 'button', innerHTML: 'Start Game' }, eventListeners: { click: listener('remoteListener') } }

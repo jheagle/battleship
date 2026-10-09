@@ -5,6 +5,7 @@ import { defaultShipSpecs } from './defaultFleet'
 import generateRandomFleet from './generateRandomFleet'
 import queueTimeout from '../queue'
 import { isValidPlacement, placeShip } from './placeShip'
+import { setStatsShown } from './placement'
 import remotePlacementPanel from '../components/layout/remotePlacementPanel'
 import remoteOrderingPanel from '../components/layout/remoteOrderingPanel'
 import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
@@ -146,6 +147,10 @@ export const startRemotePlacement = (players: Player[], body: DomItem, done: (or
   }
   sessions.set(root, session)
   update(root.body, { 'data-placement-deadline': String(session.deadline) })
+  // Name, ship list and (when hints are optional) the "show heat hint" checkbox all belong to a round already
+  // under way - none of them make sense yet during placement/ordering. Shown again once finishOrdering below
+  // resolves, mirroring local hot-seat's own placement.ts.
+  setStatsShown(players, false)
   players.forEach(player => {
     jsonDom.renderHtml(jsonDom.createDomItem(remotePlacementPanel()), player as unknown as DomItem)
     renderPanel(session, player)
@@ -350,6 +355,7 @@ const finishOrdering = (session: RemotePlacementState, root: DomItemRoot): void 
   session.players.forEach(player => update(player as unknown as DomItem, { 'data-pickable': 'false' }))
   updateOrderingPanel(session, root)
   update(child(root.body, 'remote-ordering'), { style: { display: 'none' } })
+  setStatsShown(session.players, true)
   sessions.delete(root)
   session.done(session.order)
 }

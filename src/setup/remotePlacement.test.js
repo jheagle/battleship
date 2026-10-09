@@ -159,3 +159,26 @@ describe('remote placement: host-driven ordering', () => {
     expect(order[0].map(player => player.name)).toEqual([players[1].name, players[0].name])
   })
 })
+
+describe('remote placement: player stats stay hidden until a round actually starts', () => {
+  // The real bug this covers: unlike local hot-seat's own placement.ts, remote placement never hid player-stats
+  // (name, ship list, and - with hints 'optional' - the "Show heat hint on my turn" checkbox) during placement,
+  // so a checkbox that does nothing yet stayed visible the whole time ships were being placed and ordered.
+  test('player stats (including the hint checkbox nested inside) are hidden during placement and ordering, shown again once the order is set', () => {
+    const { players } = setUp(2)
+    // Each player's stats panel has the "Show heat hint on my turn" checkbox nested inside it (hints is
+    // 'optional' here) - hiding the panel itself hides that checkbox too, with no separate toggle needed.
+    players.forEach(player => expect(jsonDom.getChildrenFromAttribute('type', 'checkbox', player.playerStats)).toHaveLength(1))
+    players.forEach(player => expect(player.playerStats.attributes.style.display).toBe('none'))
+
+    players.forEach(player => { placeFullFleet(player); readyRemotePlayer(player) })
+    // Still hidden once placement ends and the host is choosing how to order - no round has started yet.
+    players.forEach(player => expect(player.playerStats.attributes.style.display).toBe('none'))
+
+    beginOrderSet(players[0])
+    handleRemoteBoardClick(tile(players[1], 0, 0), players[1].board)
+    handleRemoteBoardClick(tile(players[0], 0, 0), players[0].board)
+
+    players.forEach(player => expect(player.playerStats.attributes.style.display).toBe(''))
+  })
+})

@@ -35,9 +35,17 @@ describe('the entry point', () => {
         jest.doMock('browser-or-node', () => ({ isNode: false }))
         const battleship = require('./main').default
         battleship()
+        // The real room lookup (see remoteListener.ts's peekAndConfirm) opened a real (never-connecting, since
+        // no lobby server is running in this test) lobby socket - close it so it doesn't linger as an open
+        // handle. Has to be required inside this same isolateModules call: that sandbox gives every module it
+        // pulls in its own fresh instance, separate from one required outside it at this file's own top level.
+        require('./network/lobbySocket').disconnectLobbySocket()
       })
       expect(document.querySelector('.presets').style.display).toBe('none')
       expect(document.querySelector('.remote-entry').style.display).not.toBe('none')
+      // The code-entry panel shows immediately, pre-filled, rather than staying blank while the lookup is
+      // still (never, here) in flight.
+      expect(document.querySelector('.remote-code-entry').style.display).not.toBe('none')
       expect(document.querySelector('#remote-code').value).toBe('WXYZ')
     } finally {
       window.history.pushState(null, '', '/')
