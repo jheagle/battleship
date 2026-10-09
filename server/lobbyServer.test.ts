@@ -224,6 +224,53 @@ describe('the lobby server', () => {
       expect(readyDisabled(hostsOwnView, 'Alice')).toBe(true)
     })
 
+    // The real gap this guards against: a still-placing viewer's own push includes every player's own real
+    // board and placement panel (only hidden from the *other* ones visually, via CSS - see redactGameState.ts's
+    // applyPlacingView and the PR it shipped in), so nothing about the markup itself stops a client that
+    // bypasses its own UI (devtools, or a hand-built gameAction payload) from targeting a board that was never
+    // theirs. Found live by the user: "I can also find it in the html dom, remove display: none, and place
+    // ships on boards I do not own."
+    test('a socket cannot place a ship on - or ready up - a board that is not its own, even with a crafted path', async () => {
+      const { host, joiner } = await setUpRoom()
+      const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      // startGame's own initial broadcast pushes to every connected player, joiner included - has to be
+      // drained here too, not just the host's own copy, or it can still be sitting unconsumed by the time the
+      // "did anything happen" listener below is registered and look like a result of the malicious action.
+      const joinerUpdate = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
+      await emit(host, 'startGame', { hints: 'optional' })
+      const [initialView] = await Promise.all([hostUpdate, joinerUpdate])
+
+      const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
+      const aliceIndex = boardsOf(initialView).findIndex((p: any) => p.name === 'Alice')
+      const alice = boardsOf(initialView)[aliceIndex]
+      const matrixIndex = alice.children.findIndex((child: any) => child.attributes?.className === 'matrix')
+      const panelIndex = alice.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
+      const randomiseIndex = alice.children[panelIndex].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
+
+      // The joiner targets Alice's own board tile and her own Randomise button directly - exactly what
+      // removing the placing-hidden CSS and clicking either for real would send. Neither should do anything:
+      // no broadcast, no state change either side.
+      let sawAnyUpdate = false
+      const onUpdate = (): void => { sawAnyUpdate = true }
+      host.on('gameUpdate', onUpdate)
+      joiner.on('gameUpdate', onUpdate)
+      joiner.emit('gameAction', { itemPath: [1, boardsIndex, aliceIndex, matrixIndex, 0, 0, 0], eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      joiner.emit('gameAction', { itemPath: [1, boardsIndex, aliceIndex, panelIndex, randomiseIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      await new Promise(resolve => setTimeout(resolve, 150))
+      host.off('gameUpdate', onUpdate)
+      joiner.off('gameUpdate', onUpdate)
+      expect(sawAnyUpdate).toBe(false)
+
+      // Confirmed from the real server-side source of truth, not just the absence of a push: Alice's own
+      // fleet is still completely unplaced - her own, real Randomise click (right after) is the first thing
+      // that actually places it.
+      const aliceSeesItForReal = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      host.emit('gameAction', { itemPath: [1, boardsIndex, aliceIndex, panelIndex, randomiseIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      const aliceOwnView = await aliceSeesItForReal
+      const alicePanel = boardsOf(aliceOwnView).find((p: any) => p.name === 'Alice').children.find((child: any) => child.attributes?.className === 'remote-placement-panel')
+      expect(alicePanel.children.find((child: any) => child.attributes?.className === 'remote-placement-ready').attributes.disabled).toBeFalsy()
+    })
+
     test('only the host can start the game', async () => {
       const { joiner } = await setUpRoom()
       const response = await emit<{ error: string }>(joiner, 'startGame', { hints: 'optional' })

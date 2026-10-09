@@ -3,7 +3,7 @@ import { createServer } from 'http'
 import jsonDom from 'json-dom'
 import { Server, Socket } from 'socket.io'
 import { startRoomGame, watchRoomGame } from './gameplay'
-import { isHostOnlyStage, isRemoteSessionActive } from '../src/setup/remotePlacement'
+import { isHostOnlyStage, isRemoteSessionActive, remotePlacementStage } from '../src/setup/remotePlacement'
 import type { Server as HttpServer } from 'http'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { ForwardedEvent } from 'json-dom/dist/events/types'
@@ -175,10 +175,30 @@ export const createLobbyServer = (): HttpServer => {
       }
       // Choosing the turn order (Random, or Set order's own board clicks) is host-only - enforced here, not just
       // by those controls being disabled on a non-host's own redacted copy, since receiveForwardedEvent dispatches
-      // a bare DOM event with no socket identity attached once it reaches whatever listener actually runs. Ship
-      // placement itself needs no such check: a client can only ever act on its own board either way.
+      // a bare DOM event with no socket identity attached once it reaches whatever listener actually runs.
       if (isHostOnlyStage(room.game.root) && socket.id !== room.hostId) {
         return
+      }
+      // While actively placing, every connected client renders every player's own board and placement panel
+      // (redactGameState.ts's redactGameBody only hides the others visually, via a CSS class - every player's
+      // own real tile and button is still there, same shape as the server's own tree, which itemPath-based
+      // forwarding depends on). Nothing before this point checks *which* player's own subtree an itemPath
+      // actually resolves into, so a client that bypasses its own UI (devtools, or a hand-built gameAction
+      // payload) could otherwise place ships on - or ready up - a board that was never theirs. Resolve the
+      // envelope's own target first and refuse anything that doesn't land inside the dispatching socket's own
+      // player. A malformed/stale path (the tree already moved on) is refused the same way a real one that
+      // resolves to someone else is - getItemByPath throws for that, never silently resolves to the wrong spot.
+      if (remotePlacementStage(room.game.root) === 'placing') {
+        let target: DomItem
+        try {
+          target = jsonDom.getItemByPath(room.game.root, envelope.itemPath) as DomItem
+        } catch {
+          return
+        }
+        const owner = jsonDom.getParentsByClass('player', target)[0]
+        if (!owner || room.game.playerBySocket.get(socket.id) !== owner) {
+          return
+        }
       }
       // Once real gameplay begins (placement/ordering both over), only the current attacker's own socket may
       // act at all - every independent remote client renders every board, live and clickable, with nothing
