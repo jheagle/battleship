@@ -166,9 +166,12 @@ describe('the lobby server', () => {
       const ack = await emit<{ started: true } | { error: string }>(host, 'startGame', { hints: 'optional' })
       expect(ack).toEqual({ started: true })
       const [hostView, joinerView] = await Promise.all([hostUpdate, joinerUpdate])
-      expect(boardsOf(hostView)).toHaveLength(2)
-      expect(boardsOf(joinerView)).toHaveLength(2)
-      expect(boardsOf(hostView).map((p: any) => p.name).sort()).toEqual(['Alice', 'Bob'])
+      // Still placing - each socket's own push only ever includes their own player (see
+      // redactGameState.ts's redactGameBody), not the other one's board/fleet/placement panel.
+      expect(boardsOf(hostView)).toHaveLength(1)
+      expect(boardsOf(joinerView)).toHaveLength(1)
+      expect(boardsOf(hostView)[0].name).toBe('Alice')
+      expect(boardsOf(joinerView)[0].name).toBe('Bob')
     })
 
     test('only the host can start the game', async () => {
@@ -310,7 +313,11 @@ describe('the lobby server', () => {
       await afterBeginOrderSet
 
       // Host (the only one allowed to during ordering) clicks Alice's board, then Bob's - Alice goes first.
-      const boardIndexOf = (playerIndex: number): number => initialView.children[boardsIndex].children[playerIndex].children.findIndex((child: any) => child.attributes?.className === 'matrix')
+      // Both players' own board index comes from choosingView, not initialView: while still placing, a
+      // viewer's own push only ever includes themselves (see redactGameState.ts's redactGameBody), so
+      // initialView (captured right after startGame, before anyone has readied up) has no entry for Bob at
+      // all yet - choosingView (captured once both have) is the first view with both players present.
+      const boardIndexOf = (playerIndex: number): number => choosingView.children[boardsIndex].children[playerIndex].children.findIndex((child: any) => child.attributes?.className === 'matrix')
       const tilePath = (playerIndex: number): number[] => [1, boardsIndex, playerIndex, boardIndexOf(playerIndex), 0, 0, 0]
       const afterFirstPick = new Promise<any>(resolve => host.once('gameUpdate', resolve))
       host.emit('gameAction', { itemPath: tilePath(0), eventType: 'click', listenerFunc: 'attackListener', data: [] })

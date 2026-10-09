@@ -100,39 +100,68 @@ describe('watching a room\'s game for changes', () => {
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
     expect(pushes.size).toBe(2)
+    // While actively placing, a viewer's own push includes only themselves - nobody else's board, fleet or
+    // placement panel is needed yet (see redactGameState.ts's redactGameBody, keyed off remotePlacementStage).
     const aliceView = playersOf(pushes.get('alice-socket') as DomItem)
-    expect(aliceView).toHaveLength(2)
-    expect(aliceView.map(p => p.name)).toEqual(game.players.map(p => p.name))
+    expect(aliceView).toHaveLength(1)
+    expect(aliceView[0].name).toBe('Alice')
   })
 
-  test('a player only sees their own board\'s unattacked ship positions in their own push', () => {
+  test('a player sees their own board in full while placing - nobody else\'s board is even present', () => {
     const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
     const pushes = new Map<string, DomItem>()
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
     const aliceView = playersOf(pushes.get('alice-socket') as DomItem)
-    // Robots get a fleet immediately; humans place during the placement phase, so there is nothing to hide yet
-    // for a fresh human-only game - this just confirms the shape round-trips correctly either way.
+    expect(aliceView).toHaveLength(1)
     expect(matrixDom.getAllPoints(aliceView[0].board).filter((p: { z: number }) => p.z === 0)).toHaveLength(100)
-    expect(matrixDom.getAllPoints(aliceView[1].board).filter((p: { z: number }) => p.z === 0)).toHaveLength(100)
   })
 
-  test('each player gets their own placement panel, carrying the deadline and interactive only for its owner', () => {
+  test('once everyone has placed and ordering begins, every player is visible again, for every viewer', () => {
     const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
     const pushes = new Map<string, DomItem>()
-    watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
+    const broadcast = watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
+
+    // readyRemotePlayer/placeFullFleet are called directly here (bypassing the socket/gameAction layer this
+    // unit test has no server for), and run entirely synchronously - unlike a real dispatched action, nothing
+    // triggers watchRoomGame's own broadcast on their behalf, so it is called explicitly, same as
+    // lobbyServer.ts's gameAction handler already does for every synchronous action in production.
+    game.players.forEach(player => {
+      placeFullFleet(player)
+      readyRemotePlayer(player)
+    })
+    broadcast()
+
+    const aliceView = playersOf(pushes.get('alice-socket') as DomItem)
+    expect(aliceView.map(p => p.name).sort()).toEqual(['Alice', 'Bob'])
+  })
+
+  test('a player\'s own placement panel carries the deadline and is interactive; everyone else\'s is not', () => {
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
+    const pushes = new Map<string, DomItem>()
+    const broadcast = watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
     const aliceBody = pushes.get('alice-socket') as DomItem
     expect((aliceBody.attributes as { 'data-placement-deadline'?: string })['data-placement-deadline']).toBeDefined()
 
-    const aliceView = playersOf(aliceBody)
     const panelOf = (player: any): any => player.children.find((child: any) => child.attributes.className === 'remote-placement-panel')
     const randomiseOf = (panel: any): any => panel.children.find((child: any) => child.attributes.className === 'remote-placement-randomise')
 
-    // Alice's own panel, in Alice's own push, is interactive - nobody has readied up yet.
+    // Alice's own panel, in Alice's own push, is interactive - nobody has readied up yet. Bob is not even
+    // present in this push at all (still placing - see the trimming test above), so there is nothing of his
+    // to check here; once ordering begins (see the test above) he reappears, always disabled for Alice.
+    const aliceView = playersOf(aliceBody)
+    expect(aliceView).toHaveLength(1)
     expect(randomiseOf(panelOf(aliceView[0])).attributes.disabled).toBeFalsy()
-    // Bob's panel, as seen in Alice's own push, is always disabled - Alice can't act on Bob's behalf.
-    expect(randomiseOf(panelOf(aliceView[1])).attributes.disabled).toBe(true)
+
+    game.players.forEach(player => {
+      placeFullFleet(player)
+      readyRemotePlayer(player)
+    })
+    broadcast()
+    const aliceOrderingView = playersOf(pushes.get('alice-socket') as DomItem)
+    const bob = aliceOrderingView.find((p: any) => p.name === 'Bob')
+    expect(randomiseOf(panelOf(bob)).attributes.disabled).toBe(true)
   })
 
   test('pushes again once a queued engine step resolves', async () => {
@@ -259,5 +288,54 @@ describe('the per-turn timeout', () => {
     }
 
     expect(hitCount(thirdPlayer)).toBe(hitsOnThirdBefore)
+  }, 15000)
+})
+
+describe('player roles, once real gameplay begins', () => {
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => jest.useRealTimers())
+
+  const classNameOf = (player: any): string => player.attributes?.className
+
+  test('a viewer\'s own push marks themselves as role-own, and their opponent as role-target only on their own turn', async () => {
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
+    const pushes = new Map<string, DomItem>()
+    const broadcast = watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
+    await playToRealGame(game)
+    // playToRealGame's own last queued step (finishOrdering/startRound) still broadcasts through the debounced
+    // queue hook, which may not have settled by the time the fake-timer advance it ran under returns - called
+    // explicitly here for a guaranteed-fresh push, same as the earlier "once ordering begins" test above.
+    broadcast()
+
+    const attacker = game.players.find(player => player.attacker) as any
+    const nonAttacker = game.players.find(player => !player.attacker) as any
+    const attackerSocket = attacker.name === 'Alice' ? 'alice-socket' : 'bob-socket'
+    const nonAttackerSocket = attackerSocket === 'alice-socket' ? 'bob-socket' : 'alice-socket'
+
+    const attackerView = playersOf(pushes.get(attackerSocket) as DomItem)
+    expect(classNameOf(attackerView.find((p: any) => p.name === attacker.name))).toBe('player role-own')
+    expect(classNameOf(attackerView.find((p: any) => p.name === nonAttacker.name))).toBe('player role-target')
+
+    // The non-attacker's own push sees the exact same two players, but the roles flip: their own board is
+    // still role-own, but the attacker (not their turn to act on) is only ever a plain role-summary.
+    const nonAttackerView = playersOf(pushes.get(nonAttackerSocket) as DomItem)
+    expect(classNameOf(nonAttackerView.find((p: any) => p.name === nonAttacker.name))).toBe('player role-own')
+    expect(classNameOf(nonAttackerView.find((p: any) => p.name === attacker.name))).toBe('player role-summary')
+  }, 15000)
+
+  test('an eliminated player is role-summary for everyone, even the attacker, on the attacker\'s own turn', async () => {
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob'], ['carol-socket', 'Carol']], 'optional')
+    const pushes = new Map<string, DomItem>()
+    const broadcast = watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
+    await playToRealGame(game)
+
+    const attacker = game.players.find(player => player.attacker) as any
+    const eliminated = game.players.find(player => player !== attacker) as any
+    eliminated.status = 0
+    broadcast()
+
+    const attackerSocket = game.players.indexOf(attacker) === 0 ? 'alice-socket' : game.players.indexOf(attacker) === 1 ? 'bob-socket' : 'carol-socket'
+    const attackerView = playersOf(pushes.get(attackerSocket) as DomItem)
+    expect(classNameOf(attackerView.find((p: any) => p.name === eliminated.name))).toBe('player role-summary')
   }, 15000)
 })

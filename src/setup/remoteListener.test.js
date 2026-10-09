@@ -287,13 +287,14 @@ describe('the Online Multiplayer tile and its lobby', () => {
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     // The whole lobby is gone - this is the real game's own markup now, not the waiting room any more.
     expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
+    // Still placing - each viewer's own push only ever includes themselves (see redactGameState.ts's
+    // redactGameBody), so the host's own doc shows only her own board and placement panel, nobody else's.
     const players = jsonDom.getChildrenByClass('boards', doc.body)[0].children
-    expect(players).toHaveLength(2)
-    // Each player has their own placement panel - nobody waits on a shared handoff screen any more.
+    expect(players).toHaveLength(1)
     expect(players.every(player => jsonDom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
 
     const joinerView = await joinerSawUpdate
-    expect(joinerView.children.find(child => child.attributes.className === 'boards').children).toHaveLength(2)
+    expect(joinerView.children.find(child => child.attributes.className === 'boards').children).toHaveLength(1)
   })
 
   // The real timer that ends placement runs on the server (see remotePlacement.ts's PLACEMENT_TIMEOUT_MS) -
@@ -341,8 +342,10 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
+    // Still placing - the joiner's own doc shows only her own board and placement panel, same reasoning as
+    // the host's own case above.
     const players = jsonDom.getChildrenByClass('boards', doc.body)[0].children
-    expect(players).toHaveLength(2)
+    expect(players).toHaveLength(1)
     expect(players.every(player => jsonDom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
   })
 
@@ -361,22 +364,19 @@ describe('the Online Multiplayer tile and its lobby', () => {
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     await joinerSawFirstUpdate
 
-    // Both players place simultaneously, each on their own board - no shared handoff screen for either of them.
-    // Alice's own copy of her own panel is the one with enabled controls; Bob's copy of his own panel (rendered
-    // in Alice's own doc too, redacted) is always disabled, since Alice can't act on Bob's behalf.
-    const aliceRandomise = jsonDom.getChildrenByClass('remote-placement-randomise', doc.body).find(button => !button.attributes.disabled)
-    expect(aliceRandomise).toBeDefined()
+    // Both players place simultaneously, each on their own board - no shared handoff screen for either of
+    // them. While still placing, each viewer's own push only ever includes themselves (see
+    // redactGameState.ts's redactGameBody), so Alice's own doc shows only her own panel - there is no copy of
+    // Bob's to find here at all any more.
+    expect(jsonDom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(1)
+    const aliceRandomise = jsonDom.getChildrenByClass('remote-placement-randomise', doc.body)[0]
+    expect(aliceRandomise.attributes.disabled).toBeFalsy()
 
-    const joinerSawSecondUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
     aliceRandomise.element.click()
-    const joinerView = await joinerSawSecondUpdate
 
-    // Alice's fleet is now fully placed - the real result is visible in Bob's own (independent) view too, since
-    // the panel's message text is never secret, only the ship positions themselves.
-    const alicePlayer = joinerView.children.find(child => child.attributes.className === 'boards').children[0]
-    const alicePanel = alicePlayer.children.find(child => child.attributes.className === 'remote-placement-panel')
-    const aliceMessage = alicePanel.children.find(child => child.attributes.className === 'remote-placement-message')
-    expect(aliceMessage.attributes.innerHTML).toContain('All placed')
+    // Alice's fleet is now fully placed - visible in her own (real) view, driven by the same gameUpdate the
+    // joiner also receives (confirmed above) for whatever their own turn comes to need next.
+    await waitFor(() => jsonDom.getChildrenByClass('remote-placement-message', doc.body)[0].attributes.innerHTML.includes('All placed'))
   })
 
   test('leaving the waiting room returns to the game types and lets a fresh room be hosted', async () => {

@@ -22,7 +22,7 @@ export const PLACEMENT_TIMEOUT_MS = 60000
  * - shuffling: Random is picking the order, with a short animation.
  * - chosen: the order is set; the round starts immediately after.
  */
-type RemoteStage = 'placing' | 'choosing' | 'ordering' | 'shuffling' | 'chosen'
+export type RemoteStage = 'placing' | 'choosing' | 'ordering' | 'shuffling' | 'chosen'
 
 interface RemotePlayerState {
   pending: ShipSpec[]
@@ -62,6 +62,13 @@ export const isHostOnlyStage = (item: DomItem): boolean => {
   const found = findSession(item)
   return found !== null && found.stage !== 'placing'
 }
+
+/** The current remote placement/ordering stage for this item's game, or null once the round has actually
+ * started (no session is running any more - see finishOrdering, which deletes it). redactGameState.ts's own
+ * redactGameBody reads this to decide whether a viewer's own push should include every player (ordering,
+ * where the host needs to see and click everyone) or only their own (placing itself, see the plan this
+ * served - every other player's board/fleet/placement panel never need to reach a still-placing viewer). */
+export const remotePlacementStage = (item: DomItem): RemoteStage | null => findSession(item)?.stage ?? null
 
 const update = (item: DomItem, attributes: object): void => {
   jsonDom.updateElement(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem)

@@ -79,6 +79,47 @@
     outline: 4px solid yellow
     outline-offset: 6px
 
+// Remote gameplay's own per-viewer roles (see redactGameState.ts's applyPlayerView) - which role a player has
+// only ever changes this styling, never what data they carry; a role-summary player's board is still their
+// real one, just plainer. Local hot-seat never sets a role class at all, so none of this ever applies there.
+.player.role-own
+  position: fixed
+  top: 1rem
+  right: 1rem
+  z-index: 100
+  max-width: 18rem
+  background-color: rgba(20, 20, 20, .9)
+  box-shadow: 0 0 1rem rgba(0, 0, 0, .6)
+
+  .matrix .layer .row .column
+    height: 1.4rem
+    width: 1.4rem
+
+  .player-stats
+    font-size: 1.1rem
+    margin-top: .4rem
+
+// No highlighting or animation on a board that is not the viewer's own to act on right now - still the real
+// board (blue/red/white cells, redacted the same as any target), just without the interactive dressing.
+.player.role-summary
+  .matrix, .matrix .layer, .matrix .layer .row .column
+    transition: none
+
+  .matrix .layer .row .column
+    cursor: default
+
+    &:hover
+      opacity: 1
+
+  .column.valid-target
+    cursor: default
+
+    &:hover
+      outline: none
+
+  .column.valid-end
+    outline: none
+
 
 .turn-badge
   color: white
