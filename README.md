@@ -12,6 +12,11 @@ A relatively recent version is running at https: //joshuaheagle.com/battleship/
 <dt><a href="#PLACEMENT_TIMEOUT_MS">PLACEMENT_TIMEOUT_MS</a></dt>
 <dd><p>How long players have to finish placing before any still-pending ships are placed at random for them.</p>
 </dd>
+<dt><a href="#lastGameSettings">lastGameSettings</a></dt>
+<dd><p>The settings the host last actually started a game with - Play Again (see remotePlayAgainListener.ts) has no
+settings form of its own, it just reuses whatever the last real game used, the same way local hot-seat&#39;s own
+playAgain.ts does. Set only from the waiting room&#39;s own Start Game click - never read before that happens.</p>
+</dd>
 <dt><a href="#playerColours">playerColours</a></dt>
 <dd><p>The colour each player is identified by, in the order they are created. They are bright enough to read on the dark
 background, and distinct from one another.</p>
@@ -112,6 +117,14 @@ before playing again - unlike the main menu button, which goes all the way back 
 </dd>
 <dt><a href="#restart">restart(e, button)</a></dt>
 <dd></dd>
+<dt><a href="#remotePlayAgainListener">remotePlayAgainListener(e, target)</a></dt>
+<dd><p>The final-score screen&#39;s Play Again button, for a remote game - host-only (enforced server-side, see
+lobbyServer.ts&#39;s startGame handler; disabled on a non-host&#39;s own redacted copy too, see redactGameState.ts).
+Reuses the settings the last real game actually started with (see remoteListener.ts&#39;s getLastGameSettings) -
+there is no settings form on this screen, same as local hot-seat&#39;s own playAgain.ts. This only ever runs
+client-side with forwarding already turned off for this exact reason (see remoteGame.ts&#39;s enterRemoteGame) -
+the server&#39;s own copy of this listener name is a trivial stand-in, never meant to actually run.</p>
+</dd>
 <dt><a href="#remotePlacementListener">remotePlacementListener(e, target)</a></dt>
 <dd><p>The remote placement/ordering panels&#39; own buttons - each player&#39;s Randomise/Ready, and the host-only Random/
 Set order. Told apart by class name, same pattern as local placement&#39;s own placementListener.</p>
@@ -176,6 +189,13 @@ two-click mechanic, just resolved from the clicked board&#39;s own owner instead
 <dt><a href="#finishOrdering">finishOrdering()</a></dt>
 <dd><p>The order is set (either way) - show it briefly, then begin the round.</p>
 </dd>
+<dt><a href="#getLastGameSettings">getLastGameSettings()</a></dt>
+<dd><p>The settings the current room&#39;s game last actually started with, if any.</p>
+</dd>
+<dt><a href="#showRemoteEntry">showRemoteEntry()</a></dt>
+<dd><p>Show the remote entry form in place of the game-type tiles, optionally with a room code already filled in -
+used both by clicking the Online Multiplayer tile and by a shared join link (see main.ts).</p>
+</dd>
 <dt><a href="#renderRoomState">renderRoomState()</a></dt>
 <dd><p>Replace the waiting room&#39;s player list, room code and host controls with a freshly-received room state.</p>
 </dd>
@@ -183,7 +203,9 @@ two-click mechanic, just resolved from the clicked board&#39;s own owner instead
 <dd><p>Leave whatever room is open and show the game types again, clearing any status message.</p>
 </dd>
 <dt><a href="#enterWaitingRoom">enterWaitingRoom()</a></dt>
-<dd><p>Once a room is created or joined, watch it for changes and show the waiting room.</p>
+<dd><p>Once a room is created or joined, watch it for changes and show the waiting room. Puts the room&#39;s own code in
+the address bar too, so the host (or anyone else) can just copy the current URL to share a join link - see
+showRemoteEntry, which reads it back out on the receiving end.</p>
 </dd>
 <dt><a href="#remoteListener">remoteListener(e, target)</a></dt>
 <dd><p>The Online Multiplayer tile, its host/join form, and the waiting room it leads to. Room/presence only - actual
@@ -416,6 +438,11 @@ Not used by the game&#39;s robot yet: it is kept for game styles where the chanc
 <dt><a href="#deadlineOf">deadlineOf()</a></dt>
 <dd><p>The placement deadline a pushed body carries, if placement is still running.</p>
 </dd>
+<dt><a href="#isGameOver">isGameOver()</a></dt>
+<dd><p>Whether a pushed body is the final-score screen (see remoteFinalScore.ts) - the one point in a remote
+game&#39;s own lifecycle where forwarding has to come back off, so its Play Again button&#39;s click runs as a real
+local listener instead of being forwarded into a game that is already over.</p>
+</dd>
 <dt><a href="#ensureCountdownElement">ensureCountdownElement()</a></dt>
 <dd><p>Create the countdown element if there is not already a live one in the page - not just a non-null reference:
 something else clearing the page for a fresh game (without going through leaveRemoteGame) can detach the old
@@ -433,6 +460,12 @@ body&#39;s own children - not nested one level deeper under some other wrapper -
 (getItemPath) and one resolved against the server&#39;s own root (getItemByPath) agree: both are root -&gt; body -&gt;
 [boards, placement panel], the exact shape redactGameBody sends.</p>
 </dd>
+<dt><a href="#stopForwarding">stopForwarding()</a></dt>
+<dd><p>Stop forwarding (and the countdown, which can&#39;t be running once the game has ended anyway) without touching
+whatever is currently rendered - used once the game is actually over, so the final score screen&#39;s own Play
+Again button (already rendered by the same push that triggered this) resolves to a real local listener on
+its next click instead of being forwarded into a game that no longer exists.</p>
+</dd>
 <dt><a href="#enterRemoteGame">enterRemoteGame(root, firstUpdate)</a></dt>
 <dd><p>Start rendering and interacting with a remote game, reusing the app&#39;s own existing root rather than a second
 one (a second documentDomItem() would claim the same real document.head/body the app&#39;s own root already has -
@@ -441,6 +474,9 @@ on the rendered tree is forwarded to the server instead of run locally (setForwa
 receiveForwardedEvent resolves and dispatches it, and the resulting gameUpdate re-renders this same tree fresh.
 Leaving the lobby&#39;s own listeners (presetListener, remoteListener, ...) alone is safe because the lobby&#39;s own
 markup is no longer in the tree by the time this runs - clearChildren above already removed it.</p>
+<p>Forwarding comes back off once the game actually ends (see isGameOver/stopForwarding) - the final-score
+screen&#39;s own Play Again button needs to run as a real local listener, not a forwarded one - and back on
+again for whatever the next gameUpdate turns out to be once Play Again succeeds and a fresh game starts.</p>
 </dd>
 <dt><a href="#leaveRemoteGame">leaveRemoteGame()</a></dt>
 <dd><p>Stop forwarding and clear whatever the remote game last rendered, so the root can go back to running locally.</p>
@@ -492,13 +528,13 @@ exact same components local play already uses, and forward its clicks the same w
 </dd>
 <dt><a href="#redactGameBody">redactGameBody(body, players, viewer)</a></dt>
 <dd><p>A whole screen&#39;s worth of game state, redacted for one viewer - the boards wrapper&#39;s own children replaced with
-redactGameState&#39;s result, and (for a remote game) the global ordering panel&#39;s own Random/Set order controls
-disabled for anyone but the host - players[0] is always the room&#39;s host for as long as any game of theirs is
-running (the host is always the first to join a room, and the whole room closes if they ever leave, so this
-holds without needing to thread a separate host id through here). Everything else (the robots-only
-show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
-remote client actually renders and interacts with: the exact same markup local play already uses, inflated
-from this instead of built fresh.</p>
+redactGameState&#39;s result, and (for a remote game) the global ordering panel&#39;s own Random/Set order controls,
+and the final-score screen&#39;s own Play Again button, both disabled for anyone but the host - players[0] is
+always the room&#39;s host for as long as any game of theirs is running (the host is always the first to join a
+room, and the whole room closes if they ever leave, so this holds without needing to thread a separate host
+id through here). Everything else (the robots-only show-all-ships control, if present) is kept as is, since
+none of it carries anything secret. This is what a remote client actually renders and interacts with: the
+exact same markup local play already uses, inflated from this instead of built fresh.</p>
 </dd>
 <dt><a href="#connectLobbySocket">connectLobbySocket(url)</a></dt>
 <dd><p>The lobby socket, connecting on first use. A test can connect it to its own ephemeral server before triggering any
@@ -573,10 +609,11 @@ any stage but placing), not just by these buttons being disabled on a non-host&#
 </dd>
 <dt><a href="#remoteFinalScore">remoteFinalScore(players)</a></dt>
 <dd><p>The final score screen for a remote room&#39;s game: the same public score cards local hot-seat shows (see
-finalScore.ts), with no buttons of its own - Play Again, Change Settings and Main Menu all assume one
-physical screen controlling the whole shared game, which does not hold for several independent remote
-clients. Leaving/restarting a remote room is its own, not-yet-built feature; for now the game simply ends
-and shows the real result to everyone.</p>
+finalScore.ts), plus a single host-only Play Again button (see remotePlayAgainListener.ts) - disabled on a
+non-host&#39;s own redacted copy, same as the ordering panel (see redactGameState.ts). Change Settings and Main
+Menu/leave-the-room are still not built - both assume one physical screen controlling the whole shared game,
+which does not hold for several independent remote clients, and restarting with different settings or
+leaving the room are each their own, separate feature.</p>
 </dd>
 <dt><a href="#placementPanel">placementPanel(message)</a></dt>
 <dd><p>The panel shown during the placement phase: a message for whoever is placing, and their buttons. Each button has one
@@ -683,6 +720,14 @@ The typed version of json-dom's hasTrait, it narrows an item to the trait it was
 
 ## PLACEMENT\_TIMEOUT\_MS
 How long players have to finish placing before any still-pending ships are placed at random for them.
+
+**Kind**: global variable  
+<a name="lastGameSettings"></a>
+
+## lastGameSettings
+The settings the host last actually started a game with - Play Again (see remotePlayAgainListener.ts) has no
+settings form of its own, it just reuses whatever the last real game used, the same way local hot-seat's own
+playAgain.ts does. Set only from the waiting room's own Start Game click - never read before that happens.
 
 **Kind**: global variable  
 <a name="playerColours"></a>
@@ -969,6 +1014,23 @@ before playing again - unlike the main menu button, which goes all the way back 
 | e | 
 | button | 
 
+<a name="remotePlayAgainListener"></a>
+
+## remotePlayAgainListener(e, target)
+The final-score screen's Play Again button, for a remote game - host-only (enforced server-side, see
+lobbyServer.ts's startGame handler; disabled on a non-host's own redacted copy too, see redactGameState.ts).
+Reuses the settings the last real game actually started with (see remoteListener.ts's getLastGameSettings) -
+there is no settings form on this screen, same as local hot-seat's own playAgain.ts. This only ever runs
+client-side with forwarding already turned off for this exact reason (see remoteGame.ts's enterRemoteGame) -
+the server's own copy of this listener name is a trivial stand-in, never meant to actually run.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| e | 
+| target | 
+
 <a name="remotePlacementListener"></a>
 
 ## remotePlacementListener(e, target)
@@ -1107,6 +1169,19 @@ The Random button: a short highlight passes over the players, then lands on a fu
 The order is set (either way) - show it briefly, then begin the round.
 
 **Kind**: global function  
+<a name="getLastGameSettings"></a>
+
+## getLastGameSettings()
+The settings the current room's game last actually started with, if any.
+
+**Kind**: global function  
+<a name="showRemoteEntry"></a>
+
+## showRemoteEntry()
+Show the remote entry form in place of the game-type tiles, optionally with a room code already filled in -
+used both by clicking the Online Multiplayer tile and by a shared join link (see main.ts).
+
+**Kind**: global function  
 <a name="renderRoomState"></a>
 
 ## renderRoomState()
@@ -1122,7 +1197,9 @@ Leave whatever room is open and show the game types again, clearing any status m
 <a name="enterWaitingRoom"></a>
 
 ## enterWaitingRoom()
-Once a room is created or joined, watch it for changes and show the waiting room.
+Once a room is created or joined, watch it for changes and show the waiting room. Puts the room's own code in
+the address bar too, so the host (or anyone else) can just copy the current URL to share a join link - see
+showRemoteEntry, which reads it back out on the receiving end.
 
 **Kind**: global function  
 <a name="remoteListener"></a>
@@ -1902,6 +1979,14 @@ Remove every one of a parent's children - the same pattern startNewGame's clearB
 The placement deadline a pushed body carries, if placement is still running.
 
 **Kind**: global function  
+<a name="isGameOver"></a>
+
+## isGameOver()
+Whether a pushed body is the final-score screen (see remoteFinalScore.ts) - the one point in a remote
+game's own lifecycle where forwarding has to come back off, so its Play Again button's click runs as a real
+local listener instead of being forwarded into a game that is already over.
+
+**Kind**: global function  
 <a name="ensureCountdownElement"></a>
 
 ## ensureCountdownElement()
@@ -1937,6 +2022,15 @@ body's own children - not nested one level deeper under some other wrapper - so 
 | root | 
 | redactedBody | 
 
+<a name="stopForwarding"></a>
+
+## stopForwarding()
+Stop forwarding (and the countdown, which can't be running once the game has ended anyway) without touching
+whatever is currently rendered - used once the game is actually over, so the final score screen's own Play
+Again button (already rendered by the same push that triggered this) resolves to a real local listener on
+its next click instead of being forwarded into a game that no longer exists.
+
+**Kind**: global function  
 <a name="enterRemoteGame"></a>
 
 ## enterRemoteGame(root, firstUpdate)
@@ -1947,6 +2041,10 @@ on the rendered tree is forwarded to the server instead of run locally (setForwa
 receiveForwardedEvent resolves and dispatches it, and the resulting gameUpdate re-renders this same tree fresh.
 Leaving the lobby's own listeners (presetListener, remoteListener, ...) alone is safe because the lobby's own
 markup is no longer in the tree by the time this runs - clearChildren above already removed it.
+
+Forwarding comes back off once the game actually ends (see isGameOver/stopForwarding) - the final-score
+screen's own Play Again button needs to run as a real local listener, not a forwarded one - and back on
+again for whatever the next gameUpdate turns out to be once Play Again succeeds and a fresh game starts.
 
 **Kind**: global function  
 
@@ -2057,13 +2155,13 @@ exact same components local play already uses, and forward its clicks the same w
 
 ## redactGameBody(body, players, viewer)
 A whole screen's worth of game state, redacted for one viewer - the boards wrapper's own children replaced with
-redactGameState's result, and (for a remote game) the global ordering panel's own Random/Set order controls
-disabled for anyone but the host - players[0] is always the room's host for as long as any game of theirs is
-running (the host is always the first to join a room, and the whole room closes if they ever leave, so this
-holds without needing to thread a separate host id through here). Everything else (the robots-only
-show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
-remote client actually renders and interacts with: the exact same markup local play already uses, inflated
-from this instead of built fresh.
+redactGameState's result, and (for a remote game) the global ordering panel's own Random/Set order controls,
+and the final-score screen's own Play Again button, both disabled for anyone but the host - players[0] is
+always the room's host for as long as any game of theirs is running (the host is always the first to join a
+room, and the whole room closes if they ever leave, so this holds without needing to thread a separate host
+id through here). Everything else (the robots-only show-all-ships control, if present) is kept as is, since
+none of it carries anything secret. This is what a remote client actually renders and interacts with: the
+exact same markup local play already uses, inflated from this instead of built fresh.
 
 **Kind**: global function  
 
@@ -2231,10 +2329,11 @@ any stage but placing), not just by these buttons being disabled on a non-host's
 
 ## remoteFinalScore(players)
 The final score screen for a remote room's game: the same public score cards local hot-seat shows (see
-finalScore.ts), with no buttons of its own - Play Again, Change Settings and Main Menu all assume one
-physical screen controlling the whole shared game, which does not hold for several independent remote
-clients. Leaving/restarting a remote room is its own, not-yet-built feature; for now the game simply ends
-and shows the real result to everyone.
+finalScore.ts), plus a single host-only Play Again button (see remotePlayAgainListener.ts) - disabled on a
+non-host's own redacted copy, same as the ordering panel (see redactGameState.ts). Change Settings and Main
+Menu/leave-the-room are still not built - both assume one physical screen controlling the whole shared game,
+which does not hold for several independent remote clients, and restarting with different settings or
+leaving the room are each their own, separate feature.
 
 **Kind**: global function  
 

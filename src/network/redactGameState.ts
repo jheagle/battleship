@@ -63,7 +63,7 @@ const classNameOf = (item: DomItem): string | undefined => (item.attributes as {
  */
 const disableControls = (panel: DomItem): DomItem => ({
   ...panel,
-  children: panel.children.map(child => classNameOf(child) === 'remote-placement-message' || classNameOf(child) === 'remote-ordering-message'
+  children: panel.children.map(child => classNameOf(child)?.endsWith('-message')
     ? child
     : { ...child, attributes: { ...child.attributes, disabled: true } } as DomItem)
 }) as DomItem
@@ -108,13 +108,13 @@ export const redactGameState = (players: Player[], viewer: Player): Player[] => 
 
 /**
  * A whole screen's worth of game state, redacted for one viewer - the boards wrapper's own children replaced with
- * redactGameState's result, and (for a remote game) the global ordering panel's own Random/Set order controls
- * disabled for anyone but the host - players[0] is always the room's host for as long as any game of theirs is
- * running (the host is always the first to join a room, and the whole room closes if they ever leave, so this
- * holds without needing to thread a separate host id through here). Everything else (the robots-only
- * show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
- * remote client actually renders and interacts with: the exact same markup local play already uses, inflated
- * from this instead of built fresh.
+ * redactGameState's result, and (for a remote game) the global ordering panel's own Random/Set order controls,
+ * and the final-score screen's own Play Again button, both disabled for anyone but the host - players[0] is
+ * always the room's host for as long as any game of theirs is running (the host is always the first to join a
+ * room, and the whole room closes if they ever leave, so this holds without needing to thread a separate host
+ * id through here). Everything else (the robots-only show-all-ships control, if present) is kept as is, since
+ * none of it carries anything secret. This is what a remote client actually renders and interacts with: the
+ * exact same markup local play already uses, inflated from this instead of built fresh.
  * @param body
  * @param players
  * @param viewer
@@ -128,6 +128,10 @@ export const redactGameBody = (body: DomItem, players: Player[], viewer: Player)
   const orderingIndex = clone.children.findIndex(child => classNameOf(child) === 'remote-ordering')
   if (orderingIndex !== -1 && viewer !== players[0]) {
     clone.children[orderingIndex] = disableControls(clone.children[orderingIndex])
+  }
+  const finalScoreIndex = clone.children.findIndex(child => classNameOf(child) === 'final-scores')
+  if (finalScoreIndex !== -1 && viewer !== players[0]) {
+    clone.children[finalScoreIndex] = disableControls(clone.children[finalScoreIndex])
   }
   return clone
 }

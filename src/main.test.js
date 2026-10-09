@@ -27,6 +27,32 @@ describe('the entry point', () => {
     expect(document.querySelector('.main-menu')).not.toBeNull()
     expect(document.querySelectorAll('.player')).toHaveLength(0)
   })
+
+  test('in a browser, a shared join link (?room=CODE) jumps straight to the join form with the code filled in', () => {
+    window.history.pushState(null, '', '/?room=wxyz')
+    try {
+      jest.isolateModules(() => {
+        jest.doMock('browser-or-node', () => ({ isNode: false }))
+        const battleship = require('./main').default
+        battleship()
+      })
+      expect(document.querySelector('.presets').style.display).toBe('none')
+      expect(document.querySelector('.remote-entry').style.display).not.toBe('none')
+      expect(document.querySelector('#remote-code').value).toBe('WXYZ')
+    } finally {
+      window.history.pushState(null, '', '/')
+    }
+  })
+
+  test('in a browser with no shared link, the menu shows the game types as usual', () => {
+    jest.isolateModules(() => {
+      jest.doMock('browser-or-node', () => ({ isNode: false }))
+      const battleship = require('./main').default
+      battleship()
+    })
+    expect(document.querySelector('.presets').style.display).not.toBe('none')
+    expect(document.querySelector('.remote-entry').style.display).toBe('none')
+  })
 })
 
 describe('a human against a robot', () => {

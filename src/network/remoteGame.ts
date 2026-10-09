@@ -5,7 +5,7 @@ import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
 /** A pushed body carries the placement deadline as a plain attribute - see remotePlacement.ts's startRemotePlacement. */
 interface RedactedBody {
   attributes?: { 'data-placement-deadline'?: string }
-  children: object[]
+  children: Array<{ attributes?: { className?: string } }>
 }
 
 /** Remove every one of a parent's children - the same pattern startNewGame's clearBody uses locally. */
@@ -20,6 +20,11 @@ const deadlineOf = (redactedBody: RedactedBody): number | null => {
   const raw = redactedBody.attributes?.['data-placement-deadline']
   return raw ? Number(raw) : null
 }
+
+/** Whether a pushed body is the final-score screen (see remoteFinalScore.ts) - the one point in a remote
+ * game's own lifecycle where forwarding has to come back off, so its Play Again button's click runs as a real
+ * local listener instead of being forwarded into a game that is already over. */
+const isGameOver = (redactedBody: RedactedBody): boolean => redactedBody.children.some(child => child.attributes?.className === 'final-scores')
 
 // The countdown is cosmetic only (the server's own timer is the one that actually fires - see
 // PLACEMENT_TIMEOUT_MS), so it is kept entirely outside json-dom's own tree: renderInto below wipes and rebuilds
@@ -103,6 +108,15 @@ const renderInto = (root: DomItemRoot, redactedBody: object): void => {
   })
 }
 
+/** Stop forwarding (and the countdown, which can't be running once the game has ended anyway) without touching
+ * whatever is currently rendered - used once the game is actually over, so the final score screen's own Play
+ * Again button (already rendered by the same push that triggered this) resolves to a real local listener on
+ * its next click instead of being forwarded into a game that no longer exists. */
+const stopForwarding = (root: DomItemRoot): void => {
+  delete root.forwardEvents
+  stopCountdown()
+}
+
 /**
  * Start rendering and interacting with a remote game, reusing the app's own existing root rather than a second
  * one (a second documentDomItem() would claim the same real document.head/body the app's own root already has -
@@ -111,6 +125,10 @@ const renderInto = (root: DomItemRoot, redactedBody: object): void => {
  * receiveForwardedEvent resolves and dispatches it, and the resulting gameUpdate re-renders this same tree fresh.
  * Leaving the lobby's own listeners (presetListener, remoteListener, ...) alone is safe because the lobby's own
  * markup is no longer in the tree by the time this runs - clearChildren above already removed it.
+ *
+ * Forwarding comes back off once the game actually ends (see isGameOver/stopForwarding) - the final-score
+ * screen's own Play Again button needs to run as a real local listener, not a forwarded one - and back on
+ * again for whatever the next gameUpdate turns out to be once Play Again succeeds and a fresh game starts.
  * @param root
  * @param firstUpdate the redacted body already received (the game has already started by the time this is called)
  */
@@ -118,15 +136,22 @@ export const enterRemoteGame = (root: DomItemRoot, firstUpdate: RedactedBody): v
   jsonDom.setForwardEvents(sendGameAction, root)
   renderInto(root, firstUpdate)
   setCountdownDeadline(deadlineOf(firstUpdate))
+  if (isGameOver(firstUpdate)) {
+    stopForwarding(root)
+  }
   onGameUpdate(redactedBody => {
     renderInto(root, redactedBody as RedactedBody)
     setCountdownDeadline(deadlineOf(redactedBody as RedactedBody))
+    if (isGameOver(redactedBody as RedactedBody)) {
+      stopForwarding(root)
+    } else if (!root.forwardEvents) {
+      jsonDom.setForwardEvents(sendGameAction, root)
+    }
   })
 }
 
 /** Stop forwarding and clear whatever the remote game last rendered, so the root can go back to running locally. */
 export const leaveRemoteGame = (root: DomItemRoot): void => {
-  delete root.forwardEvents
+  stopForwarding(root)
   clearChildren(root.body)
-  stopCountdown()
 }

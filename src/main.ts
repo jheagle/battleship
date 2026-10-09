@@ -1,7 +1,8 @@
 import attackListener from './attack/attackListener'
 import placementListener from './setup/placementListener'
 import presetListener from './setup/presetListener'
-import remoteListener from './setup/remoteListener'
+import remoteListener, { showRemoteEntry } from './setup/remoteListener'
+import remotePlayAgainListener from './setup/remotePlayAgainListener'
 import shipsListener from './attack/shipsListener'
 import hintListener from './attack/hintListener'
 import beginRound from './setup/beginRound'
@@ -21,6 +22,7 @@ const battleship = (): void => {
     placementListener,
     presetListener,
     remoteListener,
+    remotePlayAgainListener,
     shipsListener,
     restart,
     playAgain,
@@ -36,6 +38,14 @@ const battleship = (): void => {
     const form = jsonDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
     const submitBtn = jsonDom.getChildrenFromAttribute('type', 'submit', form)
     ;(submitBtn[0].element as HTMLElement).click()
+  } else {
+    // A shared join link (see remoteListener.ts's enterWaitingRoom) puts the room's own code here - jump
+    // straight to the join form with it already filled in, instead of making a joiner read it off the host and
+    // type it in by hand.
+    const roomCode = new URLSearchParams(window.location.search).get('room')
+    if (roomCode) {
+      showRemoteEntry(jsonDom.getChildrenByClass('main-menu', documentItem.body)[0], roomCode.toUpperCase())
+    }
   }
 }
 

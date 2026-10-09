@@ -15,7 +15,7 @@ import { io as ioClient } from 'socket.io-client'
 import jsonDom from 'json-dom'
 import startMenu from './startMenu'
 import presetListener from './presetListener'
-import remoteListener from './remoteListener'
+import remoteListener, { showRemoteEntry } from './remoteListener'
 import beginRound from './beginRound'
 import { createLobbyServer } from '../../server/lobbyServer'
 import { connectLobbySocket, disconnectLobbySocket } from '../network/lobbySocket'
@@ -85,6 +85,36 @@ describe('the Online Multiplayer tile and its lobby', () => {
     await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
     expect(byClass(doc, 'waiting-room-players').element.textContent).toContain('Alice (Host)')
     expect(byClass(doc, 'waiting-room-code').element.textContent).toMatch(/Room Code: [A-Z0-9]{4}/)
+  })
+
+  test('showRemoteEntry (a shared join link landing on the join form) pre-fills the code and focuses the name field', () => {
+    const doc = openMenu()
+    showRemoteEntry(byClass(doc, 'main-menu'), 'ABCD')
+    expect(byClass(doc, 'presets').element.style.display).toBe('none')
+    expect(byClass(doc, 'remote-entry').element.style.display).not.toBe('none')
+    expect(byName(doc, 'remote-code').element.value).toBe('ABCD')
+    expect(document.activeElement).toBe(byName(doc, 'remote-name').element)
+  })
+
+  test('showRemoteEntry with no code (the Online Multiplayer tile itself) leaves the code field untouched', () => {
+    const doc = openMenu()
+    showRemoteEntry(byClass(doc, 'main-menu'))
+    expect(byName(doc, 'remote-code').element.value).toBe('')
+  })
+
+  test('hosting puts the room\'s own code in the address bar, so the current URL is a real shareable join link', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    byClass(doc, 'preset-remote').element.click()
+    byName(doc, 'remote-name').element.value = 'Alice'
+    byClass(doc, 'remote-host').element.click()
+
+    await waitFor(() => byClass(doc, 'waiting-room').element.style.display !== 'none')
+    const roomCode = byClass(doc, 'waiting-room-code').element.textContent.replace('Room Code: ', '')
+    expect(window.location.search).toBe(`?room=${roomCode}`)
+
+    byClass(doc, 'waiting-room-leave').element.click()
+    expect(window.location.search).toBe('')
   })
 
   test('joining an existing room by its code shows both players in the waiting room', async () => {

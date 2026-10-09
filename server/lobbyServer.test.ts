@@ -2,9 +2,10 @@
  * @jest-environment node
  */
 import { io as ioClient, Socket as ClientSocket } from 'socket.io-client'
-import { createLobbyServer } from './lobbyServer'
+import { createLobbyServer, isRoomGameOver } from './lobbyServer'
 import type { Server as HttpServer } from 'http'
 import type { RoomState } from './lobbyServer'
+import type { RoomGame } from './gameplay'
 
 let server: HttpServer
 let baseUrl: string
@@ -34,6 +35,20 @@ const connect = (): ClientSocket => {
 /** Emit with an acknowledgement, as a promise. */
 const emit = <T>(socket: ClientSocket, event: string, payload: object): Promise<T> =>
   new Promise(resolve => socket.emit(event, payload, (response: T) => resolve(response)))
+
+describe('isRoomGameOver', () => {
+  const gameWith = (statuses: number[]): RoomGame => ({ players: statuses.map(status => ({ status })) } as unknown as RoomGame)
+
+  test('is false while at least 2 players are still alive', () => {
+    expect(isRoomGameOver(gameWith([100, 100]))).toBe(false)
+    expect(isRoomGameOver(gameWith([1, 1, 0]))).toBe(false)
+  })
+
+  test('is true once fewer than 2 players are still alive', () => {
+    expect(isRoomGameOver(gameWith([100, 0]))).toBe(true)
+    expect(isRoomGameOver(gameWith([0, 0, 0]))).toBe(true)
+  })
+})
 
 describe('the lobby server', () => {
   test('creating a room makes the creator its host and only player', async () => {
@@ -138,6 +153,9 @@ describe('the lobby server', () => {
       expect(response.error).toMatch(/only the host/i)
     })
 
+    // Also covers the relaxed "or the game is over" guard's own "still active" branch (see isRoomGameOver,
+    // used by this same handler to let a room's startGame double as a rematch once a game actually ends) -
+    // a still-active game must keep refusing a second startGame exactly as before.
     test('the game cannot be started twice', async () => {
       const { host } = await setUpRoom()
       await emit(host, 'startGame', { hints: 'optional', firstGoesFirst: true })
@@ -323,5 +341,17 @@ describe('the lobby server', () => {
       await emit<RoomState>(lonelyHost, 'createRoom', { name: 'Carol' })
       expect(() => lonelyHost.emit('gameAction', { itemPath: [0], eventType: 'click', listenerFunc: 'whatever', data: [] })).not.toThrow()
     })
+
+    // A full real win was tried here (place both fleets by hand, alternate real attacks through to an actual
+    // sink, then restart) and genuinely works, but costs several minutes end to end: updatePlayer's own
+    // per-turn follow-ups (valid-target highlighting, outline, stats, the attack-lock release) each broadcast
+    // separately, and a real win needs 33 turn changes (turns strictly alternate - no "keep attacking on a
+    // hit" house rule, see getNextAttacker.ts). That cost is disproportionate to what actually changed here -
+    // one relaxed guard condition, reusing startRoomGame/watchRoomGame entirely unmodified otherwise. The
+    // existing "the game cannot be started twice" test above already covers the relaxed guard's "still
+    // active" branch; isRoomGameOver's own logic is unit tested above, and server/gameplay.test.ts's own
+    // "calling startRoomGame again... produces a genuinely fresh, independent game" test proves the restart
+    // mechanics the guard's "is over" branch unlocks - between the three, a full socket-driven win is not
+    // needed to trust this change.
   })
 })
