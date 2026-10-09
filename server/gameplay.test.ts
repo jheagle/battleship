@@ -3,14 +3,44 @@
  */
 import './installPseudoDom'
 import matrixDom from 'matrix-dom'
-import { startRoomGame, watchRoomGame, QUEUE_BROADCAST_DEBOUNCE_MS } from './gameplay'
-import { PLACEMENT_TIMEOUT_MS } from '../src/setup/remotePlacement'
+import siFunciona from 'si-funciona'
+import { startRoomGame, watchRoomGame, QUEUE_BROADCAST_DEBOUNCE_MS, TURN_TIMEOUT_MS } from './gameplay'
+import { PLACEMENT_TIMEOUT_MS, handleRemoteBoardClick, readyRemotePlayer, chooseOrderRandom } from '../src/setup/remotePlacement'
+import attackFleet from '../src/attack/attackFleet'
 import endGame from '../src/attack/endGame'
+import type { RoomGame } from './gameplay'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 
 /** The redacted players, out of a pushed redacted body (see redactGameBody). */
 const playersOf = (redactedBody: DomItem): any[] =>
   (redactedBody.children.find(child => (child.attributes as { className?: string } | undefined)?.className === 'boards') as DomItem).children
+
+/** A known, fixed fleet - the two-click method at the same coordinates every time, so exactly which cells end
+ * up with ships is known rather than left to Randomise. */
+const FLEET: Array<[[number, number], [number, number]]> = [[[0, 0], [4, 0]], [[0, 1], [3, 1]], [[0, 2], [2, 2]], [[0, 3], [2, 3]], [[0, 4], [1, 4]]]
+
+const tileAt = (player: any, x: number, y: number): any => matrixDom.getDomItemFromPoint(matrixDom.point(x, y, 0), player.board)
+const placeFullFleet = (player: any): void => FLEET.forEach(([from, to]) => {
+  handleRemoteBoardClick(tileAt(player, ...from), player.board)
+  handleRemoteBoardClick(tileAt(player, ...to), player.board)
+})
+
+/** Drives a started room's game all the way through placement and a random turn order, using fake timers for
+ * the order's own brief shuffle animation - needs jest.useFakeTimers() already active. Returns once a real
+ * attacker exists, the one precondition the turn-timeout itself cares about. */
+const playToRealGame = async (game: RoomGame): Promise<void> => {
+  game.players.forEach(player => {
+    placeFullFleet(player)
+    readyRemotePlayer(player)
+  })
+  chooseOrderRandom(game.root)
+  await jest.advanceTimersByTimeAsync(13 * 120)
+}
+
+/** How many of a player's own cells have been hit so far - (9, 9) is always water and always unhit for a
+ * freshly-placed FLEET above, so it is a safe, known cell to attack directly in these tests. */
+const hitCount = (player: any): number => matrixDom.getAllPoints(player.board).filter((p: any) => p.z === 0)
+  .filter((p: any) => matrixDom.getDomItemFromPoint(p, player.board).isHit).length
 
 describe('starting a room\'s game', () => {
   test('builds one player per connected socket, in join order', () => {
@@ -155,4 +185,79 @@ describe('watching a room\'s game for changes', () => {
     expect(pushCount).toBeGreaterThan(afterWatching)
     jest.useRealTimers()
   })
+})
+
+describe('the per-turn timeout', () => {
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => jest.useRealTimers())
+
+  test('a random shot is taken on a slow attacker\'s behalf once their own deadline passes, and the turn passes', async () => {
+    let broadcast: () => void = () => {}
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', () => broadcast())
+    broadcast = watchRoomGame(game, () => {})
+    await playToRealGame(game)
+
+    const attacker = game.players.find(player => player.attacker) as any
+    const victim = game.players.find(player => !player.attacker) as any
+    expect(attacker).toBeDefined()
+    const hitsBefore = hitCount(victim)
+
+    await jest.advanceTimersByTimeAsync(TURN_TIMEOUT_MS)
+
+    expect(hitCount(victim)).toBe(hitsBefore + 1)
+    expect(attacker.attacker).toBe(false)
+    expect(victim.attacker).toBe(true)
+  }, 15000)
+
+  test('triggers a fresh broadcast too, the same as the placement deadline does', async () => {
+    let broadcast: () => void = () => {}
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional', () => broadcast())
+    let pushCount = 0
+    broadcast = watchRoomGame(game, () => { pushCount++ })
+    await playToRealGame(game)
+    const afterStarting = pushCount
+
+    await jest.advanceTimersByTimeAsync(TURN_TIMEOUT_MS)
+
+    expect(pushCount).toBeGreaterThan(afterStarting)
+  }, 15000)
+
+  // The real bug this guards against: onAttackerChanged has to clear the PREVIOUS attacker's own pending
+  // timer before starting a new one - otherwise a real, on-time action leaves the old timer running
+  // alongside the new one, and it eventually fires anyway at its own original (by then meaningless) deadline.
+  // Needs 3 players, not 2: with only one possible opponent, attackFleet's own "never attack the current
+  // attacker" guard happens to also block a stale shot aimed at them, masking a missing clearTimeout entirely
+  // by coincidence - with a third player available, a stale shot can land on someone that guard does not cover.
+  test('a real action before the deadline cancels it - the stale timer never fires afterward', async () => {
+    const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob'], ['carol-socket', 'Carol']], 'optional')
+    await playToRealGame(game)
+
+    const original = game.players.find(player => player.attacker) as any
+    const originalIndex = game.players.indexOf(original)
+    const nextAttacker = game.players[(originalIndex + 1) % 3]
+    const thirdPlayer = game.players[(originalIndex + 2) % 3]
+
+    // Some real time passes, then the attacker actually acts, well before their own deadline - the turn
+    // passes for real (findNextAttacker.ts cycles seat order, so it is always nextAttacker next, regardless
+    // of who was actually clicked), and the new attacker gets their own fresh deadline from this moment.
+    await jest.advanceTimersByTimeAsync(5000)
+    attackFleet(tileAt(nextAttacker, 9, 9))
+    expect(nextAttacker.attacker).toBe(true)
+    const hitsOnThirdBefore = hitCount(thirdPlayer)
+
+    // Force the stale call's own random pick (opponents = everyone but `original`) onto thirdPlayer - the one
+    // player attackFleet's own self-attack guard does NOT protect, since they are not the current attacker.
+    const opponentsOfOriginal = game.players.filter(player => player !== original)
+    const spy = jest.spyOn(siFunciona, 'randomInteger').mockReturnValue(opponentsOfOriginal.indexOf(thirdPlayer))
+    try {
+      // Past where the ORIGINAL (now stale) deadline would have fired (due TURN_TIMEOUT_MS after it was set),
+      // but still well before the new attacker's own (set 5000ms later). A correctly cancelled stale timer
+      // does nothing here; an uncancelled one takes an unwanted shot at thirdPlayer.
+      await jest.advanceTimersByTimeAsync(TURN_TIMEOUT_MS - 5000 + 1)
+    } finally {
+      spy.mockRestore()
+    }
+
+    expect(hitCount(thirdPlayer)).toBe(hitsOnThirdBefore)
+  }, 15000)
 })

@@ -3,9 +3,10 @@ import siFunciona from 'si-funciona'
 import getAttackLock from './attackLock'
 import queueTimeout from '../queue'
 import updatePlayerStats from './updatePlayerStats'
+import { getSession } from '../setup/gameSession'
 import { clearHeatHint, showHeatHint, victimsOf } from './heatHint'
 import { clearValidTargets, showValidTargets } from './validTargets'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
 
 /** How long a human attacker's own lock stays on once their turn starts. This used to be 400ms to match a
@@ -54,6 +55,10 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
   if (player.attacker) {
     if (!player.isRobot) {
       queueTimeout(player, () => { attackLock.isLocked = false }, ATTACKER_LOCK_MS)
+      // Remote play only (see gameSession.ts) - starts/resets this player's own turn-timeout deadline. Fired
+      // synchronously, right as the turn actually begins, not queued - a queued call would start the clock
+      // late relative to the real wall-clock deadline a remote client is shown.
+      getSession(player as unknown as DomItem).onAttackerChanged?.(player, jsonDom.getTopParentItem(player as unknown as DomItem) as DomItemRoot)
     }
     ++player.turnCnt
   } else {

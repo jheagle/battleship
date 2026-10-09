@@ -309,17 +309,17 @@ describe('the Online Multiplayer tile and its lobby', () => {
     await waitFor(() => byClass(doc, 'waiting-room-players').element.textContent.includes('Bob'))
     byClass(doc, 'waiting-room-start').element.click()
 
-    await waitFor(() => document.querySelector('.remote-placement-countdown') !== null)
-    const firstReading = Number(document.querySelector('.remote-placement-countdown').textContent.match(/(\d+)s left/)[1])
+    await waitFor(() => document.querySelector('.remote-countdown') !== null)
+    const firstReading = Number(document.querySelector('.remote-countdown').textContent.match(/(\d+)s left/)[1])
     expect(firstReading).toBeGreaterThan(0)
 
     // No server action happens in between - the display only ticks down because of its own local interval.
     await new Promise(resolve => setTimeout(resolve, 600))
-    const secondReading = Number(document.querySelector('.remote-placement-countdown').textContent.match(/(\d+)s left/)[1])
+    const secondReading = Number(document.querySelector('.remote-countdown').textContent.match(/(\d+)s left/)[1])
     expect(secondReading).toBeLessThanOrEqual(firstReading)
 
     leaveRemoteGame(doc)
-    expect(document.querySelector('.remote-placement-countdown')).toBeNull()
+    expect(document.querySelector('.remote-countdown')).toBeNull()
   })
 
   // The real bug this covers: only the client that clicked Start ever rendered the game - a joiner who never

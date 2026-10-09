@@ -21,6 +21,11 @@ export interface GameSession {
    * null (the default) keeps local hot-seat's own finalScore screen and its Play Again/Change Settings/Main Menu
    * buttons, which only make sense for one physical screen controlling the whole game. */
   onGameOver: ((players: Player[], parent: DomItemRoot) => void) | null
+  /** Called whenever a human player becomes the attacker - see updatePlayer.ts, the one place a player's own
+   * attacker flag actually flips. null (the default) for local hot-seat, which has no need for a per-turn
+   * timer (one shared screen, nobody to stall). Set by a remote room's game (see gameplay.ts's startRoomGame)
+   * to start/reset that player's own turn-timeout deadline. */
+  onAttackerChanged: ((attacker: Player, root: DomItemRoot) => void) | null
 }
 
 const sessions = new WeakMap<DomItemRoot, GameSession>()
@@ -32,7 +37,8 @@ const defaultSession = (): GameSession => ({
   attackLock: { isLocked: false },
   queue: siFunciona.queueTimeout(),
   placement: null,
-  onGameOver: null
+  onGameOver: null,
+  onAttackerChanged: null
 })
 
 /**

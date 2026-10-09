@@ -1,9 +1,11 @@
 import './installPseudoDom'
 import jsonDom from 'json-dom'
+import siFunciona from 'si-funciona'
 import attackListener from '../src/attack/attackListener'
 import hintListener from '../src/attack/hintListener'
 import placementListener from '../src/setup/placementListener'
 import remotePlacementListener from '../src/setup/remotePlacementListener'
+import randomAttack from '../src/attack/randomAttack'
 import shipsListener from '../src/attack/shipsListener'
 import { startNewGame } from '../src/setup/startNewGame'
 import { startRemotePlacement } from '../src/setup/remotePlacement'
@@ -16,6 +18,17 @@ import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
 import type { ListenerFunction } from 'json-dom/dist/events/types'
 import type { HintSetting } from '../src/setup/gameOptions'
 import type { Player } from '../src/types'
+
+/** Set an attribute directly on an already-rendered item - the same pattern remotePlacement.ts's own `update`
+ * uses for its placement deadline, mirrored here for the turn deadline below. */
+const update = (item: DomItem, attributes: object): void => {
+  jsonDom.updateElement(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem)
+}
+
+/** How long a human player has to act before a random shot is taken on their behalf - see startRoomGame's own
+ * onAttackerChanged hook below. No targeting logic at all (see randomAttack.ts) - the point is just to keep a
+ * slow or disconnected player from stalling everyone else, not to play well for them. */
+export const TURN_TIMEOUT_MS = 20000
 
 /** One room's started game: its own document root, its players, and which socket owns which player. */
 export interface RoomGame {
@@ -86,14 +99,38 @@ export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string
   // button to run as a real local listener), rendering that stale sibling would throw "Undefined listener
   // function" partway through - before the final-score screen itself ever rendered, clearing the whole page
   // with nothing on it at all.
+  let players: Player[] = []
+  const playerBySocket = new Map<string, Player>()
+  // The pending random-shot timeout for whoever is the current attacker, if anyone - see onAttackerChanged
+  // below. unref so an abandoned room's own pending timer never keeps the process (or a test) alive by itself.
+  let turnTimer: ReturnType<typeof setTimeout> | null = null
   getSession(root).onGameOver = (players, parent) => {
+    // Nobody should still be waiting on a turn that no longer matters once the game is actually over.
+    if (turnTimer) {
+      clearTimeout(turnTimer)
+      turnTimer = null
+    }
+    // The last real attacker's own deadline is now stale (whoever it was never ran out the clock - the game
+    // ended first) - cleared so the final-score screen never shows a frozen "Turn - 0s left" banner.
+    update(parent.body, { 'data-turn-deadline': '' })
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
       jsonDom.removeChild(parent.body, parent.body.children[i])
     }
     jsonDom.renderHtml(remoteFinalScore(players), parent.body)
   }
-  let players: Player[] = []
-  const playerBySocket = new Map<string, Player>()
+  getSession(root).onAttackerChanged = (attacker, gameRoot) => {
+    if (turnTimer) {
+      clearTimeout(turnTimer)
+    }
+    const deadline = Date.now() + TURN_TIMEOUT_MS
+    update(gameRoot.body, { 'data-turn-deadline': String(deadline) })
+    turnTimer = setTimeout(() => {
+      turnTimer = null
+      randomAttack(attacker, players)
+      onTimerChange()
+    }, TURN_TIMEOUT_MS)
+    turnTimer.unref?.()
+  }
   // startNewGame's own firstGoesFirst only ever matters when humans <= 1 (see its own startRound) - every
   // remote seat is a connected human, so this is always ignored in favour of the real order the host chooses
   // afterward (see remotePlacement.ts's own ordering stage). The literal value passed here is never read.

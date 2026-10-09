@@ -480,7 +480,9 @@ Not used by the game&#39;s robot yet: it is kept for game styles where the chanc
 <dd><p>Remove every one of a parent&#39;s children - the same pattern startNewGame&#39;s clearBody uses locally.</p>
 </dd>
 <dt><a href="#deadlineOf">deadlineOf()</a></dt>
-<dd><p>The placement deadline a pushed body carries, if placement is still running.</p>
+<dd><p>Whichever deadline a pushed body actually carries right now, placement or turn - an empty string (the
+lingering, no-longer-relevant state left behind once that phase ends) is falsy, same as it being absent
+altogether, so both read the same way here.</p>
 </dd>
 <dt><a href="#isGameOver">isGameOver()</a></dt>
 <dd><p>Whether a pushed body is the final-score screen (see remoteFinalScore.ts) - the one point in a remote
@@ -742,6 +744,12 @@ show a target cursor and a highlight when hovered. Tiles keep their own class (&
 <dt><a href="#shipsListener">shipsListener(e, target)</a></dt>
 <dd><p>The ship toggles. A player&#39;s own checkbox (one-player game) shows or hides their ships. The all-ships control
 (robots-only game) does the same for every board at once.</p>
+</dd>
+<dt><a href="#randomAttack">randomAttack(attacker, players)</a></dt>
+<dd><p>Attack a random still-unhit cell on a random still-afloat opponent&#39;s board - no targeting logic at all,
+unlike computerAttack.ts&#39;s own density-based choice (this is deliberately the dumbest possible fallback, not
+a robot&#39;s turn). Used when a human player&#39;s own turn-timeout deadline expires in a remote game (see
+server/gameplay.ts) instead of leaving everyone else waiting on them indefinitely.</p>
 </dd>
 <dt><a href="#hintListener">hintListener(e, target)</a></dt>
 <dd><p>The hint checkbox in a human&#39;s panel: switching it on shows the heat map at once if it is their turn.</p>
@@ -2116,7 +2124,9 @@ Remove every one of a parent's children - the same pattern startNewGame's clearB
 <a name="deadlineOf"></a>
 
 ## deadlineOf()
-The placement deadline a pushed body carries, if placement is still running.
+Whichever deadline a pushed body actually carries right now, placement or turn - an empty string (the
+lingering, no-longer-relevant state left behind once that phase ends) is falsy, same as it being absent
+altogether, so both read the same way here.
 
 **Kind**: global function  
 <a name="isGameOver"></a>
@@ -2716,6 +2726,21 @@ The ship toggles. A player's own checkbox (one-player game) shows or hides their
 | --- |
 | e | 
 | target | 
+
+<a name="randomAttack"></a>
+
+## randomAttack(attacker, players)
+Attack a random still-unhit cell on a random still-afloat opponent's board - no targeting logic at all,
+unlike computerAttack.ts's own density-based choice (this is deliberately the dumbest possible fallback, not
+a robot's turn). Used when a human player's own turn-timeout deadline expires in a remote game (see
+server/gameplay.ts) instead of leaving everyone else waiting on them indefinitely.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| attacker | 
+| players | 
 
 <a name="hintListener"></a>
 

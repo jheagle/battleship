@@ -13,7 +13,7 @@ import type { Point } from 'matrix-dom/dist/point/types'
 import type { Board, Player, ShipSpec, Tile } from '../types'
 
 /** How long players have to finish placing before any still-pending ships are placed at random for them. */
-export const PLACEMENT_TIMEOUT_MS = 120000
+export const PLACEMENT_TIMEOUT_MS = 60000
 
 /**
  * - placing: every player places their own ships on their own board, independently and at the same time.
@@ -356,6 +356,10 @@ const finishOrdering = (session: RemotePlacementState, root: DomItemRoot): void 
   updateOrderingPanel(session, root)
   update(child(root.body, 'remote-ordering'), { style: { display: 'none' } })
   setStatsShown(session.players, true)
+  // Clears the placement countdown's own deadline now that it no longer applies - left alone, remoteGame.ts's
+  // own deadlineOf would keep reading this same (now long past) timestamp for the rest of the game, showing a
+  // frozen "Placing ships - 0s left" banner throughout real gameplay instead of nothing at all.
+  update(root.body, { 'data-placement-deadline': '' })
   sessions.delete(root)
   session.done(session.order)
 }
