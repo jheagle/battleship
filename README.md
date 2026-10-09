@@ -50,6 +50,16 @@ background, and distinct from one another.</p>
 <dt><a href="#setHiddenShip">setHiddenShip</a></dt>
 <dd><p>Set a hidden ship part at the given coordinates (not shown, the default cell styling still applies).</p>
 </dd>
+<dt><a href="#ATTACKER_LOCK_MS">ATTACKER_LOCK_MS</a></dt>
+<dd><p>How long a human attacker&#39;s own lock stays on once their turn starts. This used to be 400ms to match a
+board-resize animation (sass/game-pieces.sass&#39;s old per-turn <code>.matrix</code> resize, confirmed via git history -
+<code>d1be1695</code>); that resize was removed later and nothing on <code>.player</code> itself has ever had a CSS transition to
+wait out, so the original value outlived the thing it was timed to. It stays non-zero, just much shorter, for
+the one real job it still does in local hot-seat: attackFleet.ts&#39;s guard only blocks attacking the <em>current</em>
+attacker&#39;s own board, so without this lock a human could rapid-click several different victims inside what
+should be a single turn. Remote play already blocks the same thing independently, by socket identity
+(lobbyServer.ts&#39;s gameAction handler), so this is redundant there - but it costs nothing to keep uniform.</p>
+</dd>
 </dl>
 
 ## Functions
@@ -812,6 +822,19 @@ Mark the cell at the given coordinates as hit.
 
 ## setHiddenShip
 Set a hidden ship part at the given coordinates (not shown, the default cell styling still applies).
+
+**Kind**: global constant  
+<a name="ATTACKER_LOCK_MS"></a>
+
+## ATTACKER\_LOCK\_MS
+How long a human attacker's own lock stays on once their turn starts. This used to be 400ms to match a
+board-resize animation (sass/game-pieces.sass's old per-turn `.matrix` resize, confirmed via git history -
+`d1be1695`); that resize was removed later and nothing on `.player` itself has ever had a CSS transition to
+wait out, so the original value outlived the thing it was timed to. It stays non-zero, just much shorter, for
+the one real job it still does in local hot-seat: attackFleet.ts's guard only blocks attacking the *current*
+attacker's own board, so without this lock a human could rapid-click several different victims inside what
+should be a single turn. Remote play already blocks the same thing independently, by socket identity
+(lobbyServer.ts's gameAction handler), so this is redundant there - but it costs nothing to keep uniform.
 
 **Kind**: global constant  
 <a name="queueTimeout"></a>

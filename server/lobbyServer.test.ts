@@ -302,12 +302,12 @@ describe('the lobby server', () => {
       const victimIndex = attackerIndex === 0 ? 1 : 0
 
       // updatePlayer (the shared engine, unrelated to this fix) queues several of its own follow-up updates on
-      // every turn change - valid-target highlighting, the attacker's outline, stats, a 400ms attack-lock
-      // release - each resolving through the same session queue watchRoomGame's own broadcast hook wraps, so
-      // each one triggers its own gameUpdate push well after this handler's own immediate one, on no fixed
-      // schedule under test-suite load. Waiting for a quiet stretch (no gameUpdate for 300ms) rather than a
-      // fixed delay keeps the next check honest - racing a short window while one of these is still in flight
-      // would catch one of those instead of whatever joiner's own blocked click did or didn't do.
+      // every turn change - valid-target highlighting, the attacker's outline, stats, a short attack-lock
+      // release - each resolving through the same session queue watchRoomGame's own broadcast hook wraps
+      // (debounced, but still eventually firing) once they settle, on no fixed schedule under test-suite load.
+      // Waiting for a quiet stretch (no gameUpdate for 300ms) rather than a fixed delay keeps the next check
+      // honest - racing a short window while one of these is still in flight would catch one of those instead
+      // of whatever joiner's own blocked click did or didn't do.
       await new Promise<void>(resolve => {
         let quietTimer: ReturnType<typeof setTimeout>
         const onUpdate = (): void => {

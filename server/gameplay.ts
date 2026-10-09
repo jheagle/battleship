@@ -102,16 +102,31 @@ export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string
   return { root, players, playerBySocket }
 }
 
+/** How long to wait, after a queued engine step resolves, for any others to follow before actually broadcasting
+ * - see watchRoomGame's own comment on why this exists only for that one path. Short enough that nobody could
+ * perceive the wait as its own delay, long enough to reliably catch the handful of 0ms-declared steps a single
+ * turn change queues one after another (valid-target highlighting, outline, stats - see updatePlayer.ts). */
+export const QUEUE_BROADCAST_DEBOUNCE_MS = 60
+
 /**
  * Push each connected player their own redacted view of the whole screen - the same markup local play renders
  * (boards, placement panel and all), with the boards wrapper's own children replaced per redactGameBody. Called
  * once up front, then arranges for every subsequent queued engine step (an attack, a robot's turn, a placement
  * animation...) to push again once it resolves - every timed engine action for this game funnels through its own
  * session's queue (see gameSession.ts), so wrapping it once here is the one hook point that catches all of them,
- * with no changes needed to the engine itself. The returned function broadcasts again on demand - needed because
- * plenty of real actions (continueTurn, placeCell, finishTurn, choosing/clicking a player to set the turn order)
- * run entirely synchronously, queuing nothing at all, so the queue hook alone would never see them; the caller
- * handling an incoming forwarded action calls this once right after dispatching it, to cover that case too.
+ * with no changes needed to the engine itself. The returned function broadcasts again on demand, immediately,
+ * with no debounce - needed because plenty of real actions (continueTurn, placeCell, finishTurn, choosing/
+ * clicking a player to set the turn order) run entirely synchronously, queuing nothing at all, so the queue hook
+ * alone would never see them; the caller handling an incoming forwarded action calls this once right after
+ * dispatching it, to cover that case too, and whoever just acted deserves to see the result land instantly.
+ *
+ * The queue-driven path is different: a single turn change queues several follow-up steps in a row (see
+ * updatePlayer.ts) - valid-target highlighting, the attacker's outline, stats, twice over (once for whoever's
+ * turn just ended, once for whoever's just starting) - and broadcasting after every one of them, unmodified,
+ * meant a real redact-and-serialize-and-emit round trip per step, most of which only ever re-send cosmetic
+ * detail nobody asked to see again. Debouncing just this path (never the immediate one above) coalesces that
+ * whole burst into one real broadcast once it actually settles, without changing the engine's own timing or
+ * touching anything local hot-seat relies on - this function is never called for a local game at all.
  * @param game
  * @param push
  */
@@ -119,10 +134,22 @@ export const watchRoomGame = (game: RoomGame, push: (socketId: string, redactedB
   const broadcast = (): void => {
     game.playerBySocket.forEach((viewer, socketId) => push(socketId, redactGameBody(game.root.body, game.players, viewer)))
   }
+  let debounceTimer: NodeJS.Timeout | null = null
+  const debouncedBroadcast = (): void => {
+    if (debounceTimer !== null) {
+      clearTimeout(debounceTimer)
+    }
+    // unref so a pending debounce never keeps the process (or a test) alive on its own - nothing here is load
+    // for anyone unless broadcast() actually needs to run.
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null
+      broadcast()
+    }, QUEUE_BROADCAST_DEBOUNCE_MS).unref()
+  }
   const session = getSession(game.root)
   const originalQueue = session.queue
   session.queue = (fn, time, ...args) => originalQueue(fn, time, ...args).then(result => {
-    broadcast()
+    debouncedBroadcast()
     return result
   })
   broadcast()
