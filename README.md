@@ -597,19 +597,18 @@ it is still a real, renderable, clickable DomItem tree: a remote client can infl
 exact same components local play already uses, and forward its clicks the same way.</p>
 </dd>
 <dt><a href="#applyPlacingView">applyPlacingView(players, redactedPlayers, viewer)</a></dt>
-<dd><p>Marks every player but <code>viewer</code> as <code>placing-hidden</code> while placement is actively running - the viewer&#39;s own
-player keeps its plain className, rendering exactly as it always has (full size, centred); the client&#39;s own
-CSS turns the <code>placing-hidden</code> ones into nothing on screen at all. This is deliberately a visibility-only
-change, never a structural one: an earlier version of this function (now fixed, see the PR this comment
-survives from) instead dropped everyone but the viewer from the array outright, which seemed like the more
-complete &quot;divide player state&quot; move but broke something more fundamental - json-dom&#39;s own itemPath-based
-forwarding (setForwardEvents/getItemByPath) resolves a click by the <em>index</em> a tile sits at in the tree, and
-assumes the client&#39;s own tree is shaped exactly like the server&#39;s real one. Trimming the array changed a
-joiner&#39;s own index (they are never player 0 on the server, but were always player 0 in their own trimmed
-view), so every click during placement resolved against the wrong real player&#39;s board on the server - a
-real, reported bug (&quot;remote player was unable to click or update anything during placement&quot;), not a guess.
-Keeping every player in the list, same order, same count, index for index, and only ever hiding the extra
-ones with a class is what keeps that correspondence intact while still only ever showing one board.</p>
+<dd><p>Reduces the boards wrapper to just <code>viewer</code>&#39;s own player while placement is actively running - nobody else&#39;s
+board or placement panel is sent at all, not just hidden with CSS. A first version of this function did
+exactly that (hide via a <code>placing-hidden</code> class, every player still present, same shape as the server&#39;s own
+tree), because trimming the array broke json-dom&#39;s own <em>position</em>-based forwarding at the time
+(setForwardEvents/getItemByPath resolved a click by the index a tile sat at in the tree, which a joiner&#39;s own
+trimmed view - always player 0 to themselves, never to the server - did not match: &quot;remote player was unable
+to click or update anything during placement&quot;, a real reported bug, not a guess). Forwarding resolves by a
+stable id now instead (see json-dom&#39;s getItemById, JSON-DOM#95), which does not care whether the two trees
+are even the same shape, so the actual data-minimizing version is safe again - another player&#39;s own
+placement never needs to reach a viewer&#39;s screen at all, closing the devtools-visible gap PR #132&#39;s
+server-side ownership check already defends against independently (this is &quot;also don&#39;t send it&quot;, not a
+replacement for &quot;also don&#39;t trust it&quot;).</p>
 </dd>
 <dt><a href="#applyPlayerView">applyPlayerView(players, redactedPlayers, viewer)</a></dt>
 <dd><p>Marks each already-redacted player with which role they play in <code>viewer</code>&#39;s own current view (see
@@ -632,12 +631,12 @@ the room&#39;s own waiting room again, nothing that needs a host check. Everythi
 show-all-ships control, if present) is kept as is, since none of it carries anything secret. This is what a
 remote client actually renders and interacts with: the exact same markup local play already uses, inflated
 from this instead of built fresh.</p>
-<p>While placement is actively running (remotePlacementStage(body) === &#39;placing&#39;), every player but <code>viewer</code>
-is marked placing-hidden (see applyPlacingView) - still present in the tree, same index as the server&#39;s own
-real one, just not shown. Every other stage (choosing/ordering/shuffling/chosen) still includes and shows
-everyone, same as today - the host needs to see and click every player&#39;s board to set the order. Once
-placement is over entirely (stage is null), applyPlayerView marks each player&#39;s role for this viewer, so the
-client&#39;s own CSS can style a <code>summary</code> player plainer.</p>
+<p>While placement is actively running (remotePlacementStage(body) === &#39;placing&#39;), only <code>viewer</code>&#39;s own player
+is sent at all (see applyPlacingView) - nobody else&#39;s board, panel or deadline reaches this viewer&#39;s screen
+during placement. Every other stage (choosing/ordering/shuffling/chosen) still includes and shows everyone,
+same as today - the host needs to see and click every player&#39;s board to set the order. Once placement is
+over entirely (stage is null), applyPlayerView marks each player&#39;s role for this viewer, so the client&#39;s own
+CSS can style a <code>summary</code> player plainer.</p>
 </dd>
 <dt><a href="#connectLobbySocket">connectLobbySocket(url)</a></dt>
 <dd><p>The lobby socket, connecting on first use. A test can connect it to its own ephemeral server before triggering any
@@ -2388,25 +2387,24 @@ exact same components local play already uses, and forward its clicks the same w
 <a name="applyPlacingView"></a>
 
 ## applyPlacingView(players, redactedPlayers, viewer)
-Marks every player but `viewer` as `placing-hidden` while placement is actively running - the viewer's own
-player keeps its plain className, rendering exactly as it always has (full size, centred); the client's own
-CSS turns the `placing-hidden` ones into nothing on screen at all. This is deliberately a visibility-only
-change, never a structural one: an earlier version of this function (now fixed, see the PR this comment
-survives from) instead dropped everyone but the viewer from the array outright, which seemed like the more
-complete "divide player state" move but broke something more fundamental - json-dom's own itemPath-based
-forwarding (setForwardEvents/getItemByPath) resolves a click by the *index* a tile sits at in the tree, and
-assumes the client's own tree is shaped exactly like the server's real one. Trimming the array changed a
-joiner's own index (they are never player 0 on the server, but were always player 0 in their own trimmed
-view), so every click during placement resolved against the wrong real player's board on the server - a
-real, reported bug ("remote player was unable to click or update anything during placement"), not a guess.
-Keeping every player in the list, same order, same count, index for index, and only ever hiding the extra
-ones with a class is what keeps that correspondence intact while still only ever showing one board.
+Reduces the boards wrapper to just `viewer`'s own player while placement is actively running - nobody else's
+board or placement panel is sent at all, not just hidden with CSS. A first version of this function did
+exactly that (hide via a `placing-hidden` class, every player still present, same shape as the server's own
+tree), because trimming the array broke json-dom's own *position*-based forwarding at the time
+(setForwardEvents/getItemByPath resolved a click by the index a tile sat at in the tree, which a joiner's own
+trimmed view - always player 0 to themselves, never to the server - did not match: "remote player was unable
+to click or update anything during placement", a real reported bug, not a guess). Forwarding resolves by a
+stable id now instead (see json-dom's getItemById, JSON-DOM#95), which does not care whether the two trees
+are even the same shape, so the actual data-minimizing version is safe again - another player's own
+placement never needs to reach a viewer's screen at all, closing the devtools-visible gap PR #132's
+server-side ownership check already defends against independently (this is "also don't send it", not a
+replacement for "also don't trust it").
 
 **Kind**: global function  
 
 | Param | Description |
 | --- | --- |
-| players | the real players, same order as redactedPlayers |
+| players | the real players, same order as redactedPlayers - redactPlayer's own siFunciona.cloneObject means a redacted entry is never === viewer, even for viewer's own, so the real references are what decide which one to keep |
 | redactedPlayers |  |
 | viewer |  |
 
@@ -2445,12 +2443,12 @@ show-all-ships control, if present) is kept as is, since none of it carries anyt
 remote client actually renders and interacts with: the exact same markup local play already uses, inflated
 from this instead of built fresh.
 
-While placement is actively running (remotePlacementStage(body) === 'placing'), every player but `viewer`
-is marked placing-hidden (see applyPlacingView) - still present in the tree, same index as the server's own
-real one, just not shown. Every other stage (choosing/ordering/shuffling/chosen) still includes and shows
-everyone, same as today - the host needs to see and click every player's board to set the order. Once
-placement is over entirely (stage is null), applyPlayerView marks each player's role for this viewer, so the
-client's own CSS can style a `summary` player plainer.
+While placement is actively running (remotePlacementStage(body) === 'placing'), only `viewer`'s own player
+is sent at all (see applyPlacingView) - nobody else's board, panel or deadline reaches this viewer's screen
+during placement. Every other stage (choosing/ordering/shuffling/chosen) still includes and shows everyone,
+same as today - the host needs to see and click every player's board to set the order. Once placement is
+over entirely (stage is null), applyPlayerView marks each player's role for this viewer, so the client's own
+CSS can style a `summary` player plainer.
 
 **Kind**: global function  
 
