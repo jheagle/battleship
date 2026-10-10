@@ -470,6 +470,55 @@ describe('the lobby server', () => {
       expect(victimTile.isHit).toBe(true)
     }, 15000)
 
+    // The real bug this guards against: an id that fails to resolve (stale, unregistered, or - the live case
+    // that actually crashed the server - resolving to something attackListener's own code could not turn
+    // back into a real tile) threw all the way up through receiveForwardedEvent, uncaught, taking down this
+    // whole process - every room, every connected player - for the one socket's one bad click. Found live
+    // during a real two-browser game, past placement and ordering, on a real attack click.
+    test('a crafted or unresolvable id during real gameplay never crashes the server', async () => {
+      const { host, joiner, initialView, initialViews } = await setUpStartedGame()
+      const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
+      const panelIndex = initialView.children[boardsIndex].children[0].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
+      const panel = initialView.children[boardsIndex].children[0].children[panelIndex]
+      const randomiseIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
+      const readyIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-ready')
+      const readyUp = async (socket: ClientSocket, playerIndex: number): Promise<any> => {
+        const idOf = (buttonIndex: number): number => idAtPath(initialViews[playerIndex], [boardsIndex, 0, panelIndex, buttonIndex])
+        const afterRandomise = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+        socket.emit('gameAction', { itemId: idOf(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        await afterRandomise
+        const afterReady = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+        socket.emit('gameAction', { itemId: idOf(readyIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        return afterReady
+      }
+      await readyUp(host, 0)
+      const choosingView = await readyUp(joiner, 1)
+      const orderingIndex = choosingView.children.findIndex((child: any) => child.attributes?.className === 'remote-ordering')
+      const setOrderIndex = choosingView.children[orderingIndex].children.findIndex((child: any) => child.attributes?.className === 'remote-order-set')
+      const afterSetOrder = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      // Set (not Random) order - it transitions synchronously with no queued animation of its own, so nothing
+      // is left running past this test's own end to interfere with whichever test runs next (same reasoning
+      // as the "only the host can choose the turn order" test above).
+      host.emit('gameAction', { itemId: idAtPath(choosingView, [orderingIndex, setOrderIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      const orderPickingView = await afterSetOrder
+      const boardIndexOf = (playerIndex: number): number => orderPickingView.children[boardsIndex].children[playerIndex].children.findIndex((child: any) => child.attributes?.className === 'matrix')
+      const afterFirstPick = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      host.emit('gameAction', { itemId: idAtPath(orderPickingView, [boardsIndex, 0, boardIndexOf(0), 0, 0, 0]), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      await afterFirstPick
+      const afterSecondPick = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      host.emit('gameAction', { itemId: idAtPath(orderPickingView, [boardsIndex, 1, boardIndexOf(1), 0, 0, 0]), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      await afterSecondPick
+
+      // An id nothing has ever been registered under - the same shape of failure a resolvable-but-wrong-kind
+      // id (attackListener's own now-guarded case) would also have hit before reaching this point.
+      expect(() => host.emit('gameAction', { itemId: 999999999, eventType: 'click', listenerFunc: 'attackListener', data: [] })).not.toThrow()
+
+      // The server is still alive and responsive to a real, well-formed action right after.
+      const stillAlive = new Promise<{ error: string } | { started: true }>(resolve => host.emit('startGame', { hints: 'optional' }, resolve))
+      const response = await stillAlive
+      expect(response).toEqual({ error: expect.stringMatching(/already started/i) })
+    }, 15000)
+
     test('an action for a room with no started game is silently ignored', async () => {
       const lonelyHost = connect()
       await emit<RoomState>(lonelyHost, 'createRoom', { name: 'Carol', roomName: 'Test Lobby' })

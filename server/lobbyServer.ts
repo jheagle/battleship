@@ -216,7 +216,20 @@ export const createLobbyServer = (): HttpServer => {
       // nothing at all - watchRoomGame's own queue hook alone would never see them, so broadcast again
       // unconditionally here too; a queued action's own later pushes (robot turns, animations) still happen
       // on top of this via that hook, unaffected.
-      jsonDom.receiveForwardedEvent(room.game.root, envelope)
+      //
+      // Wrapped in a try/catch deliberately broader than just the resolve step above: getItemById throwing on
+      // a stale/unknown id is the known, expected failure, but the real, already-bound listener this goes on
+      // to run (attackListener, remotePlacementListener, ...) is arbitrary application code this handler has
+      // no way to fully vouch for - one bad or unexpected click crashing this whole process, for every room
+      // and every connected player, is a far worse outcome than silently dropping the one action that caused
+      // it. Any real bug surfaced this way is still worth fixing at its own source (see attackListener.ts's
+      // own guard against matrix-dom's getDomItemFromElement returning false) - this is the backstop under
+      // that, not a replacement for it.
+      try {
+        jsonDom.receiveForwardedEvent(room.game.root, envelope)
+      } catch {
+        return
+      }
       room.broadcastGame?.()
     })
 
