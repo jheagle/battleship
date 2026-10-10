@@ -179,15 +179,14 @@ export const createLobbyServer = (): HttpServer => {
       if (isHostOnlyStage(room.game.root) && socket.id !== room.hostId) {
         return
       }
-      // While actively placing, every connected client renders every player's own board and placement panel
-      // (redactGameState.ts's redactGameBody only hides the others visually, via a CSS class - every player's
-      // own real tile and button is still there). Nothing before this point checks *which* player's own
-      // subtree an envelope's own itemId actually resolves into, so a client that bypasses its own UI
-      // (devtools, or a hand-built gameAction payload) could otherwise place ships on - or ready up - a board
-      // that was never theirs. Resolve the envelope's own target first and refuse anything that doesn't land
-      // inside the dispatching socket's own player. A stale id (the tree already moved on, or never had it -
-      // see json-dom's getItemById) is refused the same way a real one that resolves to someone else is -
-      // it throws for that, never silently resolves to the wrong spot.
+      // While actively placing, a viewer's own push only ever includes their own player at all any more (see
+      // redactGameState.ts's applyPlacingView) - but an id is a real, resolvable server-side reference, not
+      // markup a client has to already have on screen to use: a hand-built gameAction payload could still
+      // name another player's own board by id (guessed, or recalled from an earlier stage's push), even with
+      // nothing to see or un-hide in devtools any more. Resolve the envelope's own target first and refuse
+      // anything that doesn't land inside the dispatching socket's own player. A stale id (the tree already
+      // moved on, or never had it - see json-dom's getItemById) is refused the same way a real one that
+      // resolves to someone else is - it throws for that, never silently resolves to the wrong spot.
       if (remotePlacementStage(room.game.root) === 'placing') {
         let target: DomItem
         try {

@@ -171,21 +171,15 @@ describe('the lobby server', () => {
       const ack = await emit<{ started: true } | { error: string }>(host, 'startGame', { hints: 'optional' })
       expect(ack).toEqual({ started: true })
       const [hostView, joinerView] = await Promise.all([hostUpdate, joinerUpdate])
-      // Still placing - both players are present either way (full tree shape, same as the server's own -
-      // see redactGameState.ts's applyPlacingView), but only each socket's own player keeps the plain
-      // 'player' class; the other is marked placing-hidden for the client's own CSS to hide.
-      expect(boardsOf(hostView)).toHaveLength(2)
-      expect(boardsOf(joinerView)).toHaveLength(2)
-      // Same order, same index, in both pushes - this is just describing current behavior (applyPlacingView
-      // keeps every player's own real subtree, only CSS-hiding the others), not a hard requirement any more:
-      // resolution is by id now, not position, so a future version could omit a still-placing viewer's other
-      // players entirely without breaking anything that targets them by id (see json-dom's getItemById).
-      expect(boardsOf(hostView).map((p: any) => p.name)).toEqual(['Alice', 'Bob'])
-      expect(boardsOf(joinerView).map((p: any) => p.name)).toEqual(['Alice', 'Bob'])
-      expect(boardsOf(hostView).find((p: any) => p.name === 'Alice').attributes.className).toBe('player')
-      expect(boardsOf(hostView).find((p: any) => p.name === 'Bob').attributes.className).toBe('player placing-hidden')
-      expect(boardsOf(joinerView).find((p: any) => p.name === 'Bob').attributes.className).toBe('player')
-      expect(boardsOf(joinerView).find((p: any) => p.name === 'Alice').attributes.className).toBe('player placing-hidden')
+      // Still placing - each socket's own push includes only their own player at all (see
+      // redactGameState.ts's applyPlacingView). Resolution is by id now (json-dom's getItemById), not by
+      // position, so there is no need to keep the other player's own subtree around just to preserve shape.
+      expect(boardsOf(hostView)).toHaveLength(1)
+      expect(boardsOf(joinerView)).toHaveLength(1)
+      expect(boardsOf(hostView)[0].name).toBe('Alice')
+      expect(boardsOf(hostView)[0].attributes.className).toBe('player')
+      expect(boardsOf(joinerView)[0].name).toBe('Bob')
+      expect(boardsOf(joinerView)[0].attributes.className).toBe('player')
     })
 
     // The real bug this guards against (when forwarding was itemPath-based): a path is resolved by *index*
@@ -202,18 +196,17 @@ describe('the lobby server', () => {
       const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
       const joinerUpdate = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
       await emit(host, 'startGame', { hints: 'optional' })
-      const [initialView] = await Promise.all([hostUpdate, joinerUpdate])
+      // While placing, each one's own push includes only their own player - Bob's own board/panel only ever
+      // exist in his own view, never Alice's, so the id used below has to come from the joiner's own push.
+      const [, initialJoinerView] = await Promise.all([hostUpdate, joinerUpdate])
 
-      const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
-      const bobIndex = boardsOf(initialView).findIndex((p: any) => p.name === 'Bob')
-      const bob = boardsOf(initialView)[bobIndex]
+      const boardsIndex = initialJoinerView.children.findIndex((child: any) => child.attributes?.className === 'boards')
+      const bob = boardsOf(initialJoinerView)[0]
       const panelIndex = bob.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
       const randomiseIndex = bob.children[panelIndex].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
 
-      // Read each one's own readiness from their *own* push, not the other's view of them - redactPlayer
-      // forces every control disabled on a panel that isn't the viewer's own (disableControls), so Bob's own
-      // Ready button would always look disabled from Alice's own view regardless of his real state, and vice
-      // versa; only each one's own push reflects their own real state.
+      // Read each one's own readiness from their *own* push, not the other's view of them - the other
+      // player is not even present in it any more (applyPlacingView), let alone their real state.
       const readyDisabled = (view: any, name: string): boolean => {
         const player = boardsOf(view).find((p: any) => p.name === name)
         const panel = player.children.find((child: any) => child.attributes?.className === 'remote-placement-panel')
@@ -222,7 +215,7 @@ describe('the lobby server', () => {
 
       const hostSawIt = new Promise<any>(resolve => host.once('gameUpdate', resolve))
       const joinerSawIt = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
-      joiner.emit('gameAction', { itemId: idAtPath(initialView, [boardsIndex, bobIndex, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      joiner.emit('gameAction', { itemId: idAtPath(initialJoinerView, [boardsIndex, 0, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       const [hostsOwnView, bobsOwnView] = await Promise.all([hostSawIt, joinerSawIt])
 
       // Bob's own fleet is now fully placed (Ready enabled, from his own point of view) - his click landed on
@@ -231,12 +224,13 @@ describe('the lobby server', () => {
       expect(readyDisabled(hostsOwnView, 'Alice')).toBe(true)
     })
 
-    // The real gap this guards against: a still-placing viewer's own push includes every player's own real
-    // board and placement panel (only hidden from the *other* ones visually, via CSS - see redactGameState.ts's
-    // applyPlacingView and the PR it shipped in), so nothing about the markup itself stops a client that
-    // bypasses its own UI (devtools, or a hand-built gameAction payload) from targeting a board that was never
-    // theirs. Found live by the user: "I can also find it in the html dom, remove display: none, and place
-    // ships on boards I do not own."
+    // The real gap this guards against: an id is a real, resolvable server-side reference, not markup a client
+    // has to already have on screen to use - even though a still-placing viewer's own push no longer includes
+    // anyone else's board or panel at all (applyPlacingView), a client that bypasses its own UI (devtools, or
+    // a hand-built gameAction payload) naming another player's id directly - guessed, or obtained some other
+    // way, simulated here by reading it from the host's own view - could still target a board that was never
+    // theirs. Found live by the user, back when every player's subtree was still sent (just CSS-hidden): "I
+    // can also find it in the html dom, remove display: none, and place ships on boards I do not own."
     test('a socket cannot place a ship on - or ready up - a board that is not its own, even with a crafted id', async () => {
       const { host, joiner } = await setUpRoom()
       const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
@@ -245,24 +239,24 @@ describe('the lobby server', () => {
       // "did anything happen" listener below is registered and look like a result of the malicious action.
       const joinerUpdate = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
       await emit(host, 'startGame', { hints: 'optional' })
-      const [initialView] = await Promise.all([hostUpdate, joinerUpdate])
+      // Alice's own ids, read from the host's own view - standing in for however the joiner actually got
+      // hold of them (a still-placing viewer's own push no longer contains another player's subtree at all).
+      const [aliceOwnView] = await Promise.all([hostUpdate, joinerUpdate])
 
-      const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
-      const aliceIndex = boardsOf(initialView).findIndex((p: any) => p.name === 'Alice')
-      const alice = boardsOf(initialView)[aliceIndex]
+      const boardsIndex = aliceOwnView.children.findIndex((child: any) => child.attributes?.className === 'boards')
+      const alice = boardsOf(aliceOwnView)[0]
       const matrixIndex = alice.children.findIndex((child: any) => child.attributes?.className === 'matrix')
       const panelIndex = alice.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
       const randomiseIndex = alice.children[panelIndex].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
 
-      // The joiner targets Alice's own board tile and her own Randomise button directly - exactly what
-      // removing the placing-hidden CSS and clicking either for real would send. Neither should do anything:
-      // no broadcast, no state change either side.
+      // The joiner targets Alice's own board tile and her own Randomise button directly, by id. Neither
+      // should do anything: no broadcast, no state change either side.
       let sawAnyUpdate = false
       const onUpdate = (): void => { sawAnyUpdate = true }
       host.on('gameUpdate', onUpdate)
       joiner.on('gameUpdate', onUpdate)
-      joiner.emit('gameAction', { itemId: idAtPath(initialView, [boardsIndex, aliceIndex, matrixIndex, 0, 0, 0]), eventType: 'click', listenerFunc: 'attackListener', data: [] })
-      joiner.emit('gameAction', { itemId: idAtPath(initialView, [boardsIndex, aliceIndex, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      joiner.emit('gameAction', { itemId: idAtPath(aliceOwnView, [boardsIndex, 0, matrixIndex, 0, 0, 0]), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      joiner.emit('gameAction', { itemId: idAtPath(aliceOwnView, [boardsIndex, 0, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       await new Promise(resolve => setTimeout(resolve, 150))
       host.off('gameUpdate', onUpdate)
       joiner.off('gameUpdate', onUpdate)
@@ -272,9 +266,9 @@ describe('the lobby server', () => {
       // fleet is still completely unplaced - her own, real Randomise click (right after) is the first thing
       // that actually places it.
       const aliceSeesItForReal = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      host.emit('gameAction', { itemId: idAtPath(initialView, [boardsIndex, aliceIndex, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
-      const aliceOwnView = await aliceSeesItForReal
-      const alicePanel = boardsOf(aliceOwnView).find((p: any) => p.name === 'Alice').children.find((child: any) => child.attributes?.className === 'remote-placement-panel')
+      host.emit('gameAction', { itemId: idAtPath(aliceOwnView, [boardsIndex, 0, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      const aliceRealOwnView = await aliceSeesItForReal
+      const alicePanel = boardsOf(aliceRealOwnView)[0].children.find((child: any) => child.attributes?.className === 'remote-placement-panel')
       expect(alicePanel.children.find((child: any) => child.attributes?.className === 'remote-placement-ready').attributes.disabled).toBeFalsy()
     })
 
@@ -314,9 +308,13 @@ describe('the lobby server', () => {
       const joiner = connect()
       await emit<RoomState>(joiner, 'joinRoom', { roomCode, name: 'Bob' })
       const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
+      const joinerUpdate = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
       await emit(host, 'startGame', { hints: 'optional' })
-      const initialView = await hostUpdate
-      return { host, joiner, initialView }
+      // While placing, each one's own push includes only their own player (applyPlacingView) - indexed here
+      // by player, not socket, so a caller needing Bob's own ids can read them from his own view instead of
+      // the host's, which never has him in it at all during this stage.
+      const [initialView, joinerInitialView] = await Promise.all([hostUpdate, joinerUpdate])
+      return { host, joiner, initialView, initialViews: [initialView, joinerInitialView] }
     }
 
     test('a forwarded action actually runs on the server and both players see the result', async () => {
@@ -344,7 +342,7 @@ describe('the lobby server', () => {
     // A longer budget than the suite's default: several real round trips in sequence (two ready-ups, a 150ms
     // negative-result race, then a final confirming click), which can run past 5000ms under load.
     test('only the host can choose the turn order, once everyone has placed', async () => {
-      const { host, joiner, initialView } = await setUpStartedGame()
+      const { host, joiner, initialView, initialViews } = await setUpStartedGame()
       const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
       const panelIndex = initialView.children[boardsIndex].children[0].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
       const panel = initialView.children[boardsIndex].children[0].children[panelIndex]
@@ -353,7 +351,9 @@ describe('the lobby server', () => {
       // Every change broadcasts to every player, so host always sees a fresh gameUpdate after either player's
       // action - awaiting that each step keeps the two players' actions from racing each other over the wire.
       const readyUp = async (socket: ClientSocket, playerIndex: number): Promise<any> => {
-        const idOf = (buttonIndex: number): number => idAtPath(initialView, [boardsIndex, playerIndex, panelIndex, buttonIndex])
+        // Each player's own view has only their own player while still placing - always at index 0 there,
+        // whichever socket's view it is.
+        const idOf = (buttonIndex: number): number => idAtPath(initialViews[playerIndex], [boardsIndex, 0, panelIndex, buttonIndex])
         const afterRandomise = new Promise<any>(resolve => host.once('gameUpdate', resolve))
         socket.emit('gameAction', { itemId: idOf(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
         await afterRandomise
@@ -389,14 +389,16 @@ describe('the lobby server', () => {
     // Every independent remote client renders both boards, live and clickable - nothing but this guard stops a
     // click from resolving against any board regardless of whose turn it actually is or which socket sent it.
     test('only the current attacker\'s own socket can act once real gameplay begins', async () => {
-      const { host, joiner, initialView } = await setUpStartedGame()
+      const { host, joiner, initialView, initialViews } = await setUpStartedGame()
       const boardsIndex = initialView.children.findIndex((child: any) => child.attributes?.className === 'boards')
       const panelIndex = initialView.children[boardsIndex].children[0].children.findIndex((child: any) => child.attributes?.className === 'remote-placement-panel')
       const panel = initialView.children[boardsIndex].children[0].children[panelIndex]
       const randomiseIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
       const readyIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-ready')
       const readyUp = async (socket: ClientSocket, playerIndex: number): Promise<any> => {
-        const idOf = (buttonIndex: number): number => idAtPath(initialView, [boardsIndex, playerIndex, panelIndex, buttonIndex])
+        // Each player's own view has only their own player while still placing - always at index 0 there,
+        // whichever socket's view it is.
+        const idOf = (buttonIndex: number): number => idAtPath(initialViews[playerIndex], [boardsIndex, 0, panelIndex, buttonIndex])
         const afterRandomise = new Promise<any>(resolve => host.once('gameUpdate', resolve))
         socket.emit('gameAction', { itemId: idOf(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
         await afterRandomise
