@@ -287,19 +287,18 @@ describe('the Online Multiplayer tile and its lobby', () => {
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     // The whole lobby is gone - this is the real game's own markup now, not the waiting room any more.
     expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
-    // Still placing - both players are present (client and server trees have to stay the same shape for a
-    // click to forward correctly), but only the host's own board keeps the plain 'player' class; Bob's is
-    // placing-hidden, for the client's own CSS to hide (see redactGameState.ts's applyPlacingView).
+    // Still placing - only the host's own player is sent to her at all (see redactGameState.ts's
+    // applyPlacingView); Bob's own board/panel never reaches her screen during this stage.
     const players = jsonDom.getChildrenByClass('boards', doc.body)[0].children
-    expect(players).toHaveLength(2)
-    expect(players.find(player => player.attributes.className === 'player').name).toBe('Alice')
-    expect(players.find(player => player.attributes.className === 'player placing-hidden').name).toBe('Bob')
+    expect(players).toHaveLength(1)
+    expect(players[0].attributes.className).toBe('player')
+    expect(players[0].name).toBe('Alice')
     expect(players.every(player => jsonDom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
 
     const joinerView = await joinerSawUpdate
     const joinerPlayers = joinerView.children.find(child => child.attributes.className === 'boards').children
-    expect(joinerPlayers).toHaveLength(2)
-    expect(joinerPlayers.find(player => player.attributes.className === 'player').name).toBe('Bob')
+    expect(joinerPlayers).toHaveLength(1)
+    expect(joinerPlayers[0].name).toBe('Bob')
   })
 
   // The real timer that ends placement runs on the server (see remotePlacement.ts's PLACEMENT_TIMEOUT_MS) -
@@ -347,11 +346,11 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
     await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
     expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
-    // Still placing - the joiner's own doc keeps both players, same reasoning as the host's own case above;
-    // only Bob's own board keeps the plain 'player' class, Alice's is placing-hidden.
+    // Still placing - the joiner's own doc has only his own player, same reasoning as the host's own case above.
     const players = jsonDom.getChildrenByClass('boards', doc.body)[0].children
-    expect(players).toHaveLength(2)
-    expect(players.find(player => player.attributes.className === 'player').name).toBe('Bob')
+    expect(players).toHaveLength(1)
+    expect(players[0].attributes.className).toBe('player')
+    expect(players[0].name).toBe('Bob')
     expect(players.every(player => jsonDom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
   })
 
@@ -371,12 +370,12 @@ describe('the Online Multiplayer tile and its lobby', () => {
     await joinerSawFirstUpdate
 
     // Both players place simultaneously, each on their own board - no shared handoff screen for either of
-    // them. Both players are still present in Alice's own doc (client and server trees have to stay the same
-    // shape for a click to forward against the right player - see redactGameState.ts's applyPlacingView), but
-    // only her own copy of her own panel is interactive; Bob's copy of his is always disabled for her.
-    expect(jsonDom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(2)
-    const aliceRandomise = jsonDom.getChildrenByClass('remote-placement-randomise', doc.body).find(button => !button.attributes.disabled)
+    // them. Only Alice's own player is ever sent to her own doc during placement (redactGameState.ts's
+    // applyPlacingView) - Bob's own copy of his panel never reaches her screen at all, let alone interactive.
+    expect(jsonDom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(1)
+    const aliceRandomise = jsonDom.getChildrenByClass('remote-placement-randomise', doc.body)[0]
     expect(aliceRandomise).toBeDefined()
+    expect(aliceRandomise.attributes.disabled).toBeFalsy()
 
     aliceRandomise.element.click()
 

@@ -179,15 +179,14 @@ export const createLobbyServer = (): HttpServer => {
       if (isHostOnlyStage(room.game.root) && socket.id !== room.hostId) {
         return
       }
-      // While actively placing, every connected client renders every player's own board and placement panel
-      // (redactGameState.ts's redactGameBody only hides the others visually, via a CSS class - every player's
-      // own real tile and button is still there). Nothing before this point checks *which* player's own
-      // subtree an envelope's own itemId actually resolves into, so a client that bypasses its own UI
-      // (devtools, or a hand-built gameAction payload) could otherwise place ships on - or ready up - a board
-      // that was never theirs. Resolve the envelope's own target first and refuse anything that doesn't land
-      // inside the dispatching socket's own player. A stale id (the tree already moved on, or never had it -
-      // see json-dom's getItemById) is refused the same way a real one that resolves to someone else is -
-      // it throws for that, never silently resolves to the wrong spot.
+      // While actively placing, a viewer's own push only ever includes their own player at all any more (see
+      // redactGameState.ts's applyPlacingView) - but an id is a real, resolvable server-side reference, not
+      // markup a client has to already have on screen to use: a hand-built gameAction payload could still
+      // name another player's own board by id (guessed, or recalled from an earlier stage's push), even with
+      // nothing to see or un-hide in devtools any more. Resolve the envelope's own target first and refuse
+      // anything that doesn't land inside the dispatching socket's own player. A stale id (the tree already
+      // moved on, or never had it - see json-dom's getItemById) is refused the same way a real one that
+      // resolves to someone else is - it throws for that, never silently resolves to the wrong spot.
       if (remotePlacementStage(room.game.root) === 'placing') {
         let target: DomItem
         try {
@@ -217,7 +216,20 @@ export const createLobbyServer = (): HttpServer => {
       // nothing at all - watchRoomGame's own queue hook alone would never see them, so broadcast again
       // unconditionally here too; a queued action's own later pushes (robot turns, animations) still happen
       // on top of this via that hook, unaffected.
-      jsonDom.receiveForwardedEvent(room.game.root, envelope)
+      //
+      // Wrapped in a try/catch deliberately broader than just the resolve step above: getItemById throwing on
+      // a stale/unknown id is the known, expected failure, but the real, already-bound listener this goes on
+      // to run (attackListener, remotePlacementListener, ...) is arbitrary application code this handler has
+      // no way to fully vouch for - one bad or unexpected click crashing this whole process, for every room
+      // and every connected player, is a far worse outcome than silently dropping the one action that caused
+      // it. Any real bug surfaced this way is still worth fixing at its own source (see attackListener.ts's
+      // own guard against matrix-dom's getDomItemFromElement returning false) - this is the backstop under
+      // that, not a replacement for it.
+      try {
+        jsonDom.receiveForwardedEvent(room.game.root, envelope)
+      } catch {
+        return
+      }
       room.broadcastGame?.()
     })
 

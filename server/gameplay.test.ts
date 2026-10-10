@@ -100,16 +100,13 @@ describe('watching a room\'s game for changes', () => {
     watchRoomGame(game, (socketId, redactedBody) => pushes.set(socketId, redactedBody))
 
     expect(pushes.size).toBe(2)
-    // While actively placing, every player is still present in a viewer's own push, same shape as the
-    // server's own real tree (itemPath-based forwarding needs that correspondence to resolve a click against
-    // the right player at all) - only the viewer's own player stays visible on screen, everyone else is
-    // marked placing-hidden for the client's own CSS to hide (see redactGameState.ts's applyPlacingView).
+    // While actively placing, a viewer's own push includes only their own player at all - see
+    // redactGameState.ts's applyPlacingView. Resolution is by id now (json-dom's getItemById), not by
+    // position, so there is no need for the two trees to stay the same shape any more.
     const aliceView = playersOf(pushes.get('alice-socket') as DomItem)
-    expect(aliceView).toHaveLength(2)
-    const alice = aliceView.find((p: any) => p.name === 'Alice')
-    const bob = aliceView.find((p: any) => p.name === 'Bob')
-    expect(alice.attributes.className).toBe('player')
-    expect(bob.attributes.className).toBe('player placing-hidden')
+    expect(aliceView).toHaveLength(1)
+    expect(aliceView[0].name).toBe('Alice')
+    expect(aliceView[0].attributes.className).toBe('player')
   })
 
   test('a player sees their own board in full while placing, and theirs alone is ever visible', () => {
@@ -152,8 +149,7 @@ describe('watching a room\'s game for changes', () => {
     const panelOf = (player: any): any => player.children.find((child: any) => child.attributes.className === 'remote-placement-panel')
     const randomiseOf = (panel: any): any => panel.children.find((child: any) => child.attributes.className === 'remote-placement-randomise')
 
-    // Alice's own panel, in Alice's own push, is interactive - nobody has readied up yet. Bob's own panel is
-    // always disabled for Alice (she can't act on his behalf), whether he is visible to her or not.
+    // Alice's own panel, in Alice's own push, is interactive - nobody has readied up yet.
     const aliceView = playersOf(aliceBody)
     const alice = aliceView.find((p: any) => p.name === 'Alice')
     expect(randomiseOf(panelOf(alice)).attributes.disabled).toBeFalsy()
