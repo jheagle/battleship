@@ -181,17 +181,17 @@ export const createLobbyServer = (): HttpServer => {
       }
       // While actively placing, every connected client renders every player's own board and placement panel
       // (redactGameState.ts's redactGameBody only hides the others visually, via a CSS class - every player's
-      // own real tile and button is still there, same shape as the server's own tree, which itemPath-based
-      // forwarding depends on). Nothing before this point checks *which* player's own subtree an itemPath
-      // actually resolves into, so a client that bypasses its own UI (devtools, or a hand-built gameAction
-      // payload) could otherwise place ships on - or ready up - a board that was never theirs. Resolve the
-      // envelope's own target first and refuse anything that doesn't land inside the dispatching socket's own
-      // player. A malformed/stale path (the tree already moved on) is refused the same way a real one that
-      // resolves to someone else is - getItemByPath throws for that, never silently resolves to the wrong spot.
+      // own real tile and button is still there). Nothing before this point checks *which* player's own
+      // subtree an envelope's own itemId actually resolves into, so a client that bypasses its own UI
+      // (devtools, or a hand-built gameAction payload) could otherwise place ships on - or ready up - a board
+      // that was never theirs. Resolve the envelope's own target first and refuse anything that doesn't land
+      // inside the dispatching socket's own player. A stale id (the tree already moved on, or never had it -
+      // see json-dom's getItemById) is refused the same way a real one that resolves to someone else is -
+      // it throws for that, never silently resolves to the wrong spot.
       if (remotePlacementStage(room.game.root) === 'placing') {
         let target: DomItem
         try {
-          target = jsonDom.getItemByPath(room.game.root, envelope.itemPath) as DomItem
+          target = jsonDom.getItemById(room.game.root, envelope.itemId) as DomItem
         } catch {
           return
         }
