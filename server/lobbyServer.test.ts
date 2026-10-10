@@ -36,6 +36,11 @@ const connect = (): ClientSocket => {
 const emit = <T>(socket: ClientSocket, event: string, payload: object): Promise<T> =>
   new Promise(resolve => socket.emit(event, payload, (response: T) => resolve(response)))
 
+// A pushed view is a clone of the server's real body (see domItemToJson/cloneObject), so every node's own id
+// survives the trip untouched - walking the same child-index path against the pushed view that would once
+// have been sent to the server as an itemPath now just reads the real id off the node it lands on.
+const idAtPath = (pushedView: any, path: number[]): number => path.reduce((node, index) => node.children[index], pushedView).id
+
 describe('isRoomGameOver', () => {
   const gameWith = (statuses: number[]): RoomGame => ({ players: statuses.map(status => ({ status })) } as unknown as RoomGame)
 
@@ -166,15 +171,15 @@ describe('the lobby server', () => {
       const ack = await emit<{ started: true } | { error: string }>(host, 'startGame', { hints: 'optional' })
       expect(ack).toEqual({ started: true })
       const [hostView, joinerView] = await Promise.all([hostUpdate, joinerUpdate])
-      // Still placing - both players are present either way (the client and server trees have to stay the
-      // same shape for itemPath-based forwarding to resolve a click against the right player), but only each
-      // socket's own player keeps the plain 'player' class; the other is marked placing-hidden for the
-      // client's own CSS to hide (see redactGameState.ts's applyPlacingView).
+      // Still placing - both players are present either way (full tree shape, same as the server's own -
+      // see redactGameState.ts's applyPlacingView), but only each socket's own player keeps the plain
+      // 'player' class; the other is marked placing-hidden for the client's own CSS to hide.
       expect(boardsOf(hostView)).toHaveLength(2)
       expect(boardsOf(joinerView)).toHaveLength(2)
-      // Same order, same index, in both pushes - not just "present somewhere": itemPath-based forwarding
-      // resolves a click by position against the server's own real tree (always [Alice, Bob], join order), so
-      // a joiner's own push has to keep that same position for every player, not just include them.
+      // Same order, same index, in both pushes - this is just describing current behavior (applyPlacingView
+      // keeps every player's own real subtree, only CSS-hiding the others), not a hard requirement any more:
+      // resolution is by id now, not position, so a future version could omit a still-placing viewer's other
+      // players entirely without breaking anything that targets them by id (see json-dom's getItemById).
       expect(boardsOf(hostView).map((p: any) => p.name)).toEqual(['Alice', 'Bob'])
       expect(boardsOf(joinerView).map((p: any) => p.name)).toEqual(['Alice', 'Bob'])
       expect(boardsOf(hostView).find((p: any) => p.name === 'Alice').attributes.className).toBe('player')
@@ -183,13 +188,15 @@ describe('the lobby server', () => {
       expect(boardsOf(joinerView).find((p: any) => p.name === 'Alice').attributes.className).toBe('player placing-hidden')
     })
 
-    // The real bug this guards against: an itemPath is resolved by index against the server's own real tree
-    // (getItemByPath), which always has every player, in real join order - a client-side tree that *drops*
-    // some players (an earlier version of applyPlacingView/redactGameBody did exactly that) shifts a joiner's
-    // own index relative to their real one, so a click they make during placement resolves against whichever
-    // player actually sits at that index on the server - in a 2-player room, the host. Reported directly by
-    // the user from a real two-browser test: "remote player was unable to click or update anything during
-    // placement." A real click only works at all here because both trees now stay the same shape throughout.
+    // The real bug this guards against (when forwarding was itemPath-based): a path is resolved by *index*
+    // against the server's own real tree, which always has every player, in real join order - a client-side
+    // tree that *drops* some players (an earlier version of applyPlacingView/redactGameBody did exactly that)
+    // shifts a joiner's own index relative to their real one, so a click they make during placement resolves
+    // against whichever player actually sits at that index on the server - in a 2-player room, the host.
+    // Reported directly by the user from a real two-browser test: "remote player was unable to click or
+    // update anything during placement." Resolution is by id now (see json-dom's getItemById), which this
+    // bug class cannot recur under even if a future client tree omits a player entirely - kept as a
+    // regression test for the real click-lands-on-the-right-player behavior either way.
     test('a joiner\'s own click during placement lands on the joiner\'s own fleet, not the host\'s', async () => {
       const { host, joiner } = await setUpRoom()
       const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
@@ -215,7 +222,7 @@ describe('the lobby server', () => {
 
       const hostSawIt = new Promise<any>(resolve => host.once('gameUpdate', resolve))
       const joinerSawIt = new Promise<any>(resolve => joiner.once('gameUpdate', resolve))
-      joiner.emit('gameAction', { itemPath: [1, boardsIndex, bobIndex, panelIndex, randomiseIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      joiner.emit('gameAction', { itemId: idAtPath(initialView, [boardsIndex, bobIndex, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       const [hostsOwnView, bobsOwnView] = await Promise.all([hostSawIt, joinerSawIt])
 
       // Bob's own fleet is now fully placed (Ready enabled, from his own point of view) - his click landed on
@@ -230,7 +237,7 @@ describe('the lobby server', () => {
     // bypasses its own UI (devtools, or a hand-built gameAction payload) from targeting a board that was never
     // theirs. Found live by the user: "I can also find it in the html dom, remove display: none, and place
     // ships on boards I do not own."
-    test('a socket cannot place a ship on - or ready up - a board that is not its own, even with a crafted path', async () => {
+    test('a socket cannot place a ship on - or ready up - a board that is not its own, even with a crafted id', async () => {
       const { host, joiner } = await setUpRoom()
       const hostUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
       // startGame's own initial broadcast pushes to every connected player, joiner included - has to be
@@ -254,8 +261,8 @@ describe('the lobby server', () => {
       const onUpdate = (): void => { sawAnyUpdate = true }
       host.on('gameUpdate', onUpdate)
       joiner.on('gameUpdate', onUpdate)
-      joiner.emit('gameAction', { itemPath: [1, boardsIndex, aliceIndex, matrixIndex, 0, 0, 0], eventType: 'click', listenerFunc: 'attackListener', data: [] })
-      joiner.emit('gameAction', { itemPath: [1, boardsIndex, aliceIndex, panelIndex, randomiseIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      joiner.emit('gameAction', { itemId: idAtPath(initialView, [boardsIndex, aliceIndex, matrixIndex, 0, 0, 0]), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      joiner.emit('gameAction', { itemId: idAtPath(initialView, [boardsIndex, aliceIndex, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       await new Promise(resolve => setTimeout(resolve, 150))
       host.off('gameUpdate', onUpdate)
       joiner.off('gameUpdate', onUpdate)
@@ -265,7 +272,7 @@ describe('the lobby server', () => {
       // fleet is still completely unplaced - her own, real Randomise click (right after) is the first thing
       // that actually places it.
       const aliceSeesItForReal = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      host.emit('gameAction', { itemPath: [1, boardsIndex, aliceIndex, panelIndex, randomiseIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      host.emit('gameAction', { itemId: idAtPath(initialView, [boardsIndex, aliceIndex, panelIndex, randomiseIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       const aliceOwnView = await aliceSeesItForReal
       const alicePanel = boardsOf(aliceOwnView).find((p: any) => p.name === 'Alice').children.find((child: any) => child.attributes?.className === 'remote-placement-panel')
       expect(alicePanel.children.find((child: any) => child.attributes?.className === 'remote-placement-ready').attributes.disabled).toBeFalsy()
@@ -325,10 +332,7 @@ describe('the lobby server', () => {
       expect(panel.children[buttonIndex('remote-placement-ready')].attributes.disabled).toBe(true)
 
       const nextUpdate = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      // The path is relative to the server's real root (#document), not the pushed body directly: root.children[1]
-      // is the body itself, so the body's own children (boards, remote-ordering) sit one level deeper than they
-      // do when just looking at the pushed payload (which IS the body already).
-      host.emit('gameAction', { itemPath: [1, boardsIndex, 0, panelIndex, randomiseIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      host.emit('gameAction', { itemId: panel.children[randomiseIndex].id, eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       const updatedView = await nextUpdate
 
       // Randomise fully placed Alice's fleet - nothing left pending, so Ready is no longer disabled.
@@ -349,12 +353,12 @@ describe('the lobby server', () => {
       // Every change broadcasts to every player, so host always sees a fresh gameUpdate after either player's
       // action - awaiting that each step keeps the two players' actions from racing each other over the wire.
       const readyUp = async (socket: ClientSocket, playerIndex: number): Promise<any> => {
-        const path = (buttonIndex: number): number[] => [1, boardsIndex, playerIndex, panelIndex, buttonIndex]
+        const idOf = (buttonIndex: number): number => idAtPath(initialView, [boardsIndex, playerIndex, panelIndex, buttonIndex])
         const afterRandomise = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-        socket.emit('gameAction', { itemPath: path(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        socket.emit('gameAction', { itemId: idOf(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
         await afterRandomise
         const afterReady = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-        socket.emit('gameAction', { itemPath: path(readyIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        socket.emit('gameAction', { itemId: idOf(readyIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
         return afterReady
       }
 
@@ -370,13 +374,13 @@ describe('the lobby server', () => {
 
       // A non-host's attempt is silently ignored - nothing gets pushed as a result of it at all.
       const sawUpdateFromJoiner = new Promise<string>(resolve => host.once('gameUpdate', () => resolve('update')))
-      joiner.emit('gameAction', { itemPath: [1, orderingIndex, setOrderIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      joiner.emit('gameAction', { itemId: idAtPath(choosingView, [orderingIndex, setOrderIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       const raceResult = await Promise.race([sawUpdateFromJoiner, new Promise<string>(resolve => setTimeout(() => resolve('timeout'), 150))])
       expect(raceResult).toBe('timeout')
 
       // The host's own click, right after, really does work - proving the harness itself is sound, not just quiet.
       const hostChose = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      host.emit('gameAction', { itemPath: [1, orderingIndex, setOrderIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      host.emit('gameAction', { itemId: idAtPath(choosingView, [orderingIndex, setOrderIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       const orderingView = await hostChose
       const orderingMessage = orderingView.children[orderingIndex].children.find((child: any) => child.attributes?.className === 'remote-ordering-message')
       expect(orderingMessage.attributes.innerHTML).toMatch(/click each player/i)
@@ -392,12 +396,12 @@ describe('the lobby server', () => {
       const randomiseIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-randomise')
       const readyIndex = panel.children.findIndex((child: any) => child.attributes?.className === 'remote-placement-ready')
       const readyUp = async (socket: ClientSocket, playerIndex: number): Promise<any> => {
-        const path = (buttonIndex: number): number[] => [1, boardsIndex, playerIndex, panelIndex, buttonIndex]
+        const idOf = (buttonIndex: number): number => idAtPath(initialView, [boardsIndex, playerIndex, panelIndex, buttonIndex])
         const afterRandomise = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-        socket.emit('gameAction', { itemPath: path(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        socket.emit('gameAction', { itemId: idOf(randomiseIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
         await afterRandomise
         const afterReady = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-        socket.emit('gameAction', { itemPath: path(readyIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+        socket.emit('gameAction', { itemId: idOf(readyIndex), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
         return afterReady
       }
       await readyUp(host, 0)
@@ -406,7 +410,7 @@ describe('the lobby server', () => {
       const orderingIndex = choosingView.children.findIndex((child: any) => child.attributes?.className === 'remote-ordering')
       const setOrderIndex = choosingView.children[orderingIndex].children.findIndex((child: any) => child.attributes?.className === 'remote-order-set')
       const afterBeginOrderSet = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      host.emit('gameAction', { itemPath: [1, orderingIndex, setOrderIndex], eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
+      host.emit('gameAction', { itemId: idAtPath(choosingView, [orderingIndex, setOrderIndex]), eventType: 'click', listenerFunc: 'remotePlacementListener', data: [] })
       await afterBeginOrderSet
 
       // Host (the only one allowed to during ordering) clicks Alice's board, then Bob's - Alice goes first.
@@ -415,12 +419,12 @@ describe('the lobby server', () => {
       // initialView (captured right after startGame, before anyone has readied up) has no entry for Bob at
       // all yet - choosingView (captured once both have) is the first view with both players present.
       const boardIndexOf = (playerIndex: number): number => choosingView.children[boardsIndex].children[playerIndex].children.findIndex((child: any) => child.attributes?.className === 'matrix')
-      const tilePath = (playerIndex: number): number[] => [1, boardsIndex, playerIndex, boardIndexOf(playerIndex), 0, 0, 0]
+      const tileId = (playerIndex: number): number => idAtPath(choosingView, [boardsIndex, playerIndex, boardIndexOf(playerIndex), 0, 0, 0])
       const afterFirstPick = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      host.emit('gameAction', { itemPath: tilePath(0), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      host.emit('gameAction', { itemId: tileId(0), eventType: 'click', listenerFunc: 'attackListener', data: [] })
       await afterFirstPick
       const afterSecondPick = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      host.emit('gameAction', { itemPath: tilePath(1), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      host.emit('gameAction', { itemId: tileId(1), eventType: 'click', listenerFunc: 'attackListener', data: [] })
       const gameView = await afterSecondPick
 
       const attackerIndex = gameView.children[boardsIndex].children.findIndex((player: any) => player.attacker)
@@ -452,13 +456,13 @@ describe('the lobby server', () => {
 
       // The non-attacker's own socket, attacking the real victim's board: silently ignored - not their turn.
       const sawUpdateFromNonAttacker = new Promise<string>(resolve => host.once('gameUpdate', () => resolve('update')))
-      nonAttackerSocket.emit('gameAction', { itemPath: tilePath(victimIndex), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      nonAttackerSocket.emit('gameAction', { itemId: tileId(victimIndex), eventType: 'click', listenerFunc: 'attackListener', data: [] })
       const raceResult = await Promise.race([sawUpdateFromNonAttacker, new Promise<string>(resolve => setTimeout(() => resolve('timeout'), 150))])
       expect(raceResult).toBe('timeout')
 
       // The real attacker's own socket, attacking the same cell, right after: this one actually lands.
       const afterRealAttack = new Promise<any>(resolve => host.once('gameUpdate', resolve))
-      attackerSocket.emit('gameAction', { itemPath: tilePath(victimIndex), eventType: 'click', listenerFunc: 'attackListener', data: [] })
+      attackerSocket.emit('gameAction', { itemId: tileId(victimIndex), eventType: 'click', listenerFunc: 'attackListener', data: [] })
       const attackedView = await afterRealAttack
       const victimTile = attackedView.children[boardsIndex].children[victimIndex].children[boardIndexOf(victimIndex)].children[0].children[0].children[0]
       expect(victimTile.isHit).toBe(true)
@@ -467,7 +471,8 @@ describe('the lobby server', () => {
     test('an action for a room with no started game is silently ignored', async () => {
       const lonelyHost = connect()
       await emit<RoomState>(lonelyHost, 'createRoom', { name: 'Carol', roomName: 'Test Lobby' })
-      expect(() => lonelyHost.emit('gameAction', { itemPath: [0], eventType: 'click', listenerFunc: 'whatever', data: [] })).not.toThrow()
+      // The id is never actually resolved - the handler returns on the missing-game check before that.
+      expect(() => lonelyHost.emit('gameAction', { itemId: 0, eventType: 'click', listenerFunc: 'whatever', data: [] })).not.toThrow()
     })
 
     // A full real win was tried here (place both fleets by hand, alternate real attacks through to an actual
