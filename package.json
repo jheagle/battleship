@@ -1,6 +1,6 @@
 {
   "name": "battleship",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This is just a fun project creating a game of battleship. Experimenting with functional programming and ES6 features.",
   "main": "dist/main.js",
   "author": "Joshua Heagle",
