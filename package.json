@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "gulp": "^5.0.1",
-    "js-build-tools": "^5.2.0",
+    "js-build-tools": "^6.1.0",
     "test-filesystem": "^1.5.1",
     "typescript": "^6.0.3"
   },

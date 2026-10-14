@@ -54,6 +54,7 @@ export const showRemoteEntry = (menu: DomItem, roomCode: string = ''): void => {
   show(jsonDom.getChildrenByClass('presets', menu)[0], false)
   show(entry, true)
   if (roomCode) {
+    // eslint-disable-next-line no-void -- marks this unawaited promise as deliberate (showRemoteEntry is not async)
     void peekAndConfirm(entry, roomCode)
     return
   }

@@ -31,7 +31,7 @@ describe('redacting the game state for a remote viewer', () => {
   })
 
   test('a viewer does not see another player\'s unattacked ship positions, but every cell is still there', async () => {
-    const [viewer, other] = await setUp()
+    const [, other] = await setUp()
     const redacted = redactBoard(other.board, false)
     shipCells(other).forEach(({ x, y }) => {
       expect(hasShipAt(redacted, x, y)).toBe(false)
@@ -41,7 +41,7 @@ describe('redacting the game state for a remote viewer', () => {
   })
 
   test('a hit cell shows its ship on any board, even one the viewer does not own', async () => {
-    const [viewer, other] = await setUp()
+    const [, other] = await setUp()
     const part = other.shipFleet[0].parts[0]
     matrixDom.getDomItemFromPoint(part.point, other.board).isHit = true
     const redacted = redactBoard(other.board, false)
@@ -50,7 +50,7 @@ describe('redacting the game state for a remote viewer', () => {
   })
 
   test('a miss stays a miss: isHit is true but hasShip is false, on any board', async () => {
-    const [viewer, other] = await setUp()
+    const [, other] = await setUp()
     const miss = matrixDom.getAllPoints(other.board).filter(p => p.z === 0).find(p => !shipCells(other).some(s => s.x === p.x && s.y === p.y))
     matrixDom.getDomItemFromPoint(miss, other.board).isHit = true
     const redacted = redactBoard(other.board, false)
@@ -59,7 +59,7 @@ describe('redacting the game state for a remote viewer', () => {
   })
 
   test('an unhit ship\'s baked-in colour is cleared too - not just hasShip, so position never leaks through colour', async () => {
-    const [viewer, other] = await setUp()
+    const [, other] = await setUp()
     // setViewShip bakes a grey backgroundColor onto a ship tile's own attributes the moment it is placed by
     // hand (src/cells/setViewShip.ts) - set directly here, the same way the existing isHit-based tests above set
     // their own scenario directly rather than driving the whole placement UI just to reach one specific state.
@@ -72,7 +72,7 @@ describe('redacting the game state for a remote viewer', () => {
   })
 
   test('a hit cell keeps its own colour untouched when redacted for someone else', async () => {
-    const [viewer, other] = await setUp()
+    const [, other] = await setUp()
     const part = other.shipFleet[0].parts[0]
     const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
     realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: 'red' }
@@ -82,7 +82,7 @@ describe('redacting the game state for a remote viewer', () => {
   })
 
   test('redacting a board does not change the real board it was redacted from', async () => {
-    const [viewer, other] = await setUp()
+    const [, other] = await setUp()
     redactBoard(other.board, false)
     shipCells(other).forEach(({ x, y }) => {
       expect(hasShipAt(other.board, x, y)).toBe(true)

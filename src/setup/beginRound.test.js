@@ -5,7 +5,7 @@
 import presetListener from './presetListener'
 import remoteListener from './remoteListener'
 import jsonDom from 'json-dom'
-import { useGameLifecycle, startGame, getPlayers, attacker } from '../../tests/helpers/game'
+import { useGameLifecycle, startGame, getPlayers } from '../../tests/helpers/game'
 import beginRound from './beginRound'
 import startMenu from './startMenu'
 

@@ -99,5 +99,4 @@ describe('ending the game', () => {
     expect(document.querySelector('.boards')).not.toBeNull()
     expect(getPlayers(game.doc)).toHaveLength(2)
   }, 120000)
-
 })
