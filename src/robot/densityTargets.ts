@@ -16,7 +16,7 @@ const toCell = (point: { x: number, y: number }): Cell => ({ x: point.x, y: poin
  * @param victim
  */
 export const buildShotState = (victim: Player): ShotState => {
-  const points = matrixDom.getAllPoints(victim.board).filter(p => p.z === 0)
+  const points = matrixDom.getLayerPoints(victim.board, 0)
   const size = Math.max(...points.map(p => p.x)) + 1
   const hitParts = victim.shipFleet.flatMap(ship => ship.parts.filter(part => part.isHit))
   const hits = hitParts.map(part => toCell(part.point))

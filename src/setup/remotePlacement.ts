@@ -97,7 +97,7 @@ const renderPanel = (session: RemotePlacementState, player: Player): void => {
 /** Mark which cells a ship-in-progress could end on, same visual as local placement's own showStart. */
 const showStart = (player: Player, point: Point | null, size: number): void => {
   const board = player.board
-  matrixDom.getAllPoints(board).filter(p => p.z === 0).forEach(p => {
+  matrixDom.getLayerPoints(board, 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, board) as unknown as DomItem
     const isStart = Boolean(point && p.x === point.x && p.y === point.y)
     const isEnd = point !== null && !isStart && isValidPlacement(board, point, p, size)
@@ -297,7 +297,7 @@ export const randomiseRemoteShips = (player: Player): void => {
   if (state.ready) {
     return
   }
-  matrixDom.getAllPoints(player.board).filter(p => p.z === 0).forEach(p => {
+  matrixDom.getLayerPoints(player.board, 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
     jsonDom.updateElement(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem)
   })
