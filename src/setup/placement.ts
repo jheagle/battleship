@@ -340,7 +340,7 @@ export const chooseOrder = (item: DomItem): void => {
     setBadge(p, '')
     update(p as unknown as DomItem, { 'data-pickable': 'true' })
   })
-  setMessage(session, `Click each player's board in turn. The first one you click goes first.`)
+  setMessage(session, 'Click each player\'s board in turn. The first one you click goes first.')
   setButtons(session, { orderShown: true })
 }
 

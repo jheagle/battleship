@@ -141,4 +141,3 @@ export const hitChances = (state: ShotState, damagedWeight: number = DAMAGED_WEI
   }
   return chances
 }
-

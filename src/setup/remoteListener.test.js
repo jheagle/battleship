@@ -129,7 +129,7 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
     await waitFor(() => byClass(doc, 'remote-join-confirm').element.style.display !== 'none')
     expect(byClass(doc, 'presets').element.style.display).toBe('none')
-    expect(byClass(doc, 'remote-join-message').element.textContent).toBe(`You are joining Alice's Pirate Battle.`)
+    expect(byClass(doc, 'remote-join-message').element.textContent).toBe('You are joining Alice\'s Pirate Battle.')
     expect(document.activeElement).toBe(byName(doc, 'remote-join-name').element)
   })
 
