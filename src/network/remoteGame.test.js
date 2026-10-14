@@ -1,14 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-// Same real-vs-browser-stub ws issue as remoteListener.test.js's own comment explains - this file runs a real
-// socket.io server in-process inside a jsdom test file, which needs ws's actual Node implementation.
-jest.mock('ws', () => {
-  const path = require('path')
-  const wsIndexPath = path.join(path.dirname(require.resolve('ws/package.json')), 'index.js')
-  return require(wsIndexPath)
-})
-
+// 'ws' is forced to its real Node implementation (not the browser stub jsdom would otherwise resolve to) for every
+// test file via jest.config.js's moduleNameMapper - this file also runs a real socket.io server in-process, which
+// needs it.
 import { Server } from 'socket.io'
 import { createServer } from 'http'
 import jsonDom from 'json-dom'

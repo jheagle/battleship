@@ -1,16 +1,9 @@
 /**
  * @jest-environment jsdom
  */
-// Jest's jsdom environment resolves bare `require('ws')` to ws's own browser stub (a function that just throws), via the
-// package's own "browser" export condition - fine for client code, but this file also runs the real lobby server
-// in-process, which needs ws's actual Node implementation. Force the real one by its absolute path, bypassing that
-// export condition (which only governs resolution by package specifier, not by direct file path).
-jest.mock('ws', () => {
-  const path = require('path')
-  const wsIndexPath = path.join(path.dirname(require.resolve('ws/package.json')), 'index.js')
-  return require(wsIndexPath)
-})
-
+// 'ws' is forced to its real Node implementation (not the browser stub jsdom would otherwise resolve to) for every
+// test file via jest.config.js's moduleNameMapper - this file also runs the real lobby server in-process, which
+// needs it.
 import { io as ioClient } from 'socket.io-client'
 import jsonDom from 'json-dom'
 import startMenu from './startMenu'
