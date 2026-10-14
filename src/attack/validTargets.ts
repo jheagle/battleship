@@ -11,7 +11,7 @@ import type { Player, Tile } from '../types'
  * @param attackable
  */
 const markBoard = (victim: Player, attackable: boolean): void => {
-  matrixDom.getAllPoints(victim.board).filter(point => point.z === 0).forEach(point => {
+  matrixDom.getLayerPoints(victim.board, 0).forEach(point => {
     const tile = matrixDom.getDomItemFromPoint(point, victim.board) as Tile
     const className = attackable && !tile.isHit ? 'column valid-target' : 'column'
     jsonDom.updateElement(siFunciona.mergeObjectsMutable(tile as unknown as DomItem, { attributes: { className } }) as DomItem)

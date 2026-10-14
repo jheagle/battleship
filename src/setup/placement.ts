@@ -202,7 +202,7 @@ export const continueTurn = (item: DomItem): void => {
  */
 const showStart = (session: PlacementSession, point: Point | null, size: number): void => {
   const board = current(session).board
-  matrixDom.getAllPoints(board).filter(p => p.z === 0).forEach(p => {
+  matrixDom.getLayerPoints(board, 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, board) as unknown as DomItem
     const isStart = Boolean(point && p.x === point.x && p.y === point.y)
     const isEnd = point !== null && !isStart && isValidPlacement(board, point, p, size)
@@ -279,7 +279,7 @@ export const placeCell = (tile: Tile, board: Board): void => {
 export const randomise = (item: DomItem): void => {
   const session = active(item)
   const player = current(session)
-  matrixDom.getAllPoints(player.board).filter(p => p.z === 0).forEach(p => {
+  matrixDom.getLayerPoints(player.board, 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
     jsonDom.updateElement(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem)
   })
@@ -295,7 +295,7 @@ export const randomise = (item: DomItem): void => {
  * @param player
  */
 const hideShips = (player: Player): void => {
-  matrixDom.getAllPoints(player.board).filter(p => p.z === 0).forEach(p => {
+  matrixDom.getLayerPoints(player.board, 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
     if (checkIfShipCell(p, player.board)) {
       // Switch the transition off for this change only, so the shading goes at once rather than fading out

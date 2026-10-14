@@ -12,7 +12,7 @@ import type { Player, Tile } from '../types'
  * @param shown
  */
 const shadeShips = (player: Player, shown: boolean): void => {
-  matrixDom.getAllPoints(player.board).filter(p => p.z === 0).forEach(p => {
+  matrixDom.getLayerPoints(player.board, 0).forEach(p => {
     if (!checkIfShipCell(p, player.board)) {
       return
     }

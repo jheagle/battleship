@@ -25,7 +25,7 @@ import type { Board, Player, Ship, Tile } from '../types'
  */
 export const redactBoard = (board: Board, ownBoard: boolean): Board => {
   const clone = siFunciona.cloneObject(board) as Board
-  matrixDom.getAllPoints(board).filter(point => point.z === 0).forEach(point => {
+  matrixDom.getLayerPoints(board, 0).forEach(point => {
     if (ownBoard || checkIfHitCell(point, board)) {
       return
     }

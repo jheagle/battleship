@@ -24,5 +24,5 @@ export const showHeatHint = (victim: Player): void => {
  * @param victim
  */
 export const clearHeatHint = (victim: Player): void => {
-  matrixDom.getAllPoints(victim.board).filter(p => p.z === 0).forEach(point => paint(victim, point, '#333'))
+  matrixDom.getLayerPoints(victim.board, 0).forEach(point => paint(victim, point, '#333'))
 }
