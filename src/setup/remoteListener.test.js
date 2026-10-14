@@ -428,4 +428,24 @@ describe('the Online Multiplayer tile and its lobby', () => {
     expect(byClass(doc, 'remote-entry').element.style.display).toBe('none')
     expect(byClass(doc, 'waiting-room').element.style.display).not.toBe('none')
   })
+
+  test('the robots field\'s own max shrinks as real players join, and never offers more than that', async () => {
+    connectLobbySocket(baseUrl)
+    const doc = openMenu()
+    await hostRoom(doc, 'Pirate Battle', 'Alice')
+    // One player (the host) is in the room so far - up to 3 robots could still fill the other seats.
+    expect(byName(doc, 'waiting-room-robots').element.max).toBe('3')
+
+    const roomCode = byClass(doc, 'waiting-room-code').element.innerHTML.replace('Room Code: ', '')
+    const bob = rawPlayer()
+    await rawEmit(bob, 'joinRoom', { roomCode, name: 'Bob' })
+    await waitFor(() => byName(doc, 'waiting-room-robots').element.max === '2')
+
+    // A previously entered value above the new max is clamped down, not left stale.
+    byName(doc, 'waiting-room-robots').element.value = '3'
+    const carol = rawPlayer()
+    await rawEmit(carol, 'joinRoom', { roomCode, name: 'Carol' })
+    await waitFor(() => byName(doc, 'waiting-room-robots').element.max === '1')
+    expect(byName(doc, 'waiting-room-robots').element.value).toBe('1')
+  })
 })

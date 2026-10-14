@@ -145,6 +145,14 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
                     }
                   ]
                 },
+                {
+                  nodeName: 'div',
+                  attributes: { className: 'form-group' },
+                  children: [
+                    { nodeName: 'label', attributes: { for: 'waiting-room-robots', innerText: 'Robots (fill empty seats)' } },
+                    { nodeName: 'input', attributes: { id: 'waiting-room-robots', name: 'waiting-room-robots', type: 'number', value: 0, min: 0, max: 0 } }
+                  ]
+                },
                 { nodeName: 'button', attributes: { className: 'waiting-room-start', type: 'button', innerHTML: 'Start Game' }, eventListeners: { click: listener('remoteListener') } }
               ]
             },

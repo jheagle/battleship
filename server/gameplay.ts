@@ -66,21 +66,24 @@ const remoteLeaveListener: ListenerFunction = () => {}
  * Build and start a real game for a room's connected players, reusing the engine entirely unmodified - the same
  * startNewGame local play uses, just handed a pseudo-dom-backed root instead of a real browser one (the engine
  * already runs headless this way, see battleship's own Node self-start path and its whole test suite), with
- * startRemotePlacement in place of local hot-seat's own handoff-based placement. Every seat is a connected
- * human, so robots are always 0.
+ * startRemotePlacement in place of local hot-seat's own handoff-based placement.
  * @param roomPlayers the room's players, in join order - buildPlayers generates players in this same order, so
  * this is what maps a socket to the player it owns. Real names are set as soon as the players exist (via
  * startNewGame's onPlayersBuilt hook), before placement ever renders anything - buildPlayers itself has no way
  * to take them in at build time, and setting them any later left the very first thing a player sees (their own
- * name, in their own stats panel) showing the default "Player N" instead.
+ * name, in their own stats panel) showing the default "Player N" instead. Only the first roomPlayers.length
+ * built players are named this way - buildPlayers always puts every human before any robot, so a robot (if any)
+ * is never one of them.
  * @param hints
  * @param onTimerChange called whenever remote placement's own server-side deadline fires and changes state on
  * its own (auto-placing a not-yet-ready player, moving everyone into ordering) - the one state change in the
  * whole game that happens on a raw timer rather than in response to a dispatched/forwarded action, so it is the
  * one case watchRoomGame's own broadcast hooks (wrapping the session queue, and the gameAction handler's own
  * post-dispatch broadcast) can never see on their own. See remotePlacement.ts's startRemotePlacement.
+ * @param robots fills whatever seats the room's own connected humans haven't - lobbyServer.ts's startGame
+ * handler already validated this against the room's remaining capacity before calling here.
  */
-export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string]>, hints: HintSetting, onTimerChange: () => void = () => {}): RoomGame => {
+export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string]>, hints: HintSetting, onTimerChange: () => void = () => {}, robots: number = 0): RoomGame => {
   const root = buildIsolatedRoot({ attackListener, hintListener, placementListener, remotePlacementListener, remotePlayAgainListener, remoteLeaveListener, shipsListener })
   // Every seat is a connected human, so this is always the multiplayer game mode - startNewGame itself reads this
   // (its own robots-only branch would otherwise fire, since a fresh session's mode defaults to 'robots').
@@ -134,9 +137,11 @@ export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string
   // startNewGame's own firstGoesFirst only ever matters when humans <= 1 (see its own startRound) - every
   // remote seat is a connected human, so this is always ignored in favour of the real order the host chooses
   // afterward (see remotePlacement.ts's own ordering stage). The literal value passed here is never read.
-  startNewGame(root, roomPlayers.length, 0, true, hints, (p, body, done) => startRemotePlacement(p, body, done, onTimerChange), builtPlayers => {
+  startNewGame(root, roomPlayers.length, robots, true, hints, (p, body, done) => startRemotePlacement(p, body, done, onTimerChange), builtPlayers => {
     players = builtPlayers
-    builtPlayers.forEach((player, i) => {
+    // Only the human seats - buildPlayers always puts humans first, so any robot sits past roomPlayers.length
+    // and is never one of this room's own connected sockets.
+    builtPlayers.slice(0, roomPlayers.length).forEach((player, i) => {
       player.name = roomPlayers[i][1]
       updatePlayerStats(player)
       playerBySocket.set(roomPlayers[i][0], player)

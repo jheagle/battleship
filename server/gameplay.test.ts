@@ -93,6 +93,64 @@ describe('starting a room\'s game', () => {
   })
 })
 
+describe('robots filling empty remote seats', () => {
+  test('a robot seat already has a placed fleet, and is never one of the room\'s own named sockets', () => {
+    const game = startRoomGame([['alice-socket', 'Alice']], 'optional', () => {}, 1)
+    expect(game.players).toHaveLength(2)
+    expect(game.playerBySocket.size).toBe(1)
+    const [alice, robot] = game.players
+    expect(alice.isRobot).toBe(false)
+    expect(alice.name).toBe('Alice')
+    expect(robot.isRobot).toBe(true)
+    expect(robot.shipFleet.length).toBeGreaterThan(0)
+  })
+
+  test('placement never waits on a robot - it finishes once the one human readies up', async () => {
+    jest.useFakeTimers()
+    const game = startRoomGame([['alice-socket', 'Alice']], 'optional', () => {}, 1)
+    const [alice] = game.players
+    placeFullFleet(alice)
+    readyRemotePlayer(alice)
+    chooseOrderRandom(game.root)
+    await jest.advanceTimersByTimeAsync(13 * 120)
+
+    expect(game.players.some(player => player.attacker)).toBe(true)
+    jest.useRealTimers()
+  })
+
+  test('a robot filling an empty seat plays a full game to completion, same as it would locally', async () => {
+    jest.useFakeTimers()
+    try {
+      let broadcast: () => void = () => {}
+      const game = startRoomGame([['alice-socket', 'Alice']], 'optional', () => broadcast(), 1)
+      broadcast = watchRoomGame(game, () => {})
+      await playToRealGame(game)
+
+      const [alice, robot] = game.players
+      const unhitCellOf = (player: any): any => {
+        const point = matrixDom.getAllPoints(player.board).filter((p: any) => p.z === 0)
+          .find((p: any) => !matrixDom.getDomItemFromPoint(p, player.board).isHit)
+        return matrixDom.getDomItemFromPoint(point, player.board)
+      }
+
+      // Alice attacks on her own turn; the robot's own turns run entirely on their own (computerAttack, driven
+      // by the fake-timer advance) - this only ever finishes if the robot is genuinely taking its turns too.
+      for (let round = 0; round < 300 && alice.status > 0 && robot.status > 0; round++) {
+        if (alice.attacker) {
+          attackFleet(unhitCellOf(robot))
+        }
+        await jest.advanceTimersByTimeAsync(1000)
+      }
+
+      expect(alice.status <= 0 || robot.status <= 0).toBe(true)
+    } finally {
+      // However this test ends - a passing finish, a failed assertion, or the whole test timing out - fake
+      // timers must never leak into whatever test runs next in this same file/worker.
+      jest.useRealTimers()
+    }
+  }, 60000)
+})
+
 describe('watching a room\'s game for changes', () => {
   test('pushes each player their own redacted view as soon as watching starts', () => {
     const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')

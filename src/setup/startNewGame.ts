@@ -4,10 +4,11 @@ import boards from '../components/layout/boards'
 import buildPlayers from './buildPlayers'
 import computerAttack from '../robot/computerAttack'
 import updatePlayer from '../attack/updatePlayer'
+import { applyLocalPlayerView } from '../attack/localPlayerView'
 import { startPlacement } from './placement'
 import { getGameMode, setHintSetting } from './gameOptions'
 import showShipsControl from '../components/layout/showShipsControl'
-import type { HintSetting } from './gameOptions'
+import type { GameMode, HintSetting } from './gameOptions'
 import type { DomItemRoot } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
 
@@ -19,6 +20,22 @@ import type { Player } from '../types'
 const clearBody = (parent: DomItemRoot): void => {
   for (let i = parent.body.children.length - 1; i >= 0; --i) {
     jsonDom.removeChild(parent.body, parent.body.children[i])
+  }
+}
+
+/**
+ * Set every player's role for robots-only/watch, the one mode whose view never changes by turn at all - nobody
+ * is ever "own", so there is nothing for updatePlayer.ts's own per-turn hook to recompute (see its own comment).
+ * Solo's "own" viewer is also fixed (always the human) but its opponents' target/summary split still depends on
+ * whose turn it actually is (robots attack each other too, not just the human), so solo is recomputed on every
+ * turn the same way hot-seat is - see updatePlayer.ts - not set up here. Remote's own per-socket roles are
+ * applied separately, per viewer, by redactGameState.ts - never here, on the one shared server tree.
+ * @param players
+ * @param mode
+ */
+const applyInitialLocalView = (players: Player[], mode: GameMode): void => {
+  if (mode === 'robots') {
+    applyLocalPlayerView(players, null)
   }
 }
 
@@ -68,5 +85,11 @@ export const startNewGame = (
   // With hints on for everyone, every human gets them on their turn; with them off or optional, nobody does by default
   players.filter(player => !player.isRobot).forEach(player => { player.showHint = hints === 'on' })
   onPlayersBuilt(players)
-  placementStarter(players, parent.body, order => startRound(order, humans > 1 ? undefined : firstGoesFirst))
+  const mode = getGameMode(parent)
+  placementStarter(players, parent.body, order => {
+    // Only once placement is actually finished - any earlier would shrink/pin boards while a human is still
+    // trying to place ships on them.
+    applyInitialLocalView(order, mode)
+    startRound(order, humans > 1 ? undefined : firstGoesFirst)
+  })
 }

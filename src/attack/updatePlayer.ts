@@ -3,7 +3,9 @@ import siFunciona from 'si-funciona'
 import getAttackLock from './attackLock'
 import queueTimeout from '../queue'
 import updatePlayerStats from './updatePlayerStats'
+import { applyLocalPlayerView } from './localPlayerView'
 import { getSession } from '../setup/gameSession'
+import { getGameMode } from '../setup/gameOptions'
 import { clearHeatHint, showHeatHint, victimsOf } from './heatHint'
 import { clearValidTargets, showValidTargets } from './validTargets'
 import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
@@ -53,12 +55,29 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
     queueTimeout(player, () => victimsOf(player).forEach(victim => player.attacker ? showHeatHint(victim) : clearHeatHint(victim)), 0)
   }
   if (player.attacker) {
+    const root = jsonDom.getTopParentItem(player as unknown as DomItem) as DomItemRoot
     if (!player.isRobot) {
       queueTimeout(player, () => { attackLock.isLocked = false }, ATTACKER_LOCK_MS)
       // Remote play only (see gameSession.ts) - starts/resets this player's own turn-timeout deadline. Fired
       // synchronously, right as the turn actually begins, not queued - a queued call would start the clock
       // late relative to the real wall-clock deadline a remote client is shown.
-      getSession(player as unknown as DomItem).onAttackerChanged?.(player, jsonDom.getTopParentItem(player as unknown as DomItem) as DomItemRoot)
+      getSession(player as unknown as DomItem).onAttackerChanged?.(player, root)
+    }
+    // Local-only role recompute (never remote, which always sets onAttackerChanged above - that's what tells
+    // hot-seat's own 'multi' apart from a remote room's identical GameMode). Hot-seat: the physical "whoever's
+    // turn it is" is this mode's own "own" viewer, re-marked every turn so the role-based layout (see
+    // localPlayerView.ts) follows whoever is currently holding the screen, human or robot. Solo: "own" is
+    // always the one human, but target/summary still needs recomputing every turn - robots attack each other
+    // too, not just the human, so a robot's own role genuinely changes depending on whose turn it actually is.
+    // Robots-only needs no recompute at all - see startNewGame.ts's own one-time setup, never "own" either way.
+    const mode = getGameMode(root)
+    if (mode === 'multi' || mode === 'solo') {
+      const players = jsonDom.getParentsByClass('boards', player as unknown as DomItem)[0].children as Player[]
+      if (mode === 'solo') {
+        applyLocalPlayerView(players, players.find(p => !p.isRobot) ?? null)
+      } else if (!getSession(root).onAttackerChanged) {
+        applyLocalPlayerView(players, player)
+      }
     }
     ++player.turnCnt
   } else {

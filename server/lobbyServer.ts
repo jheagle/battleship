@@ -27,7 +27,9 @@ export const isRoomGameOver = (game: RoomGame): boolean => game.players.filter(p
  */
 const forTransport = (body: DomItem): object => JSON.parse(jsonDom.domItemToJson(body))
 
-/** Up to four players in a room, the same limit as a local multiplayer game. */
+/** Up to four players in a room, the same limit as a local multiplayer game - robots fill whatever seats are
+ * left under this same cap (see the startGame handler below and roomState's own maxRobots field), they never
+ * grow it. */
 const MAX_PLAYERS = 4
 
 /** Room codes avoid 0/O and 1/I, which are easy to misread when read aloud or typed from a screen. */
@@ -39,12 +41,16 @@ export interface RoomPlayer {
   name: string
 }
 
-/** A room's state, as sent to clients: its code, its own host-chosen name, who is hosting, and who has joined. */
+/** A room's state, as sent to clients: its code, its own host-chosen name, who is hosting, who has joined, and
+ * the most robot seats that could be filled right now (MAX_PLAYERS minus how many have actually joined) - sent
+ * over the wire rather than the client importing MAX_PLAYERS directly, since this is a server-only module
+ * (Node http/socket.io, pseudo-dom's own install) that cannot be bundled for the browser. */
 export interface RoomState {
   roomCode: string
   roomName: string
   hostId: string
   players: RoomPlayer[]
+  maxRobots: number
 }
 
 interface Room {
@@ -75,7 +81,13 @@ const generateRoomCode = (rooms: Map<string, Room>): string => {
  */
 const roomState = (rooms: Map<string, Room>, roomCode: string): RoomState => {
   const room = rooms.get(roomCode) as Room
-  return { roomCode, roomName: room.roomName, hostId: room.hostId, players: [...room.players].map(([id, name]) => ({ id, name })) }
+  return {
+    roomCode,
+    roomName: room.roomName,
+    hostId: room.hostId,
+    players: [...room.players].map(([id, name]) => ({ id, name })),
+    maxRobots: Math.max(0, MAX_PLAYERS - room.players.size)
+  }
 }
 
 /**
@@ -142,7 +154,7 @@ export const createLobbyServer = (): HttpServer => {
       socket.to(roomCode).emit('roomUpdate', state)
     })
 
-    socket.on('startGame', ({ hints }: { hints: HintSetting }, ack: (result: { started: true } | { error: string }) => void) => {
+    socket.on('startGame', ({ hints, robots = 0 }: { hints: HintSetting, robots?: number }, ack: (result: { started: true } | { error: string }) => void) => {
       const room = currentRoom ? rooms.get(currentRoom) : undefined
       if (!room) {
         ack({ error: 'No room to start a game in' })
@@ -160,10 +172,16 @@ export const createLobbyServer = (): HttpServer => {
         ack({ error: `Need at least ${MIN_PLAYERS_TO_START} players to start` })
         return
       }
+      // Robots only ever fill the seats this room's own human players haven't - never grow the room past
+      // MAX_PLAYERS in total.
+      if (robots < 0 || robots > MAX_PLAYERS - room.players.size) {
+        ack({ error: `Robots can only fill the ${MAX_PLAYERS - room.players.size} remaining seat(s)` })
+        return
+      }
       // room.broadcastGame does not exist yet at this exact line - startRoomGame's own placement timer will not
       // fire for a good two minutes, long after the very next line assigns it, so the closure below still reads
       // the real function by the time it's ever actually called.
-      room.game = startRoomGame([...room.players.entries()], hints, () => room.broadcastGame?.())
+      room.game = startRoomGame([...room.players.entries()], hints, () => room.broadcastGame?.(), robots)
       room.broadcastGame = watchRoomGame(room.game, (socketId, redactedBody) => io.to(socketId).emit('gameUpdate', forTransport(redactedBody)))
       ack({ started: true })
     })
