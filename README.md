@@ -368,8 +368,9 @@ cells, inside the board, and not touching a ship which is already there.</p>
 </dd>
 <dt><a href="#validPlacements">validPlacements(matrix, shipLength)</a></dt>
 <dd><p>Every straight, horizontal or vertical, start and end point of a ship of this length which fits on the board without
-touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0); diagonal or 3D
-ships, if they come in a later version, would add their own directions here.</p>
+touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0) - matrix-dom&#39;s
+getLinesOfLength enumerates every line the geometry allows, and only knows about shape, not what occupies a cell,
+so the blocked-cell filter (and any future direction, if diagonal or 3D ships ever arrive) stays here.</p>
 </dd>
 <dt><a href="#generateStartEnd">generateStartEnd(matrix, shipLength)</a></dt>
 <dd><p>Pick a start and end point for a ship of the given length, at random from every placement that fits. Throws if no
@@ -1783,8 +1784,9 @@ Place a ship from the player's chosen start and end points, if the placement is 
 
 ## validPlacements(matrix, shipLength)
 Every straight, horizontal or vertical, start and end point of a ship of this length which fits on the board without
-touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0); diagonal or 3D
-ships, if they come in a later version, would add their own directions here.
+touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0) - matrix-dom's
+getLinesOfLength enumerates every line the geometry allows, and only knows about shape, not what occupies a cell,
+so the blocked-cell filter (and any future direction, if diagonal or 3D ships ever arrive) stays here.
 
 **Kind**: global function  
 

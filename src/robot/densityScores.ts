@@ -1,3 +1,9 @@
+// Deep imports, not the full 'matrix-dom' barrel - this module is deliberately kept free of a real DOM dependency
+// (it runs in plain Node, not jsdom), and matrix-dom's own main.js pulls in json-dom, which touches `document`
+// eagerly at import time. getLinesOfLength and point are both pure, with no such dependency of their own.
+import getLinesOfLength from 'matrix-dom/dist/line/getLinesOfLength'
+import point from 'matrix-dom/dist/point/point'
+
 export interface Cell {
   x: number
   y: number
@@ -29,20 +35,8 @@ const edgeNeighbours = (cell: Cell): Cell[] => [{ x: cell.x + 1, y: cell.y }, { 
 
 const keyOf = (cell: Cell): string => `${cell.x},${cell.y}`
 
-const placementsOf = (size: number, length: number): Cell[][] => {
-  const placements: Cell[][] = []
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (x + length <= size) {
-        placements.push(Array.from({ length }, (_, i) => ({ x: x + i, y })))
-      }
-      if (y + length <= size) {
-        placements.push(Array.from({ length }, (_, i) => ({ x, y: y + i })))
-      }
-    }
-  }
-  return placements
-}
+const placementsOf = (size: number, length: number): Cell[][] =>
+  getLinesOfLength(point(size, size, 0), length)
 
 /**
  * Whether a placement could be where a ship really is: it avoids misses, covers all of the ship's own known hits, and
