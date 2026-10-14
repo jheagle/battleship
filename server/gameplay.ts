@@ -8,7 +8,7 @@ import remotePlacementListener from '../src/setup/remotePlacementListener'
 import randomAttack from '../src/attack/randomAttack'
 import shipsListener from '../src/attack/shipsListener'
 import { startNewGame } from '../src/setup/startNewGame'
-import { startRemotePlacement } from '../src/setup/remotePlacement'
+import { cancelRemotePlacement, startRemotePlacement } from '../src/setup/remotePlacement'
 import { setGameMode } from '../src/setup/gameOptions'
 import { getSession } from '../src/setup/gameSession'
 import { redactGameBody } from '../src/network/redactGameState'
@@ -113,6 +113,11 @@ export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string
       clearTimeout(turnTimer)
       turnTimer = null
     }
+    // Normally a no-op (placement already finished and deleted its own session long before a real game could
+    // ever end) - but endGame can run directly against a room still mid-placement/ordering (tests do this; a
+    // real abandoned room could too), which would otherwise leave that session's own 60-second auto-finish
+    // timer pending, to fire later against this now-torn-down root.
+    cancelRemotePlacement(root)
     // The last real attacker's own deadline is now stale (whoever it was never ran out the clock - the game
     // ended first) - cleared so the final-score screen never shows a frozen "Turn - 0s left" banner.
     update(parent.body, { 'data-turn-deadline': '' })

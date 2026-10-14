@@ -160,6 +160,15 @@ Set order. Told apart by class name, same pattern as local placement&#39;s own p
 <dd><p>Whether a remote placement/ordering phase is running for this item&#39;s game - so a board click during it is
 routed here instead of to a normal attack (see attackListener.ts).</p>
 </dd>
+<dt><a href="#cancelRemotePlacement">cancelRemotePlacement()</a></dt>
+<dd><p>Cancel this game&#39;s own placement/ordering session, if one is still running, clearing its pending
+auto-finish timer and forgetting it. Without this, a room abandoned (or ended some other way, e.g.
+onGameOver - see server/gameplay.ts) while still placing/ordering leaves its own 60-second timer pending;
+<code>unref()</code> keeps that alone from holding the process open, but it can still fire later against an
+already-torn-down root, crashing on whatever stale assumption autoFinishPlacement/beginOrdering makes about
+its shape. Safe to call even when no session is running (normal completion already deletes its own via
+finishOrdering).</p>
+</dd>
 <dt><a href="#isHostOnlyStage">isHostOnlyStage()</a></dt>
 <dd><p>Whether only the host may act right now - every stage except placing itself (see server/lobbyServer.ts).</p>
 </dd>
@@ -1241,6 +1250,18 @@ Set order. Told apart by class name, same pattern as local placement's own place
 ## isRemoteSessionActive()
 Whether a remote placement/ordering phase is running for this item's game - so a board click during it is
 routed here instead of to a normal attack (see attackListener.ts).
+
+**Kind**: global function  
+<a name="cancelRemotePlacement"></a>
+
+## cancelRemotePlacement()
+Cancel this game's own placement/ordering session, if one is still running, clearing its pending
+auto-finish timer and forgetting it. Without this, a room abandoned (or ended some other way, e.g.
+onGameOver - see server/gameplay.ts) while still placing/ordering leaves its own 60-second timer pending;
+`unref()` keeps that alone from holding the process open, but it can still fire later against an
+already-torn-down root, crashing on whatever stale assumption autoFinishPlacement/beginOrdering makes about
+its shape. Safe to call even when no session is running (normal completion already deletes its own via
+finishOrdering).
 
 **Kind**: global function  
 <a name="isHostOnlyStage"></a>

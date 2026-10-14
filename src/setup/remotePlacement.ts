@@ -57,6 +57,23 @@ const activeSession = (item: DomItem): RemotePlacementState => {
  * routed here instead of to a normal attack (see attackListener.ts). */
 export const isRemoteSessionActive = (item: DomItem): boolean => findSession(item) !== null
 
+/** Cancel this game's own placement/ordering session, if one is still running, clearing its pending
+ * auto-finish timer and forgetting it. Without this, a room abandoned (or ended some other way, e.g.
+ * onGameOver - see server/gameplay.ts) while still placing/ordering leaves its own 60-second timer pending;
+ * `unref()` keeps that alone from holding the process open, but it can still fire later against an
+ * already-torn-down root, crashing on whatever stale assumption autoFinishPlacement/beginOrdering makes about
+ * its shape. Safe to call even when no session is running (normal completion already deletes its own via
+ * finishOrdering). */
+export const cancelRemotePlacement = (item: DomItem): void => {
+  const root = jsonDom.getTopParentItem(item) as DomItemRoot
+  const session = sessions.get(root)
+  if (!session) {
+    return
+  }
+  clearTimeout(session.timer)
+  sessions.delete(root)
+}
+
 /** Whether only the host may act right now - every stage except placing itself (see server/lobbyServer.ts). */
 export const isHostOnlyStage = (item: DomItem): boolean => {
   const found = findSession(item)
