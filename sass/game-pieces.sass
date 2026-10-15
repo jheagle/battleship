@@ -2,18 +2,27 @@
   color: white
   font-size: 1.6rem
   padding: .5rem
-  border: .3rem solid transparent
   border-radius: .6rem
+  // .boards' own flex-wrap is what should handle "doesn't fit in this row" - letting a board shrink instead
+  // (flex's own default) would squeeze its tiles narrower than their real clamp()'d size instead of wrapping.
+  flex-shrink: 0
 
   ul
     list-style: none
     padding: 0
 
 .boards
-  display: grid
-  grid-template-columns: repeat(auto-fit, minmax(38rem, 1fr))
-  justify-items: center
-  gap: 2rem
+  // Flex, not grid: a CSS Grid's own auto-fit/minmax column sizing assumes every item is roughly the same
+  // size, sharing a uniform track width - real boards here are anything but uniform (role-own's own ~14rem
+  // mini board next to a full ~35rem+ target board in the very same row). One real board's own content
+  // forcing its shared track wider squeezed every other track in that row below what it actually needed,
+  // overlapping rather than wrapping - confirmed live (a 4-player hot-seat game, screenshot). Flex items each
+  // size to their own real content and wrap independently, with no shared-track distortion.
+  display: flex
+  flex-wrap: wrap
+  justify-content: center
+  align-items: flex-start
+  gap: 1rem
   margin: 0 auto 3rem
   padding: 3rem 2rem 0
 
@@ -79,13 +88,19 @@
     outline: 4px solid yellow
     outline-offset: 6px
 
-// Remote gameplay's own per-viewer roles (see redactGameState.ts's applyPlayerView) - which role a player has
-// only ever changes this styling, never what data they carry; a role-summary player's board is still their
-// real one, just plainer. Local hot-seat never sets a role class at all, so none of this ever applies there.
+// Per-viewer roles (see playerView.ts's roleFor) - which role a player has only ever changes this styling,
+// never what data they carry. Remote play sets these per socket (redactGameState.ts's applyPlayerView); local
+// solo/hot-seat/robots-only set them directly on the real tree instead (localPlayerView.ts's
+// applyLocalPlayerView) - same classes, same CSS, no local/remote distinction needed here.
 .player.role-own
-  position: fixed
+  // Sticky, not fixed: fixed floats outside the flow entirely, so it has no footprint of its own - on a page
+  // tall enough to scroll (easy now, with the raised robot caps), whatever board happens to scroll into that
+  // same top-right viewport rectangle at any given moment gets covered, not just whatever was there at the
+  // top of the page - exactly the overlap this was found to cause. Sticky keeps its own real flex item (so
+  // nothing else can ever render there), just stays pinned near the top of it while scrolling - .boards'
+  // own align-items: flex-start is what keeps it from being stretched tall to match its row's tallest sibling.
+  position: sticky
   top: 1rem
-  right: 1rem
   z-index: 100
   max-width: 18rem
   background-color: rgba(20, 20, 20, .9)
@@ -99,9 +114,20 @@
     font-size: 1.1rem
     margin-top: .4rem
 
-// No highlighting or animation on a board that is not the viewer's own to act on right now - still the real
-// board (blue/red/white cells, redacted the same as any target), just without the interactive dressing.
+// A board that is not the viewer's own to act on right now - still the real board (blue/red/white cells,
+// redacted the same as any target), just plainer (no highlighting or animation) and genuinely smaller, not
+// just de-interactified - this is what lets watch-only comfortably fit many more robots, and what keeps solo/
+// hot-seat from feeling like every board is equally "in play" when most of them are not, right now.
 .player.role-summary
+  font-size: 1.3rem
+
+  .matrix .layer .row .column
+    height: clamp(1.1rem, 4vw, 2rem)
+    width: clamp(1.1rem, 4vw, 2rem)
+
+  .player-stats
+    font-size: 1.2rem
+
   .matrix, .matrix .layer, .matrix .layer .row .column
     transition: none
 

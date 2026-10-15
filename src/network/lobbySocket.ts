@@ -55,9 +55,11 @@ export const onRoomClosed = (callback: () => void): void => {
 /** This connection's own socket id, once connected - used to tell whether this player is the room's host. */
 export const getSocketId = (): string | undefined => connectLobbySocket().id
 
-/** The host starts the game: every connected player becomes a human player, in the room's own join order. */
-export const startGame = (hints: HintSetting): Promise<{ started: true } | { error: string }> =>
-  new Promise(resolve => connectLobbySocket().emit('startGame', { hints }, resolve))
+/** The host starts the game: every connected player becomes a human player, in the room's own join order, and
+ * `robots` (if any) fill whatever seats are still empty - the server validates this against the room's actual
+ * remaining capacity. */
+export const startGame = (hints: HintSetting, robots: number = 0): Promise<{ started: true } | { error: string }> =>
+  new Promise(resolve => connectLobbySocket().emit('startGame', { hints, robots }, resolve))
 
 /** Be told whenever the game's state changes - the redacted view of the whole screen, for this connection alone.
  * Replaces any previous listener rather than adding another - a rematch (see remotePlayAgainListener.ts,

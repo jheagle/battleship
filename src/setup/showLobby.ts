@@ -44,7 +44,7 @@ export const showLobby = (menu: DomItem, preset: GamePreset, values: LobbyValues
   const robotInput = jsonDom.getChildrenByName('robot-players', form)[0]
   // Limits first: updating an input re-applies its stored value, so the values are set after them
   update(humanInput, { min: preset.humansRange[0], max: preset.humansRange[1] })
-  update(robotInput, { min: preset.robotsMin })
+  update(robotInput, { min: preset.robotsMin, max: preset.robotsMax })
   ;(humanInput.element as HTMLInputElement).value = String(values.humans ?? preset.humans)
   ;(robotInput.element as HTMLInputElement).value = String(values.robots ?? preset.robots)
   ;(jsonDom.getChildrenByName('first-go-first', form)[0].element as HTMLInputElement).checked = values.firstGoesFirst ?? true

@@ -57,6 +57,23 @@ const activeSession = (item: DomItem): RemotePlacementState => {
  * routed here instead of to a normal attack (see attackListener.ts). */
 export const isRemoteSessionActive = (item: DomItem): boolean => findSession(item) !== null
 
+/** Cancel this game's own placement/ordering session, if one is still running, clearing its pending
+ * auto-finish timer and forgetting it. Without this, a room abandoned (or ended some other way, e.g.
+ * onGameOver - see server/gameplay.ts) while still placing/ordering leaves its own 60-second timer pending;
+ * `unref()` keeps that alone from holding the process open, but it can still fire later against an
+ * already-torn-down root, crashing on whatever stale assumption autoFinishPlacement/beginOrdering makes about
+ * its shape. Safe to call even when no session is running (normal completion already deletes its own via
+ * finishOrdering). */
+export const cancelRemotePlacement = (item: DomItem): void => {
+  const root = jsonDom.getTopParentItem(item) as DomItemRoot
+  const session = sessions.get(root)
+  if (!session) {
+    return
+  }
+  clearTimeout(session.timer)
+  sessions.delete(root)
+}
+
 /** Whether only the host may act right now - every stage except placing itself (see server/lobbyServer.ts). */
 export const isHostOnlyStage = (item: DomItem): boolean => {
   const found = findSession(item)
@@ -129,6 +146,9 @@ const updateOrderingPanel = (session: RemotePlacementState, root: DomItemRoot): 
  * server's own broadcast-after-dispatch already covers; the deadline is the one change that happens on a raw
  * timer with nothing else watching for it, so without this hook a client that lets it expire sees nothing at
  * all, even though the server's own state has already moved on.
+ * A robot filling an empty remote seat (see server/gameplay.ts's startRoomGame) already has its fleet placed
+ * by buildPlayers.ts, same as local play's own robots - it is seeded ready here immediately, never waiting on
+ * a ready-up that nothing would ever drive, and never gets a placement panel of its own.
  * @param players
  * @param body
  * @param done
@@ -136,7 +156,9 @@ const updateOrderingPanel = (session: RemotePlacementState, root: DomItemRoot): 
  */
 export const startRemotePlacement = (players: Player[], body: DomItem, done: (order: Player[]) => void, onTimerChange: () => void = () => {}): void => {
   const root = jsonDom.getTopParentItem(body) as DomItemRoot
-  const playerState = new Map(players.map(player => [player, { pending: [...defaultShipSpecs], start: null, ready: false }]))
+  const playerState = new Map(players.map(player => [player, player.isRobot
+    ? { pending: [], start: null, ready: true }
+    : { pending: [...defaultShipSpecs], start: null, ready: false }]))
   // unref so an unfinished placement (an abandoned room, or just a test that never lets this fire) never keeps
   // the process alive on its own - guarded since this same module also runs under jsdom (a test's own in-process
   // lobby server), where setTimeout returns a plain number with no unref to call.
@@ -158,7 +180,7 @@ export const startRemotePlacement = (players: Player[], body: DomItem, done: (or
   // under way - none of them make sense yet during placement/ordering. Shown again once finishOrdering below
   // resolves, mirroring local hot-seat's own placement.ts.
   setStatsShown(players, false)
-  players.forEach(player => {
+  players.filter(player => !player.isRobot).forEach(player => {
     jsonDom.renderHtml(jsonDom.createDomItem(remotePlacementPanel()), player as unknown as DomItem)
     renderPanel(session, player)
   })
@@ -251,7 +273,7 @@ export const handleRemoteBoardClick = (tile: Tile, board: Board): void => {
 /** Once every player is ready (or the timer below fires), hide their panels and show the ordering choice. */
 const beginOrdering = (session: RemotePlacementState, root: DomItemRoot): void => {
   session.stage = 'choosing'
-  session.players.forEach(player => update(panelOf(player), { style: { display: 'none' } }))
+  session.players.filter(player => !player.isRobot).forEach(player => update(panelOf(player), { style: { display: 'none' } }))
   updateOrderingPanel(session, root)
 }
 
@@ -279,6 +301,11 @@ const autoFinishPlacement = (root: DomItemRoot): void => {
 
 /** The Ready button: locks a player's own fleet in once nothing is left pending. */
 export const readyRemotePlayer = (player: Player): void => {
+  // A robot is already seeded ready, with no panel of its own to render into - nothing a real client would
+  // ever dispatch on a robot's behalf, but harmless to guard regardless.
+  if (player.isRobot) {
+    return
+  }
   const root = jsonDom.getTopParentItem(player as unknown as DomItem) as DomItemRoot
   const session = activeSession(player as unknown as DomItem)
   const state = session.playerState.get(player) as RemotePlayerState

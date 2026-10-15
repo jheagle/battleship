@@ -116,6 +116,14 @@ game has its own queue (see gameSession), so two games&#39; turn changes, robot 
 <dd><p>Remove everything from the page: whatever screen was showing (the menu, a finished game&#39;s final scores, or a game
 in progress), so a new one can be built on a blank page.</p>
 </dd>
+<dt><a href="#applyInitialLocalView">applyInitialLocalView(players, mode)</a></dt>
+<dd><p>Set every player&#39;s role for robots-only/watch, the one mode whose view never changes by turn at all - nobody
+is ever &quot;own&quot;, so there is nothing for updatePlayer.ts&#39;s own per-turn hook to recompute (see its own comment).
+Solo&#39;s &quot;own&quot; viewer is also fixed (always the human) but its opponents&#39; target/summary split still depends on
+whose turn it actually is (robots attack each other too, not just the human), so solo is recomputed on every
+turn the same way hot-seat is - see updatePlayer.ts - not set up here. Remote&#39;s own per-socket roles are
+applied separately, per viewer, by redactGameState.ts - never here, on the one shared server tree.</p>
+</dd>
 <dt><a href="#startRound">startRound(order, firstGoesFirst)</a></dt>
 <dd><p>Pick the first attacker, and let a robot start if it is one.</p>
 </dd>
@@ -167,6 +175,15 @@ Set order. Told apart by class name, same pattern as local placement&#39;s own p
 <dd><p>Whether a remote placement/ordering phase is running for this item&#39;s game - so a board click during it is
 routed here instead of to a normal attack (see attackListener.ts).</p>
 </dd>
+<dt><a href="#cancelRemotePlacement">cancelRemotePlacement()</a></dt>
+<dd><p>Cancel this game&#39;s own placement/ordering session, if one is still running, clearing its pending
+auto-finish timer and forgetting it. Without this, a room abandoned (or ended some other way, e.g.
+onGameOver - see server/gameplay.ts) while still placing/ordering leaves its own 60-second timer pending;
+<code>unref()</code> keeps that alone from holding the process open, but it can still fire later against an
+already-torn-down root, crashing on whatever stale assumption autoFinishPlacement/beginOrdering makes about
+its shape. Safe to call even when no session is running (normal completion already deletes its own via
+finishOrdering).</p>
+</dd>
 <dt><a href="#isHostOnlyStage">isHostOnlyStage()</a></dt>
 <dd><p>Whether only the host may act right now - every stage except placing itself (see server/lobbyServer.ts).</p>
 </dd>
@@ -190,7 +207,10 @@ time - no handoff, no &quot;look away&quot;. <code>done</code> runs once the ord
 state change in this module happens inside a function a dispatched/forwarded click calls directly, which the
 server&#39;s own broadcast-after-dispatch already covers; the deadline is the one change that happens on a raw
 timer with nothing else watching for it, so without this hook a client that lets it expire sees nothing at
-all, even though the server&#39;s own state has already moved on.</p>
+all, even though the server&#39;s own state has already moved on.
+A robot filling an empty remote seat (see server/gameplay.ts&#39;s startRoomGame) already has its fleet placed
+by buildPlayers.ts, same as local play&#39;s own robots - it is seeded ready here immediately, never waiting on
+a ready-up that nothing would ever drive, and never gets a placement panel of its own.</p>
 </dd>
 <dt><a href="#placeRemoteShip">placeRemoteShip(tile, board)</a></dt>
 <dd><p>A click on a player&#39;s own board during placement: the first click sets where a ship starts, the second where
@@ -684,7 +704,9 @@ the same reason as onRoomUpdate above.</p>
 <dd><p>This connection&#39;s own socket id, once connected - used to tell whether this player is the room&#39;s host.</p>
 </dd>
 <dt><a href="#startGame">startGame()</a></dt>
-<dd><p>The host starts the game: every connected player becomes a human player, in the room&#39;s own join order.</p>
+<dd><p>The host starts the game: every connected player becomes a human player, in the room&#39;s own join order, and
+<code>robots</code> (if any) fill whatever seats are still empty - the server validates this against the room&#39;s actual
+remaining capacity.</p>
 </dd>
 <dt><a href="#onGameUpdate">onGameUpdate()</a></dt>
 <dd><p>Be told whenever the game&#39;s state changes - the redacted view of the whole screen, for this connection alone.
@@ -811,6 +833,15 @@ styled plainer, no highlighting or animation (see redactGameState.ts&#39;s apply
 place this actually changes anything sent or rendered). Independent of local vs remote - whatever renders
 a player&#39;s own screen, remote today, local single-player later, decides what to draw for each role; this
 only decides which role applies.</p>
+</dd>
+<dt><a href="#applyLocalPlayerView">applyLocalPlayerView(players, viewer)</a></dt>
+<dd><p>Marks every player with which role they play in <code>viewer</code>&#39;s own current view (see playerView.ts&#39;s roleFor) -
+the local-play counterpart to redactGameState.ts&#39;s applyPlayerView, which does the same thing for a remote
+viewer&#39;s own redacted clone. Local play never redacts data, so this mutates the real tree directly, the same
+way updatePlayer.ts already mutates a player&#39;s own outline/box-shadow style. Only ever changes a className,
+never touches board/fleet data.</p>
+<p><code>viewer === null</code> means nobody is &quot;own&quot; (robots-only/watch - there is no human playing) - every player gets
+role-summary unconditionally.</p>
 </dd>
 <dt><a href="#hintListener">hintListener(e, target)</a></dt>
 <dd><p>The hint checkbox in a human&#39;s panel: switching it on shows the heat map at once if it is their turn.</p>
@@ -1070,6 +1101,23 @@ in progress), so a new one can be built on a blank page.
 | --- |
 | parent | 
 
+<a name="applyInitialLocalView"></a>
+
+## applyInitialLocalView(players, mode)
+Set every player's role for robots-only/watch, the one mode whose view never changes by turn at all - nobody
+is ever "own", so there is nothing for updatePlayer.ts's own per-turn hook to recompute (see its own comment).
+Solo's "own" viewer is also fixed (always the human) but its opponents' target/summary split still depends on
+whose turn it actually is (robots attack each other too, not just the human), so solo is recomputed on every
+turn the same way hot-seat is - see updatePlayer.ts - not set up here. Remote's own per-socket roles are
+applied separately, per viewer, by redactGameState.ts - never here, on the one shared server tree.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| players | 
+| mode | 
+
 <a name="startRound"></a>
 
 ## startRound(order, firstGoesFirst)
@@ -1219,6 +1267,18 @@ Whether a remote placement/ordering phase is running for this item's game - so a
 routed here instead of to a normal attack (see attackListener.ts).
 
 **Kind**: global function  
+<a name="cancelRemotePlacement"></a>
+
+## cancelRemotePlacement()
+Cancel this game's own placement/ordering session, if one is still running, clearing its pending
+auto-finish timer and forgetting it. Without this, a room abandoned (or ended some other way, e.g.
+onGameOver - see server/gameplay.ts) while still placing/ordering leaves its own 60-second timer pending;
+`unref()` keeps that alone from holding the process open, but it can still fire later against an
+already-torn-down root, crashing on whatever stale assumption autoFinishPlacement/beginOrdering makes about
+its shape. Safe to call even when no session is running (normal completion already deletes its own via
+finishOrdering).
+
+**Kind**: global function  
 <a name="isHostOnlyStage"></a>
 
 ## isHostOnlyStage()
@@ -1257,6 +1317,9 @@ state change in this module happens inside a function a dispatched/forwarded cli
 server's own broadcast-after-dispatch already covers; the deadline is the one change that happens on a raw
 timer with nothing else watching for it, so without this hook a client that lets it expire sees nothing at
 all, even though the server's own state has already moved on.
+A robot filling an empty remote seat (see server/gameplay.ts's startRoomGame) already has its fleet placed
+by buildPlayers.ts, same as local play's own robots - it is seeded ready here immediately, never waiting on
+a ready-up that nothing would ever drive, and never gets a placement panel of its own.
 
 **Kind**: global function  
 
@@ -2536,7 +2599,9 @@ This connection's own socket id, once connected - used to tell whether this play
 <a name="startGame"></a>
 
 ## startGame()
-The host starts the game: every connected player becomes a human player, in the room's own join order.
+The host starts the game: every connected player becomes a human player, in the room's own join order, and
+`robots` (if any) fill whatever seats are still empty - the server validates this against the room's actual
+remaining capacity.
 
 **Kind**: global function  
 <a name="onGameUpdate"></a>
@@ -2881,6 +2946,25 @@ only decides which role applies.
 | Param |
 | --- |
 | player | 
+| viewer | 
+
+<a name="applyLocalPlayerView"></a>
+
+## applyLocalPlayerView(players, viewer)
+Marks every player with which role they play in `viewer`'s own current view (see playerView.ts's roleFor) -
+the local-play counterpart to redactGameState.ts's applyPlayerView, which does the same thing for a remote
+viewer's own redacted clone. Local play never redacts data, so this mutates the real tree directly, the same
+way updatePlayer.ts already mutates a player's own outline/box-shadow style. Only ever changes a className,
+never touches board/fleet data.
+
+`viewer === null` means nobody is "own" (robots-only/watch - there is no human playing) - every player gets
+role-summary unconditionally.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| players | 
 | viewer | 
 
 <a name="hintListener"></a>

@@ -77,6 +77,20 @@ const renderRoomState = (menu: DomItem, state: RoomState): void => {
   update(jsonDom.getChildrenByClass('waiting-room-name', menu)[0], { innerHTML: `Lobby: ${state.roomName}` })
   update(jsonDom.getChildrenByClass('waiting-room-code', menu)[0], { innerHTML: `Room Code: ${state.roomCode}` })
   show(jsonDom.getChildrenByClass('waiting-room-host-controls', menu)[0], state.hostId === getSocketId())
+  // Robots only ever fill whatever seats the room's own connected players haven't - this shrinks/grows as
+  // players join or leave, so it's kept in sync here rather than set once. The server validates this again
+  // either way (see lobbyServer.ts's startGame handler) - this is just so the host isn't offered a number
+  // that's already wrong.
+  // Limits first, value after - same as showLobby.ts's own humanInput/robotInput: updating an input via
+  // jsonDom.updateElement re-renders it from the DomItem's own tracked attributes, which would otherwise wipe
+  // out whatever the host had actually typed (never reflected back into those attributes) back to its stale
+  // default the moment any other player's own join/leave triggers this same render again.
+  const robotsInput = jsonDom.getChildrenByName('waiting-room-robots', menu)[0]
+  const robotsMax = state.maxRobots
+  const robotsElement = robotsInput.element as HTMLInputElement
+  const currentRobots = parseInt(robotsElement.value) || 0
+  update(robotsInput, { max: robotsMax })
+  robotsElement.value = String(Math.min(currentRobots, robotsMax))
 }
 
 /** Leave whatever room is open and show the game types again, clearing any status message - or, with a
@@ -202,7 +216,8 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
   if (className.includes('waiting-room-start')) {
     const waitingRoom = jsonDom.getChildrenByClass('waiting-room', menu)[0]
     const hints = (jsonDom.getChildrenByName('waiting-room-hints', waitingRoom)[0].element as HTMLSelectElement).value as HintSetting
-    const ack = await startGame(hints)
+    const robots = parseInt((jsonDom.getChildrenByName('waiting-room-robots', waitingRoom)[0].element as HTMLInputElement).value) || 0
+    const ack = await startGame(hints, robots)
     if ('error' in ack) {
       update(jsonDom.getChildrenByClass('waiting-room-status', waitingRoom)[0], { innerHTML: ack.error })
     }

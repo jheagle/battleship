@@ -77,6 +77,24 @@ describe('starting a room\'s game', () => {
     expect(actionClasses).toEqual(['remote-play-again', 'remote-leave'])
   })
 
+  // The real bug this covers: ending a game that is still mid-placement (as the test above does, and a real
+  // abandoned room could too) used to leave that placement session's own 60-second auto-finish timer pending -
+  // unref'd, so it never kept the process alive by itself, but still able to fire later against this same,
+  // by-then-already-torn-down root, crashing deep inside autoFinishPlacement/beginOrdering. Caught by actually
+  // letting fake time pass past PLACEMENT_TIMEOUT_MS after ending the game this way, not just by reading the
+  // code - reverting the onGameOver fix alone reproduces the crash here.
+  test('ending a game still mid-placement cancels its own placement timer - it never fires later', async () => {
+    jest.useFakeTimers()
+    try {
+      const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob']], 'optional')
+      expect(() => endGame(game.players[0])).not.toThrow()
+
+      expect(() => jest.advanceTimersByTime(PLACEMENT_TIMEOUT_MS)).not.toThrow()
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
   test('calling startRoomGame again with the same players (a rematch) produces a genuinely fresh, independent game', () => {
     const roomPlayers: Array<[string, string]> = [['alice-socket', 'Alice'], ['bob-socket', 'Bob']]
     const firstGame = startRoomGame(roomPlayers, 'optional')
@@ -91,6 +109,68 @@ describe('starting a room\'s game', () => {
     expect(secondGame.players.every(player => player.shipFleet.length === 0)).toBe(true)
     expect(secondGame.players.every(player => player.status === 100)).toBe(true)
   })
+})
+
+describe('robots filling empty remote seats', () => {
+  test('a robot seat already has a placed fleet, and is never one of the room\'s own named sockets', () => {
+    const game = startRoomGame([['alice-socket', 'Alice']], 'optional', () => {}, 1)
+    expect(game.players).toHaveLength(2)
+    expect(game.playerBySocket.size).toBe(1)
+    const [alice, robot] = game.players
+    expect(alice.isRobot).toBe(false)
+    expect(alice.name).toBe('Alice')
+    expect(robot.isRobot).toBe(true)
+    expect(robot.shipFleet.length).toBeGreaterThan(0)
+  })
+
+  test('placement never waits on a robot - it finishes once the one human readies up', async () => {
+    jest.useFakeTimers()
+    const game = startRoomGame([['alice-socket', 'Alice']], 'optional', () => {}, 1)
+    const [alice] = game.players
+    placeFullFleet(alice)
+    readyRemotePlayer(alice)
+    chooseOrderRandom(game.root)
+    await jest.advanceTimersByTimeAsync(13 * 120)
+
+    expect(game.players.some(player => player.attacker)).toBe(true)
+    jest.useRealTimers()
+  })
+
+  test('a robot filling an empty seat takes its own real turns in a remote game', async () => {
+    jest.useFakeTimers()
+    try {
+      let broadcast: () => void = () => {}
+      const game = startRoomGame([['alice-socket', 'Alice']], 'optional', () => broadcast(), 1)
+      broadcast = watchRoomGame(game, () => {})
+      await playToRealGame(game)
+
+      const [alice, robot] = game.players
+      const unhitCellOf = (player: any): any => {
+        const point = matrixDom.getAllPoints(player.board).filter((p: any) => p.z === 0)
+          .find((p: any) => !matrixDom.getDomItemFromPoint(p, player.board).isHit)
+        return matrixDom.getDomItemFromPoint(point, player.board)
+      }
+
+      // Just enough rounds to prove the robot genuinely takes its own turns (computerAttack, driven by the
+      // fake-timer advance, with no human input at all) - not a full game to completion, which needs the real
+      // robot AI to actually sink an entire 17-cell fleet and is expensive enough to risk starving whatever
+      // test happens to run right after this one in the same file/worker (a previous version of this test did
+      // exactly that, timing out a later, unrelated test under load).
+      for (let round = 0; round < 10 && alice.status > 0 && robot.status > 0; round++) {
+        if (alice.attacker) {
+          attackFleet(unhitCellOf(robot))
+        }
+        await jest.advanceTimersByTimeAsync(1000)
+      }
+
+      expect(alice.turnCnt).toBeGreaterThan(0)
+      expect(robot.turnCnt).toBeGreaterThan(0)
+    } finally {
+      // However this test ends - a passing finish, a failed assertion, or the whole test timing out - fake
+      // timers must never leak into whatever test runs next in this same file/worker.
+      jest.useRealTimers()
+    }
+  }, 15000)
 })
 
 describe('watching a room\'s game for changes', () => {

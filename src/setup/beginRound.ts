@@ -1,6 +1,7 @@
 import jsonDom from 'json-dom'
 import { startNewGame } from './startNewGame'
 import { getGameMode, setGameSettings } from './gameOptions'
+import { presetForMode } from './gamePresets'
 import type { HintSetting } from './gameOptions'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 
@@ -18,13 +19,15 @@ const beginRound = (e: Event, mainForm: DomItem): boolean => {
   const parent = jsonDom.getTopParentItem(mainForm)
   const humans = parseInt((jsonDom.getChildrenByName('human-players', mainForm)[0].element as HTMLInputElement).value)
   let robots = parseInt((jsonDom.getChildrenByName('robot-players', mainForm)[0].element as HTMLInputElement).value)
-  // Up to four humans on one screen, up to four robots, and six players in all so the boards still fit
-  if (humans < 0 || humans > 4 || robots < 0 || robots > 4 || humans + robots > 6) {
-    return false
-  }
-  // Each game type has its own limits: one human; two to four humans; or no humans
+  // Each game type has its own upper limits on both fields, from the same preset showLobby used to set the
+  // form's own min/max in the first place - one human; two to four humans; or no humans, plus each mode's own
+  // robot ceiling and total. robotsMin is deliberately NOT enforced here: the form's own native HTML validation
+  // (robot-players' min attribute) already blocks submitting below it when the lobby was actually used, and the
+  // self-starting Node path (main.ts) submits the raw form with no preset/lobby involved at all - its own 0/0
+  // defaults rely on the bump-up below to reach a valid minimum, not a reject here.
   const mode = getGameMode(parent)
-  if ((mode === 'solo' && humans !== 1) || (mode === 'multi' && (humans < 2 || humans > 4)) || (mode === 'robots' && humans !== 0)) {
+  const preset = presetForMode(mode)
+  if (humans < preset.humansRange[0] || humans > preset.humansRange[1] || robots < 0 || robots > preset.robotsMax || humans + robots > preset.totalMax) {
     return false
   }
   const firstGoesFirst = (jsonDom.getChildrenByName('first-go-first', mainForm)[0].element as HTMLInputElement).checked
