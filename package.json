@@ -10,6 +10,8 @@
     "dev": "gulp",
     "htmldocs": "jsdoc -R MAIN.md -c ./.jsdoc.conf.js -d docs",
     "readme": "gulp readme",
+    "release": "release-it",
+    "release:dry-run": "release-it --dry-run",
     "resolutions": "npx npm-force-resolutions",
     "serve:lobby": "tsc server/lobbyServer.ts --ignoreConfig --outDir dist/server --rootDir . --module commonjs --target es2020 --moduleResolution node --esModuleInterop --skipLibCheck --ignoreDeprecations 6.0 && node dist/server/server/lobbyServer.js",
     "test": "gulp testFull",
@@ -21,6 +23,7 @@
   "devDependencies": {
     "gulp": "^5.0.1",
     "js-build-tools": "^6.1.0",
+    "release-it": "^21.1.1",
     "test-filesystem": "^2.0.0",
     "typescript": "^6.0.3"
   },
