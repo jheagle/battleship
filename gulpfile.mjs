@@ -1,5 +1,6 @@
 export {
   build,
+  copyFiles,
   defaultCmd,
   partials,
   readme,
