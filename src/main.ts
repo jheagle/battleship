@@ -51,7 +51,15 @@ const battleship = (): void => {
   }
 }
 
-export default battleship
+// `export =` (CommonJS `module.exports = battleship`), not `export default` (`exports.default = battleship`)
+// - this is the bundle's own entry point, and js-build-tools' browserify `standalone` option exposes this
+// module's exports AS the global a bare <script> tag gets (see js-build-tools' bundle.mjs) - with a default
+// export instead, that global ends up `{ default: battleship }`, not the callable `battleship` itself, which
+// silently broke index.html's own `battleship()` call (confirmed via a real browser: "battleship is not a
+// function", a dark screen with no menu at all). The explicit window/this assignment right below already set
+// the global correctly on its own - the bug was browserify's own standalone wrapper running after it and
+// overwriting it with the wrong shape, not anything wrong with that assignment itself.
+export = battleship
 
 if (this) {
   // @ts-ignore

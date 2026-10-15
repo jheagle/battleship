@@ -11,7 +11,7 @@ useGameLifecycle()
 
 describe('the entry point', () => {
   test('in Node the game starts by itself: the menu is submitted for you and two robots play', async () => {
-    const battleship = require('./main').default
+    const battleship = require('./main')
     battleship()
     expect(document.querySelector('.main-menu')).toBeNull()
     expect(document.querySelectorAll('.player')).toHaveLength(2)
@@ -21,7 +21,7 @@ describe('the entry point', () => {
   test('in a browser the menu waits for the player', () => {
     jest.isolateModules(() => {
       jest.doMock('browser-or-node', () => ({ isNode: false }))
-      const battleship = require('./main').default
+      const battleship = require('./main')
       battleship()
     })
     expect(document.querySelector('.main-menu')).not.toBeNull()
@@ -33,7 +33,7 @@ describe('the entry point', () => {
     try {
       jest.isolateModules(() => {
         jest.doMock('browser-or-node', () => ({ isNode: false }))
-        const battleship = require('./main').default
+        const battleship = require('./main')
         battleship()
         // The real room lookup (see remoteListener.ts's peekAndConfirm) opened a real (never-connecting, since
         // no lobby server is running in this test) lobby socket - close it so it doesn't linger as an open
@@ -55,7 +55,7 @@ describe('the entry point', () => {
   test('in a browser with no shared link, the menu shows the game types as usual', () => {
     jest.isolateModules(() => {
       jest.doMock('browser-or-node', () => ({ isNode: false }))
-      const battleship = require('./main').default
+      const battleship = require('./main')
       battleship()
     })
     expect(document.querySelector('.presets').style.display).not.toBe('none')
