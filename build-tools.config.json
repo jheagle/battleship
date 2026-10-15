@@ -2,6 +2,16 @@
   "browser": {
     "name": "battleship"
   },
+  "copyFiles": [
+    {
+      "from": "browser/*.js",
+      "to": "../joshuaheagle.local/projects/battleship/browser"
+    },
+    {
+      "from": "browser/css/*.css",
+      "to": "../joshuaheagle.local/projects/battleship/browser/css"
+    }
+  ],
   "readme": {
     "from": "dist/**/!(*.min).js"
   },
