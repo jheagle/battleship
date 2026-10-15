@@ -2,7 +2,6 @@
   color: white
   font-size: 1.6rem
   padding: .5rem
-  border: .3rem solid transparent
   border-radius: .6rem
 
   ul
@@ -14,10 +13,11 @@
   // Low enough that a row of mostly role-summary boards (see .player.role-summary below) actually packs more
   // per row, not just shrinks within unchanged-size tracks - a full-size target/own-less board still fits fine,
   // CSS Grid's own per-track intrinsic sizing grows that one track to fit it without forcing every other track
-  // to match.
+  // to match. Each board's own tile size is responsive now too (see matrix.sass), so a track can actually
+  // shrink down to this minimum on a narrow screen instead of overflowing it.
   grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr))
   justify-items: center
-  gap: 2rem
+  gap: 1rem
   margin: 0 auto 3rem
   padding: 3rem 2rem 0
 
@@ -88,9 +88,14 @@
 // solo/hot-seat/robots-only set them directly on the real tree instead (localPlayerView.ts's
 // applyLocalPlayerView) - same classes, same CSS, no local/remote distinction needed here.
 .player.role-own
-  position: fixed
+  // Sticky, not fixed: fixed floats outside the grid entirely, so it has no footprint of its own - on a page
+  // tall enough to scroll (easy now, with the raised robot caps), whatever board happens to scroll into that
+  // same top-right viewport rectangle at any given moment gets covered, not just whatever was there at the
+  // top of the page - exactly the overlap this was found to cause. Sticky keeps its own real grid cell (so
+  // nothing else can ever render there), just stays pinned near the top of that cell while scrolling.
+  position: sticky
   top: 1rem
-  right: 1rem
+  align-self: start
   z-index: 100
   max-width: 18rem
   background-color: rgba(20, 20, 20, .9)
@@ -112,8 +117,8 @@
   font-size: 1.3rem
 
   .matrix .layer .row .column
-    height: 2rem
-    width: 2rem
+    height: clamp(1.1rem, 4vw, 2rem)
+    width: clamp(1.1rem, 4vw, 2rem)
 
   .player-stats
     font-size: 1.2rem

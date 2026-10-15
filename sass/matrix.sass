@@ -14,9 +14,13 @@
 
       .column
         height: 35px
-        height: 3.5em
+        // A fixed em size never let a full 10-tile board shrink below ~35em - on a narrow screen it simply
+        // overflowed its own grid track (see game-pieces.sass's .boards) rather than wrapping, since the grid
+        // itself was never actually too wide to wrap, the tiles inside one board were. clamp keeps today's
+        // size on anything reasonably wide (the 3.5rem ceiling), while letting it shrink on a narrow one.
+        height: clamp(1.6rem, 6vw, 3.5rem)
         width: 35px
-        width: 3.5em
+        width: clamp(1.6rem, 6vw, 3.5rem)
         border: 1px solid #333
         border: 0.1em solid #333
         background-color: blue

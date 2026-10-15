@@ -24,8 +24,11 @@ const buildPlayers = (humans: number, root: DomItem, robots: number = 0, players
   }
   const player = playerSet({}, `Player ${players.length + 1}`)
   player.isRobot = humans <= 0
+  // Used for the attack-target glow (updatePlayer.ts), the player's own name in their stats panel
+  // (playerStats.ts), and the robot-targeting highlight animation (resetTargets.ts) - no longer for the
+  // player panel's own border, which got busy once the own/target/summary role layout gave each panel a much
+  // clearer visual distinction of its own.
   player.colour = playerColour(players.length)
-  player.attributes = { ...player.attributes, style: { borderColor: player.colour } }
   // square() takes single objects here (matrix-dom's JSDoc says arrays, but arrays get merged in under a '0' key)
   player.board = jDomMatrix.updateMatrixPoints(jDomMatrix.square({
     x: waterTile(),
