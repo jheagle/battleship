@@ -2,6 +2,7 @@ export {
   build,
   copyFiles,
   defaultCmd,
+  docs,
   partials,
   readme,
   sass,
