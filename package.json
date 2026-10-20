@@ -8,7 +8,6 @@
   "scripts": {
     "build": "gulp build",
     "dev": "gulp",
-    "htmldocs": "jsdoc -R MAIN.md -c ./.jsdoc.conf.js -d docs",
     "readme": "gulp readme",
     "release": "release-it",
     "release:dry-run": "release-it --dry-run",
@@ -18,13 +17,15 @@
     "test:quick": "gulp testQuick",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.type-tests.json",
     "watch": "gulp watchFull",
-    "watch:test": "gulp watchTest"
+    "watch:test": "gulp watchTest",
+    "docs": "gulp docs"
   },
   "devDependencies": {
     "gulp": "^5.0.1",
     "js-build-tools": "^6.1.0",
     "release-it": "^21.1.1",
     "test-filesystem": "^2.0.0",
+    "typedoc": "^0.28.20",
     "typescript": "^6.0.3"
   },
   "dependencies": {

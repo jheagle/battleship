@@ -12,6 +12,12 @@
       "to": "../joshuaheagle.local/projects/battleship/browser/css"
     }
   ],
+  "docs": {
+    "enabled": true,
+    "from": "src",
+    "index": "MAIN.md",
+    "to": "../joshuaheagle.local/projects/battleship/docs"
+  },
   "readme": {
     "from": "dist/**/!(*.min).js"
   },

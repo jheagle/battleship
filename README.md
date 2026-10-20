@@ -2,7 +2,7 @@
 
 This is just a fun project creating a game of battleship. Experimenting with functional programming and ES6 features.
 
-A relatively recent version is running at https: //joshuaheagle.com/battleship/
+Play it at https://joshuaheagle.com/projects/battleship/play.html (docs: https://joshuaheagle.com/projects/battleship/docs/).
 
 ## Running locally
 
