@@ -3,6 +3,7 @@ export {
   copyFiles,
   defaultCmd,
   docs,
+  lint,
   partials,
   readme,
   sass,
