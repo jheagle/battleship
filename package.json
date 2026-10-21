@@ -18,11 +18,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.type-tests.json",
     "watch": "gulp watchFull",
     "watch:test": "gulp watchTest",
-    "docs": "gulp docs"
+    "docs": "gulp docs",
+    "lint": "gulp lint"
   },
   "devDependencies": {
     "gulp": "^5.0.1",
-    "js-build-tools": "^6.3.1",
+    "js-build-tools": "^6.4.1",
     "release-it": "^21.1.1",
     "test-filesystem": "^2.0.0",
     "typedoc": "^0.28.20",
@@ -51,5 +52,11 @@
       "jest"
     ]
   },
-  "types": "dist/main.d.ts"
+  "types": "dist/main.d.ts",
+  "allowScripts": {
+    "core-js": false,
+    "core-js-pure": false,
+    "@parcel/watcher": false,
+    "unrs-resolver": false
+  }
 }
