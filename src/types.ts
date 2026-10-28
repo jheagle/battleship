@@ -1,4 +1,3 @@
-import 'core-js/stable'
 import jsonDom from 'json-dom'
 import type { DomItem, WithTraits } from 'json-dom/dist/domItem/types'
 import type hasTraitType from 'json-dom/dist/domItem/traits/hasTrait'
