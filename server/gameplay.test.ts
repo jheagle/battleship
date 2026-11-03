@@ -11,6 +11,10 @@ import endGame from '../src/attack/endGame'
 import type { RoomGame } from './gameplay'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 
+// These tests run real socket.io servers and play real games (the slowest takes ~5.5s on its own); the default 5s
+// and the old per-test 15s limits ran out when several builds shared the machine. 45s leaves room for that.
+jest.setTimeout(45000)
+
 /** The redacted players, out of a pushed redacted body (see redactGameBody). */
 const playersOf = (redactedBody: DomItem): any[] =>
   (redactedBody.children.find(child => (child.attributes as { className?: string } | undefined)?.className === 'boards') as DomItem).children
@@ -170,7 +174,7 @@ describe('robots filling empty remote seats', () => {
       // timers must never leak into whatever test runs next in this same file/worker.
       jest.useRealTimers()
     }
-  }, 15000)
+  })
 })
 
 describe('watching a room\'s game for changes', () => {
@@ -316,7 +320,7 @@ describe('the per-turn timeout', () => {
     expect(hitCount(victim)).toBe(hitsBefore + 1)
     expect(attacker.attacker).toBe(false)
     expect(victim.attacker).toBe(true)
-  }, 15000)
+  })
 
   test('triggers a fresh broadcast too, the same as the placement deadline does', async () => {
     let broadcast: () => void = () => {}
@@ -329,7 +333,7 @@ describe('the per-turn timeout', () => {
     await jest.advanceTimersByTimeAsync(TURN_TIMEOUT_MS)
 
     expect(pushCount).toBeGreaterThan(afterStarting)
-  }, 15000)
+  })
 
   // The real bug this guards against: onAttackerChanged has to clear the PREVIOUS attacker's own pending
   // timer before starting a new one - otherwise a real, on-time action leaves the old timer running
@@ -368,7 +372,7 @@ describe('the per-turn timeout', () => {
     }
 
     expect(hitCount(thirdPlayer)).toBe(hitsOnThirdBefore)
-  }, 15000)
+  })
 })
 
 describe('player roles, once real gameplay begins', () => {
@@ -401,7 +405,7 @@ describe('player roles, once real gameplay begins', () => {
     const nonAttackerView = playersOf(pushes.get(nonAttackerSocket) as DomItem)
     expect(classNameOf(nonAttackerView.find((p: any) => p.name === nonAttacker.name))).toBe('player role-own')
     expect(classNameOf(nonAttackerView.find((p: any) => p.name === attacker.name))).toBe('player role-summary')
-  }, 15000)
+  })
 
   test('an eliminated player is role-summary for everyone, even the attacker, on the attacker\'s own turn', async () => {
     const game = startRoomGame([['alice-socket', 'Alice'], ['bob-socket', 'Bob'], ['carol-socket', 'Carol']], 'optional')
@@ -417,5 +421,5 @@ describe('player roles, once real gameplay begins', () => {
     const attackerSocket = game.players.indexOf(attacker) === 0 ? 'alice-socket' : game.players.indexOf(attacker) === 1 ? 'bob-socket' : 'carol-socket'
     const attackerView = playersOf(pushes.get(attackerSocket) as DomItem)
     expect(classNameOf(attackerView.find((p: any) => p.name === eliminated.name))).toBe('player role-summary')
-  }, 15000)
+  })
 })
