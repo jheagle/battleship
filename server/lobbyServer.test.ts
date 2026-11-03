@@ -7,6 +7,10 @@ import type { Server as HttpServer } from 'http'
 import type { RoomState } from './lobbyServer'
 import type { RoomGame } from './gameplay'
 
+// These tests run real socket.io servers and play real games (the slowest takes ~5.5s on its own); the default 5s
+// and the old per-test 15s limits ran out when several builds shared the machine. 45s leaves room for that.
+jest.setTimeout(45000)
+
 let server: HttpServer
 let baseUrl: string
 const sockets: ClientSocket[] = []
@@ -384,7 +388,7 @@ describe('the lobby server', () => {
       const orderingView = await hostChose
       const orderingMessage = orderingView.children[orderingIndex].children.find((child: any) => child.attributes?.className === 'remote-ordering-message')
       expect(orderingMessage.attributes.innerHTML).toMatch(/click each player/i)
-    }, 15000)
+    })
 
     // Every independent remote client renders both boards, live and clickable - nothing but this guard stops a
     // click from resolving against any board regardless of whose turn it actually is or which socket sent it.
@@ -468,7 +472,7 @@ describe('the lobby server', () => {
       const attackedView = await afterRealAttack
       const victimTile = attackedView.children[boardsIndex].children[victimIndex].children[boardIndexOf(victimIndex)].children[0].children[0].children[0]
       expect(victimTile.isHit).toBe(true)
-    }, 15000)
+    })
 
     // The real bug this guards against: an id that fails to resolve (stale, unregistered, or - the live case
     // that actually crashed the server - resolving to something attackListener's own code could not turn
@@ -517,7 +521,7 @@ describe('the lobby server', () => {
       const stillAlive = new Promise<{ error: string } | { started: true }>(resolve => host.emit('startGame', { hints: 'optional' }, resolve))
       const response = await stillAlive
       expect(response).toEqual({ error: expect.stringMatching(/already started/i) })
-    }, 15000)
+    })
 
     test('an action for a room with no started game is silently ignored', async () => {
       const lonelyHost = connect()
