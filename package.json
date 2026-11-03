@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "gulp": "^5.0.1",
-    "js-build-tools": "^6.9.0",
+    "js-build-tools": "^7.0.0",
     "release-it": "^21.1.2",
     "test-filesystem": "^2.0.0",
     "typedoc": "^0.28.20",
