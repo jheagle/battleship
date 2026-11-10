@@ -79,6 +79,30 @@ describe('the intro demo', () => {
     expect(demo().querySelectorAll('[role="grid"]')).toHaveLength(DEMO_ROBOTS)
   })
 
+  test('a quick menu -> game -> menu keeps exactly one demo running', async () => {
+    const root = pageWithMenu()
+    startNewGame(root, 0, 2, true, 'off')
+    startMenu(root)
+    expect(demo().querySelectorAll('[role="grid"]')).toHaveLength(DEMO_ROBOTS)
+    await settle(20000)
+    expect(demo().querySelectorAll('[role="grid"]')).toHaveLength(DEMO_ROBOTS)
+    expect(demoShots()).toBeGreaterThan(0)
+  })
+
+  test('with prefers-reduced-motion it is a still frame: boards and ships, no shots', async () => {
+    const original = window.matchMedia
+    window.matchMedia = query => ({ matches: query === '(prefers-reduced-motion: reduce)', media: query, addEventListener () {}, removeEventListener () {} })
+    try {
+      pageWithMenu()
+      expect(demo().querySelectorAll('[role="grid"]')).toHaveLength(DEMO_ROBOTS)
+      expect(demo().querySelectorAll('[role="gridcell"][aria-label$=", ship"]').length).toBeGreaterThan(0)
+      await settle(30000)
+      expect(demoShots()).toBe(0)
+    } finally {
+      window.matchMedia = original
+    }
+  })
+
   test('the demo is its own game: the page root is not touched', () => {
     const root = pageWithMenu()
     expect(jsonDom.getChildrenByClass('boards', root.body)).toHaveLength(0)

@@ -63,6 +63,9 @@ const playDemo = (root: DomItemRoot): void => {
   ;((boards?.children ?? []) as Player[]).forEach(player => shadeShips(player, true))
 }
 
+/** Whether the player asked for less motion: the demo is then a still frame (boards and ships, no shots). */
+const prefersReducedMotion = (): boolean => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+
 /** Stop the demo and clear its layer. */
 export const stopIntroDemo = (): void => {
   demoRoot = null
@@ -72,6 +75,7 @@ export const stopIntroDemo = (): void => {
 
 /**
  * Robots play a real game of Cloakfall behind the menu, using the game's own code, and start another after each win.
+ * With prefers-reduced-motion it is a still frame instead: the boards and their ships, and no shots.
  * Every step of the demo runs on its own queue, which stops it as soon as the menu is gone (a real game started), so
  * nothing needs to remember to stop it; showing the menu again (startMenu) starts a fresh one.
  * @param listeners
@@ -85,7 +89,12 @@ export const startIntroDemo = (listeners: Record<string, ListenerFunction>): voi
   const root = demoGameRoot(listeners, layer)
   const session = getSession(root)
   const queue = session.queue
+  const still = prefersReducedMotion()
   session.queue = (fn: Function, time: number = 0, ...args: any[]): Promise<any> => {
+    if (still) {
+      // Nothing moves: the robots never take a turn
+      return Promise.resolve()
+    }
     if (demoRoot !== root || !menuShowing(document)) {
       if (demoRoot === root) {
         stopIntroDemo()
