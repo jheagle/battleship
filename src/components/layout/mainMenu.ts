@@ -19,6 +19,7 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
         className: 'content'
       },
       children: [
+        { nodeName: 'p', attributes: { className: 'tagline', textContent: 'Every fleet is cloaked. Fire blind into the dark. The last fleet still hidden wins.' } },
         {
           nodeName: 'div',
           attributes: {

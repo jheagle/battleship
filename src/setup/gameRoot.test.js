@@ -35,8 +35,12 @@ describe('gameRoot', () => {
     expect(root.body.children.length).toBeGreaterThan(0)
     expect(main.querySelector('.main-menu')).not.toBeNull()
     expect(jsonDom.getChildrenByClass('main-menu', root.body)).toHaveLength(1)
-    // nothing the game renders is left outside the landmarks
-    expect([...document.body.children].map(child => child.tagName)).toEqual(['HEADER', 'MAIN'])
+    // nothing the game renders is left outside the landmarks; the one extra layer is the robots' demo, hidden scenery
+    expect([...document.body.children].map(child => child.tagName)).toEqual(['HEADER', 'DIV', 'MAIN'])
+    const demo = document.body.children[1]
+    expect(demo.className).toBe('intro-demo')
+    expect(demo.getAttribute('aria-hidden')).toBe('true')
+    expect(demo.hasAttribute('inert')).toBe(true)
   })
 
   test('a page with its own main and h1 keeps them: one main, one h1, no extra header', () => {
