@@ -9,6 +9,7 @@ import { createServer } from 'http'
 import jsonDom from 'json-dom'
 import matrixDom from 'matrix-dom'
 import { enterRemoteGame, leaveRemoteGame } from './remoteGame'
+import gameRoot from '../setup/gameRoot'
 import { connectLobbySocket, disconnectLobbySocket } from './lobbySocket'
 
 let httpServer
@@ -218,5 +219,20 @@ describe('enterRemoteGame: the boards stay keyboard navigable across re-renders'
     expect(document.activeElement).toBe(cellAt(1, 1))
     expect([...document.querySelectorAll('.boards [tabindex="0"]')]).toEqual([cellAt(1, 1)])
     leaveRemoteGame(root)
+  })
+})
+
+describe('enterRemoteGame: the countdown', () => {
+  test('is a timer in the page header, not loose in the body', () => {
+    // The browser's real root: the game renders into <main>, under the header (see gameRoot)
+    document.body.innerHTML = ''
+    const root = gameRoot({})
+    enterRemoteGame(root, { attributes: { 'data-turn-deadline': String(Date.now() + 30000) }, ...bodyWithClass('boards') })
+    const countdown = document.querySelector('.remote-countdown')
+    expect(countdown.getAttribute('role')).toBe('timer')
+    expect(countdown.parentElement).toBe(document.querySelector('header.game-header'))
+    expect(document.querySelector('main .boards')).not.toBeNull()
+    leaveRemoteGame(root)
+    expect(document.querySelector('.remote-countdown')).toBeNull()
   })
 })

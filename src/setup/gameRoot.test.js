@@ -38,4 +38,22 @@ describe('gameRoot', () => {
     // nothing the game renders is left outside the landmarks
     expect([...document.body.children].map(child => child.tagName)).toEqual(['HEADER', 'MAIN'])
   })
+
+  test('a page with its own main and h1 keeps them: one main, one h1, no extra header', () => {
+    document.body.innerHTML = '<h1>Play</h1><main id="own"></main>'
+    const { header, main } = gameLayout(document)
+    expect(header).toBeNull()
+    expect(main.id).toBe('own')
+    expect(main.classList.contains('game')).toBe(true)
+    expect(document.querySelectorAll('main, h1')).toHaveLength(2)
+    expect(document.querySelector('header')).toBeNull()
+  })
+
+  test('the h1 is hidden by its own inline styles too, so it stays hidden without the game\'s stylesheet', () => {
+    gameLayout(document)
+    const style = document.querySelector('h1').style
+    expect(style.position).toBe('absolute')
+    expect(style.width).toBe('1px')
+    expect(style.overflow).toBe('hidden')
+  })
 })
