@@ -1,4 +1,5 @@
 import jsonDom from 'json-dom'
+import labelTile from '../cells/labelTile'
 import matrixDom from 'matrix-dom'
 import siFunciona from 'si-funciona'
 import { defaultShipSpecs } from './defaultFleet'
@@ -88,7 +89,8 @@ export const isHostOnlyStage = (item: DomItem): boolean => {
 export const remotePlacementStage = (item: DomItem): RemoteStage | null => findSession(item)?.stage ?? null
 
 const update = (item: DomItem, attributes: object): void => {
-  jsonDom.updateElement(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem)
+  // labelTile only acts on tiles: a tile's accessible name follows its colour
+  jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem))
 }
 
 const child = (item: DomItem, className: string): DomItem => jsonDom.getChildrenByClass(className, item)[0]
@@ -326,7 +328,7 @@ export const randomiseRemoteShips = (player: Player): void => {
   }
   matrixDom.getLayerPoints(player.board, 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
-    jsonDom.updateElement(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem)
+    jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem))
   })
   player.shipFleet = generateRandomFleet(defaultShipSpecs, player.board, true)
   state.pending = []

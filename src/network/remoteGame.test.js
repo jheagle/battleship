@@ -7,6 +7,7 @@
 import { Server } from 'socket.io'
 import { createServer } from 'http'
 import jsonDom from 'json-dom'
+import matrixDom from 'matrix-dom'
 import { enterRemoteGame, leaveRemoteGame } from './remoteGame'
 import { connectLobbySocket, disconnectLobbySocket } from './lobbySocket'
 
@@ -174,5 +175,48 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
 
     await waitFor(() => gameActionReceived)
     expect(localListener).not.toHaveBeenCalled()
+  })
+})
+
+describe('enterRemoteGame: the boards stay keyboard navigable across re-renders', () => {
+  // A board as the server sends it: built like buildPlayers builds one, then through json (forTransport), which drops
+  // navigableGrid's function listeners but keeps the named attackListener
+  const boardsBody = () => {
+    const board = matrixDom.navigableGrid(matrixDom.square({
+      matrix: { eventListeners: { click: [{ listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }] } }
+    }, 3))
+    return { children: [{ nodeName: 'div', attributes: { className: 'boards' }, children: [JSON.parse(jsonDom.domItemToJson(board))] }] }
+  }
+  const cellAt = (x, y) => document.querySelector('.boards [role="grid"]').children[0].children[y].children[x]
+  const press = (element, key) => element.dispatchEvent(new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
+
+  test('arrow keys work on a board rendered from a push, and Enter is forwarded as a click', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const root = jsonDom.documentDomItem({})
+    enterRemoteGame(root, boardsBody())
+    cellAt(0, 0).focus()
+    press(cellAt(0, 0), 'ArrowRight')
+    expect(document.activeElement).toBe(cellAt(1, 0))
+    expect(gameActionReceived).toBe(false)
+    press(cellAt(1, 0), 'Enter')
+    await waitFor(() => gameActionReceived)
+    leaveRemoteGame(root)
+  })
+
+  test('the next push re-renders everything, and focus goes back to the same cell', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const root = jsonDom.documentDomItem({})
+    enterRemoteGame(root, boardsBody())
+    cellAt(0, 0).focus()
+    press(cellAt(0, 0), 'ArrowDown')
+    press(document.activeElement, 'ArrowRight')
+    const before = document.activeElement
+    io.emit('gameUpdate', boardsBody())
+    await waitFor(() => !document.body.contains(before))
+    expect(document.activeElement).toBe(cellAt(1, 1))
+    expect([...document.querySelectorAll('.boards [tabindex="0"]')]).toEqual([cellAt(1, 1)])
+    leaveRemoteGame(root)
   })
 })

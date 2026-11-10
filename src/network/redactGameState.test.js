@@ -71,6 +71,23 @@ describe('redacting the game state for a remote viewer', () => {
     expect(matrixDom.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBeUndefined()
   })
 
+  test('an unhit ship\'s accessible name is redacted with its colour, so a screen reader never hears "ship" either', async () => {
+    const [own, other] = await setUp()
+    const part = other.shipFleet[0].parts[0]
+    const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
+    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: '#777' }
+    realTile.attributes['aria-label'] = `${String.fromCharCode(65 + part.point.x)}${part.point.y + 1}, ship`
+
+    const redacted = matrixDom.getDomItemFromPoint(part.point, redactBoard(other.board, false))
+    expect(redacted.attributes['aria-label']).toBe(`${String.fromCharCode(65 + part.point.x)}${part.point.y + 1}`)
+    // the owner still hears their own ship
+    const ownPart = own.shipFleet[0].parts[0]
+    const ownTile = matrixDom.getDomItemFromPoint(ownPart.point, own.board)
+    ownTile.attributes.style = { ...ownTile.attributes.style, backgroundColor: '#777' }
+    ownTile.attributes['aria-label'] = 'kept'
+    expect(matrixDom.getDomItemFromPoint(ownPart.point, redactBoard(own.board, true)).attributes['aria-label']).toBe('kept')
+  })
+
   test('a hit cell keeps its own colour untouched when redacted for someone else', async () => {
     const [, other] = await setUp()
     const part = other.shipFleet[0].parts[0]

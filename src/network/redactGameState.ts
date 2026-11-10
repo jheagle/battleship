@@ -1,6 +1,7 @@
 import matrixDom from 'matrix-dom'
 import siFunciona from 'si-funciona'
 import checkIfHitCell from '../utils/checkIfHitCell'
+import labelTile from '../cells/labelTile'
 import { roleFor } from '../attack/playerView'
 import { remotePlacementStage } from '../setup/remotePlacement'
 import type { DomItem } from 'json-dom/dist/domItem/types'
@@ -35,6 +36,8 @@ export const redactBoard = (board: Board, ownBoard: boolean): Board => {
     if (style) {
       delete style.backgroundColor
     }
+    // The accessible name follows the colour (labelTile), so it is recomputed too: "B4, ship" must not survive either
+    labelTile(tile)
   })
   return clone
 }

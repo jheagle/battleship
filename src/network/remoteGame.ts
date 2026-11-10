@@ -1,6 +1,9 @@
 import jsonDom from 'json-dom'
+import matrixDom from 'matrix-dom'
 import { onGameUpdate, sendGameAction } from './lobbySocket'
 import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
+import type { Point } from 'matrix-dom/dist/point/types'
+import type { Board } from '../types'
 
 /** A pushed body carries whichever deadline currently applies as a plain attribute - see remotePlacement.ts's
  * startRemotePlacement (placement) and server/gameplay.ts's startRoomGame (turns). At most one is ever actually
@@ -121,6 +124,26 @@ const stopCountdown = (): void => {
   countdownKind = null
 }
 
+/** Every board (matrix-dom matrix) within an item, in tree order. */
+const boardsIn = (item: DomItem): Board[] => item.has?.['matrix.matrix']
+  ? [item as unknown as Board]
+  : (item.children ?? []).flatMap(boardsIn)
+
+/**
+ * The cell which has keyboard focus, as the index of its board among the rendered boards and its point, so focus can
+ * be put back on the same cell after a re-render; null when focus is not on a board cell.
+ * @param root
+ */
+const focusedCell = (root: DomItemRoot): { board: number, point: Point } | null => {
+  const focused = typeof document === 'undefined' ? null : document.activeElement
+  const grid = focused?.getAttribute('role') === 'gridcell' ? focused.closest('[role="grid"]') : null
+  const body = root.body.element as HTMLElement | undefined
+  if (!focused || !grid || !body) {
+    return null
+  }
+  return { board: Array.from(body.querySelectorAll('[role="grid"]')).indexOf(grid), point: matrixDom.getPointFromElement(focused) }
+}
+
 /**
  * Replace the root's own body content with a freshly-inflated redacted body's children, rendered directly as the
  * body's own children - not nested one level deeper under some other wrapper - so a path captured from this tree
@@ -130,8 +153,14 @@ const stopCountdown = (): void => {
  * @param redactedBody
  */
 const renderInto = (root: DomItemRoot, redactedBody: object): void => {
+  const focus = focusedCell(root)
   clearChildren(root.body)
   const inflated = jsonDom.jsonToDomItem(JSON.stringify(redactedBody))
+  // The boards' keyboard navigation (navigableGrid) is function listeners, which json drops: put it back, keeping
+  // the Tab stop on the cell that had focus. Its listeners run locally even while events are forwarded (json-dom only
+  // forwards named listeners), and Enter / Space click the cell, which is forwarded like a mouse click.
+  const boards = boardsIn(inflated)
+  boards.forEach((board, index) => matrixDom.navigableGrid(board, focus?.board === index ? focus.point : undefined))
   inflated.children.forEach((child: DomItem) => {
     // jsonToDomItem already set child.parentItem - to the throwaway top-level body it was inflated as part of,
     // not root.body. Left alone, renderHtml sees a non-null parentItem and assumes the item is already correctly
@@ -140,6 +169,9 @@ const renderInto = (root: DomItemRoot, redactedBody: object): void => {
     child.parentItem = null
     jsonDom.renderHtml(child, root.body)
   })
+  // Every update re-renders the whole tree, so keyboard focus would fall back to the page: return it to the same cell
+  const refocus = focus && boards[focus.board] ? matrixDom.getDomItemFromPoint(focus.point, boards[focus.board]) : false
+  ;(refocus ? refocus.element as HTMLElement | undefined : undefined)?.focus()
 }
 
 /** Stop forwarding (and the countdown, which can't be running once the game has ended anyway) without touching

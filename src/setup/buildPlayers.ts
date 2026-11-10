@@ -5,6 +5,7 @@ import playerColour from './playerColours'
 import playerSet from '../components/pieces/playerSet'
 import playerStats from '../components/pieces/playerStats'
 import waterTile from '../components/pieces/waterTile'
+import { labelBoard, labelBoardTiles } from '../cells/labelTile'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Player } from '../types'
 
@@ -29,15 +30,20 @@ const buildPlayers = (humans: number, root: DomItem, robots: number = 0, players
   // player panel's own border, which got busy once the own/target/summary role layout gave each panel a much
   // clearer visual distinction of its own.
   player.colour = playerColour(players.length)
-  // square() takes single objects here (matrix-dom's JSDoc says arrays, but arrays get merged in under a '0' key)
-  player.board = jDomMatrix.updateMatrixPoints(jDomMatrix.square({
+  // square() takes single objects here (matrix-dom's JSDoc says arrays, but arrays get merged in under a '0' key).
+  // navigableGrid makes the board an ARIA grid with keyboard navigation (arrows, Home / End, Enter or Space to click
+  // the focused cell, which runs attackListener like a mouse click); each tile is named by its coordinate and what it
+  // shows (labelTile), and the board by its player (labelBoard). A remote client re-applies it after each render (see
+  // remoteGame.ts), since its listeners are functions and do not survive the trip as json.
+  player.board = jDomMatrix.navigableGrid(labelBoardTiles(jDomMatrix.updateMatrixPoints(jDomMatrix.square({
     x: waterTile(),
     matrix: {
       eventListeners: {
         click: [{ listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }]
       }
     }
-  }, 10))
+  }, 10))))
+  labelBoard(player)
   // Robots get a random fleet now. Humans place their own during the placement phase (see placement.ts)
   player.shipFleet = player.isRobot ? defaultFleet(player.board, false) : []
   // Completed via createDomItem right here, not left as a plain config for later recursive discovery to pick
