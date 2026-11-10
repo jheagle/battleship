@@ -92,9 +92,12 @@ const ensureCountdownElement = (): void => {
   }
   countdownElement = document.createElement('div')
   countdownElement.className = 'remote-countdown'
+  // A timer: shown, not announced every second
+  countdownElement.setAttribute('role', 'timer')
   countdownElement.style.cssText = 'position: fixed; top: 0.5em; right: 0.5em; padding: 0.4em 0.8em; ' +
     'background: #222; color: #fff; border-radius: 4px; font: 14px sans-serif; z-index: 1000;'
-  document.body.appendChild(countdownElement)
+  // In the page header (a landmark), next to the h1, not loose in the body; fixed to the corner either way
+  ;(document.querySelector('header.game-header') ?? document.body).appendChild(countdownElement)
 }
 
 /** Start, update, or stop the visual countdown, as each new deadline (or its absence) comes in. */

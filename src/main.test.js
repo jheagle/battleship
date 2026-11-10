@@ -19,6 +19,9 @@ describe('the entry point', () => {
   })
 
   test('in a browser the menu waits for the player', () => {
+    // The Node test above played a game in the body; in a browser the game renders into its own <main> (gameRoot), so
+    // it no longer clears whatever else is in the body: start from the empty page a browser would have
+    document.body.innerHTML = ''
     jest.isolateModules(() => {
       jest.doMock('browser-or-node', () => ({ isNode: false }))
       const battleship = require('./main')
@@ -26,6 +29,9 @@ describe('the entry point', () => {
     })
     expect(document.querySelector('.main-menu')).not.toBeNull()
     expect(document.querySelectorAll('.player')).toHaveLength(0)
+    // and it is inside the main landmark, under the page's h1
+    expect(document.querySelector('main .main-menu')).not.toBeNull()
+    expect(document.querySelector('header h1').textContent).toBe('Battleship')
   })
 
   test('in a browser, a shared join link (?room=CODE) jumps straight to the join form with the code filled in', () => {
