@@ -1,7 +1,7 @@
 {
-  "name": "battleship",
+  "name": "cloakfall",
   "version": "1.0.1",
-  "description": "This is just a fun project creating a game of battleship. Experimenting with functional programming and ES6 features.",
+  "description": "Cloakfall: a free-for-all, hidden-fleet grid game for 2 to 4 players and robots, in a dark sector of space. Built on json-dom and matrix-dom.",
   "main": "dist/main.js",
   "author": "Joshua Heagle",
   "license": "ISC",
@@ -42,12 +42,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jheagle/battleship.git"
+    "url": "git+https://github.com/jheagle/cloakfall.git"
   },
   "bugs": {
-    "url": "https://github.com/jheagle/battleship/issues"
+    "url": "https://github.com/jheagle/cloakfall/issues"
   },
-  "homepage": "https://github.com/jheagle/battleship#readme",
+  "homepage": "https://github.com/jheagle/cloakfall#readme",
   "standard": {
     "env": [
       "jest"

@@ -1,13 +1,24 @@
-# battleship
+# Cloakfall
 
-This is just a fun project creating a game of battleship. Experimenting with functional programming and ES6 features.
+Every fleet is cloaked. Fire blind into the dark. The last fleet still hidden wins.
 
-Play it at https://joshuaheagle.com/projects/battleship/play.html (docs: https://joshuaheagle.com/projects/battleship/docs/).
+Cloakfall is a hidden-fleet grid game in a dark sector of space: 2 to 4 fleets, any mix of players and robots, in a
+free-for-all where the robots hunt each other too. Play it solo against robots, hot-seat on one screen, online with
+friends, or just watch the robots play. It is fully keyboard playable (Tab onto a board, arrow keys, Enter to fire) and
+screen-reader friendly: every cell is named by its coordinate and what it shows ("B4, miss").
+
+Play it at https://joshuaheagle.com/projects/cloakfall/play.html (docs: https://joshuaheagle.com/projects/cloakfall/docs/).
+
+Built with TypeScript on [json-dom](https://github.com/jheagle/json-dom) (the page as data) and
+[matrix-dom](https://github.com/jheagle/matrix-dom) (the grids), with a socket.io lobby server for online play.
+
+*Formerly "Battleship": renamed in November 2026, since that name is Hasbro's trademark. The rules of the classic
+pencil-and-paper game are free to use; the name, and Hasbro's own rules text, are not.*
 
 ## Running locally
 
 Solo, hot-seat and robots-only play are just the static page - nothing to run, open the built page
-(e.g. http://battleship.local) in a browser.
+(e.g. http://battleship.local, the local vhost's name from before the rename) in a browser.
 
 Online Multiplayer additionally needs the lobby server running:
 
@@ -23,6 +34,18 @@ just the socket.io server it talks to for room hosting/joining and the remote ga
 <dl>
 <dt><a href="#hasTrait">hasTrait</a></dt>
 <dd><p>The typed version of json-dom&#39;s hasTrait, it narrows an item to the trait it was checked for.</p>
+</dd>
+<dt><a href="#colours">colours</a></dt>
+<dd><p>Cloakfall&#39;s look in one place: the colours a board cell can show. Every fleet is cloaked in a dark sector of
+space; a shot that finds nothing is a dim scatter of empty space, a hit is a bright flare, and a player&#39;s own
+visible ships are silver.</p>
+<p>Colour is never the only signal: a shot cell also gets data-shot (hit / miss), which the CSS marks with a shape
+(a cross for a hit, a dot for a miss), since a hit and a shown ship differ mostly by hue.</p>
+<p>These are the only states a player can see on a board, so the cell names a screen reader hears (labelTile) and the
+remote redaction of hidden ships (redactBoard) both read them from here.</p>
+</dd>
+<dt><a href="#gameName">gameName</a></dt>
+<dd><p>The game&#39;s name, as players see it.</p>
 </dd>
 <dt><a href="#PLACEMENT_TIMEOUT_MS">PLACEMENT_TIMEOUT_MS</a></dt>
 <dd><p>How long players have to finish placing before any still-pending ships are placed at random for them.</p>
@@ -41,7 +64,7 @@ submit can join it without needing its own room-code field.</p>
 background, and distinct from one another.</p>
 </dd>
 <dt><a href="#defaultShipSpecs">defaultShipSpecs</a></dt>
-<dd><p>Create a default fleet using the standard battleship lengths.</p>
+<dd><p>Create a default fleet using the standard fleet lengths (5, 4, 3, 3, 2).</p>
 </dd>
 <dt><a href="#STAGE_MS">STAGE_MS</a></dt>
 <dd><p>How long each stage of the robot&#39;s attack is shown for, in turn.</p>
@@ -52,6 +75,15 @@ background, and distinct from one another.</p>
 <dt><a href="#ADJACENT_WEIGHT">ADJACENT_WEIGHT</a></dt>
 <dd><p>Extra weight for an unattacked cell next to a hit on a ship which is not yet sunk, the partial-hit follow-up.</p>
 </dd>
+<dt><a href="#DEMO_ROBOTS">DEMO_ROBOTS</a></dt>
+<dd><p>How many robots play the demo game behind the menu.</p>
+</dd>
+<dt><a href="#RESTART_MS">RESTART_MS</a></dt>
+<dd><p>The pause after a demo game is won, before the next one starts.</p>
+</dd>
+<dt><a href="#demoRoot">demoRoot</a></dt>
+<dd><p>The demo game currently running, if any.</p>
+</dd>
 </dl>
 
 ## Constants
@@ -61,13 +93,18 @@ background, and distinct from one another.</p>
 <dd><p>No server is deployed yet - this only works against a locally-run lobby server (npm run dev:lobby).</p>
 </dd>
 <dt><a href="#setViewShip">setViewShip</a></dt>
-<dd><p>Set a visible ship part at the given coordinates (shown with a grey background).</p>
+<dd><p>Set a visible ship part at the given coordinates (shown in the theme&#39;s ship colour).</p>
 </dd>
 <dt><a href="#setHit">setHit</a></dt>
 <dd><p>Mark the cell at the given coordinates as hit.</p>
 </dd>
 <dt><a href="#setHiddenShip">setHiddenShip</a></dt>
 <dd><p>Set a hidden ship part at the given coordinates (not shown, the default cell styling still applies).</p>
+</dd>
+<dt><a href="#colourWords">colourWords</a></dt>
+<dd><p>What a tile&#39;s background colour shows, in words. The colours are the only state a player can see on a board (see
+colourHitCell, setViewShip, shadeShips), so the words come from the colour, never from hasShip: a hidden ship must
+not be announced to a screen reader any more than it is shown on screen.</p>
 </dd>
 <dt><a href="#ATTACKER_LOCK_MS">ATTACKER_LOCK_MS</a></dt>
 <dd><p>How long a human attacker&#39;s own lock stays on once their turn starts. This used to be 400ms to match a
@@ -331,6 +368,10 @@ the players will take turns in. With several players that order is chosen here; 
 <dt><a href="#setStatsShown">setStatsShown(players, shown)</a></dt>
 <dd><p>Show or hide every player&#39;s stats (health, and the hint checkbox), which are not wanted during placement.</p>
 </dd>
+<dt><a href="#keepFocusInPanel">keepFocusInPanel(session)</a></dt>
+<dd><p>Keep keyboard focus somewhere real when the panel hides the control that had it: the first control still shown in
+the panel. A hidden focused button leaves focus nowhere (WebKit then ignores Tab until the page is clicked).</p>
+</dd>
 <dt><a href="#showOnly">showOnly(session, player)</a></dt>
 <dd><p>Show only this player&#39;s board, or with null hide every board.</p>
 </dd>
@@ -419,6 +460,18 @@ The optional parameter view will set the visibility of the ships.</p>
 <dd><p>The session for whichever game <code>item</code> belongs to - any DomItem in that game&#39;s tree, or its root itself, works the
 same way. A game gets its own session the first time anything asks for it, and it is garbage-collected along with
 its root once nothing else references the game any more - there is nothing to explicitly tear down.</p>
+</dd>
+<dt><a href="#gameLayout">gameLayout(doc)</a></dt>
+<dd><p>The page&#39;s landmarks: a header with the page&#39;s h1 (visually hidden, so the game looks the same, but a screen reader
+user can find the page by its heading) and the main element the game renders into. Reuses them when the page
+already has them (a re-run, or a page which provides its own main or h1), creating them at the top of the body
+otherwise. header is null when the page brought its own h1.</p>
+</dd>
+<dt><a href="#gameRoot">gameRoot(listeners)</a></dt>
+<dd><p>The game&#39;s root, like json-dom&#39;s documentDomItem, but its body is the page&#39;s main element rather than the body
+itself, so everything the game renders is inside the main landmark. The tree keeps the same shape (root -&gt; body -&gt;
+[boards, panels]), which remote play relies on (see remoteGame.ts); the server builds its rooms&#39; roots the same way
+(gameplay.ts&#39;s buildIsolatedRoot).</p>
 </dd>
 <dt><a href="#presetForMode">presetForMode(mode)</a></dt>
 <dd><p>The preset for a given game mode, so the lobby can be shown for it without a preset button having been clicked.</p>
@@ -550,6 +603,13 @@ one from the document while this module&#39;s own reference to it lives on.</p>
 </dd>
 <dt><a href="#stopCountdown">stopCountdown()</a></dt>
 <dd><p>Remove the countdown entirely - called once the remote game is left.</p>
+</dd>
+<dt><a href="#boardsIn">boardsIn()</a></dt>
+<dd><p>Every board (matrix-dom matrix) within an item, in tree order.</p>
+</dd>
+<dt><a href="#focusedCell">focusedCell(root)</a></dt>
+<dd><p>The cell which has keyboard focus, as the index of its board among the rendered boards and its point, so focus can
+be put back on the same cell after a re-render; null when focus is not on a board cell.</p>
 </dd>
 <dt><a href="#renderInto">renderInto(root, redactedBody)</a></dt>
 <dd><p>Replace the root&#39;s own body content with a freshly-inflated redacted body&#39;s children, rendered directly as the
@@ -717,6 +777,32 @@ would otherwise leave the first game&#39;s own render loop listening alongside t
 <dt><a href="#sendGameAction">sendGameAction()</a></dt>
 <dd><p>Forward a user interaction to the server instead of running its listener locally - see setForwardEvents.</p>
 </dd>
+<dt><a href="#menuShowing">menuShowing(doc)</a></dt>
+<dd><p>Whether the main menu is showing: the demo only plays behind it, and stops once a real game replaces it.</p>
+</dd>
+<dt><a href="#introLayer">introLayer(doc)</a></dt>
+<dd><p>The decorative layer behind the menu the demo game renders into. It is hidden from screen readers and inert, so its
+boards are never announced, focused or clicked: it is scenery, not part of the page.</p>
+</dd>
+<dt><a href="#demoGameRoot">demoGameRoot(listeners, layer)</a></dt>
+<dd><p>A game root of its own whose body is the demo layer, the same way the server gives every room its own root (see
+server/gameplay.ts&#39;s buildIsolatedRoot): its own session, queue and boards, independent of the player&#39;s game.</p>
+</dd>
+<dt><a href="#playDemo">playDemo(root)</a></dt>
+<dd><p>Play one robots-only game, with every ship shown so the hits land on something visible.</p>
+</dd>
+<dt><a href="#prefersReducedMotion">prefersReducedMotion()</a></dt>
+<dd><p>Whether the player asked for less motion: the demo is then a still frame (boards and ships, no shots).</p>
+</dd>
+<dt><a href="#stopIntroDemo">stopIntroDemo()</a></dt>
+<dd><p>Stop the demo and clear its layer.</p>
+</dd>
+<dt><a href="#startIntroDemo">startIntroDemo(listeners)</a></dt>
+<dd><p>Robots play a real game of Cloakfall behind the menu, using the game&#39;s own code, and start another after each win.
+With prefers-reduced-motion it is a still frame instead: the boards and their ships, and no shots.
+Every step of the demo runs on its own queue, which stops it as soon as the menu is gone (a real game started), so
+nothing needs to remember to stop it; showing the menu again (startMenu) starts a fresh one.</p>
+</dd>
 <dt><a href="#waterTile">waterTile()</a></dt>
 <dd><p>Set the style for tiles representing water: a default (unhit, shipless) tile with an empty point, ready to be given
 its real point when the board is built.</p>
@@ -739,7 +825,7 @@ given their real values once the board is built (see buildPlayers).</p>
 <dd><p>Set the status of the tile to hit.</p>
 </dd>
 <dt><a href="#gameTile">gameTile()</a></dt>
-<dd><p>Default properties for a tile in the battleship game.</p>
+<dd><p>Default properties for a tile in Cloakfall.</p>
 </dd>
 <dt><a href="#showShipsControl">showShipsControl()</a></dt>
 <dd><p>The one control for the robots-only game: a single checkbox to show every ship on every board, rather than one per
@@ -791,12 +877,27 @@ only the parts not yet hit change.</p>
 <dt><a href="#setShip">setShip(matrix, point, view)</a></dt>
 <dd><p>Set a specified point to be part of a ship</p>
 </dd>
+<dt><a href="#coordinateName">coordinateName(point)</a></dt>
+<dd><p>A tile&#39;s coordinate as players call it: the column as a letter, the row as a number, so (0, 0) is A1 and (9, 9) J10.</p>
+</dd>
+<dt><a href="#tileLabel">tileLabel(tile)</a></dt>
+<dd><p>A tile&#39;s accessible name: its coordinate, then what its colour shows, e.g. &quot;B4&quot;, &quot;B4, miss&quot;, &quot;C7, hit&quot;.</p>
+</dd>
+<dt><a href="#labelTile">labelTile(tile)</a></dt>
+<dd><p>Set a tile&#39;s accessible name from what it currently shows (call it before updateElement, so the element gets it).</p>
+</dd>
+<dt><a href="#labelBoardTiles">labelBoardTiles(board)</a></dt>
+<dd><p>Name every tile of a board.</p>
+</dd>
+<dt><a href="#labelBoard">labelBoard(player)</a></dt>
+<dd><p>Name a player&#39;s board after the player (the name can change during placement, see updatePlayerStats).</p>
+</dd>
 <dt><a href="#configureHtml">configureHtml(config, isRobot)</a></dt>
 <dd><p>Update view based on actions performed</p>
 </dd>
 <dt><a href="#colourHitCell">colourHitCell(config)</a></dt>
-<dd><p>Colour a cell once it has been hit: red for a ship, white for water. Cells only have a style object once something
-has resized or highlighted them, so it is created here when it is missing.</p>
+<dd><p>Colour a cell once it has been hit: a flare for a ship, dim empty space for a miss (see theme.ts). Cells only have a
+style object once something has resized or highlighted them, so it is created here when it is missing.</p>
 </dd>
 <dt><a href="#markBoard">markBoard(victim, attackable)</a></dt>
 <dd><p>Mark the cells of a board which can still be attacked: the ones not yet hit. The class is what the stylesheet uses to
@@ -889,6 +990,50 @@ exactly one of the two is ever active for a given game, never both.</p>
 The typed version of json-dom's hasTrait, it narrows an item to the trait it was checked for.
 
 **Kind**: global variable  
+<a name="colours"></a>
+
+## colours
+Cloakfall's look in one place: the colours a board cell can show. Every fleet is cloaked in a dark sector of
+space; a shot that finds nothing is a dim scatter of empty space, a hit is a bright flare, and a player's own
+visible ships are silver.
+
+Colour is never the only signal: a shot cell also gets data-shot (hit / miss), which the CSS marks with a shape
+(a cross for a hit, a dot for a miss), since a hit and a shown ship differ mostly by hue.
+
+These are the only states a player can see on a board, so the cell names a screen reader hears (labelTile) and the
+remote redaction of hidden ships (redactBoard) both read them from here.
+
+**Kind**: global variable  
+
+* [colours](#colours)
+    * [.hit](#colours.hit)
+    * [.miss](#colours.miss)
+    * [.ship](#colours.ship)
+
+<a name="colours.hit"></a>
+
+### colours.hit
+A shot that hit a ship: a bright orange flare.
+
+**Kind**: static property of [<code>colours</code>](#colours)  
+<a name="colours.miss"></a>
+
+### colours.miss
+A shot into empty space: slate (3.9:1 against an unshot cell).
+
+**Kind**: static property of [<code>colours</code>](#colours)  
+<a name="colours.ship"></a>
+
+### colours.ship
+A player's own ship, when shown (placement, "Show my ships").
+
+**Kind**: static property of [<code>colours</code>](#colours)  
+<a name="gameName"></a>
+
+## gameName
+The game's name, as players see it.
+
+**Kind**: global variable  
 <a name="PLACEMENT_TIMEOUT_MS"></a>
 
 ## PLACEMENT\_TIMEOUT\_MS
@@ -920,7 +1065,7 @@ background, and distinct from one another.
 <a name="defaultShipSpecs"></a>
 
 ## defaultShipSpecs
-Create a default fleet using the standard battleship lengths.
+Create a default fleet using the standard fleet lengths (5, 4, 3, 3, 2).
 
 **Kind**: global variable  
 
@@ -947,6 +1092,24 @@ Extra weight for placements which explain a ship that is already damaged, relati
 Extra weight for an unattacked cell next to a hit on a ship which is not yet sunk, the partial-hit follow-up.
 
 **Kind**: global variable  
+<a name="DEMO_ROBOTS"></a>
+
+## DEMO\_ROBOTS
+How many robots play the demo game behind the menu.
+
+**Kind**: global variable  
+<a name="RESTART_MS"></a>
+
+## RESTART\_MS
+The pause after a demo game is won, before the next one starts.
+
+**Kind**: global variable  
+<a name="demoRoot"></a>
+
+## demoRoot
+The demo game currently running, if any.
+
+**Kind**: global variable  
 <a name="DEFAULT_URL"></a>
 
 ## DEFAULT\_URL
@@ -956,7 +1119,7 @@ No server is deployed yet - this only works against a locally-run lobby server (
 <a name="setViewShip"></a>
 
 ## setViewShip
-Set a visible ship part at the given coordinates (shown with a grey background).
+Set a visible ship part at the given coordinates (shown in the theme's ship colour).
 
 **Kind**: global constant  
 <a name="setHit"></a>
@@ -969,6 +1132,14 @@ Mark the cell at the given coordinates as hit.
 
 ## setHiddenShip
 Set a hidden ship part at the given coordinates (not shown, the default cell styling still applies).
+
+**Kind**: global constant  
+<a name="colourWords"></a>
+
+## colourWords
+What a tile's background colour shows, in words. The colours are the only state a player can see on a board (see
+colourHitCell, setViewShip, shadeShips), so the words come from the colour, never from hasShip: a hidden ship must
+not be announced to a screen reader any more than it is shown on screen.
 
 **Kind**: global constant  
 <a name="ATTACKER_LOCK_MS"></a>
@@ -1609,6 +1780,18 @@ Show or hide every player's stats (health, and the hint checkbox), which are not
 | players | 
 | shown | 
 
+<a name="keepFocusInPanel"></a>
+
+## keepFocusInPanel(session)
+Keep keyboard focus somewhere real when the panel hides the control that had it: the first control still shown in
+the panel. A hidden focused button leaves focus nowhere (WebKit then ignores Tab until the page is clicked).
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| session | 
+
 <a name="showOnly"></a>
 
 ## showOnly(session, player)
@@ -1912,6 +2095,34 @@ its root once nothing else references the game any more - there is nothing to ex
 | Param |
 | --- |
 | item | 
+
+<a name="gameLayout"></a>
+
+## gameLayout(doc)
+The page's landmarks: a header with the page's h1 (visually hidden, so the game looks the same, but a screen reader
+user can find the page by its heading) and the main element the game renders into. Reuses them when the page
+already has them (a re-run, or a page which provides its own main or h1), creating them at the top of the body
+otherwise. header is null when the page brought its own h1.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| doc | 
+
+<a name="gameRoot"></a>
+
+## gameRoot(listeners)
+The game's root, like json-dom's documentDomItem, but its body is the page's main element rather than the body
+itself, so everything the game renders is inside the main landmark. The tree keeps the same shape (root -> body ->
+[boards, panels]), which remote play relies on (see remoteGame.ts); the server builds its rooms' roots the same way
+(gameplay.ts's buildIsolatedRoot).
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| listeners | 
 
 <a name="presetForMode"></a>
 
@@ -2303,6 +2514,24 @@ Start, update, or stop the visual countdown, as each new deadline (or its absenc
 Remove the countdown entirely - called once the remote game is left.
 
 **Kind**: global function  
+<a name="boardsIn"></a>
+
+## boardsIn()
+Every board (matrix-dom matrix) within an item, in tree order.
+
+**Kind**: global function  
+<a name="focusedCell"></a>
+
+## focusedCell(root)
+The cell which has keyboard focus, as the index of its board among the rendered boards and its point, so focus can
+be put back on the same cell after a re-render; null when focus is not on a board cell.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| root | 
+
 <a name="renderInto"></a>
 
 ## renderInto(root, redactedBody)
@@ -2619,6 +2848,79 @@ would otherwise leave the first game's own render loop listening alongside the n
 Forward a user interaction to the server instead of running its listener locally - see setForwardEvents.
 
 **Kind**: global function  
+<a name="menuShowing"></a>
+
+## menuShowing(doc)
+Whether the main menu is showing: the demo only plays behind it, and stops once a real game replaces it.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| doc | 
+
+<a name="introLayer"></a>
+
+## introLayer(doc)
+The decorative layer behind the menu the demo game renders into. It is hidden from screen readers and inert, so its
+boards are never announced, focused or clicked: it is scenery, not part of the page.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| doc | 
+
+<a name="demoGameRoot"></a>
+
+## demoGameRoot(listeners, layer)
+A game root of its own whose body is the demo layer, the same way the server gives every room its own root (see
+server/gameplay.ts's buildIsolatedRoot): its own session, queue and boards, independent of the player's game.
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| listeners | the real game's listeners (named listeners on the demo's boards must resolve) |
+| layer |  |
+
+<a name="playDemo"></a>
+
+## playDemo(root)
+Play one robots-only game, with every ship shown so the hits land on something visible.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| root | 
+
+<a name="prefersReducedMotion"></a>
+
+## prefersReducedMotion()
+Whether the player asked for less motion: the demo is then a still frame (boards and ships, no shots).
+
+**Kind**: global function  
+<a name="stopIntroDemo"></a>
+
+## stopIntroDemo()
+Stop the demo and clear its layer.
+
+**Kind**: global function  
+<a name="startIntroDemo"></a>
+
+## startIntroDemo(listeners)
+Robots play a real game of Cloakfall behind the menu, using the game's own code, and start another after each win.
+With prefers-reduced-motion it is a still frame instead: the boards and their ships, and no shots.
+Every step of the demo runs on its own queue, which stops it as soon as the menu is gone (a real game started), so
+nothing needs to remember to stop it; showing the menu again (startMenu) starts a fresh one.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| listeners | 
+
 <a name="waterTile"></a>
 
 ## waterTile()
@@ -2679,7 +2981,7 @@ Set the status of the tile to hit.
 <a name="gameTile"></a>
 
 ## gameTile()
-Default properties for a tile in the battleship game.
+Default properties for a tile in Cloakfall.
 
 **Kind**: global function  
 <a name="showShipsControl"></a>
@@ -2808,6 +3110,61 @@ Set a specified point to be part of a ship
 | point | 
 | view | 
 
+<a name="coordinateName"></a>
+
+## coordinateName(point)
+A tile's coordinate as players call it: the column as a letter, the row as a number, so (0, 0) is A1 and (9, 9) J10.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| point | 
+
+<a name="tileLabel"></a>
+
+## tileLabel(tile)
+A tile's accessible name: its coordinate, then what its colour shows, e.g. "B4", "B4, miss", "C7, hit".
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| tile | 
+
+<a name="labelTile"></a>
+
+## labelTile(tile)
+Set a tile's accessible name from what it currently shows (call it before updateElement, so the element gets it).
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| tile | 
+
+<a name="labelBoardTiles"></a>
+
+## labelBoardTiles(board)
+Name every tile of a board.
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| board | 
+
+<a name="labelBoard"></a>
+
+## labelBoard(player)
+Name a player's board after the player (the name can change during placement, see updatePlayerStats).
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| player | 
+
 <a name="configureHtml"></a>
 
 ## configureHtml(config, isRobot)
@@ -2823,8 +3180,8 @@ Update view based on actions performed
 <a name="colourHitCell"></a>
 
 ## colourHitCell(config)
-Colour a cell once it has been hit: red for a ship, white for water. Cells only have a style object once something
-has resized or highlighted them, so it is created here when it is missing.
+Colour a cell once it has been hit: a flare for a ship, dim empty space for a miss (see theme.ts). Cells only have a
+style object once something has resized or highlighted them, so it is created here when it is missing.
 
 **Kind**: global function  
 

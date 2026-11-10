@@ -3,7 +3,7 @@ import type { Board, Player, Ship, Tile } from '../src/types'
 import type { CoreItem } from 'json-dom/dist/domItem/types'
 import type { Matrix } from 'matrix-dom/dist/grid/types'
 
-// A tile is both a matrix column and carries the battleship trait
+// A tile is both a matrix column and carries the cloakfall trait
 const tile = {} as Tile
 const hasShip: boolean = tile.hasShip
 const isHit: boolean = tile.isHit
@@ -13,12 +13,12 @@ const axis: 'x' = tile.axis
 const item = {} as CoreItem
 let narrowedBoard: Board | null = null
 let narrowedFleet: Ship[] | null = null
-if (hasTrait(item, 'battleship.player')) {
+if (hasTrait(item, 'cloakfall.player')) {
   narrowedBoard = item.board
   narrowedFleet = item.shipFleet
 }
 let narrowedHasShip: boolean | null = null
-if (hasTrait(item, 'battleship.tile')) {
+if (hasTrait(item, 'cloakfall.tile')) {
   narrowedHasShip = item.hasShip
 }
 
@@ -32,6 +32,6 @@ const wrongStatus: Ship = { name: 'Destroyer', status: '100', parts: [] }
 // @ts-expect-error - a tile needs hasShip and isHit
 const notATile: Tile = { point: { x: 0, y: 0, z: 0 } }
 // @ts-expect-error - there is no such trait
-hasTrait(item, 'battleship.submarine')
+hasTrait(item, 'cloakfall.submarine')
 
 export { hasShip, isHit, axis, narrowedBoard, narrowedFleet, narrowedHasShip, board, stats }

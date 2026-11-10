@@ -11,8 +11,8 @@ useGameLifecycle()
 
 describe('the entry point', () => {
   test('in Node the game starts by itself: the menu is submitted for you and two robots play', async () => {
-    const battleship = require('./main')
-    battleship()
+    const cloakfall = require('./main')
+    cloakfall()
     expect(document.querySelector('.main-menu')).toBeNull()
     expect(document.querySelectorAll('.player')).toHaveLength(2)
     await settle(60000)
@@ -24,8 +24,8 @@ describe('the entry point', () => {
     document.body.innerHTML = ''
     jest.isolateModules(() => {
       jest.doMock('browser-or-node', () => ({ isNode: false }))
-      const battleship = require('./main')
-      battleship()
+      const cloakfall = require('./main')
+      cloakfall()
     })
     expect(document.querySelector('.main-menu')).not.toBeNull()
     // no game in the page itself: the only boards are the robots' demo behind the menu
@@ -41,8 +41,8 @@ describe('the entry point', () => {
     try {
       jest.isolateModules(() => {
         jest.doMock('browser-or-node', () => ({ isNode: false }))
-        const battleship = require('./main')
-        battleship()
+        const cloakfall = require('./main')
+        cloakfall()
         // The real room lookup (see remoteListener.ts's peekAndConfirm) opened a real (never-connecting, since
         // no lobby server is running in this test) lobby socket - close it so it doesn't linger as an open
         // handle. Has to be required inside this same isolateModules call: that sandbox gives every module it
@@ -63,8 +63,8 @@ describe('the entry point', () => {
   test('in a browser with no shared link, the menu shows the game types as usual', () => {
     jest.isolateModules(() => {
       jest.doMock('browser-or-node', () => ({ isNode: false }))
-      const battleship = require('./main')
-      battleship()
+      const cloakfall = require('./main')
+      cloakfall()
     })
     expect(document.querySelector('.presets').style.display).not.toBe('none')
     expect(document.querySelector('.remote-entry').style.display).toBe('none')

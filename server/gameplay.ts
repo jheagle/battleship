@@ -65,7 +65,7 @@ const remoteLeaveListener: ListenerFunction = () => {}
 /**
  * Build and start a real game for a room's connected players, reusing the engine entirely unmodified - the same
  * startNewGame local play uses, just handed a pseudo-dom-backed root instead of a real browser one (the engine
- * already runs headless this way, see battleship's own Node self-start path and its whole test suite), with
+ * already runs headless this way, see the game's own Node self-start path and its whole test suite), with
  * startRemotePlacement in place of local hot-seat's own handoff-based placement.
  * @param roomPlayers the room's players, in join order - buildPlayers generates players in this same order, so
  * this is what maps a socket to the player it owns. Real names are set as soon as the players exist (via

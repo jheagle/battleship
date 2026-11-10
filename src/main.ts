@@ -15,7 +15,7 @@ import gameRoot from './setup/gameRoot'
 import jsonDom from 'json-dom'
 import { isNode } from 'browser-or-node'
 
-const battleship = (): void => {
+const cloakfall = (): void => {
   // Create new private reference to the document. In a browser the game renders into a <main> (see gameRoot), under a
   // header with the page's h1; on Node (the server's own module use) it keeps json-dom's default document root.
   const listeners = {
@@ -54,20 +54,26 @@ const battleship = (): void => {
   }
 }
 
-// `export =` (CommonJS `module.exports = battleship`), not `export default` (`exports.default = battleship`)
+// `export =` (CommonJS `module.exports = cloakfall`), not `export default` (`exports.default = cloakfall`)
 // - this is the bundle's own entry point, and js-build-tools' browserify `standalone` option exposes this
 // module's exports AS the global a bare <script> tag gets (see js-build-tools' bundle.mjs) - with a default
-// export instead, that global ends up `{ default: battleship }`, not the callable `battleship` itself, which
-// silently broke index.html's own `battleship()` call (confirmed via a real browser: "battleship is not a
+// export instead, that global ends up `{ default: cloakfall }`, not the callable `cloakfall` itself, which
+// silently broke index.html's own `battleship()` call, as it was then named (confirmed via a real browser: "battleship is not a
 // function", a dark screen with no menu at all). The explicit window/this assignment right below already set
 // the global correctly on its own - the bug was browserify's own standalone wrapper running after it and
 // overwriting it with the wrong shape, not anything wrong with that assignment itself.
-export = battleship
+export = cloakfall
 
+// The game was called Battleship until 2026-11 (renamed for the trademark): `battleship()` stays as an alias, so a page
+// still calling the old name keeps working
 if (this) {
   // @ts-ignore
-  this.battleship = battleship
+  this.cloakfall = cloakfall
+  // @ts-ignore
+  this.battleship = cloakfall
 } else if (typeof window !== 'undefined') {
   // @ts-ignore
-  window.battleship = battleship
+  window.cloakfall = cloakfall
+  // @ts-ignore
+  window.battleship = cloakfall
 }
