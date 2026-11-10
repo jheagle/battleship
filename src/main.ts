@@ -11,12 +11,14 @@ import restart from './setup/restart'
 import playAgain from './setup/playAgain'
 import returnToLobby from './setup/returnToLobby'
 import startMenu from './setup/startMenu'
+import gameRoot from './setup/gameRoot'
 import jsonDom from 'json-dom'
 import { isNode } from 'browser-or-node'
 
 const battleship = (): void => {
-  // Create new private reference to the document
-  const documentItem = startMenu(jsonDom.documentDomItem({
+  // Create new private reference to the document. In a browser the game renders into a <main> (see gameRoot), under a
+  // header with the page's h1; on Node (the server's own module use) it keeps json-dom's default document root.
+  const listeners = {
     beginRound,
     attackListener,
     hintListener,
@@ -29,7 +31,8 @@ const battleship = (): void => {
     restart,
     playAgain,
     returnToLobby
-  }))
+  }
+  const documentItem = startMenu(isNode ? jsonDom.documentDomItem(listeners) : gameRoot(listeners))
 
   // Trigger game to start if running as a Node module. This used to check
   // `!(document instanceof HTMLDocument)`, but pseudo-dom's installGlobal (which must already have run - see below -
