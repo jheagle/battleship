@@ -70,12 +70,19 @@
       color: white
       font-size: 1.6rem
 
+.tagline
+  color: #c9d1e8
+  font-size: clamp(1.5rem, 3vw, 2rem)
+  max-width: 60rem
+  margin: 1.5rem auto 0
+  padding: 0 2rem
+
 .presets
   display: grid
   grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr))
   gap: 2rem
   max-width: 90rem
-  margin: 4rem auto 3rem
+  margin: 2rem auto 3rem
   padding: 3rem 2rem 0
 
   button
@@ -83,14 +90,16 @@
     font-weight: 700
     min-height: 9rem
     padding: 1.5rem 2rem
-    border: none
+    border: .1rem solid #3a4770
     border-radius: .8rem
-    background-color: white
-    color: #333
+    // Dark translucent panels, so the robots' game shows faintly through; text 15:1 on the panel
+    background-color: rgba(16, 23, 44, .88)
+    color: #e8ecf8
     cursor: pointer
 
-    &:hover
-      color: green
+    &:hover, &:focus-visible
+      border-color: #ff8a3d
+      box-shadow: 0 0 1.2rem rgba(255, 138, 61, .35)
 
 .main-menu-form, .remote-entry, .waiting-room
   h2

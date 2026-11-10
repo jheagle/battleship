@@ -28,7 +28,9 @@ describe('the entry point', () => {
       battleship()
     })
     expect(document.querySelector('.main-menu')).not.toBeNull()
-    expect(document.querySelectorAll('.player')).toHaveLength(0)
+    // no game in the page itself: the only boards are the robots' demo behind the menu
+    expect(document.querySelectorAll('main .player')).toHaveLength(0)
+    expect(document.querySelectorAll('.intro-demo .player')).toHaveLength(3)
     // and it is inside the main landmark, under the page's h1
     expect(document.querySelector('main .main-menu')).not.toBeNull()
     expect(document.querySelector('header h1').textContent).toBe('Cloakfall')
