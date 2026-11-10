@@ -1,6 +1,7 @@
 import jsonDom from 'json-dom'
 import getAttackLock from '../attack/attackLock'
 import colourHitCell from './colourHitCell'
+import labelTile from './labelTile'
 import queueTimeout from '../queue'
 
 import type { Tile } from '../types'
@@ -18,13 +19,13 @@ const configureHtml = (config: Tile, isRobot: boolean): Tile => {
     attackLock.isLocked = true
     queueTimeout(config, () => {
       colourHitCell(config)
-      config = jsonDom.updateElement(config) as Tile
+      config = jsonDom.updateElement(labelTile(config)) as Tile
       attackLock.isLocked = false
       return config
     }, 0)
   } else {
     colourHitCell(config)
-    config = jsonDom.updateElement(config) as Tile
+    config = jsonDom.updateElement(labelTile(config)) as Tile
   }
   return config
 }

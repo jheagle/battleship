@@ -1,4 +1,5 @@
 import jsonDom from 'json-dom'
+import labelTile from '../cells/labelTile'
 import matrixDom from 'matrix-dom'
 import siFunciona from 'si-funciona'
 import { defaultShipSpecs } from './defaultFleet'
@@ -53,7 +54,8 @@ const active = (item: DomItem): PlacementSession => {
 const child = (item: DomItem, className: string): DomItem => jsonDom.getChildrenByClass(className, item)[0]
 
 const update = (item: DomItem, attributes: object): void => {
-  jsonDom.updateElement(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem)
+  // labelTile only acts on tiles: a tile's accessible name follows its colour
+  jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem))
 }
 
 /**
@@ -130,6 +132,21 @@ interface Buttons {
   nameShown?: boolean
 }
 
+/**
+ * Keep keyboard focus somewhere real when the panel hides the control that had it: the first control still shown in
+ * the panel. A hidden focused button leaves focus nowhere (WebKit then ignores Tab until the page is clicked).
+ * @param session
+ */
+const keepFocusInPanel = (session: PlacementSession): void => {
+  const panel = session.panel.element as HTMLElement | undefined
+  const focused = typeof document === 'undefined' ? null : document.activeElement as HTMLElement | null
+  if (!panel || !focused || !panel.contains(focused) || focused.offsetParent !== null || focused.getClientRects().length) {
+    return
+  }
+  const next = Array.from(panel.querySelectorAll<HTMLElement>('button, input')).find(control => control.style.display !== 'none' && !(control as HTMLButtonElement).disabled)
+  next?.focus()
+}
+
 const setButtons = (session: PlacementSession, { continueShown = false, placingShown = false, doneEnabled = false, randomShown = false, orderShown = false, nameShown = false }: Buttons): void => {
   const shown = (on: boolean) => ({ style: { display: on ? '' : 'none' } })
   update(child(session.panel, 'placement-name'), shown(nameShown))
@@ -138,6 +155,7 @@ const setButtons = (session: PlacementSession, { continueShown = false, placingS
   update(child(session.panel, 'placement-done'), { ...shown(placingShown), disabled: !doneEnabled })
   update(child(session.panel, 'begin-random'), shown(randomShown))
   update(child(session.panel, 'begin-order'), shown(orderShown))
+  keepFocusInPanel(session)
 }
 
 /**
@@ -281,7 +299,7 @@ export const randomise = (item: DomItem): void => {
   const player = current(session)
   matrixDom.getLayerPoints(player.board, 0).forEach(p => {
     const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
-    jsonDom.updateElement(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem)
+    jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem))
   })
   player.shipFleet = generateRandomFleet(defaultShipSpecs, player.board, true)
   session.pending = []
@@ -458,6 +476,9 @@ const startRound = (session: PlacementSession, order: Player[]): void => {
   setStatsShown(players, true)
   getSession(order[0] as unknown as DomItem).placement = null
   done(order)
+  // The panel (and the Done button which had focus) is gone: start keyboard users on a board they can attack
+  const target = order.find(p => !p.attacker) ?? order[0]
+  ;(target?.board.element as HTMLElement | undefined)?.querySelector<HTMLElement>('[tabindex="0"]')?.focus()
 }
 
 /**
