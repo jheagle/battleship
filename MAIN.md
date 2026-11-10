@@ -24,7 +24,7 @@ icons (`scripts/build-icons.mjs` there). Re-render them after changing the SVG.
 ## Running locally
 
 Solo, hot-seat and robots-only play are just the static page - nothing to run, open the built page
-(e.g. http://battleship.local, the local vhost's name from before the rename) in a browser.
+(e.g. http://cloakfall.local) in a browser.
 
 Online Multiplayer additionally needs the lobby server running:
 
