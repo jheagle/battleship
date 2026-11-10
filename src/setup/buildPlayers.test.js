@@ -39,7 +39,7 @@ describe('setup: each board and fleet', () => {
     })
   })
 
-  test('the fleet is a carrier, battleship, submarine, cruiser and destroyer', () => {
+  test('the fleet is a mothership, dreadnought, phantom, cruiser and scout', () => {
     games.flat().forEach(player => {
       expect(player.shipFleet.map(ship => ship.name)).toEqual(fleetNames)
       expect(player.shipFleet.map(ship => ship.parts.length)).toEqual(fleetSizes)

@@ -1,15 +1,15 @@
 {
   "browser": {
-    "name": "battleship"
+    "name": "cloakfall"
   },
   "copyFiles": [
     {
       "from": "browser/*.js",
-      "to": "../joshuaheagle.local/projects/battleship/browser"
+      "to": "../joshuaheagle.local/projects/cloakfall/browser"
     },
     {
       "from": "browser/css/*.css",
-      "to": "../joshuaheagle.local/projects/battleship/browser/css"
+      "to": "../joshuaheagle.local/projects/cloakfall/browser/css"
     }
   ],
   "docs": {
@@ -17,7 +17,7 @@
     "enabled": true,
     "from": "src",
     "index": "MAIN.md",
-    "to": "../joshuaheagle.local/projects/battleship/docs"
+    "to": "../joshuaheagle.local/projects/cloakfall/docs"
   },
   "readme": {
     "from": "dist/**/!(*.min).js"

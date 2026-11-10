@@ -3,7 +3,7 @@ import generateRandomFleet from './generateRandomFleet'
 import type { Board, Ship, ShipSpec } from '../types'
 
 /**
- * Create a default fleet using the standard battleship lengths.
+ * Create a default fleet using the standard fleet lengths (5, 4, 3, 3, 2).
  * @param matrix
  * @param view
  */

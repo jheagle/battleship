@@ -47,7 +47,7 @@ const buildPlayers = (humans: number, root: DomItem, robots: number = 0, players
   // Robots get a random fleet now. Humans place their own during the placement phase (see placement.ts)
   player.shipFleet = player.isRobot ? defaultFleet(player.board, false) : []
   // Completed via createDomItem right here, not left as a plain config for later recursive discovery to pick
-  // up: player already carries its own has map (battleship.player, set directly in playerSet.ts, not via
+  // up: player already carries its own has map (cloakfall.player, set directly in playerSet.ts, not via
   // withTrait), so createCoreItem's "skip children which already look complete" check treats player itself
   // as already done whenever it is found as someone else's child (see boards.ts) - its own children, this one
   // included, would otherwise never get a real id/parentItem/has at all. updatePlayerStats's own later merges

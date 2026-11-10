@@ -271,5 +271,5 @@ export const createLobbyServer = (): HttpServer => {
 
 if (process.argv[1] && process.argv[1].endsWith('lobbyServer.js')) {
   const port = process.env.PORT || 3002
-  createLobbyServer().listen(port, () => console.log(`battleship lobby server listening on port ${port}`))
+  createLobbyServer().listen(port, () => console.log(`cloakfall lobby server listening on port ${port}`))
 }

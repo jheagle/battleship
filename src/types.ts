@@ -5,14 +5,14 @@ import type { Matrix, MatrixColumn } from 'matrix-dom/dist/grid/types'
 
 /**
  * The traits of a game: a tile (a matrix-dom column which also has a ship and a hit state) and a player. They are
- * added to json-dom's TraitRegistry, so `hasTrait(item, 'battleship.player')` narrows an item to a Player.
+ * added to json-dom's TraitRegistry, so `hasTrait(item, 'cloakfall.player')` narrows an item to a Player.
  */
 declare module 'json-dom/dist/domItem/types' {
   interface TraitRegistry {
     /** The tile has a ship on it, and whether it has been hit. */
-    'battleship.tile': { hasShip: boolean, isHit: boolean }
+    'cloakfall.tile': { hasShip: boolean, isHit: boolean }
     /** The item is a player: their board, fleet and stats. */
-    'battleship.player': {
+    'cloakfall.player': {
       name: string
       isRobot: boolean
       /** The colour this player is identified by on the boards. */
@@ -37,11 +37,11 @@ declare module 'json-dom/dist/domItem/types' {
  */
 export const hasTrait: typeof hasTraitType = jsonDom.hasTrait
 
-jsonDom.defineTrait('battleship.tile', { keys: ['hasShip', 'isHit'] })
-jsonDom.defineTrait('battleship.player', { keys: ['name', 'isRobot', 'status', 'turnCnt', 'attacker', 'showHint', 'attacks', 'board', 'shipFleet', 'playerStats'] })
+jsonDom.defineTrait('cloakfall.tile', { keys: ['hasShip', 'isHit'] })
+jsonDom.defineTrait('cloakfall.player', { keys: ['name', 'isRobot', 'status', 'turnCnt', 'attacker', 'showHint', 'attacks', 'board', 'shipFleet', 'playerStats'] })
 
 /** A cell of a player's board: a matrix-dom column which also carries whether it has a ship and has been hit. */
-export type Tile = MatrixColumn & WithTraits<'battleship.tile'>
+export type Tile = MatrixColumn & WithTraits<'cloakfall.tile'>
 
 /** A player's board: a matrix-dom matrix of Tiles. */
 export type Board = Matrix
@@ -62,7 +62,7 @@ export interface Ship {
 }
 
 /** A player: their board, fleet, stats panel and turn state, rendered as an item in the tree. */
-export type Player = DomItem & WithTraits<'battleship.player'>
+export type Player = DomItem & WithTraits<'cloakfall.player'>
 
 /** The name and length of a ship, before it has been placed on a board. */
 export interface ShipSpec {

@@ -7,7 +7,7 @@ import type { Board, Player } from '../../types'
  * @param name
  */
 const playerSet = (board: Board | Record<string, never> = {}, name: string = ''): Player => ({
-  has: { 'battleship.player': true },
+  has: { 'cloakfall.player': true },
   name,
   isRobot: false,
   colour: '',
