@@ -10,6 +10,10 @@
     {
       "from": "browser/css/*.css",
       "to": "../joshuaheagle.local/projects/cloakfall/browser/css"
+    },
+    {
+      "from": "icons/*",
+      "to": "../joshuaheagle.local/projects/cloakfall/icons"
     }
   ],
   "docs": {

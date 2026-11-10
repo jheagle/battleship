@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Cloakfall: a cloaked ship in a dark sector, its tail fading out, its nose caught by a flare -->
+  <defs>
+    <linearGradient id="cloak" x1="0.1" y1="0.9" x2="0.95" y2="0.05">
+      <stop offset="0" stop-color="#9aa4bd" stop-opacity="0.12"/>
+      <stop offset="0.5" stop-color="#9aa4bd" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#e8ecf8"/>
+    </linearGradient>
+    <radialGradient id="flare">
+      <stop offset="0" stop-color="#fff3e6"/>
+      <stop offset="0.35" stop-color="#ff8a3d"/>
+      <stop offset="1" stop-color="#ff8a3d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#070b16"/>
+  <path d="M21.3 6v52M42.7 6v52M6 21.3h52M6 42.7h52" stroke="#26304f" stroke-width="1.5"/>
+  <path d="M50 14 L32 52 L29.5 34.5 L12 32 Z" fill="url(#cloak)"/>
+  <circle cx="49" cy="15" r="9" fill="url(#flare)"/>
+</svg>

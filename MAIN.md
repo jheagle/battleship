@@ -15,6 +15,12 @@ Built with TypeScript on [json-dom](https://github.com/jheagle/json-dom) (the pa
 *Formerly "Battleship": renamed in November 2026, since that name is Hasbro's trademark. The rules of the classic
 pencil-and-paper game are free to use; the name, and Hasbro's own rules text, are not.*
 
+## Icons
+
+`icons/icon.svg` is the source: a cloaked ship fading into the dark, its nose caught by a flare. The PNGs and
+`favicon.ico` (16, 32 and 48 px) in `icons/` are rendered from it with sharp, the same way the website builds its own
+icons (`scripts/build-icons.mjs` there). Re-render them after changing the SVG.
+
 ## Running locally
 
 Solo, hot-seat and robots-only play are just the static page - nothing to run, open the built page
