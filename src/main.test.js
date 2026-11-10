@@ -31,7 +31,7 @@ describe('the entry point', () => {
     expect(document.querySelectorAll('.player')).toHaveLength(0)
     // and it is inside the main landmark, under the page's h1
     expect(document.querySelector('main .main-menu')).not.toBeNull()
-    expect(document.querySelector('header h1').textContent).toBe('Battleship')
+    expect(document.querySelector('header h1').textContent).toBe('Cloakfall')
   })
 
   test('in a browser, a shared join link (?room=CODE) jumps straight to the join form with the code filled in', () => {

@@ -57,7 +57,7 @@ describe('remote placement: simultaneous, independent per player', () => {
     place(players[0], [0, 0], [4, 0])
     expect(players[0].shipFleet).toHaveLength(1)
     expect(players[1].shipFleet).toHaveLength(0)
-    expect(message(players[1])).toContain('Aircraft Carrier')
+    expect(message(players[1])).toContain('Mothership')
   })
 
   test('a click on a tile that is not the clicked board\'s own owner is ignored', () => {
@@ -71,7 +71,7 @@ describe('remote placement: simultaneous, independent per player', () => {
     const { players } = setUp(2)
     place(players[0], [0, 0], [2, 3])
     expect(players[0].shipFleet).toHaveLength(0)
-    expect(message(players[0])).toContain('Aircraft Carrier')
+    expect(message(players[0])).toContain('Mothership')
   })
 
   test('the Randomise button fills in the rest of a player\'s own fleet, and nobody else\'s', () => {
@@ -162,11 +162,11 @@ describe('remote placement: host-driven ordering', () => {
 
 describe('remote placement: player stats stay hidden until a round actually starts', () => {
   // The real bug this covers: unlike local hot-seat's own placement.ts, remote placement never hid player-stats
-  // (name, ship list, and - with hints 'optional' - the "Show heat hint on my turn" checkbox) during placement,
+  // (name, ship list, and - with hints 'optional' - the "Show sensor scan on my turn" checkbox) during placement,
   // so a checkbox that does nothing yet stayed visible the whole time ships were being placed and ordered.
   test('player stats (including the hint checkbox nested inside) are hidden during placement and ordering, shown again once the order is set', () => {
     const { players } = setUp(2)
-    // Each player's stats panel has the "Show heat hint on my turn" checkbox nested inside it (hints is
+    // Each player's stats panel has the "Show sensor scan on my turn" checkbox nested inside it (hints is
     // 'optional' here) - hiding the panel itself hides that checkbox too, with no separate toggle needed.
     players.forEach(player => expect(jsonDom.getChildrenFromAttribute('type', 'checkbox', player.playerStats)).toHaveLength(1))
     players.forEach(player => expect(player.playerStats.attributes.style.display).toBe('none'))

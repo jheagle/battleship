@@ -13,8 +13,8 @@ describe('playerStats', () => {
     name: 'Player 1',
     colour: '#ff6b6b',
     shipFleet: [
-      { name: 'Aircraft Carrier', status: 80, parts: [1, 2, 3, 4, 5] },
-      { name: 'Destroyer', status: 100 / 3, parts: [1, 2] }
+      { name: 'Mothership', status: 80, parts: [1, 2, 3, 4, 5] },
+      { name: 'Scout', status: 100 / 3, parts: [1, 2] }
     ]
   }
 
@@ -29,8 +29,8 @@ describe('playerStats', () => {
   test('each ship line has its name, size and status rounded to two places', () => {
     const lines = shipList(playerStats(player, '', root)).children.map(item => item.attributes.innerHTML)
     expect(lines).toEqual([
-      '<strong>Aircraft Carrier (5):</strong> 80%',
-      '<strong>Destroyer (2):</strong> 33.33%'
+      '<strong>Mothership (5):</strong> 80%',
+      '<strong>Scout (2):</strong> 33.33%'
     ])
   })
 

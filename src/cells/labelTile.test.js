@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import { colours } from '../theme'
 import matrixDom from 'matrix-dom'
 import labelTile, { coordinateName, labelBoard, tileLabel } from './labelTile'
 import updatePlayerStats from '../attack/updatePlayerStats'
@@ -21,9 +22,9 @@ describe('labelTile', () => {
 
   test('the name says what the colour shows, and only that', () => {
     expect(tileLabel(tileWith(1, 3))).toBe('B4')
-    expect(tileLabel(tileWith(1, 3, 'white'))).toBe('B4, miss')
-    expect(tileLabel(tileWith(1, 3, 'red'))).toBe('B4, hit')
-    expect(tileLabel(tileWith(1, 3, '#777'))).toBe('B4, ship')
+    expect(tileLabel(tileWith(1, 3, colours.miss))).toBe('B4, miss')
+    expect(tileLabel(tileWith(1, 3, colours.hit))).toBe('B4, hit')
+    expect(tileLabel(tileWith(1, 3, colours.ship))).toBe('B4, ship')
     // a hidden ship looks like water, so it is named like water
     expect(tileLabel({ ...tileWith(1, 3), hasShip: true })).toBe('B4')
   })
@@ -67,6 +68,8 @@ describe('the boards in a game', () => {
     await settle()
     expect(water.isHit).toBe(true)
     expect(water.element.getAttribute('aria-label')).toBe(`${coordinateName(water.point)}, miss`)
+    // and a shape, not only a colour (see matrix.sass)
+    expect(water.element.getAttribute('data-shot')).toBe('miss')
   })
 
   test('a hit ship is named a hit, an unhit hidden ship is never named a ship', async () => {
@@ -76,6 +79,8 @@ describe('the boards in a game', () => {
     hitShip.element.click()
     await settle()
     expect(hitShip.element.getAttribute('aria-label')).toBe(`${coordinateName(hitShip.point)}, hit`)
+    expect(hitShip.element.getAttribute('data-shot')).toBe('hit')
+    expect(hiddenShip.element.hasAttribute('data-shot')).toBe(false)
     expect(hiddenShip.element.getAttribute('aria-label')).toBe(coordinateName(hiddenShip.point))
     expect(cells(victim).filter(cell => /ship/.test(cell.element.getAttribute('aria-label')))).toEqual([])
   })

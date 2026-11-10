@@ -17,7 +17,7 @@ describe('gameRoot', () => {
     expect(document.body.firstElementChild).toBe(header)
     expect(header.nextElementSibling).toBe(main)
     expect(document.querySelectorAll('h1')).toHaveLength(1)
-    expect(document.querySelector('h1').textContent).toBe('Battleship')
+    expect(document.querySelector('h1').textContent).toBe('Cloakfall')
     expect(document.querySelector('h1').className).toBe('visually-hidden')
     expect(main.tagName).toBe('MAIN')
   })

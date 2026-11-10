@@ -1,3 +1,4 @@
+import { gameName } from '../theme'
 import jsonDom from 'json-dom'
 import type { DomItemRoot } from 'json-dom/dist/domItem/types'
 import type { ListenerFunction } from 'json-dom/dist/events/types'
@@ -17,7 +18,7 @@ export const gameLayout = (doc: Document): { header: HTMLElement | null, main: H
     header.className = 'game-header'
     const heading = doc.createElement('h1')
     heading.className = 'visually-hidden'
-    heading.textContent = 'Battleship'
+    heading.textContent = gameName
     // Inline too, so the heading stays hidden even on a page without the game's stylesheet (layouts.css)
     heading.style.cssText = 'position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; ' +
       'clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;'

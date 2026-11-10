@@ -23,9 +23,25 @@
         width: clamp(1.6rem, 6vw, 3.5rem)
         border: 1px solid #333
         border: 0.1em solid #333
-        background-color: blue
+        // Cloakfall's dark sector (see src/theme.ts for the shot and ship colours)
+        background-color: #141c33
         cursor: pointer
         display: inline-block
+        position: relative
+
+        // Shot cells get a shape as well as a colour, so colour is never the only signal: a dark cross on a hit's
+        // flare, a light dot on a miss
+        &[data-shot]::after
+          content: ''
+          position: absolute
+          inset: 0
+          pointer-events: none
+
+        &[data-shot="hit"]::after
+          background: linear-gradient(45deg, transparent 40%, #3b1600 40%, #3b1600 60%, transparent 60%), linear-gradient(-45deg, transparent 40%, #3b1600 40%, #3b1600 60%, transparent 60%)
+
+        &[data-shot="miss"]::after
+          background: radial-gradient(circle, #e3e7f2 0, #e3e7f2 16%, transparent 19%)
 
         &:hover
           opacity: 0.7

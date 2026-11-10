@@ -2,6 +2,7 @@
  * @jest-environment jsdom
  */
 
+import { colours } from '../theme'
 import jsonDom from 'json-dom'
 import matrixDom from 'matrix-dom'
 import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
@@ -65,7 +66,7 @@ describe('redacting the game state for a remote viewer', () => {
     // their own scenario directly rather than driving the whole placement UI just to reach one specific state.
     const part = other.shipFleet[0].parts[0]
     const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
-    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: '#777' }
+    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: colours.ship }
 
     const redacted = redactBoard(other.board, false)
     expect(matrixDom.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBeUndefined()
@@ -75,7 +76,7 @@ describe('redacting the game state for a remote viewer', () => {
     const [own, other] = await setUp()
     const part = other.shipFleet[0].parts[0]
     const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
-    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: '#777' }
+    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: colours.ship }
     realTile.attributes['aria-label'] = `${String.fromCharCode(65 + part.point.x)}${part.point.y + 1}, ship`
 
     const redacted = matrixDom.getDomItemFromPoint(part.point, redactBoard(other.board, false))
@@ -83,7 +84,7 @@ describe('redacting the game state for a remote viewer', () => {
     // the owner still hears their own ship
     const ownPart = own.shipFleet[0].parts[0]
     const ownTile = matrixDom.getDomItemFromPoint(ownPart.point, own.board)
-    ownTile.attributes.style = { ...ownTile.attributes.style, backgroundColor: '#777' }
+    ownTile.attributes.style = { ...ownTile.attributes.style, backgroundColor: colours.ship }
     ownTile.attributes['aria-label'] = 'kept'
     expect(matrixDom.getDomItemFromPoint(ownPart.point, redactBoard(own.board, true)).attributes['aria-label']).toBe('kept')
   })
@@ -92,10 +93,10 @@ describe('redacting the game state for a remote viewer', () => {
     const [, other] = await setUp()
     const part = other.shipFleet[0].parts[0]
     const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
-    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: 'red' }
+    realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: colours.hit }
     realTile.isHit = true
     const redacted = redactBoard(other.board, false)
-    expect(matrixDom.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBe('red')
+    expect(matrixDom.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBe(colours.hit)
   })
 
   test('redacting a board does not change the real board it was redacted from', async () => {
