@@ -42,7 +42,7 @@ describe('the placement phase', () => {
     button('placement-continue').click()
     expect(shown('placement-randomise')).toBe(true)
     expect(button('placement-done').disabled).toBe(true)
-    expect(message()).toContain('Aircraft Carrier')
+    expect(message()).toContain('Mothership')
   })
 
   test('a valid start and end places the ship; an invalid one is refused', async () => {
@@ -50,10 +50,10 @@ describe('the placement phase', () => {
     button('placement-continue').click()
     await place(first, [0, 0], [2, 3])
     expect(first.shipFleet).toHaveLength(0)
-    expect(message()).toContain('not a valid place for the Aircraft Carrier')
+    expect(message()).toContain('not a valid place for the Mothership')
     await place(first, [0, 0], [4, 0])
     expect(first.shipFleet).toHaveLength(1)
-    expect(message()).toContain('Battleship')
+    expect(message()).toContain('Dreadnought')
   })
 
   test('clicks on the other player\'s board are ignored while this player places', async () => {

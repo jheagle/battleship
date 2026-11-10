@@ -133,7 +133,7 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
                   nodeName: 'div',
                   attributes: { className: 'form-group' },
                   children: [
-                    { nodeName: 'label', attributes: { for: 'waiting-room-hints', innerText: 'Heat-map hints' } },
+                    { nodeName: 'label', attributes: { for: 'waiting-room-hints', innerText: 'Sensor scans (hints)' } },
                     {
                       nodeName: 'select',
                       attributes: { id: 'waiting-room-hints', name: 'waiting-room-hints' },
@@ -205,7 +205,7 @@ const mainMenu = (): DomItem => jsonDom.createDomItem({
                 className: 'form-group'
               },
               children: [
-                { nodeName: 'label', attributes: { for: 'hint-setting', innerText: 'Heat-map hints' } },
+                { nodeName: 'label', attributes: { for: 'hint-setting', innerText: 'Sensor scans (hints)' } },
                 {
                   nodeName: 'select',
                   attributes: { id: 'hint-setting', name: 'hint-setting' },

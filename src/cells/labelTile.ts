@@ -1,3 +1,4 @@
+import { colours } from '../theme'
 import type { DomItem } from 'json-dom/dist/domItem/types'
 import type { Board, Player, Tile } from '../types'
 
@@ -7,9 +8,9 @@ import type { Board, Player, Tile } from '../types'
  * not be announced to a screen reader any more than it is shown on screen.
  */
 const colourWords: Record<string, string> = {
-  red: 'hit',
-  white: 'miss',
-  '#777': 'ship'
+  [colours.hit]: 'hit',
+  [colours.miss]: 'miss',
+  [colours.ship]: 'ship'
 }
 
 /**

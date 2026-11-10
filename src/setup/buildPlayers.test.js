@@ -8,7 +8,7 @@ useGameLifecycle()
 
 const fleetSizes = [5, 4, 3, 3, 2]
 
-const fleetNames = ['Aircraft Carrier', 'Battleship', 'Submarine', 'Cruiser', 'Destroyer']
+const fleetNames = ['Mothership', 'Dreadnought', 'Phantom', 'Cruiser', 'Scout']
 
 describe('setup: each board and fleet', () => {
   const games = []

@@ -4,17 +4,22 @@
 
 import { useGameLifecycle, twoHumans, unhitShipCells, click, unhitWaterCells, settle, other, attacker, hitCells } from '../../tests/helpers/game'
 
+import { colours } from '../theme'
+
 useGameLifecycle()
+
+// theme.ts's hit / miss colours as the element reports them back (the DOM normalises hex to rgb)
+const rendered = { hit: 'rgb(255, 138, 61)', miss: 'rgb(110, 120, 152)' }
 
 const colour = cell => cell.attributes.style && cell.attributes.style.backgroundColor
 
 describe('attacking with a click', () => {
-  test('hitting a ship marks the cell red, counts a hit and passes the turn (no free turn)', async () => {
+  test('hitting a ship marks the cell as a hit, counts a hit and passes the turn (no free turn)', async () => {
     const { players: [one, two] } = await twoHumans()
     const cell = unhitShipCells(two)[0]
     await click(cell)
     expect(cell.isHit).toBe(true)
-    expect(colour(cell)).toBe('red')
+    expect(colour(cell)).toBe(colours.hit)
     expect(one.attacks).toEqual({ hit: 1, miss: 0, sunk: 0 })
     expect(one.attacker).toBe(false)
     expect(two.attacker).toBe(true)
@@ -26,10 +31,10 @@ describe('attacking with a click', () => {
     const [ship, water] = [unhitShipCells(two)[0], unhitWaterCells(two)[0]]
     // No time passes after the click: a player sees the result at once
     ship.element.click()
-    expect(ship.element.style.backgroundColor).toBe('red')
+    expect(ship.element.style.backgroundColor).toBe(rendered.hit)
     await settle()
     // (it is player 2's turn now, so player 1's board is next to be attacked - hit the same board again later)
-    expect(ship.element.style.backgroundColor).toBe('red')
+    expect(ship.element.style.backgroundColor).toBe(rendered.hit)
     expect(water.element.style.backgroundColor).toBe('')
   })
 
@@ -40,8 +45,8 @@ describe('attacking with a click', () => {
       const victim = other(players, attacker(players))
       const cell = i % 2 === 0 ? unhitShipCells(victim)[0] : unhitWaterCells(victim)[0]
       cell.element.click()
-      marked.push([cell, i % 2 === 0 ? 'red' : 'white'])
-      expect(cell.element.style.backgroundColor).toBe(i % 2 === 0 ? 'red' : 'white')
+      marked.push([cell, i % 2 === 0 ? rendered.hit : rendered.miss])
+      expect(cell.element.style.backgroundColor).toBe(i % 2 === 0 ? rendered.hit : rendered.miss)
       await settle()
     }
     marked.forEach(([cell, expected]) => expect(cell.element.style.backgroundColor).toBe(expected))
@@ -52,7 +57,7 @@ describe('attacking with a click', () => {
     const cell = unhitWaterCells(two)[0]
     await click(cell)
     expect(cell.isHit).toBe(true)
-    expect(colour(cell)).toBe('white')
+    expect(colour(cell)).toBe(colours.miss)
     expect(one.attacks).toEqual({ hit: 0, miss: 1, sunk: 0 })
     expect(two.attacker).toBe(true)
   })
@@ -129,8 +134,8 @@ describe('ship and player health', () => {
   test('the stats panel shows the new health', async () => {
     const { players: [one, two] } = await twoHumans()
     await click(two.shipFleet[0].parts[0])
-    expect(two.playerStats.element.textContent).toContain('Aircraft Carrier (5): 80%')
-    expect(two.playerStats.element.textContent).toContain('Battleship (4): 100%')
+    expect(two.playerStats.element.textContent).toContain('Mothership (5): 80%')
+    expect(two.playerStats.element.textContent).toContain('Dreadnought (4): 100%')
     // The player whose turn it is shows ATTACKER instead of their health, and goes back to a percentage afterwards
     expect(two.playerStats.element.textContent).toContain('Player 2: ATTACKER')
     expect(one.playerStats.element.textContent).toContain('Player 1: 100%')

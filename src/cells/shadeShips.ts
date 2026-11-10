@@ -1,3 +1,4 @@
+import { colours } from '../theme'
 import jsonDom from 'json-dom'
 import labelTile from './labelTile'
 import matrixDom from 'matrix-dom'
@@ -19,7 +20,7 @@ const shadeShips = (player: Player, shown: boolean): void => {
     }
     const tile = matrixDom.getDomItemFromPoint(p, player.board) as Tile
     if (!tile.isHit) {
-      jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile as unknown as DomItem, { attributes: { style: { backgroundColor: shown ? '#777' : '' } } }) as DomItem))
+      jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile as unknown as DomItem, { attributes: { style: { backgroundColor: shown ? colours.ship : '' } } }) as DomItem))
     }
   })
 }

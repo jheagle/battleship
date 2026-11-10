@@ -30,7 +30,7 @@ const playerStats = (player: Player, status: string = '', item: DomItem = player
           {
             nodeName: 'span',
             attributes: {
-              innerHTML: ' Show heat hint on my turn'
+              innerHTML: ' Show sensor scan on my turn'
             }
           }
         ]

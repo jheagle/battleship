@@ -7,7 +7,7 @@ import type { Board, Ship, ShipSpec } from '../types'
  * @param matrix
  * @param view
  */
-export const defaultShipSpecs: ShipSpec[] = [{ name: 'Aircraft Carrier', size: 5 }, { name: 'Battleship', size: 4 }, { name: 'Submarine', size: 3 }, { name: 'Cruiser', size: 3 }, { name: 'Destroyer', size: 2 }]
+export const defaultShipSpecs: ShipSpec[] = [{ name: 'Mothership', size: 5 }, { name: 'Dreadnought', size: 4 }, { name: 'Phantom', size: 3 }, { name: 'Cruiser', size: 3 }, { name: 'Scout', size: 2 }]
 
 const defaultFleet: (matrix: Board, view?: boolean) => Ship[] = siFunciona.curry(generateRandomFleet)(defaultShipSpecs)
 

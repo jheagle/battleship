@@ -10,7 +10,7 @@ useGameLifecycle()
 
 describe('placing a ship by hand', () => {
   const at = (x, y) => jDomMatrix.point(x, y, 0)
-  const carrier = { name: 'Aircraft Carrier', size: 5 }
+  const carrier = { name: 'Mothership', size: 5 }
 
   test('a straight horizontal or vertical line of the right length is valid', () => {
     const board = makeBoard()
