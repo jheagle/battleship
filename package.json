@@ -8,6 +8,10 @@
   "scripts": {
     "build": "gulp build",
     "dev": "gulp",
+    "e2e": "npm run e2e:robots && npm run e2e:hotseat && npm run e2e:online",
+    "e2e:hotseat": "node scripts/e2e/hotseat.mjs",
+    "e2e:online": "node scripts/e2e/online.mjs",
+    "e2e:robots": "node scripts/e2e/robots.mjs",
     "readme": "gulp readme",
     "release": "release-it",
     "release:dry-run": "release-it --dry-run",
@@ -24,7 +28,8 @@
   "devDependencies": {
     "@babel/core": "^8.1.0",
     "gulp": "^5.0.1",
-    "js-build-tools": "^8.2.0",
+    "js-build-tools": "^8.3.0",
+    "playwright": "^1.65.0",
     "release-it": "^21.1.2",
     "test-filesystem": "^2.0.0",
     "typedoc": "^0.28.20",
