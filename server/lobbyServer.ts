@@ -3,6 +3,7 @@ import { createServer } from 'http'
 import jsonDom from 'json-dom'
 import { Server, Socket } from 'socket.io'
 import { startRoomGame, watchRoomGame } from './gameplay'
+import { forTransport } from './transport'
 import { isHostOnlyStage, isRemoteSessionActive, remotePlacementStage } from '../src/setup/remotePlacement'
 import type { Server as HttpServer } from 'http'
 import type { DomItem } from 'json-dom/dist/domItem/types'
@@ -17,15 +18,6 @@ const MIN_PLAYERS_TO_START = 2
  * itself, re-checked here so a finished room's own startGame event can double as "play again" (see the
  * startGame handler below) without needing a separate, dedicated rematch event. */
 export const isRoomGameOver = (game: RoomGame): boolean => game.players.filter(player => player.status > 0).length < 2
-
-/**
- * A redacted body, as sent over the wire: still circularly linked in memory (parentItem, matrix-dom's own
- * internal references) like any live DomItem, which socket.io's own payload encoding cannot walk directly - this
- * strips exactly what domItemToJson already strips for any other json-dom consumer (element/parentItem/...), then
- * parses it straight back to a plain object, since socket.io does its own JSON encoding over the wire.
- * @param body
- */
-const forTransport = (body: DomItem): object => JSON.parse(jsonDom.domItemToJson(body))
 
 /** Up to four players in a room, the same limit as a local multiplayer game - robots fill whatever seats are
  * left under this same cap (see the startGame handler below and roomState's own maxRobots field), they never
