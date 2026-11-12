@@ -56,6 +56,7 @@ to compare rendering changes. `E2E_LIMIT_MS` changes how long a game may take; `
 online check needs port 3002 free (no lobby server already running). They use js-build-tools' page tools
 (`watchPage`, `clickLabel`, `trackMutations`, `serveStatic`); a browser binary is needed once per machine:
 `npx playwright install chromium`.
+
 ## Members
 
 <dl>

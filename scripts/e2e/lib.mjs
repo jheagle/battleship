@@ -144,6 +144,24 @@ export const waitForShot = (page, before, timeout = 10000) => page.waitForFuncti
 ).then(() => true, () => false)
 
 /**
+ * Run a check: a failure of any kind (a control that never appeared, a page that crashed) is reported as a FAIL line
+ * with exit code 1 instead of a stack trace, and the browser and server are always closed.
+ * @param {string} name
+ * @param {function(): Promise<void>} check
+ * @param {function(): Promise<void>} cleanUp
+ */
+export const runCheck = async (name, check, cleanUp) => {
+  try {
+    await check()
+  } catch (error) {
+    console.log(`FAIL ${name}: ${error.message.split('\n')[0]}`)
+    process.exitCode = 1
+  } finally {
+    await cleanUp()
+  }
+}
+
+/**
  * Report a check's outcome and set the exit code: it passes when the game finished and no page had a problem.
  * @param {string} name
  * @param {{finished: boolean, seconds: number, shots: number, problems: Array<string>, extra?: string}} result

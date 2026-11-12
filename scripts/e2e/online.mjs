@@ -5,7 +5,8 @@
 import { spawn } from 'node:child_process'
 import net from 'node:net'
 import {
-  attackRandomTarget, clickLabel, clickUntilGone, clickWhenShown, isOver, openGame, report, shotCount, start, trackMutations,
+  attackRandomTarget, clickLabel, clickUntilGone, clickWhenShown, isOver, openGame, report, runCheck, shotCount, start,
+  trackMutations,
   waitForShot
 } from './lib.mjs'
 
@@ -26,14 +27,26 @@ const portTaken = port => new Promise(resolve => {
 const startLobby = () => new Promise((resolve, reject) => {
   // Its own process group, so stopping it also stops the node process npm started
   const lobby = spawn('npm', ['run', 'serve:lobby'], { stdio: ['ignore', 'pipe', 'pipe'], detached: true })
-  const timer = setTimeout(() => reject(new Error('the lobby server did not start within 60 s')), 60000)
+  // Stopping it never throws: it may already have exited, and a cleanup error must not hide the real failure
+  const stop = () => {
+    try {
+      process.kill(-lobby.pid)
+    } catch {}
+  }
+  const timer = setTimeout(() => {
+    stop()
+    reject(new Error('the lobby server did not start within 60 s'))
+  }, 60000)
   lobby.stdout.on('data', chunk => {
     if (/listening on port/.test(String(chunk))) {
       clearTimeout(timer)
-      resolve(() => process.kill(-lobby.pid))
+      resolve(stop)
     }
   })
-  lobby.once('exit', code => reject(new Error(`the lobby server exited (${code})`)))
+  lobby.once('exit', code => {
+    clearTimeout(timer)
+    reject(new Error(`the lobby server exited (${code})`))
+  })
 })
 
 /** Host a room in one page, join it from the other, and get both through placement to the first turn. */
@@ -113,9 +126,12 @@ if (await portTaken(LOBBY_PORT)) {
   console.log(`FAIL online: port ${LOBBY_PORT} is already in use (a lobby server already running?); stop it first`)
   process.exit(1)
 }
-const stopLobby = await startLobby()
-const { browser, url, close } = await start()
-try {
+let stopLobby = () => {}
+let closeBrowser = async () => {}
+await runCheck('online (host + guest)', async () => {
+  stopLobby = await startLobby()
+  const { browser, url, close } = await start()
+  closeBrowser = close
   const host = await openGame(browser, url)
   const guest = await openGame(browser, url)
   const started = Date.now()
@@ -130,8 +146,8 @@ try {
     extra: `guest page per shot (median): ${median(perShot.map(shot => shot.added))} elements added, ` +
       `${median(perShot.map(shot => shot.attributes))} attribute writes` + (gaveUp ? '; gave up: nothing changed' : '')
   })
-} finally {
+}, async () => {
   // Always stop the browser and the lobby server, also when something above failed
-  await close()
+  await closeBrowser()
   stopLobby()
-}
+})
