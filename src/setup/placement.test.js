@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import { useGameLifecycle, startGame, settle, click } from '../../tests/helpers/game'
 
 useGameLifecycle()
@@ -14,7 +14,7 @@ describe('the placement phase', () => {
     await settle()
     return players
   }
-  const tile = (player, x, y) => matrixDom.getDomItemFromPoint(matrixDom.point(x, y, 0), player.board)
+  const tile = (player, x, y) => treeloomMatrix.getDomItemFromPoint(treeloomMatrix.point(x, y, 0), player.board)
   const place = async (player, from, to) => {
     await click(tile(player, ...from), 0)
     await click(tile(player, ...to), 0)
@@ -117,7 +117,7 @@ describe('the placement phase', () => {
     expect(shown('begin-order')).toBe(true)
     expect(shown('begin-random')).toBe(true)
     first.shipFleet.forEach(ship => ship.parts.forEach(part => {
-      expect(matrixDom.getDomItemFromPoint(part.point, first.board).element.style.backgroundColor).toBe('')
+      expect(treeloomMatrix.getDomItemFromPoint(part.point, first.board).element.style.backgroundColor).toBe('')
     }))
   })
 
@@ -143,7 +143,7 @@ describe('the placement phase', () => {
     expect(second.element.style.display).toBe('')
     expect(second.attacker).toBe(true)
     expect(first.attacker).toBe(false)
-    expect(jsonDom.getParentsByClass('boards', first)[0].children.map(p => p.name)).toEqual(['Player 2', 'Player 1'])
+    expect(treeloom.getParentsByClass('boards', first)[0].children.map(p => p.name)).toEqual(['Player 2', 'Player 1'])
     expect(Array.from(document.querySelectorAll('.player')).map(panel => panel.querySelector('strong').textContent)).toEqual(['Player 2', 'Player 1'])
     expect(document.querySelectorAll('.player').length).toBe(2)
   })
@@ -153,11 +153,11 @@ describe('the placement phase', () => {
     button('placement-continue').click()
     button('placement-randomise').click()
     const partPoint = first.shipFleet[0].parts[0].point
-    expect(matrixDom.getDomItemFromPoint(partPoint, first.board).element.style.backgroundColor).not.toBe('')
+    expect(treeloomMatrix.getDomItemFromPoint(partPoint, first.board).element.style.backgroundColor).not.toBe('')
     button('placement-done').click()
     const shipPoints = first.shipFleet.flatMap(ship => ship.parts.map(part => part.point))
     shipPoints.forEach(point => {
-      expect(matrixDom.getDomItemFromPoint(point, first.board).element.style.backgroundColor).toBe('')
+      expect(treeloomMatrix.getDomItemFromPoint(point, first.board).element.style.backgroundColor).toBe('')
     })
   })
 
@@ -165,7 +165,7 @@ describe('the placement phase', () => {
     const [first] = await setUp()
     button('placement-continue').click()
     await click(tile(first, 0, 0), 0)
-    const marked = matrixDom.getAllPoints(first.board).filter(p => p.z === 0)
+    const marked = treeloomMatrix.getAllPoints(first.board).filter(p => p.z === 0)
       .filter(p => tile(first, p.x, p.y).element.className.includes('valid-end')).map(p => `${p.x},${p.y}`)
     expect(marked.sort()).toEqual(['0,4', '4,0'])
     expect(message()).toContain('Click the start again to cancel')
@@ -176,7 +176,7 @@ describe('the placement phase', () => {
     button('placement-continue').click()
     await click(tile(first, 0, 0), 0)
     await click(tile(first, 0, 0), 0)
-    const marked = matrixDom.getAllPoints(first.board).filter(p => p.z === 0)
+    const marked = treeloomMatrix.getAllPoints(first.board).filter(p => p.z === 0)
       .filter(p => tile(first, p.x, p.y).element.className.includes('valid-end'))
     expect(marked).toHaveLength(0)
     expect(first.shipFleet).toHaveLength(0)
@@ -242,7 +242,7 @@ describe('the placement phase', () => {
     button('begin-order').click()
     tile(second, 0, 0).element.click()
     tile(first, 0, 0).element.click()
-    expect(jsonDom.getChildrenByClass('turn-badge', second)[0].element.textContent).toBe('1st')
-    expect(jsonDom.getChildrenByClass('turn-badge', first)[0].element.textContent).toBe('2nd')
+    expect(treeloom.getChildrenByClass('turn-badge', second)[0].element.textContent).toBe('1st')
+    expect(treeloom.getChildrenByClass('turn-badge', first)[0].element.textContent).toBe('2nd')
   })
 })

@@ -1,5 +1,5 @@
-import jsonDom from 'json-dom'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import treeloom from 'treeloom'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../../types'
 
 const listener = (listenerFunc: string) => [{ listenerFunc, listenerArgs: {}, listenerOptions: false }]
@@ -13,7 +13,7 @@ const listener = (listenerFunc: string) => [{ listenerFunc, listenerArgs: {}, li
  * button offering the same trip would be redundant.
  * @param players
  */
-const remoteFinalScore = (players: Player[] = []): DomItem => jsonDom.createDomItem({
+const remoteFinalScore = (players: Player[] = []): DomItem => treeloom.createDomItem({
   nodeName: 'div',
   attributes: {
     className: 'final-scores'

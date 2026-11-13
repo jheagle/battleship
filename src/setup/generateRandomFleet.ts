@@ -1,4 +1,4 @@
-import jDomMatrix from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import buildShip from './buildShip'
 import generateStartEnd from './generateStartEnd'
 import type { Board, Ship, ShipSpec } from '../types'
@@ -14,7 +14,7 @@ const generateRandomFleet = (ships: ShipSpec[], matrix: Board, view: boolean = f
   ships.map(
     ship => buildShip(
       ship,
-      jDomMatrix.getLinePoints(...generateStartEnd(matrix, ship.size)),
+      treeloomMatrix.getLinePoints(...generateStartEnd(matrix, ship.size)),
       matrix,
       view
     )

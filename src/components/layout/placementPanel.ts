@@ -1,4 +1,4 @@
-import type { DomItemConfig } from 'json-dom/dist/domItem/types'
+import type { DomItemConfig } from 'treeloom/dist/domItem/types'
 
 /**
  * The panel shown during the placement phase: a message for whoever is placing, and their buttons. Each button has one

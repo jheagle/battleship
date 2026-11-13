@@ -1,19 +1,19 @@
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
 import checkIfShipCell from '../utils/checkIfShipCell'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Board } from '../types'
 
 /**
  * Every straight, horizontal or vertical, start and end point of a ship of this length which fits on the board without
- * touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0) - matrix-dom's
+ * touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0) - treeloom-matrix's
  * getLinesOfLength enumerates every line the geometry allows, and only knows about shape, not what occupies a cell,
  * so the blocked-cell filter (and any future direction, if diagonal or 3D ships ever arrive) stays here.
  * @param matrix
  * @param shipLength
  */
 const validPlacements = (matrix: Board, shipLength: number): Array<[Point, Point]> =>
-  matrixDom.getLinesOfLength(matrixDom.getAxisLengths(matrix), shipLength)
+  treeloomMatrix.getLinesOfLength(treeloomMatrix.getAxisLengths(matrix), shipLength)
     .filter(line => !line.some(point => checkIfShipCell(point, matrix)))
     .map(line => [line[0], line[line.length - 1]])
 

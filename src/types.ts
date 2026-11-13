@@ -1,13 +1,13 @@
-import jsonDom from 'json-dom'
-import type { DomItem, WithTraits } from 'json-dom/dist/domItem/types'
-import type hasTraitType from 'json-dom/dist/domItem/traits/hasTrait'
-import type { Matrix, MatrixColumn } from 'matrix-dom/dist/grid/types'
+import treeloom from 'treeloom'
+import type { DomItem, WithTraits } from 'treeloom/dist/domItem/types'
+import type hasTraitType from 'treeloom/dist/domItem/traits/hasTrait'
+import type { Matrix, MatrixColumn } from 'treeloom-matrix/dist/grid/types'
 
 /**
- * The traits of a game: a tile (a matrix-dom column which also has a ship and a hit state) and a player. They are
- * added to json-dom's TraitRegistry, so `hasTrait(item, 'cloakfall.player')` narrows an item to a Player.
+ * The traits of a game: a tile (a treeloom-matrix column which also has a ship and a hit state) and a player. They are
+ * added to treeloom's TraitRegistry, so `hasTrait(item, 'cloakfall.player')` narrows an item to a Player.
  */
-declare module 'json-dom/dist/domItem/types' {
+declare module 'treeloom/dist/domItem/types' {
   interface TraitRegistry {
     /** The tile has a ship on it, and whether it has been hit. */
     'cloakfall.tile': { hasShip: boolean, isHit: boolean }
@@ -33,17 +33,17 @@ declare module 'json-dom/dist/domItem/types' {
 }
 
 /**
- * The typed version of json-dom's hasTrait, it narrows an item to the trait it was checked for.
+ * The typed version of treeloom's hasTrait, it narrows an item to the trait it was checked for.
  */
-export const hasTrait: typeof hasTraitType = jsonDom.hasTrait
+export const hasTrait: typeof hasTraitType = treeloom.hasTrait
 
-jsonDom.defineTrait('cloakfall.tile', { keys: ['hasShip', 'isHit'] })
-jsonDom.defineTrait('cloakfall.player', { keys: ['name', 'isRobot', 'status', 'turnCnt', 'attacker', 'showHint', 'attacks', 'board', 'shipFleet', 'playerStats'] })
+treeloom.defineTrait('cloakfall.tile', { keys: ['hasShip', 'isHit'] })
+treeloom.defineTrait('cloakfall.player', { keys: ['name', 'isRobot', 'status', 'turnCnt', 'attacker', 'showHint', 'attacks', 'board', 'shipFleet', 'playerStats'] })
 
-/** A cell of a player's board: a matrix-dom column which also carries whether it has a ship and has been hit. */
+/** A cell of a player's board: a treeloom-matrix column which also carries whether it has a ship and has been hit. */
 export type Tile = MatrixColumn & WithTraits<'cloakfall.tile'>
 
-/** A player's board: a matrix-dom matrix of Tiles. */
+/** A player's board: a treeloom-matrix matrix of Tiles. */
 export type Board = Matrix
 
 /** How many of a player's attacks hit, missed, or sunk a ship. */

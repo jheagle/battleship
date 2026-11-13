@@ -1,7 +1,7 @@
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player, Tile } from '../types'
 
 /**
@@ -11,10 +11,10 @@ import type { Player, Tile } from '../types'
  * @param attackable
  */
 const markBoard = (victim: Player, attackable: boolean): void => {
-  matrixDom.getLayerPoints(victim.board, 0).forEach(point => {
-    const tile = matrixDom.getDomItemFromPoint(point, victim.board) as Tile
+  treeloomMatrix.getLayerPoints(victim.board, 0).forEach(point => {
+    const tile = treeloomMatrix.getDomItemFromPoint(point, victim.board) as Tile
     const className = attackable && !tile.isHit ? 'column valid-target' : 'column'
-    jsonDom.updateElement(siFunciona.mergeObjectsMutable(tile as unknown as DomItem, { attributes: { className } }) as DomItem)
+    treeloom.updateElement(siFunciona.mergeObjectsMutable(tile as unknown as DomItem, { attributes: { className } }) as DomItem)
   })
 }
 

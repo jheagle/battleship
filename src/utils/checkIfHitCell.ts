@@ -1,4 +1,4 @@
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Board, Tile } from '../types'
 
 /**

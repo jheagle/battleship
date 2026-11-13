@@ -1,4 +1,4 @@
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
 import displayTargets from './displayTargets'
 import filterAdjacentPoints from '../utils/filterAdjacentPoints'
@@ -18,7 +18,7 @@ const selectTargetCoordinate = (victim: Player, opponents: Player[] = [victim]):
   const target = finalTargets[siFunciona.randomInteger(finalTargets.length)]
   displayTargets(heat.length ? heat : finalTargets.map(point => ({ point, intensity: 1 })), target, victim, opponents)
   // Hit one of the most likely cells at random
-  return matrixDom.getDomItemFromPoint(target, victim.board) as Tile | false
+  return treeloomMatrix.getDomItemFromPoint(target, victim.board) as Tile | false
 }
 
 export default selectTargetCoordinate

@@ -1,11 +1,11 @@
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import checkIfHitCell from '../utils/checkIfHitCell'
 import { bestTargets, hitChances, scoreTargets } from './densityScores'
 import type { Cell, ShotState } from './densityScores'
 import filterAdjacentPoints from '../utils/filterAdjacentPoints'
 import type { Player } from '../types'
 import type { HeatCell } from './resetTargets'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 
 const toCell = (point: { x: number, y: number }): Cell => ({ x: point.x, y: point.y })
 
@@ -16,7 +16,7 @@ const toCell = (point: { x: number, y: number }): Cell => ({ x: point.x, y: poin
  * @param victim
  */
 export const buildShotState = (victim: Player): ShotState => {
-  const points = matrixDom.getLayerPoints(victim.board, 0)
+  const points = treeloomMatrix.getLayerPoints(victim.board, 0)
   const size = Math.max(...points.map(p => p.x)) + 1
   const hitParts = victim.shipFleet.flatMap(ship => ship.parts.filter(part => part.isHit))
   const hits = hitParts.map(part => toCell(part.point))
@@ -38,7 +38,7 @@ export const buildShotState = (victim: Player): ShotState => {
  * @param cells
  */
 const refineTies = (cells: Cell[]): Cell[] => {
-  const checkerboard = cells.filter(c => filterAdjacentPoints(matrixDom.point(c.x, c.y, 0)))
+  const checkerboard = cells.filter(c => filterAdjacentPoints(treeloomMatrix.point(c.x, c.y, 0)))
   return checkerboard.length ? checkerboard : cells
 }
 
@@ -52,10 +52,10 @@ export const densityChoices = (victim: Player): { heat: HeatCell[], targets: Poi
   const scores = scoreTargets(buildShotState(victim))
   const best = bestTargets(scores)
   const max = Math.max(0, ...scores.flat())
-  const heat = scores.flatMap((row, y) => row.flatMap((score, x) => score > 0 ? [{ point: matrixDom.point(x, y, 0), intensity: score / max }] : []))
+  const heat = scores.flatMap((row, y) => row.flatMap((score, x) => score > 0 ? [{ point: treeloomMatrix.point(x, y, 0), intensity: score / max }] : []))
   return {
     heat,
-    targets: (best.length ? refineTies(best) : best).map(c => matrixDom.point(c.x, c.y, 0))
+    targets: (best.length ? refineTies(best) : best).map(c => treeloomMatrix.point(c.x, c.y, 0))
   }
 }
 

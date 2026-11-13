@@ -1,6 +1,6 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { clearHeatHint, showHeatHint, victimsOf } from './heatHint'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /**
@@ -9,7 +9,7 @@ import type { Player } from '../types'
  * @param target
  */
 const hintListener = (e: Event, target: DomItem): void => {
-  const player = jsonDom.getParentsByClass('player', target)[0] as unknown as Player
+  const player = treeloom.getParentsByClass('player', target)[0] as unknown as Player
   player.showHint = (e.target as HTMLInputElement).checked
   if (!player.attacker) {
     return // The hint only shows during the player's own turn; updatePlayer shows it when the turn starts

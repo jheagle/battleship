@@ -1,6 +1,6 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import labelTile from '../cells/labelTile'
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
 import { defaultShipSpecs } from './defaultFleet'
 import generateRandomFleet from './generateRandomFleet'
@@ -10,8 +10,8 @@ import queueTimeout from '../queue'
 import updatePlayerStats from '../attack/updatePlayerStats'
 import { isValidPlacement, placeShip } from './placeShip'
 import checkIfShipCell from '../utils/checkIfShipCell'
-import type { DomItem } from 'json-dom/dist/domItem/types'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Board, Player, ShipSpec, Tile } from '../types'
 
 /**
@@ -51,11 +51,11 @@ const active = (item: DomItem): PlacementSession => {
   return session
 }
 
-const child = (item: DomItem, className: string): DomItem => jsonDom.getChildrenByClass(className, item)[0]
+const child = (item: DomItem, className: string): DomItem => treeloom.getChildrenByClass(className, item)[0]
 
 const update = (item: DomItem, attributes: object): void => {
   // labelTile only acts on tiles: a tile's accessible name follows its colour
-  jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem))
+  treeloom.updateElement(labelTile(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem))
 }
 
 /**
@@ -97,7 +97,7 @@ export const startPlacement = (players: Player[], body: DomItem, done: (order: P
     done(players)
     return
   }
-  const panel = jsonDom.renderHtml(jsonDom.createDomItem(placementPanel()), body) as unknown as DomItem
+  const panel = treeloom.renderHtml(treeloom.createDomItem(placementPanel()), body) as unknown as DomItem
   const session: PlacementSession = { players, humans, index: 0, pending: [], start: null, panel, stage: 'handoff', order: [], done }
   getSession(body).placement = session
   setStatsShown(players, false)
@@ -220,8 +220,8 @@ export const continueTurn = (item: DomItem): void => {
  */
 const showStart = (session: PlacementSession, point: Point | null, size: number): void => {
   const board = current(session).board
-  matrixDom.getLayerPoints(board, 0).forEach(p => {
-    const tile = matrixDom.getDomItemFromPoint(p, board) as unknown as DomItem
+  treeloomMatrix.getLayerPoints(board, 0).forEach(p => {
+    const tile = treeloomMatrix.getDomItemFromPoint(p, board) as unknown as DomItem
     const isStart = Boolean(point && p.x === point.x && p.y === point.y)
     const isEnd = point !== null && !isStart && isValidPlacement(board, point, p, size)
     update(tile, {
@@ -237,7 +237,7 @@ const showStart = (session: PlacementSession, point: Point | null, size: number)
  * @param start
  * @param size
  */
-const endCount = (session: PlacementSession, start: Point, size: number): number => matrixDom.getAllPoints(current(session).board)
+const endCount = (session: PlacementSession, start: Point, size: number): number => treeloomMatrix.getAllPoints(current(session).board)
   .filter(p => p.z === 0 && !(p.x === start.x && p.y === start.y))
   .filter(p => isValidPlacement(current(session).board, start, p, size)).length
 
@@ -297,9 +297,9 @@ export const placeCell = (tile: Tile, board: Board): void => {
 export const randomise = (item: DomItem): void => {
   const session = active(item)
   const player = current(session)
-  matrixDom.getLayerPoints(player.board, 0).forEach(p => {
-    const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
-    jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem))
+  treeloomMatrix.getLayerPoints(player.board, 0).forEach(p => {
+    const tile = treeloomMatrix.getDomItemFromPoint(p, player.board) as unknown as DomItem
+    treeloom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem))
   })
   player.shipFleet = generateRandomFleet(defaultShipSpecs, player.board, true)
   session.pending = []
@@ -313,8 +313,8 @@ export const randomise = (item: DomItem): void => {
  * @param player
  */
 const hideShips = (player: Player): void => {
-  matrixDom.getLayerPoints(player.board, 0).forEach(p => {
-    const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
+  treeloomMatrix.getLayerPoints(player.board, 0).forEach(p => {
+    const tile = treeloomMatrix.getDomItemFromPoint(p, player.board) as unknown as DomItem
     if (checkIfShipCell(p, player.board)) {
       // Switch the transition off for this change only, so the shading goes at once rather than fading out
       update(tile, { style: { transition: 'none', backgroundColor: '' } })
@@ -449,11 +449,11 @@ const highlightOnly = (session: PlacementSession, chosen: Player): void => {
 
 /**
  * Put the boards in turn order, so the page reads in the order play will go in, and turns follow it. The game's tree and
- * the page are both reordered: moving a panel with json-dom would detach it from the page.
+ * the page are both reordered: moving a panel with treeloom would detach it from the page.
  * @param order
  */
 const reorderBoards = (order: Player[]): void => {
-  const boards = jsonDom.getParentsByClass('boards', order[0])[0]
+  const boards = treeloom.getParentsByClass('boards', order[0])[0]
   boards.children = [...order]
   order.forEach(player => boards.element.appendChild(player.element))
 }

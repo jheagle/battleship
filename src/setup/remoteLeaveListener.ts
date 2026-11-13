@@ -1,8 +1,8 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { leaveRemoteGame } from '../network/remoteGame'
 import { disconnectLobbySocket } from '../network/lobbySocket'
 import startMenu from './startMenu'
-import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
+import type { DomItem, DomItemRoot } from 'treeloom/dist/domItem/types'
 
 /**
  * The final-score screen's Leave button, for a remote game - any player can click it, same as Play Again
@@ -20,7 +20,7 @@ import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
  * @param target
  */
 const remoteLeaveListener = (e: Event, target: DomItem): void => {
-  const root = jsonDom.getTopParentItem(target) as DomItemRoot
+  const root = treeloom.getTopParentItem(target) as DomItemRoot
   leaveRemoteGame(root)
   disconnectLobbySocket()
   history.replaceState(null, '', location.pathname)

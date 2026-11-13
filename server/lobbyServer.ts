@@ -1,13 +1,13 @@
 import './installPseudoDom'
 import { createServer } from 'http'
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { Server, Socket } from 'socket.io'
 import { startRoomGame, watchRoomGame } from './gameplay'
 import { forTransport } from './transport'
 import { isHostOnlyStage, isRemoteSessionActive, remotePlacementStage } from '../src/setup/remotePlacement'
 import type { Server as HttpServer } from 'http'
-import type { DomItem } from 'json-dom/dist/domItem/types'
-import type { ForwardedEvent } from 'json-dom/dist/events/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
+import type { ForwardedEvent } from 'treeloom/dist/events/types'
 import type { HintSetting } from '../src/setup/gameOptions'
 import type { RoomGame } from './gameplay'
 
@@ -195,16 +195,16 @@ export const createLobbyServer = (): HttpServer => {
       // name another player's own board by id (guessed, or recalled from an earlier stage's push), even with
       // nothing to see or un-hide in devtools any more. Resolve the envelope's own target first and refuse
       // anything that doesn't land inside the dispatching socket's own player. A stale id (the tree already
-      // moved on, or never had it - see json-dom's getItemById) is refused the same way a real one that
+      // moved on, or never had it - see treeloom's getItemById) is refused the same way a real one that
       // resolves to someone else is - it throws for that, never silently resolves to the wrong spot.
       if (remotePlacementStage(room.game.root) === 'placing') {
         let target: DomItem
         try {
-          target = jsonDom.getItemById(room.game.root, envelope.itemId) as DomItem
+          target = treeloom.getItemById(room.game.root, envelope.itemId) as DomItem
         } catch {
           return
         }
-        const owner = jsonDom.getParentsByClass('player', target)[0]
+        const owner = treeloom.getParentsByClass('player', target)[0]
         if (!owner || room.game.playerBySocket.get(socket.id) !== owner) {
           return
         }
@@ -233,10 +233,10 @@ export const createLobbyServer = (): HttpServer => {
       // no way to fully vouch for - one bad or unexpected click crashing this whole process, for every room
       // and every connected player, is a far worse outcome than silently dropping the one action that caused
       // it. Any real bug surfaced this way is still worth fixing at its own source (see attackListener.ts's
-      // own guard against matrix-dom's getDomItemFromElement returning false) - this is the backstop under
+      // own guard against treeloom-matrix's getDomItemFromElement returning false) - this is the backstop under
       // that, not a replacement for it.
       try {
-        jsonDom.receiveForwardedEvent(room.game.root, envelope)
+        treeloom.receiveForwardedEvent(room.game.root, envelope)
       } catch {
         return
       }

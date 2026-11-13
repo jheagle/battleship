@@ -1,10 +1,10 @@
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
 import checkIfHitCell from '../utils/checkIfHitCell'
 import labelTile from '../cells/labelTile'
 import { roleFor } from '../attack/playerView'
 import { remotePlacementStage } from '../setup/remotePlacement'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Board, Player, Ship, Tile } from '../types'
 
 /**
@@ -26,11 +26,11 @@ import type { Board, Player, Ship, Tile } from '../types'
  */
 export const redactBoard = (board: Board, ownBoard: boolean): Board => {
   const clone = siFunciona.cloneObject(board) as Board
-  matrixDom.getLayerPoints(board, 0).forEach(point => {
+  treeloomMatrix.getLayerPoints(board, 0).forEach(point => {
     if (ownBoard || checkIfHitCell(point, board)) {
       return
     }
-    const tile = matrixDom.getDomItemFromPoint(point, clone) as Tile
+    const tile = treeloomMatrix.getDomItemFromPoint(point, clone) as Tile
     tile.hasShip = false
     const style = (tile.attributes as { style?: { backgroundColor?: string } } | undefined)?.style
     if (style) {
@@ -135,11 +135,11 @@ export const redactGameState = (players: Player[], viewer: Player): Player[] => 
  * Reduces the boards wrapper to just `viewer`'s own player while placement is actively running - nobody else's
  * board or placement panel is sent at all, not just hidden with CSS. A first version of this function did
  * exactly that (hide via a `placing-hidden` class, every player still present, same shape as the server's own
- * tree), because trimming the array broke json-dom's own *position*-based forwarding at the time
+ * tree), because trimming the array broke treeloom's own *position*-based forwarding at the time
  * (setForwardEvents/getItemByPath resolved a click by the index a tile sat at in the tree, which a joiner's own
  * trimmed view - always player 0 to themselves, never to the server - did not match: "remote player was unable
  * to click or update anything during placement", a real reported bug, not a guess). Forwarding resolves by a
- * stable id now instead (see json-dom's getItemById, JSON-DOM#95), which does not care whether the two trees
+ * stable id now instead (see treeloom's getItemById, treeloom#95), which does not care whether the two trees
  * are even the same shape, so the actual data-minimizing version is safe again - another player's own
  * placement never needs to reach a viewer's screen at all, closing the devtools-visible gap PR #132's
  * server-side ownership check already defends against independently (this is "also don't send it", not a

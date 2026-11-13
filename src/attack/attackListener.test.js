@@ -7,8 +7,8 @@ import { useGameLifecycle, twoHumans } from '../../tests/helpers/game'
 
 useGameLifecycle()
 
-// The real bug this guards against: matrix-dom's own getDomItemFromElement (still position-based - resolves
-// the real click target's point by walking its real DOM ancestry, unrelated to json-dom's own stable ids)
+// The real bug this guards against: treeloom-matrix's own getDomItemFromElement (still position-based - resolves
+// the real click target's point by walking its real DOM ancestry, unrelated to treeloom's own stable ids)
 // returns false, not a Tile, when the event's target does not sit where a tile of this specific board is
 // expected. Nothing downstream (attackFleet, placeCell, handleRemoteBoardClick) tolerates a bare false - each
 // eventually reads .parentItem off it several calls deep (getSession/getTopParentItem), throwing on the

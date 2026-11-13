@@ -1,4 +1,4 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import getAttackLock from '../attack/attackLock'
 import colourHitCell from './colourHitCell'
 import labelTile from './labelTile'
@@ -19,13 +19,13 @@ const configureHtml = (config: Tile, isRobot: boolean): Tile => {
     attackLock.isLocked = true
     queueTimeout(config, () => {
       colourHitCell(config)
-      config = jsonDom.updateElement(labelTile(config)) as Tile
+      config = treeloom.updateElement(labelTile(config)) as Tile
       attackLock.isLocked = false
       return config
     }, 0)
   } else {
     colourHitCell(config)
-    config = jsonDom.updateElement(labelTile(config)) as Tile
+    config = treeloom.updateElement(labelTile(config)) as Tile
   }
   return config
 }

@@ -1,7 +1,7 @@
 import { hasTrait } from '../src/types'
 import type { Board, Player, Ship, Tile } from '../src/types'
-import type { CoreItem } from 'json-dom/dist/domItem/types'
-import type { Matrix } from 'matrix-dom/dist/grid/types'
+import type { CoreItem } from 'treeloom/dist/domItem/types'
+import type { Matrix } from 'treeloom-matrix/dist/grid/types'
 
 // A tile is both a matrix column and carries the cloakfall trait
 const tile = {} as Tile

@@ -1,4 +1,4 @@
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
 import attackFleet from './attackFleet'
 import getAllNonHitCells from '../utils/getAllNonHitCells'
@@ -23,7 +23,7 @@ const randomAttack = (attacker: Player, players: Player[]): Player[] => {
     return players
   }
   const point = cells[siFunciona.randomInteger(cells.length)]
-  const tile = matrixDom.getDomItemFromPoint(point, victim.board) as Tile
+  const tile = treeloomMatrix.getDomItemFromPoint(point, victim.board) as Tile
   return attackFleet(tile)
 }
 

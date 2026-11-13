@@ -1,7 +1,7 @@
 import { gameName } from '../theme'
-import jsonDom from 'json-dom'
-import type { DomItemRoot } from 'json-dom/dist/domItem/types'
-import type { ListenerFunction } from 'json-dom/dist/events/types'
+import treeloom from 'treeloom'
+import type { DomItemRoot } from 'treeloom/dist/domItem/types'
+import type { ListenerFunction } from 'treeloom/dist/events/types'
 
 /**
  * The page's landmarks: a header with the page's h1 (visually hidden, so the game looks the same, but a screen reader
@@ -40,7 +40,7 @@ export const gameLayout = (doc: Document): { header: HTMLElement | null, main: H
 }
 
 /**
- * The game's root, like json-dom's documentDomItem, but its body is the page's main element rather than the body
+ * The game's root, like treeloom's documentDomItem, but its body is the page's main element rather than the body
  * itself, so everything the game renders is inside the main landmark. The tree keeps the same shape (root -> body ->
  * [boards, panels]), which remote play relies on (see remoteGame.ts); the server builds its rooms' roots the same way
  * (gameplay.ts's buildIsolatedRoot).
@@ -48,9 +48,9 @@ export const gameLayout = (doc: Document): { header: HTMLElement | null, main: H
  */
 const gameRoot = (listeners: Record<string, ListenerFunction>): DomItemRoot => {
   const { main } = gameLayout(document)
-  const head = jsonDom.createDomItem({ nodeName: 'head', attributes: {}, element: document.head, children: [] })
-  const body = jsonDom.createDomItem({ nodeName: 'main', attributes: { className: 'game' }, element: main, children: [] })
-  return jsonDom.documentDomItem(listeners, jsonDom.initRoot([head, body], listeners))
+  const head = treeloom.createDomItem({ nodeName: 'head', attributes: {}, element: document.head, children: [] })
+  const body = treeloom.createDomItem({ nodeName: 'main', attributes: { className: 'game' }, element: main, children: [] })
+  return treeloom.documentDomItem(listeners, treeloom.initRoot([head, body], listeners))
 }
 
 export default gameRoot

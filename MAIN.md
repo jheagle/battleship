@@ -9,8 +9,8 @@ screen-reader friendly: every cell is named by its coordinate and what it shows 
 
 Play it at https://joshuaheagle.com/projects/cloakfall/play.html (docs: https://joshuaheagle.com/projects/cloakfall/docs/).
 
-Built with TypeScript on [json-dom](https://github.com/jheagle/json-dom) (the page as data) and
-[matrix-dom](https://github.com/jheagle/matrix-dom) (the grids), with a socket.io lobby server for online play.
+Built with TypeScript on [treeloom](https://github.com/jheagle/treeloom) (the page as data) and
+[treeloom-matrix](https://github.com/jheagle/treeloom-matrix) (the grids), with a socket.io lobby server for online play.
 
 *Formerly "Battleship": renamed in November 2026, since that name is Hasbro's trademark. The rules of the classic
 pencil-and-paper game are free to use; the name, and Hasbro's own rules text, are not.*

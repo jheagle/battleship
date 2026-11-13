@@ -1,8 +1,8 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import finalScore from '../components/layout/finalScore'
 import updatePlayerStats from './updatePlayerStats'
 import { getSession } from '../setup/gameSession'
-import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
+import type { DomItem, DomItemRoot } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /**
@@ -13,7 +13,7 @@ import type { Player } from '../types'
  * @param winner
  */
 const endGame = (winner: Player): Player[] => {
-  const parent = jsonDom.getTopParentItem(winner) as DomItemRoot
+  const parent = treeloom.getTopParentItem(winner) as DomItemRoot
   const players = (winner.parentItem as DomItem).children as Player[]
   players.map(player => updatePlayerStats(player))
   winner = updatePlayerStats(winner, 'WINNER')
@@ -21,7 +21,7 @@ const endGame = (winner: Player): Player[] => {
   if (onGameOver) {
     onGameOver(players, parent)
   } else {
-    jsonDom.renderHtml(finalScore(players), parent.body)
+    treeloom.renderHtml(finalScore(players), parent.body)
   }
   return [winner]
 }

@@ -1,5 +1,5 @@
 import { getGameMode, getHintSetting } from '../../setup/gameOptions'
-import type { DomItem, DomItemConfig } from 'json-dom/dist/domItem/types'
+import type { DomItem, DomItemConfig } from 'treeloom/dist/domItem/types'
 import type { Player } from '../../types'
 
 /**

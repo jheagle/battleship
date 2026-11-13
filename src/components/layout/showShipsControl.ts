@@ -1,4 +1,4 @@
-import type { DomItemConfig } from 'json-dom/dist/domItem/types'
+import type { DomItemConfig } from 'treeloom/dist/domItem/types'
 
 /**
  * The one control for the robots-only game: a single checkbox to show every ship on every board, rather than one per

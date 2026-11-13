@@ -5,7 +5,7 @@
 // test file via jest.config.js's moduleNameMapper - this file also runs the real lobby server in-process, which
 // needs it.
 import { io as ioClient } from 'socket.io-client'
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import startMenu from './startMenu'
 import presetListener from './presetListener'
 import remoteListener, { showRemoteEntry, enterWaitingRoom } from './remoteListener'
@@ -41,10 +41,10 @@ const rawPlayer = () => {
 
 const rawEmit = (socket, event, payload) => new Promise(resolve => socket.emit(event, payload, resolve))
 
-const openMenu = () => startMenu(jsonDom.documentDomItem({ beginRound, presetListener, remoteListener }))
+const openMenu = () => startMenu(treeloom.documentDomItem({ beginRound, presetListener, remoteListener }))
 
-const byClass = (doc, className) => jsonDom.getChildrenByClass(className, doc.body)[0]
-const byName = (doc, name) => jsonDom.getChildrenByName(name, doc.body)[0]
+const byClass = (doc, className) => treeloom.getChildrenByClass(className, doc.body)[0]
+const byName = (doc, name) => treeloom.getChildrenByName(name, doc.body)[0]
 
 const waitFor = async (check, timeoutMs = 2000) => {
   const start = Date.now()
@@ -277,16 +277,16 @@ describe('the Online Multiplayer tile and its lobby', () => {
     const joinerSawUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
     byClass(doc, 'waiting-room-start').element.click()
 
-    await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
+    await waitFor(() => treeloom.getChildrenByClass('boards', doc.body).length > 0)
     // The whole lobby is gone - this is the real game's own markup now, not the waiting room any more.
-    expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
+    expect(treeloom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
     // Still placing - only the host's own player is sent to her at all (see redactGameState.ts's
     // applyPlacingView); Bob's own board/panel never reaches her screen during this stage.
-    const players = jsonDom.getChildrenByClass('boards', doc.body)[0].children
+    const players = treeloom.getChildrenByClass('boards', doc.body)[0].children
     expect(players).toHaveLength(1)
     expect(players[0].attributes.className).toBe('player')
     expect(players[0].name).toBe('Alice')
-    expect(players.every(player => jsonDom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
+    expect(players.every(player => treeloom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
 
     const joinerView = await joinerSawUpdate
     const joinerPlayers = joinerView.children.find(child => child.attributes.className === 'boards').children
@@ -337,14 +337,14 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
     await rawEmit(host, 'startGame', { hints: 'optional' })
 
-    await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
-    expect(jsonDom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
+    await waitFor(() => treeloom.getChildrenByClass('boards', doc.body).length > 0)
+    expect(treeloom.getChildrenByClass('waiting-room', doc.body)).toHaveLength(0)
     // Still placing - the joiner's own doc has only his own player, same reasoning as the host's own case above.
-    const players = jsonDom.getChildrenByClass('boards', doc.body)[0].children
+    const players = treeloom.getChildrenByClass('boards', doc.body)[0].children
     expect(players).toHaveLength(1)
     expect(players[0].attributes.className).toBe('player')
     expect(players[0].name).toBe('Bob')
-    expect(players.every(player => jsonDom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
+    expect(players.every(player => treeloom.getChildrenByClass('remote-placement-panel', player).length === 1)).toBe(true)
   })
 
   test('clicking something in the rendered game forwards it, and both players see the real result', async () => {
@@ -359,14 +359,14 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
     const joinerSawFirstUpdate = new Promise(resolve => joiner.once('gameUpdate', resolve))
     byClass(doc, 'waiting-room-start').element.click()
-    await waitFor(() => jsonDom.getChildrenByClass('boards', doc.body).length > 0)
+    await waitFor(() => treeloom.getChildrenByClass('boards', doc.body).length > 0)
     await joinerSawFirstUpdate
 
     // Both players place simultaneously, each on their own board - no shared handoff screen for either of
     // them. Only Alice's own player is ever sent to her own doc during placement (redactGameState.ts's
     // applyPlacingView) - Bob's own copy of his panel never reaches her screen at all, let alone interactive.
-    expect(jsonDom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(1)
-    const aliceRandomise = jsonDom.getChildrenByClass('remote-placement-randomise', doc.body)[0]
+    expect(treeloom.getChildrenByClass('boards', doc.body)[0].children).toHaveLength(1)
+    const aliceRandomise = treeloom.getChildrenByClass('remote-placement-randomise', doc.body)[0]
     expect(aliceRandomise).toBeDefined()
     expect(aliceRandomise.attributes.disabled).toBeFalsy()
 
@@ -374,7 +374,7 @@ describe('the Online Multiplayer tile and its lobby', () => {
 
     // Alice's fleet is now fully placed - visible in her own (real) view, driven by the same gameUpdate the
     // joiner also receives (confirmed above) for whatever their own turn comes to need next.
-    await waitFor(() => jsonDom.getChildrenByClass('remote-placement-message', doc.body)[0].attributes.innerHTML.includes('All placed'))
+    await waitFor(() => treeloom.getChildrenByClass('remote-placement-message', doc.body)[0].attributes.innerHTML.includes('All placed'))
   })
 
   test('leaving the waiting room returns to the game types and lets a fresh room be hosted', async () => {

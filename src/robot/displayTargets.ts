@@ -1,10 +1,10 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import siFunciona from 'si-funciona'
 import queueTimeout from '../queue'
 import resetTargets from './resetTargets'
 import { clearHeatHint } from '../attack/heatHint'
 import type { HeatCell } from './resetTargets'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Player } from '../types'
 
 /** How long each stage of the robot's attack is shown for, in turn. */
@@ -16,7 +16,7 @@ export const STAGE_MS = 400
  * @param color
  */
 export const outlineBoard = (player: Player, color: string): void => {
-  player.board.children.forEach(row => jsonDom.updateElement(siFunciona.mergeObjectsMutable(row, { attributes: { style: { borderColor: color } } })))
+  player.board.children.forEach(row => treeloom.updateElement(siFunciona.mergeObjectsMutable(row, { attributes: { style: { borderColor: color } } })))
 }
 
 /**

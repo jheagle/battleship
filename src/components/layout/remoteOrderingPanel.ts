@@ -1,4 +1,4 @@
-import type { DomItemConfig } from 'json-dom/dist/domItem/types'
+import type { DomItemConfig } from 'treeloom/dist/domItem/types'
 
 const listener = (listenerFunc: string) => [{ listenerFunc, listenerArgs: {}, listenerOptions: false }]
 

@@ -176,7 +176,7 @@ describe('the lobby server', () => {
       expect(ack).toEqual({ started: true })
       const [hostView, joinerView] = await Promise.all([hostUpdate, joinerUpdate])
       // Still placing - each socket's own push includes only their own player at all (see
-      // redactGameState.ts's applyPlacingView). Resolution is by id now (json-dom's getItemById), not by
+      // redactGameState.ts's applyPlacingView). Resolution is by id now (treeloom's getItemById), not by
       // position, so there is no need to keep the other player's own subtree around just to preserve shape.
       expect(boardsOf(hostView)).toHaveLength(1)
       expect(boardsOf(joinerView)).toHaveLength(1)
@@ -192,7 +192,7 @@ describe('the lobby server', () => {
     // shifts a joiner's own index relative to their real one, so a click they make during placement resolves
     // against whichever player actually sits at that index on the server - in a 2-player room, the host.
     // Reported directly by the user from a real two-browser test: "remote player was unable to click or
-    // update anything during placement." Resolution is by id now (see json-dom's getItemById), which this
+    // update anything during placement." Resolution is by id now (see treeloom's getItemById), which this
     // bug class cannot recur under even if a future client tree omits a player entirely - kept as a
     // regression test for the real click-lands-on-the-right-player behavior either way.
     test('a joiner\'s own click during placement lands on the joiner\'s own fleet, not the host\'s', async () => {

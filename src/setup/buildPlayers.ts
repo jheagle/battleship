@@ -1,12 +1,12 @@
-import jsonDom from 'json-dom'
-import jDomMatrix from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import defaultFleet from './defaultFleet'
 import playerColour from './playerColours'
 import playerSet from '../components/pieces/playerSet'
 import playerStats from '../components/pieces/playerStats'
 import waterTile from '../components/pieces/waterTile'
 import { labelBoard, labelBoardTiles } from '../cells/labelTile'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /**
@@ -30,12 +30,12 @@ const buildPlayers = (humans: number, root: DomItem, robots: number = 0, players
   // player panel's own border, which got busy once the own/target/summary role layout gave each panel a much
   // clearer visual distinction of its own.
   player.colour = playerColour(players.length)
-  // square() takes single objects here (matrix-dom's JSDoc says arrays, but arrays get merged in under a '0' key).
+  // square() takes single objects here (treeloom-matrix's JSDoc says arrays, but arrays get merged in under a '0' key).
   // navigableGrid makes the board an ARIA grid with keyboard navigation (arrows, Home / End, Enter or Space to click
   // the focused cell, which runs attackListener like a mouse click); each tile is named by its coordinate and what it
   // shows (labelTile), and the board by its player (labelBoard). A remote client re-applies it after each render (see
   // remoteGame.ts), since its listeners are functions and do not survive the trip as json.
-  player.board = jDomMatrix.navigableGrid(labelBoardTiles(jDomMatrix.updateMatrixPoints(jDomMatrix.square({
+  player.board = treeloomMatrix.navigableGrid(labelBoardTiles(treeloomMatrix.updateMatrixPoints(treeloomMatrix.square({
     x: waterTile(),
     matrix: {
       eventListeners: {
@@ -55,7 +55,7 @@ const buildPlayers = (humans: number, root: DomItem, robots: number = 0, players
   // every time - shipFleet never changes size) updates each <li>'s text in place; merging it onto a list that
   // was never completed in the first place falls back to using the fresh, incomplete items "as is" instead.
   // It is not attached to root yet either, so root is passed in for it to read the game's settings from instead.
-  player.playerStats = jsonDom.createDomItem(playerStats(player, `${Math.round(player.status * 100) / 100}%`, root)) as unknown as DomItem
+  player.playerStats = treeloom.createDomItem(playerStats(player, `${Math.round(player.status * 100) / 100}%`, root)) as unknown as DomItem
   player.children = [{ nodeName: 'div', attributes: { className: 'turn-badge' } } as unknown as DomItem, player.board, player.playerStats]
   players.push(player)
   return buildPlayers(--humans, root, humans < 0 ? --robots : robots, players)

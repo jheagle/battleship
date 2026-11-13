@@ -2,13 +2,13 @@
  * @jest-environment jsdom
  */
 
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import playerStats from './playerStats'
 
 describe('playerStats', () => {
   // player is a bare object here, not a real DomItem attached to any root (same as buildPlayers' first call), so
   // playerStats needs a real, separately-rooted item to read the game's settings from.
-  const root = jsonDom.documentDomItem()
+  const root = treeloom.documentDomItem()
   const player = {
     name: 'Player 1',
     colour: '#ff6b6b',

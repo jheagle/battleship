@@ -1,8 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import attackListener from '../attack/attackListener'
 import hintListener from '../attack/hintListener'
 import placementListener from './placementListener'
@@ -24,7 +24,7 @@ import {
 
 /** A fresh root with `count` human players, placed remotely - exactly how a room's own game is built. */
 const setUp = (count, done = () => {}) => {
-  const root = jsonDom.documentDomItem({ attackListener, hintListener, placementListener, remotePlacementListener, shipsListener })
+  const root = treeloom.documentDomItem({ attackListener, hintListener, placementListener, remotePlacementListener, shipsListener })
   setGameMode(root, 'multi')
   let players = []
   startNewGame(root, count, 0, true, 'optional', (builtPlayers, body, onDone) => {
@@ -34,16 +34,16 @@ const setUp = (count, done = () => {}) => {
   return { root, players }
 }
 
-const tile = (player, x, y) => matrixDom.getDomItemFromPoint(matrixDom.point(x, y, 0), player.board)
+const tile = (player, x, y) => treeloomMatrix.getDomItemFromPoint(treeloomMatrix.point(x, y, 0), player.board)
 const place = (player, from, to) => {
   handleRemoteBoardClick(tile(player, ...from), player.board)
   handleRemoteBoardClick(tile(player, ...to), player.board)
 }
 const fullFleet = [[[0, 0], [4, 0]], [[0, 1], [3, 1]], [[0, 2], [2, 2]], [[0, 3], [2, 3]], [[0, 4], [1, 4]]]
 const placeFullFleet = player => fullFleet.forEach(([from, to]) => place(player, from, to))
-const panel = player => jsonDom.getChildrenByClass('remote-placement-panel', player)[0]
-const message = player => jsonDom.getChildrenByClass('remote-placement-message', panel(player))[0].attributes.innerHTML
-const button = (player, name) => jsonDom.getChildrenByClass(name, panel(player))[0]
+const panel = player => treeloom.getChildrenByClass('remote-placement-panel', player)[0]
+const message = player => treeloom.getChildrenByClass('remote-placement-message', panel(player))[0].attributes.innerHTML
+const button = (player, name) => treeloom.getChildrenByClass(name, panel(player))[0]
 
 describe('remote placement: simultaneous, independent per player', () => {
   test('a session is active for every player\'s own board as soon as placement starts, and not once it ends', () => {
@@ -168,7 +168,7 @@ describe('remote placement: player stats stay hidden until a round actually star
     const { players } = setUp(2)
     // Each player's stats panel has the "Show sensor scan on my turn" checkbox nested inside it (hints is
     // 'optional' here) - hiding the panel itself hides that checkbox too, with no separate toggle needed.
-    players.forEach(player => expect(jsonDom.getChildrenFromAttribute('type', 'checkbox', player.playerStats)).toHaveLength(1))
+    players.forEach(player => expect(treeloom.getChildrenFromAttribute('type', 'checkbox', player.playerStats)).toHaveLength(1))
     players.forEach(player => expect(player.playerStats.attributes.style.display).toBe('none'))
 
     players.forEach(player => { placeFullFleet(player); readyRemotePlayer(player) })

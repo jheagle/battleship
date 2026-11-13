@@ -1,5 +1,5 @@
 import './installPseudoDom'
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import siFunciona from 'si-funciona'
 import attackListener from '../src/attack/attackListener'
 import hintListener from '../src/attack/hintListener'
@@ -14,15 +14,15 @@ import { getSession } from '../src/setup/gameSession'
 import { redactGameBody } from '../src/network/redactGameState'
 import remoteFinalScore from '../src/components/layout/remoteFinalScore'
 import updatePlayerStats from '../src/attack/updatePlayerStats'
-import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
-import type { ListenerFunction } from 'json-dom/dist/events/types'
+import type { DomItem, DomItemRoot } from 'treeloom/dist/domItem/types'
+import type { ListenerFunction } from 'treeloom/dist/events/types'
 import type { HintSetting } from '../src/setup/gameOptions'
 import type { Player } from '../src/types'
 
 /** Set an attribute directly on an already-rendered item - the same pattern remotePlacement.ts's own `update`
  * uses for its placement deadline, mirrored here for the turn deadline below. */
 const update = (item: DomItem, attributes: object): void => {
-  jsonDom.updateElement(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem)
+  treeloom.updateElement(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem)
 }
 
 /** How long a human player has to act before a random shot is taken on their behalf - see startRoomGame's own
@@ -38,7 +38,7 @@ export interface RoomGame {
 }
 
 /**
- * A root with its own independent head/body elements, rather than json-dom's own default (documentDomItem's
+ * A root with its own independent head/body elements, rather than treeloom's own default (documentDomItem's
  * default root construction, via initChildren, reads document.head/document.body - the *one* global document's
  * own fixed elements, shared by every call in this process). That default is exactly right for a browser or a
  * single jsdom test, where there is only ever one document - but a server holding several rooms' games at once
@@ -46,9 +46,9 @@ export interface RoomGame {
  * @param listeners
  */
 const buildIsolatedRoot = (listeners: Record<string, ListenerFunction>): DomItemRoot => {
-  const head = jsonDom.createDomItem({ nodeName: 'head', attributes: {}, element: document.createElement('head'), children: [] }) as DomItem
-  const body = jsonDom.createDomItem({ nodeName: 'body', attributes: {}, element: document.createElement('body'), children: [] }) as DomItem
-  return jsonDom.documentDomItem(listeners, jsonDom.initRoot([head, body], listeners))
+  const head = treeloom.createDomItem({ nodeName: 'head', attributes: {}, element: document.createElement('head'), children: [] }) as DomItem
+  const body = treeloom.createDomItem({ nodeName: 'body', attributes: {}, element: document.createElement('body'), children: [] }) as DomItem
+  return treeloom.documentDomItem(listeners, treeloom.initRoot([head, body], listeners))
 }
 
 /** remoteFinalScore.ts's own Play Again button needs this name registered just for renderHtml's own binding
@@ -122,9 +122,9 @@ export const startRoomGame = (roomPlayers: Array<[socketId: string, name: string
     // ended first) - cleared so the final-score screen never shows a frozen "Turn - 0s left" banner.
     update(parent.body, { 'data-turn-deadline': '' })
     for (let i = parent.body.children.length - 1; i >= 0; --i) {
-      jsonDom.removeChild(parent.body, parent.body.children[i])
+      treeloom.removeChild(parent.body, parent.body.children[i])
     }
-    jsonDom.renderHtml(remoteFinalScore(players), parent.body)
+    treeloom.renderHtml(remoteFinalScore(players), parent.body)
   }
   getSession(root).onAttackerChanged = (attacker, gameRoot) => {
     if (turnTimer) {

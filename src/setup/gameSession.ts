@@ -1,6 +1,6 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import siFunciona from 'si-funciona'
-import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
+import type { DomItem, DomItemRoot } from 'treeloom/dist/domItem/types'
 import type { GameMode, GameSettings, HintSetting } from './gameOptions'
 import type { PlacementSession } from './placement'
 import type { Player } from '../types'
@@ -48,7 +48,7 @@ const defaultSession = (): GameSession => ({
  * @param item
  */
 export const getSession = (item: DomItem): GameSession => {
-  const root = jsonDom.getTopParentItem(item)
+  const root = treeloom.getTopParentItem(item)
   if (!sessions.has(root)) {
     sessions.set(root, defaultSession())
   }

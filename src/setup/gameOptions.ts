@@ -1,5 +1,5 @@
 import { getSession } from './gameSession'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 
 /**
  * The heat-map hint setting chosen in the lobby. Off hides it, Optional gives each human a checkbox in their panel, and

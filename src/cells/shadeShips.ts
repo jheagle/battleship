@@ -1,10 +1,10 @@
 import { colours } from '../theme'
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import labelTile from './labelTile'
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
 import checkIfShipCell from '../utils/checkIfShipCell'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player, Tile } from '../types'
 
 /**
@@ -14,13 +14,13 @@ import type { Player, Tile } from '../types'
  * @param shown
  */
 const shadeShips = (player: Player, shown: boolean): void => {
-  matrixDom.getLayerPoints(player.board, 0).forEach(p => {
+  treeloomMatrix.getLayerPoints(player.board, 0).forEach(p => {
     if (!checkIfShipCell(p, player.board)) {
       return
     }
-    const tile = matrixDom.getDomItemFromPoint(p, player.board) as Tile
+    const tile = treeloomMatrix.getDomItemFromPoint(p, player.board) as Tile
     if (!tile.isHit) {
-      jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile as unknown as DomItem, { attributes: { style: { backgroundColor: shown ? colours.ship : '' } } }) as DomItem))
+      treeloom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile as unknown as DomItem, { attributes: { style: { backgroundColor: shown ? colours.ship : '' } } }) as DomItem))
     }
   })
 }

@@ -1,8 +1,8 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import siFunciona from 'si-funciona'
 import playerStats from '../components/pieces/playerStats'
 import { labelBoard } from '../cells/labelTile'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /**
@@ -14,10 +14,10 @@ const updatePlayerStats = (player: Player, status: string = `${Math.round(player
   if (player.board?.attributes) {
     labelBoard(player)
     if (player.board.element) {
-      jsonDom.updateElement(player.board as unknown as DomItem)
+      treeloom.updateElement(player.board as unknown as DomItem)
     }
   }
-  player.playerStats = jsonDom.updateElements(siFunciona.mergeObjectsMutable(player.playerStats, playerStats(player, status)) as DomItem)
+  player.playerStats = treeloom.updateElements(siFunciona.mergeObjectsMutable(player.playerStats, playerStats(player, status)) as DomItem)
   return player
 }
 

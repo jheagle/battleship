@@ -1,5 +1,5 @@
 import { getSession } from './setup/gameSession'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 
 /**
  * The timed queue the given item's game runs on: steps queued here run one after another, after their delay. Each

@@ -83,6 +83,23 @@ const setUpGame = async (host, guest) => {
 const whoseTurn = page => page.evaluate(() => document.body.innerText.match(/(\w+): ATTACKER/)?.[1] ?? null)
 
 /**
+ * Wait until the turn badge on the page names someone other than `from` (or the game is over): a shot's push lands
+ * before the turn change, which follows in a later push (see updatePlayer.ts's queued steps), so choosing the next
+ * attacker straight after the shot can pick the player who just fired. True once it moved, false on timeout.
+ */
+const waitForTurnChange = async (page, from, timeoutMs) => {
+  const end = Date.now() + timeoutMs
+  while (Date.now() < end) {
+    const now = await whoseTurn(page)
+    if ((now !== null && now !== from) || (await isOver(page))) {
+      return true
+    }
+    await page.waitForTimeout(25)
+  }
+  return false
+}
+
+/**
  * Play random shots until both pages show the final score: each round, the attacker is the page of the player whose
  * turn it is. The push can come in two parts (the shot, then the turn change), so every round looks for
  * the attacker afresh instead of assuming whose turn it is.
@@ -112,6 +129,8 @@ const playOut = async (host, guest, started) => {
     }
     if (shot) {
       stuck = 0
+      // Wait for the turn change too, so the next round doesn't pick the player who just fired
+      await waitForTurnChange(host.page, name, 2000)
       perShot.push(await mutations.read())
     } else {
       stuck += 0.1

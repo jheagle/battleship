@@ -1,5 +1,5 @@
-import jsonDom from 'json-dom'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import treeloom from 'treeloom'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../../types'
 
 /**
@@ -8,7 +8,7 @@ import type { Player } from '../../types'
  * (back to choosing the game type).
  * @param players
  */
-const finalScore = (players: Player[] = []): DomItem => jsonDom.createDomItem({
+const finalScore = (players: Player[] = []): DomItem => treeloom.createDomItem({
   nodeName: 'div',
   attributes: {
     className: 'final-scores'

@@ -5,7 +5,7 @@
 import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
 import densityTargets, { densityChoices } from './densityTargets'
 import checkIfHitCell from '../utils/checkIfHitCell'
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 
 useGameLifecycle()
 
@@ -40,7 +40,7 @@ describe('densityTargets', () => {
     hit.isHit = true
     ship.status = (ship.parts.length - 1) / ship.parts.length * 100
     victim.status = victim.shipFleet.reduce((total, item) => total + item.status, 0) / victim.shipFleet.length
-    matrixDom.getDomItemFromPoint(hit.point, victim.board).isHit = true
+    treeloomMatrix.getDomItemFromPoint(hit.point, victim.board).isHit = true
     const targets = densityTargets(victim)
     const neighbours = targets.filter(p => Math.abs(p.x - hit.point.x) + Math.abs(p.y - hit.point.y) === 1)
     expect(neighbours.length).toBeGreaterThan(0)

@@ -1,7 +1,7 @@
-import jDomMatrix from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import buildShip from './buildShip'
 import checkIfShipCell from '../utils/checkIfShipCell'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Board, Ship, ShipSpec } from '../types'
 
 /**
@@ -21,7 +21,7 @@ export const isValidPlacement = (board: Board, start: Point, end: Point, length:
   if (!straight || cellCount !== length || !inside) {
     return false
   }
-  return jDomMatrix.getLinePoints(start, end).every(point => !checkIfShipCell(point, board))
+  return treeloomMatrix.getLinePoints(start, end).every(point => !checkIfShipCell(point, board))
 }
 
 /**
@@ -34,5 +34,5 @@ export const isValidPlacement = (board: Board, start: Point, end: Point, length:
  */
 export const placeShip = (board: Board, shipInfo: ShipSpec, start: Point, end: Point, view: boolean = true): Ship | false =>
   isValidPlacement(board, start, end, shipInfo.size)
-    ? buildShip(shipInfo, jDomMatrix.getLinePoints(start, end), board, view)
+    ? buildShip(shipInfo, treeloomMatrix.getLinePoints(start, end), board, view)
     : false

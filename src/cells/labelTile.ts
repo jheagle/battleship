@@ -1,5 +1,5 @@
 import { colours } from '../theme'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Board, Player, Tile } from '../types'
 
 /**

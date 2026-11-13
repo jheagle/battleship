@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import { useGameLifecycle, startGame, settle, click, unhitWaterCells } from '../../tests/helpers/game'
 import getAttackLock from './attackLock'
 
@@ -16,7 +16,7 @@ describe('the heat-map hint for a human', () => {
     const checkbox = document.querySelector('input[type=checkbox]:not(.own-ships):not(.all-ships)')
     return { human, robot, checkbox }
   }
-  const borderOf = (player, x, y) => matrixDom.getDomItemFromPoint(matrixDom.point(x, y, 0), player.board).element.style.borderColor
+  const borderOf = (player, x, y) => treeloomMatrix.getDomItemFromPoint(treeloomMatrix.point(x, y, 0), player.board).element.style.borderColor
   const isShaded = color => color.includes('255, 215, 0')
   const tick = checkbox => {
     checkbox.checked = !checkbox.checked

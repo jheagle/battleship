@@ -1,8 +1,8 @@
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import { onGameUpdate, sendGameAction } from './lobbySocket'
-import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { DomItem, DomItemRoot } from 'treeloom/dist/domItem/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Board } from '../types'
 
 /** A pushed body carries whichever deadline currently applies as a plain attribute - see remotePlacement.ts's
@@ -20,7 +20,7 @@ type DeadlineKind = 'placement' | 'turn'
 /** Remove every one of a parent's children - the same pattern startNewGame's clearBody uses locally. */
 const clearChildren = (parent: DomItem): void => {
   for (let i = parent.children.length - 1; i >= 0; --i) {
-    jsonDom.removeChild(parent, parent.children[i])
+    treeloom.removeChild(parent, parent.children[i])
   }
 }
 
@@ -56,7 +56,7 @@ const finalScoreOnly = (redactedBody: RedactedBody): RedactedBody => ({
 })
 
 // The countdown is cosmetic only (the server's own timer is the one that actually fires - see
-// PLACEMENT_TIMEOUT_MS), so it is kept entirely outside json-dom's own tree: renderInto below wipes and rebuilds
+// PLACEMENT_TIMEOUT_MS), so it is kept entirely outside treeloom's own tree: renderInto below wipes and rebuilds
 // root.body's children on every single update, which would reset a ticking display right as it ticks. Plain DOM
 // state module-wide is safe because the app only ever has one remote game active (its one real root) at a time -
 // see enterRemoteGame's own comment on reusing the app's existing root instead of a second one.
@@ -127,7 +127,7 @@ const stopCountdown = (): void => {
   countdownKind = null
 }
 
-/** Every board (matrix-dom matrix) within an item, in tree order. */
+/** Every board (treeloom-matrix matrix) within an item, in tree order. */
 const boardsIn = (item: DomItem): Board[] => item.has?.['matrix.matrix']
   ? [item as unknown as Board]
   : (item.children ?? []).flatMap(boardsIn)
@@ -144,7 +144,7 @@ const focusedCell = (root: DomItemRoot): { board: number, point: Point } | null 
   if (!focused || !grid || !body) {
     return null
   }
-  return { board: Array.from(body.querySelectorAll('[role="grid"]')).indexOf(grid), point: matrixDom.getPointFromElement(focused) }
+  return { board: Array.from(body.querySelectorAll('[role="grid"]')).indexOf(grid), point: treeloomMatrix.getPointFromElement(focused) }
 }
 
 /**
@@ -158,22 +158,22 @@ const focusedCell = (root: DomItemRoot): { board: number, point: Point } | null 
 const renderInto = (root: DomItemRoot, redactedBody: object): void => {
   const focus = focusedCell(root)
   clearChildren(root.body)
-  const inflated = jsonDom.jsonToDomItem(JSON.stringify(redactedBody))
+  const inflated = treeloom.jsonToDomItem(JSON.stringify(redactedBody))
   // The boards' keyboard navigation (navigableGrid) is function listeners, which json drops: put it back, keeping
-  // the Tab stop on the cell that had focus. Its listeners run locally even while events are forwarded (json-dom only
+  // the Tab stop on the cell that had focus. Its listeners run locally even while events are forwarded (treeloom only
   // forwards named listeners), and Enter / Space click the cell, which is forwarded like a mouse click.
   const boards = boardsIn(inflated)
-  boards.forEach((board, index) => matrixDom.navigableGrid(board, focus?.board === index ? focus.point : undefined))
+  boards.forEach((board, index) => treeloomMatrix.navigableGrid(board, focus?.board === index ? focus.point : undefined))
   inflated.children.forEach((child: DomItem) => {
     // jsonToDomItem already set child.parentItem - to the throwaway top-level body it was inflated as part of,
     // not root.body. Left alone, renderHtml sees a non-null parentItem and assumes the item is already correctly
     // attached somewhere, skipping the fresh-tree setup (setParentItemReferences + insertChild) that binding any
     // listener nested within it depends on. Clearing it first forces that setup, now relative to root.body.
     child.parentItem = null
-    jsonDom.renderHtml(child, root.body)
+    treeloom.renderHtml(child, root.body)
   })
   // Every update re-renders the whole tree, so keyboard focus would fall back to the page: return it to the same cell
-  const refocus = focus && boards[focus.board] ? matrixDom.getDomItemFromPoint(focus.point, boards[focus.board]) : false
+  const refocus = focus && boards[focus.board] ? treeloomMatrix.getDomItemFromPoint(focus.point, boards[focus.board]) : false
   ;(refocus ? refocus.element as HTMLElement | undefined : undefined)?.focus()
 }
 
@@ -202,9 +202,9 @@ const stopForwarding = (root: DomItemRoot): void => {
  * @param firstUpdate the redacted body already received (the game has already started by the time this is called)
  */
 export const enterRemoteGame = (root: DomItemRoot, firstUpdate: RedactedBody): void => {
-  jsonDom.setForwardEvents(sendGameAction, root)
+  treeloom.setForwardEvents(sendGameAction, root)
   // Whether a click within the tree about to be rendered forwards to the server or runs a real local listener
-  // is decided once, right here, by json-dom's own activateListener/retrieveListener - at *bind* time, when
+  // is decided once, right here, by treeloom's own activateListener/retrieveListener - at *bind* time, when
   // renderInto below actually attaches it to the real element. Toggling root.forwardEvents afterwards has no
   // effect on anything already bound, so it has to be settled before renderInto ever runs, not after.
   const firstOver = isGameOver(firstUpdate)
@@ -218,7 +218,7 @@ export const enterRemoteGame = (root: DomItemRoot, firstUpdate: RedactedBody): v
     if (over) {
       stopForwarding(root)
     } else if (!root.forwardEvents) {
-      jsonDom.setForwardEvents(sendGameAction, root)
+      treeloom.setForwardEvents(sendGameAction, root)
     }
     renderInto(root, over ? finalScoreOnly(redactedBody as RedactedBody) : (redactedBody as RedactedBody))
     setCountdownDeadline(deadlineOf(redactedBody as RedactedBody))
