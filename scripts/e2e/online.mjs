@@ -107,6 +107,8 @@ const waitForTurnChange = async (page, from, timeoutMs) => {
 const playOut = async (host, guest, started) => {
   const mutations = await trackMutations(guest.page)
   const perShot = []
+  // Shots after which the turn badge did not move on within 2 s: reported, not failed on (a loaded machine is slow too)
+  let turnStalls = 0
   const over = async () => (await isOver(host.page)) && (await isOver(guest.page))
   // stuck grows by 0.1 per round where nothing changed, so 20 is about 200 such rounds in a row
   let stuck = 0
@@ -130,13 +132,18 @@ const playOut = async (host, guest, started) => {
     if (shot) {
       stuck = 0
       // Wait for the turn change too, so the next round doesn't pick the player who just fired
-      await waitForTurnChange(host.page, name, 2000)
+      if (!(await waitForTurnChange(host.page, name, 2000))) {
+        turnStalls++
+        if (process.env.E2E_DEBUG) {
+          console.log(`${Math.round((Date.now() - started) / 1000)}s the turn did not pass from ${name} within 2 s`)
+        }
+      }
       perShot.push(await mutations.read())
     } else {
       stuck += 0.1
     }
   }
-  return { finished: await over(), perShot, gaveUp: stuck >= 20 }
+  return { finished: await over(), perShot, gaveUp: stuck >= 20, turnStalls }
 }
 
 const median = values => values.slice().sort((a, b) => a - b)[Math.floor(values.length / 2)] ?? 0
@@ -155,7 +162,7 @@ await runCheck('online (host + guest)', async () => {
   const guest = await openGame(browser, url)
   const started = Date.now()
   await setUpGame(host, guest)
-  const { finished, perShot, gaveUp } = await playOut(host, guest, started)
+  const { finished, perShot, gaveUp, turnStalls } = await playOut(host, guest, started)
   report('online (host + guest)', {
     finished,
     seconds: Math.round((Date.now() - started) / 1000),
@@ -163,7 +170,8 @@ await runCheck('online (host + guest)', async () => {
     shots: perShot.length,
     problems: [...host.problems.map(problem => `host ${problem}`), ...guest.problems.map(problem => `guest ${problem}`)],
     extra: `guest page per shot (median): ${median(perShot.map(shot => shot.added))} elements added, ` +
-      `${median(perShot.map(shot => shot.attributes))} attribute writes` + (gaveUp ? '; gave up: nothing changed' : '')
+      `${median(perShot.map(shot => shot.attributes))} attribute writes` + (gaveUp ? '; gave up: nothing changed' : '') +
+      (turnStalls ? `; the turn did not pass within 2 s after ${turnStalls} shot(s)` : '')
   })
 }, async () => {
   // Always stop the browser and the lobby server, also when something above failed
