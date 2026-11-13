@@ -1,5 +1,5 @@
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import { densityChoices } from '../robot/densityTargets'
 import { paint, shade } from '../robot/resetTargets'
 import type { Player } from '../types'
@@ -8,7 +8,7 @@ import type { Player } from '../types'
  * The boards a player is attacking: every other player's board.
  * @param player
  */
-export const victimsOf = (player: Player): Player[] => (jsonDom.getParentsByClass('boards', player)[0].children as Player[]).filter(p => p !== player)
+export const victimsOf = (player: Player): Player[] => (treeloom.getParentsByClass('boards', player)[0].children as Player[]).filter(p => p !== player)
 
 /**
  * Shade a board's cells by the robot's weighting, as a hint to a human about where a ship may be. The weighting only
@@ -24,5 +24,5 @@ export const showHeatHint = (victim: Player): void => {
  * @param victim
  */
 export const clearHeatHint = (victim: Player): void => {
-  matrixDom.getLayerPoints(victim.board, 0).forEach(point => paint(victim, point, '#333'))
+  treeloomMatrix.getLayerPoints(victim.board, 0).forEach(point => paint(victim, point, '#333'))
 }

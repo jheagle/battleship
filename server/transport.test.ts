@@ -2,10 +2,10 @@
  * @jest-environment node
  */
 import './installPseudoDom'
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { startRoomGame, watchRoomGame } from './gameplay'
 import { forTransport, withoutChildAliases } from './transport'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 
 /** The first push one viewer of a fresh two-player room gets. */
 const firstPush = (): DomItem => {
@@ -25,7 +25,7 @@ const playersIn = (item: any): any[] => (item.attributes?.className ?? '').split
   : (item.children ?? []).flatMap(playersIn)
 
 /** A transported body as it was sent before: every alias written out in full. */
-const withAliases = (body: DomItem): any => JSON.parse(jsonDom.domItemToJson(body))
+const withAliases = (body: DomItem): any => JSON.parse(treeloom.domItemToJson(body))
 
 /** The same, with every property that is a copy of one of the object's own children removed. */
 const dropCopiesOfChildren = (item: any): any => {

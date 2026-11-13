@@ -1,5 +1,5 @@
 import { chooseOrder, continueTurn, finishTurn, randomOrder, randomise } from './placement'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 
 /**
  * The placement buttons: Continue (after the handoff), Randomise, and Done. They are told apart by class name.

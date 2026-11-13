@@ -1,6 +1,6 @@
 import setShip from '../cells/setShip'
 import ship from '../components/pieces/ship'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Board, Ship, ShipSpec } from '../types'
 
 /**

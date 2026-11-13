@@ -9,8 +9,8 @@ screen-reader friendly: every cell is named by its coordinate and what it shows 
 
 Play it at https://joshuaheagle.com/projects/cloakfall/play.html (docs: https://joshuaheagle.com/projects/cloakfall/docs/).
 
-Built with TypeScript on [json-dom](https://github.com/jheagle/json-dom) (the page as data) and
-[matrix-dom](https://github.com/jheagle/matrix-dom) (the grids), with a socket.io lobby server for online play.
+Built with TypeScript on [treeloom](https://github.com/jheagle/treeloom) (the page as data) and
+[treeloom-matrix](https://github.com/jheagle/treeloom-matrix) (the grids), with a socket.io lobby server for online play.
 
 *Formerly "Battleship": renamed in November 2026, since that name is Hasbro's trademark. The rules of the classic
 pencil-and-paper game are free to use; the name, and Hasbro's own rules text, are not.*
@@ -61,7 +61,7 @@ online check needs port 3002 free (no lobby server already running). They use js
 
 <dl>
 <dt><a href="#hasTrait">hasTrait</a></dt>
-<dd><p>The typed version of json-dom&#39;s hasTrait, it narrows an item to the trait it was checked for.</p>
+<dd><p>The typed version of treeloom&#39;s hasTrait, it narrows an item to the trait it was checked for.</p>
 </dd>
 <dt><a href="#colours">colours</a></dt>
 <dd><p>Cloakfall&#39;s look in one place: the colours a board cell can show. Every fleet is cloaked in a dark sector of
@@ -455,7 +455,7 @@ is showing, so they cannot be seen fading out.</p>
 </dd>
 <dt><a href="#reorderBoards">reorderBoards(order)</a></dt>
 <dd><p>Put the boards in turn order, so the page reads in the order play will go in, and turns follow it. The game&#39;s tree and
-the page are both reordered: moving a panel with json-dom would detach it from the page.</p>
+the page are both reordered: moving a panel with treeloom would detach it from the page.</p>
 </dd>
 <dt><a href="#startRound">startRound(session, order)</a></dt>
 <dd><p>The round starts: every board and its stats are shown in turn order, and the placement panel goes.</p>
@@ -472,7 +472,7 @@ cells, inside the board, and not touching a ship which is already there.</p>
 </dd>
 <dt><a href="#validPlacements">validPlacements(matrix, shipLength)</a></dt>
 <dd><p>Every straight, horizontal or vertical, start and end point of a ship of this length which fits on the board without
-touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0) - matrix-dom&#39;s
+touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0) - treeloom-matrix&#39;s
 getLinesOfLength enumerates every line the geometry allows, and only knows about shape, not what occupies a cell,
 so the blocked-cell filter (and any future direction, if diagonal or 3D ships ever arrive) stays here.</p>
 </dd>
@@ -496,7 +496,7 @@ already has them (a re-run, or a page which provides its own main or h1), creati
 otherwise. header is null when the page brought its own h1.</p>
 </dd>
 <dt><a href="#gameRoot">gameRoot(listeners)</a></dt>
-<dd><p>The game&#39;s root, like json-dom&#39;s documentDomItem, but its body is the page&#39;s main element rather than the body
+<dd><p>The game&#39;s root, like treeloom&#39;s documentDomItem, but its body is the page&#39;s main element rather than the body
 itself, so everything the game renders is inside the main landmark. The tree keeps the same shape (root -&gt; body -&gt;
 [boards, panels]), which remote play relies on (see remoteGame.ts); the server builds its rooms&#39; roots the same way
 (gameplay.ts&#39;s buildIsolatedRoot).</p>
@@ -633,7 +633,7 @@ one from the document while this module&#39;s own reference to it lives on.</p>
 <dd><p>Remove the countdown entirely - called once the remote game is left.</p>
 </dd>
 <dt><a href="#boardsIn">boardsIn()</a></dt>
-<dd><p>Every board (matrix-dom matrix) within an item, in tree order.</p>
+<dd><p>Every board (treeloom-matrix matrix) within an item, in tree order.</p>
 </dd>
 <dt><a href="#focusedCell">focusedCell(root)</a></dt>
 <dd><p>The cell which has keyboard focus, as the index of its board among the rendered boards and its point, so focus can
@@ -724,11 +724,11 @@ exact same components local play already uses, and forward its clicks the same w
 <dd><p>Reduces the boards wrapper to just <code>viewer</code>&#39;s own player while placement is actively running - nobody else&#39;s
 board or placement panel is sent at all, not just hidden with CSS. A first version of this function did
 exactly that (hide via a <code>placing-hidden</code> class, every player still present, same shape as the server&#39;s own
-tree), because trimming the array broke json-dom&#39;s own <em>position</em>-based forwarding at the time
+tree), because trimming the array broke treeloom&#39;s own <em>position</em>-based forwarding at the time
 (setForwardEvents/getItemByPath resolved a click by the index a tile sat at in the tree, which a joiner&#39;s own
 trimmed view - always player 0 to themselves, never to the server - did not match: &quot;remote player was unable
 to click or update anything during placement&quot;, a real reported bug, not a guess). Forwarding resolves by a
-stable id now instead (see json-dom&#39;s getItemById, JSON-DOM#95), which does not care whether the two trees
+stable id now instead (see treeloom&#39;s getItemById, treeloom#95), which does not care whether the two trees
 are even the same shape, so the actual data-minimizing version is safe again - another player&#39;s own
 placement never needs to reach a viewer&#39;s screen at all, closing the devtools-visible gap PR #132&#39;s
 server-side ownership check already defends against independently (this is &quot;also don&#39;t send it&quot;, not a
@@ -1015,7 +1015,7 @@ exactly one of the two is ever active for a given game, never both.</p>
 <a name="hasTrait"></a>
 
 ## hasTrait
-The typed version of json-dom's hasTrait, it narrows an item to the trait it was checked for.
+The typed version of treeloom's hasTrait, it narrows an item to the trait it was checked for.
 
 **Kind**: global variable  
 <a name="colours"></a>
@@ -2008,7 +2008,7 @@ Outline one player's panel, and clear the outline from the others.
 
 ## reorderBoards(order)
 Put the boards in turn order, so the page reads in the order play will go in, and turns follow it. The game's tree and
-the page are both reordered: moving a panel with json-dom would detach it from the page.
+the page are both reordered: moving a panel with treeloom would detach it from the page.
 
 **Kind**: global function  
 
@@ -2073,7 +2073,7 @@ Place a ship from the player's chosen start and end points, if the placement is 
 
 ## validPlacements(matrix, shipLength)
 Every straight, horizontal or vertical, start and end point of a ship of this length which fits on the board without
-touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0) - matrix-dom's
+touching a ship already there. Ships only go along one axis for now (no diagonals, z is always 0) - treeloom-matrix's
 getLinesOfLength enumerates every line the geometry allows, and only knows about shape, not what occupies a cell,
 so the blocked-cell filter (and any future direction, if diagonal or 3D ships ever arrive) stays here.
 
@@ -2141,7 +2141,7 @@ otherwise. header is null when the page brought its own h1.
 <a name="gameRoot"></a>
 
 ## gameRoot(listeners)
-The game's root, like json-dom's documentDomItem, but its body is the page's main element rather than the body
+The game's root, like treeloom's documentDomItem, but its body is the page's main element rather than the body
 itself, so everything the game renders is inside the main landmark. The tree keeps the same shape (root -> body ->
 [boards, panels]), which remote play relies on (see remoteGame.ts); the server builds its rooms' roots the same way
 (gameplay.ts's buildIsolatedRoot).
@@ -2545,7 +2545,7 @@ Remove the countdown entirely - called once the remote game is left.
 <a name="boardsIn"></a>
 
 ## boardsIn()
-Every board (matrix-dom matrix) within an item, in tree order.
+Every board (treeloom-matrix matrix) within an item, in tree order.
 
 **Kind**: global function  
 <a name="focusedCell"></a>
@@ -2727,11 +2727,11 @@ exact same components local play already uses, and forward its clicks the same w
 Reduces the boards wrapper to just `viewer`'s own player while placement is actively running - nobody else's
 board or placement panel is sent at all, not just hidden with CSS. A first version of this function did
 exactly that (hide via a `placing-hidden` class, every player still present, same shape as the server's own
-tree), because trimming the array broke json-dom's own *position*-based forwarding at the time
+tree), because trimming the array broke treeloom's own *position*-based forwarding at the time
 (setForwardEvents/getItemByPath resolved a click by the index a tile sat at in the tree, which a joiner's own
 trimmed view - always player 0 to themselves, never to the server - did not match: "remote player was unable
 to click or update anything during placement", a real reported bug, not a guess). Forwarding resolves by a
-stable id now instead (see json-dom's getItemById, JSON-DOM#95), which does not care whether the two trees
+stable id now instead (see treeloom's getItemById, treeloom#95), which does not care whether the two trees
 are even the same shape, so the actual data-minimizing version is safe again - another player's own
 placement never needs to reach a viewer's screen at all, closing the devtools-visible gap PR #132's
 server-side ownership check already defends against independently (this is "also don't send it", not a

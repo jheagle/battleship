@@ -1,7 +1,7 @@
 {
   "name": "cloakfall",
   "version": "1.0.1",
-  "description": "Cloakfall: a free-for-all, hidden-fleet grid game for 2 to 4 players and robots, in a dark sector of space. Built on json-dom and matrix-dom.",
+  "description": "Cloakfall: a free-for-all, hidden-fleet grid game for 2 to 4 players and robots, in a dark sector of space. Built on treeloom and treeloom-matrix.",
   "main": "dist/main.js",
   "author": "Joshua Heagle",
   "license": "ISC",
@@ -38,12 +38,12 @@
   "dependencies": {
     "browser-or-node": "^3.0.0",
     "collect-your-stuff": "^2.2.1",
-    "json-dom": "github:jheagle/JSON-DOM",
-    "matrix-dom": "github:jheagle/matrix-DOM",
     "pseudo-dom": "^1.4.0",
     "si-funciona": "^2.10.0",
     "socket.io": "^4.8.4",
-    "socket.io-client": "^4.8.4"
+    "socket.io-client": "^4.8.4",
+    "treeloom": "^2.1.0",
+    "treeloom-matrix": "^2.0.0"
   },
   "repository": {
     "type": "git",

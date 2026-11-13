@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
 import startMenu from './startMenu'
 import beginRound from './beginRound'
@@ -16,10 +16,10 @@ import restart from './restart'
 useGameLifecycle()
 
 describe('the lobby', () => {
-  const openMenu = () => startMenu(jsonDom.documentDomItem({ beginRound, presetListener, remoteListener, attackListener, hintListener, placementListener, restart }))
-  const menuItem = (doc, name) => jsonDom.getChildrenByClass(name, doc.body)[0]
+  const openMenu = () => startMenu(treeloom.documentDomItem({ beginRound, presetListener, remoteListener, attackListener, hintListener, placementListener, restart }))
+  const menuItem = (doc, name) => treeloom.getChildrenByClass(name, doc.body)[0]
   const lobby = doc => menuItem(doc, 'main-menu-form')
-  const field = (doc, name) => jsonDom.getChildrenByName(name, lobby(doc))[0].element
+  const field = (doc, name) => treeloom.getChildrenByName(name, lobby(doc))[0].element
 
   test('the entry screen shows the game types first, and the lobby is hidden', () => {
     const doc = openMenu()

@@ -1,4 +1,4 @@
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 
 /**
  * Used to generate 'checkerboard' style attack by only attacking every non-edge-touching cell

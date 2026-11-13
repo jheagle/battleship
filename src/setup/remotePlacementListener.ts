@@ -1,6 +1,6 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { beginOrderSet, chooseOrderRandom, randomiseRemoteShips, readyRemotePlayer } from './remotePlacement'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /**
@@ -12,11 +12,11 @@ import type { Player } from '../types'
 const remotePlacementListener = (e: Event, target: DomItem): void => {
   const className = (e.target as HTMLElement).className
   if (className.includes('remote-placement-randomise')) {
-    randomiseRemoteShips(jsonDom.getParentsByClass('player', target)[0] as Player)
+    randomiseRemoteShips(treeloom.getParentsByClass('player', target)[0] as Player)
     return
   }
   if (className.includes('remote-placement-ready')) {
-    readyRemotePlayer(jsonDom.getParentsByClass('player', target)[0] as Player)
+    readyRemotePlayer(treeloom.getParentsByClass('player', target)[0] as Player)
     return
   }
   if (className.includes('remote-order-random')) {

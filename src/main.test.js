@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import * as attackFleetModule from './attack/attackFleet'
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import {
   startGame, settle, click, playToTheEnd, cells, unhitWaterCells, useGameLifecycle
 } from '../tests/helpers/game'
@@ -104,8 +104,8 @@ describe('robots playing each other', () => {
     const attacks = []
     const original = attackFleetModule.default
     jest.spyOn(attackFleetModule, 'default').mockImplementation(function (target) {
-      const victim = jsonDom.getParentsByClass('player', target)[0]
-      const players = jsonDom.getParentsByClass('boards', target)[0].children
+      const victim = treeloom.getParentsByClass('player', target)[0]
+      const players = treeloom.getParentsByClass('boards', target)[0].children
       const who = players.find(player => player.attacker)
       const before = {
         attacker: who,

@@ -1,5 +1,5 @@
-import jsonDom from 'json-dom'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import treeloom from 'treeloom'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 
 /**
  * A copy of an item (and, the same way, of every descendant) without the properties that point at one of its own
@@ -25,11 +25,11 @@ export const withoutChildAliases = (item: DomItem): DomItem => {
 }
 
 /**
- * A redacted body, as sent over the wire: still circularly linked in memory (parentItem, matrix-dom's own
+ * A redacted body, as sent over the wire: still circularly linked in memory (parentItem, treeloom-matrix's own
  * internal references) like any live DomItem, which socket.io's own payload encoding cannot walk directly - this
- * strips exactly what domItemToJson already strips for any other json-dom consumer (element/parentItem/...), then
+ * strips exactly what domItemToJson already strips for any other treeloom consumer (element/parentItem/...), then
  * parses it straight back to a plain object, since socket.io does its own JSON encoding over the wire. Each child is
  * written once (see withoutChildAliases).
  * @param body
  */
-export const forTransport = (body: DomItem): object => JSON.parse(jsonDom.domItemToJson(withoutChildAliases(body)))
+export const forTransport = (body: DomItem): object => JSON.parse(treeloom.domItemToJson(withoutChildAliases(body)))

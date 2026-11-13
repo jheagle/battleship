@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import gameRoot from '../setup/gameRoot'
 import startMenu from '../setup/startMenu'
 import { startNewGame } from '../setup/startNewGame'
@@ -105,7 +105,7 @@ describe('the intro demo', () => {
 
   test('the demo is its own game: the page root is not touched', () => {
     const root = pageWithMenu()
-    expect(jsonDom.getChildrenByClass('boards', root.body)).toHaveLength(0)
-    expect(jsonDom.getChildrenByClass('main-menu', root.body)).toHaveLength(1)
+    expect(treeloom.getChildrenByClass('boards', root.body)).toHaveLength(0)
+    expect(treeloom.getChildrenByClass('main-menu', root.body)).toHaveLength(1)
   })
 })

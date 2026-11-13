@@ -1,7 +1,7 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { startNewGame } from './startNewGame'
 import { getGameSettings, getHintSetting } from './gameOptions'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 
 /**
  * Play again with the same settings as the game that just ended: the same humans, robots, who goes first, and hint
@@ -11,7 +11,7 @@ import type { DomItem } from 'json-dom/dist/domItem/types'
  * @param button
  */
 const playAgain = (e: Event, button: DomItem): void => {
-  const parent = jsonDom.getTopParentItem(button)
+  const parent = treeloom.getTopParentItem(button)
   const { humans, robots, firstGoesFirst } = getGameSettings(parent)
   startNewGame(parent, humans, robots, firstGoesFirst, getHintSetting(parent))
 }

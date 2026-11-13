@@ -1,4 +1,4 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import siFunciona from 'si-funciona'
 import boards from '../components/layout/boards'
 import buildPlayers from './buildPlayers'
@@ -9,7 +9,7 @@ import { startPlacement } from './placement'
 import { getGameMode, setHintSetting } from './gameOptions'
 import showShipsControl from '../components/layout/showShipsControl'
 import type { GameMode, HintSetting } from './gameOptions'
-import type { DomItemRoot } from 'json-dom/dist/domItem/types'
+import type { DomItemRoot } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /**
@@ -19,7 +19,7 @@ import type { Player } from '../types'
  */
 const clearBody = (parent: DomItemRoot): void => {
   for (let i = parent.body.children.length - 1; i >= 0; --i) {
-    jsonDom.removeChild(parent.body, parent.body.children[i])
+    treeloom.removeChild(parent.body, parent.body.children[i])
   }
 }
 
@@ -79,9 +79,9 @@ export const startNewGame = (
   clearBody(parent)
   // Robots only: one control above the boards shows every ship at once
   if (getGameMode(parent) === 'robots') {
-    jsonDom.renderHtml(jsonDom.createDomItem(showShipsControl()), parent.body)
+    treeloom.renderHtml(treeloom.createDomItem(showShipsControl()), parent.body)
   }
-  const players = jsonDom.renderHtml(boards(buildPlayers(humans, parent.body, robots)), parent.body).children as Player[]
+  const players = treeloom.renderHtml(boards(buildPlayers(humans, parent.body, robots)), parent.body).children as Player[]
   // With hints on for everyone, every human gets them on their turn; with them off or optional, nobody does by default
   players.filter(player => !player.isRobot).forEach(player => { player.showHint = hints === 'on' })
   onPlayersBuilt(players)

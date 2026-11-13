@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
 
 useGameLifecycle()
@@ -10,7 +10,7 @@ useGameLifecycle()
 describe('showing ships during play', () => {
   // The parts not yet hit: a hit cell is coloured by the hit, and robots may already have hit some
   const shipElements = player => player.shipFleet
-    .flatMap(ship => ship.parts.map(part => matrixDom.getDomItemFromPoint(part.point, player.board)))
+    .flatMap(ship => ship.parts.map(part => treeloomMatrix.getDomItemFromPoint(part.point, player.board)))
     .filter(tile => !tile.isHit)
     .map(tile => tile.element)
   const shaded = element => element.style.backgroundColor !== ''
@@ -36,12 +36,12 @@ describe('showing ships during play', () => {
     const { players: [human] } = startGame({ humans: 1, robots: 1 })
     await settle()
     const part = human.shipFleet[0].parts[0]
-    matrixDom.getDomItemFromPoint(part.point, human.board).isHit = true
-    matrixDom.getDomItemFromPoint(part.point, human.board).element.style.backgroundColor = 'red'
+    treeloomMatrix.getDomItemFromPoint(part.point, human.board).isHit = true
+    treeloomMatrix.getDomItemFromPoint(part.point, human.board).element.style.backgroundColor = 'red'
     toggle('.own-ships', true)
-    expect(matrixDom.getDomItemFromPoint(part.point, human.board).element.style.backgroundColor).toBe('red')
+    expect(treeloomMatrix.getDomItemFromPoint(part.point, human.board).element.style.backgroundColor).toBe('red')
     toggle('.own-ships', false)
-    expect(matrixDom.getDomItemFromPoint(part.point, human.board).element.style.backgroundColor).toBe('red')
+    expect(treeloomMatrix.getDomItemFromPoint(part.point, human.board).element.style.backgroundColor).toBe('red')
   })
 
   test('multiplayer has no own-ships checkbox', async () => {

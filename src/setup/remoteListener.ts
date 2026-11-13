@@ -1,8 +1,8 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { connectLobbySocket, createRoom, joinRoom, peekRoom, onRoomUpdate, onRoomClosed, disconnectLobbySocket, getSocketId, startGame } from '../network/lobbySocket'
 import { enterRemoteGame } from '../network/remoteGame'
 import { show, update } from './showLobby'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { HintSetting } from './gameOptions'
 import type { RoomState } from '../../server/lobbyServer'
 
@@ -23,7 +23,7 @@ type RemoteSubPanel = 'remote-choice' | 'remote-host-form' | 'remote-code-entry'
 /** Show exactly one of remote-entry's own four sub-panels (see mainMenu.ts), hiding the other three. */
 const showSubPanel = (entry: DomItem, which: RemoteSubPanel): void => {
   const panels: RemoteSubPanel[] = ['remote-choice', 'remote-host-form', 'remote-code-entry', 'remote-join-confirm']
-  panels.forEach(panel => show(jsonDom.getChildrenByClass(panel, entry)[0], panel === which))
+  panels.forEach(panel => show(treeloom.getChildrenByClass(panel, entry)[0], panel === which))
 }
 
 /** Look up a room by code (without joining it - see lobbySocket.ts's peekRoom) and move to the Join confirm
@@ -31,27 +31,27 @@ const showSubPanel = (entry: DomItem, which: RemoteSubPanel): void => {
  * not be found. The code-entry panel (with the code already filled in) shows immediately, before the lookup
  * even resolves, so a direct link lands on something straight away rather than a blank wait. */
 const peekAndConfirm = async (entry: DomItem, roomCode: string): Promise<void> => {
-  (jsonDom.getChildrenByName('remote-code', entry)[0].element as HTMLInputElement).value = roomCode
-  update(jsonDom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: 'Looking up room...' })
+  (treeloom.getChildrenByName('remote-code', entry)[0].element as HTMLInputElement).value = roomCode
+  update(treeloom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: 'Looking up room...' })
   showSubPanel(entry, 'remote-code-entry')
   const result = await peekRoom(roomCode)
   if ('error' in result) {
-    update(jsonDom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: result.error })
+    update(treeloom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: result.error })
     return
   }
-  update(jsonDom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: '' })
+  update(treeloom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: '' })
   pendingJoinCode = roomCode
-  update(jsonDom.getChildrenByClass('remote-join-message', entry)[0], { innerHTML: `You are joining ${result.hostName}'s ${result.roomName}.` })
+  update(treeloom.getChildrenByClass('remote-join-message', entry)[0], { innerHTML: `You are joining ${result.hostName}'s ${result.roomName}.` })
   showSubPanel(entry, 'remote-join-confirm')
-  ;(jsonDom.getChildrenByName('remote-join-name', entry)[0].element as HTMLInputElement).focus()
+  ;(treeloom.getChildrenByName('remote-join-name', entry)[0].element as HTMLInputElement).focus()
 }
 
 /** Show the remote entry area in place of the game-type tiles - either the Host/Join choice (no code yet, the
  * Online Multiplayer tile itself), or (a shared join link - see main.ts) straight to the Join confirm panel
  * once that code's own room has been found. */
 export const showRemoteEntry = (menu: DomItem, roomCode: string = ''): void => {
-  const entry = jsonDom.getChildrenByClass('remote-entry', menu)[0]
-  show(jsonDom.getChildrenByClass('presets', menu)[0], false)
+  const entry = treeloom.getChildrenByClass('remote-entry', menu)[0]
+  show(treeloom.getChildrenByClass('presets', menu)[0], false)
   show(entry, true)
   if (roomCode) {
     // eslint-disable-next-line no-void -- marks this unawaited promise as deliberate (showRemoteEntry is not async)
@@ -66,26 +66,26 @@ export const showRemoteEntry = (menu: DomItem, roomCode: string = ''): void => {
  * room state. */
 const renderRoomState = (menu: DomItem, state: RoomState): void => {
   lastRoomState = state
-  const list = jsonDom.getChildrenByClass('waiting-room-players', menu)[0]
-  list.children.slice().forEach((child: DomItem) => jsonDom.removeChild(list, child))
+  const list = treeloom.getChildrenByClass('waiting-room-players', menu)[0]
+  list.children.slice().forEach((child: DomItem) => treeloom.removeChild(list, child))
   state.players.forEach(player => {
-    jsonDom.renderHtml(jsonDom.createDomItem({
+    treeloom.renderHtml(treeloom.createDomItem({
       nodeName: 'li',
       attributes: { innerHTML: player.id === state.hostId ? `${player.name} (Host)` : player.name }
     }), list)
   })
-  update(jsonDom.getChildrenByClass('waiting-room-name', menu)[0], { innerHTML: `Lobby: ${state.roomName}` })
-  update(jsonDom.getChildrenByClass('waiting-room-code', menu)[0], { innerHTML: `Room Code: ${state.roomCode}` })
-  show(jsonDom.getChildrenByClass('waiting-room-host-controls', menu)[0], state.hostId === getSocketId())
+  update(treeloom.getChildrenByClass('waiting-room-name', menu)[0], { innerHTML: `Lobby: ${state.roomName}` })
+  update(treeloom.getChildrenByClass('waiting-room-code', menu)[0], { innerHTML: `Room Code: ${state.roomCode}` })
+  show(treeloom.getChildrenByClass('waiting-room-host-controls', menu)[0], state.hostId === getSocketId())
   // Robots only ever fill whatever seats the room's own connected players haven't - this shrinks/grows as
   // players join or leave, so it's kept in sync here rather than set once. The server validates this again
   // either way (see lobbyServer.ts's startGame handler) - this is just so the host isn't offered a number
   // that's already wrong.
   // Limits first, value after - same as showLobby.ts's own humanInput/robotInput: updating an input via
-  // jsonDom.updateElement re-renders it from the DomItem's own tracked attributes, which would otherwise wipe
+  // treeloom.updateElement re-renders it from the DomItem's own tracked attributes, which would otherwise wipe
   // out whatever the host had actually typed (never reflected back into those attributes) back to its stale
   // default the moment any other player's own join/leave triggers this same render again.
-  const robotsInput = jsonDom.getChildrenByName('waiting-room-robots', menu)[0]
+  const robotsInput = treeloom.getChildrenByName('waiting-room-robots', menu)[0]
   const robotsMax = state.maxRobots
   const robotsElement = robotsInput.element as HTMLInputElement
   const currentRobots = parseInt(robotsElement.value) || 0
@@ -99,14 +99,14 @@ const leaveToPresets = (menu: DomItem, message: string = ''): void => {
   disconnectLobbySocket()
   history.replaceState(null, '', location.pathname)
   pendingJoinCode = null
-  show(jsonDom.getChildrenByClass('waiting-room', menu)[0], false)
-  const entry = jsonDom.getChildrenByClass('remote-entry', menu)[0]
-  update(jsonDom.getChildrenByClass('remote-choice-status', entry)[0], { innerHTML: message })
+  show(treeloom.getChildrenByClass('waiting-room', menu)[0], false)
+  const entry = treeloom.getChildrenByClass('remote-entry', menu)[0]
+  update(treeloom.getChildrenByClass('remote-choice-status', entry)[0], { innerHTML: message })
   show(entry, Boolean(message))
   if (message) {
     showSubPanel(entry, 'remote-choice')
   }
-  show(jsonDom.getChildrenByClass('presets', menu)[0], !message)
+  show(treeloom.getChildrenByClass('presets', menu)[0], !message)
 }
 
 /** Once a room is created or joined (or a finished game's Play Again brings everyone back to it - see
@@ -120,15 +120,15 @@ export const enterWaitingRoom = (menu: DomItem, state: RoomState): void => {
   // Every player registers this the moment they enter the waiting room, host included - whichever one of them
   // starts the game, everyone (including whoever started it) gets this same first gameUpdate push, so everyone
   // enters the rendered game the same way instead of only the one who clicked Start.
-  connectLobbySocket().once('gameUpdate', firstUpdate => enterRemoteGame(jsonDom.getTopParentItem(menu), firstUpdate))
+  connectLobbySocket().once('gameUpdate', firstUpdate => enterRemoteGame(treeloom.getTopParentItem(menu), firstUpdate))
   renderRoomState(menu, state)
   // Hides both the game-type tiles and the whole remote-entry area - normally only remote-entry is still
   // showing by this point, but Play Again (see remotePlayAgainListener.ts) re-enters the waiting room straight
   // from a freshly rendered menu, where the tiles are visible by default - showing the waiting room has to hide
   // both regardless of how it got here, not rely on a different step somewhere else having already hidden one.
-  show(jsonDom.getChildrenByClass('presets', menu)[0], false)
-  show(jsonDom.getChildrenByClass('remote-entry', menu)[0], false)
-  show(jsonDom.getChildrenByClass('waiting-room', menu)[0], true)
+  show(treeloom.getChildrenByClass('presets', menu)[0], false)
+  show(treeloom.getChildrenByClass('remote-entry', menu)[0], false)
+  show(treeloom.getChildrenByClass('waiting-room', menu)[0], true)
 }
 
 /**
@@ -139,8 +139,8 @@ export const enterWaitingRoom = (menu: DomItem, state: RoomState): void => {
  */
 const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
   const className = (e.target as HTMLElement).className
-  const menu = jsonDom.getChildrenByClass('main-menu', jsonDom.getTopParentItem(target).body)[0]
-  const entry = jsonDom.getChildrenByClass('remote-entry', menu)[0]
+  const menu = treeloom.getChildrenByClass('main-menu', treeloom.getTopParentItem(target).body)[0]
+  const entry = treeloom.getChildrenByClass('remote-entry', menu)[0]
 
   if (className.includes('preset-remote')) {
     showRemoteEntry(menu)
@@ -148,7 +148,7 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
   }
   if (className.includes('remote-back')) {
     show(entry, false)
-    show(jsonDom.getChildrenByClass('presets', menu)[0], true)
+    show(treeloom.getChildrenByClass('presets', menu)[0], true)
     return
   }
   if (className.includes('remote-sub-back')) {
@@ -164,37 +164,37 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
     return
   }
   if (className.includes('remote-code-submit')) {
-    const roomCode = (jsonDom.getChildrenByName('remote-code', entry)[0].element as HTMLInputElement).value.trim().toUpperCase()
+    const roomCode = (treeloom.getChildrenByName('remote-code', entry)[0].element as HTMLInputElement).value.trim().toUpperCase()
     if (!roomCode) {
-      update(jsonDom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: 'Enter a room code' })
+      update(treeloom.getChildrenByClass('remote-code-status', entry)[0], { innerHTML: 'Enter a room code' })
       return
     }
     await peekAndConfirm(entry, roomCode)
     return
   }
   if (className.includes('remote-host-submit')) {
-    const roomName = (jsonDom.getChildrenByName('remote-room-name', entry)[0].element as HTMLInputElement).value.trim()
-    const name = (jsonDom.getChildrenByName('remote-host-name', entry)[0].element as HTMLInputElement).value.trim()
+    const roomName = (treeloom.getChildrenByName('remote-room-name', entry)[0].element as HTMLInputElement).value.trim()
+    const name = (treeloom.getChildrenByName('remote-host-name', entry)[0].element as HTMLInputElement).value.trim()
     if (!roomName) {
-      update(jsonDom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: 'A lobby name is required' })
+      update(treeloom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: 'A lobby name is required' })
       return
     }
     if (!name) {
-      update(jsonDom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: 'Enter your name first' })
+      update(treeloom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: 'Enter your name first' })
       return
     }
     const result = await createRoom(name, roomName)
     if ('error' in result) {
-      update(jsonDom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: result.error })
+      update(treeloom.getChildrenByClass('remote-host-status', entry)[0], { innerHTML: result.error })
       return
     }
     enterWaitingRoom(menu, result)
     return
   }
   if (className.includes('remote-join-submit')) {
-    const name = (jsonDom.getChildrenByName('remote-join-name', entry)[0].element as HTMLInputElement).value.trim()
+    const name = (treeloom.getChildrenByName('remote-join-name', entry)[0].element as HTMLInputElement).value.trim()
     if (!name) {
-      update(jsonDom.getChildrenByClass('remote-join-status', entry)[0], { innerHTML: 'Enter your name first' })
+      update(treeloom.getChildrenByClass('remote-join-status', entry)[0], { innerHTML: 'Enter your name first' })
       return
     }
     if (!pendingJoinCode) {
@@ -202,7 +202,7 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
     }
     const result = await joinRoom(pendingJoinCode, name)
     if ('error' in result) {
-      update(jsonDom.getChildrenByClass('remote-join-status', entry)[0], { innerHTML: result.error })
+      update(treeloom.getChildrenByClass('remote-join-status', entry)[0], { innerHTML: result.error })
       return
     }
     pendingJoinCode = null
@@ -214,12 +214,12 @@ const remoteListener = async (e: Event, target: DomItem): Promise<void> => {
     return
   }
   if (className.includes('waiting-room-start')) {
-    const waitingRoom = jsonDom.getChildrenByClass('waiting-room', menu)[0]
-    const hints = (jsonDom.getChildrenByName('waiting-room-hints', waitingRoom)[0].element as HTMLSelectElement).value as HintSetting
-    const robots = parseInt((jsonDom.getChildrenByName('waiting-room-robots', waitingRoom)[0].element as HTMLInputElement).value) || 0
+    const waitingRoom = treeloom.getChildrenByClass('waiting-room', menu)[0]
+    const hints = (treeloom.getChildrenByName('waiting-room-hints', waitingRoom)[0].element as HTMLSelectElement).value as HintSetting
+    const robots = parseInt((treeloom.getChildrenByName('waiting-room-robots', waitingRoom)[0].element as HTMLInputElement).value) || 0
     const ack = await startGame(hints, robots)
     if ('error' in ack) {
-      update(jsonDom.getChildrenByClass('waiting-room-status', waitingRoom)[0], { innerHTML: ack.error })
+      update(treeloom.getChildrenByClass('waiting-room-status', waitingRoom)[0], { innerHTML: ack.error })
     }
   }
 }

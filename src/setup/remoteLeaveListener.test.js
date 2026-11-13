@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import remoteLeaveListener from './remoteLeaveListener'
 import { leaveRemoteGame } from '../network/remoteGame'
 import { disconnectLobbySocket } from '../network/lobbySocket'
@@ -17,13 +17,13 @@ describe('remoteLeaveListener: the final-score screen\'s Leave button', () => {
   // presetListener/remoteListener/beginRound by name (the game-type tiles and lobby form it lands back on),
   // so the root needs all three registered for real, same as any other root the real app builds (main.ts).
   const setUp = () => {
-    const root = jsonDom.documentDomItem({ presetListener, remoteListener, beginRound })
-    jsonDom.renderHtml(jsonDom.createDomItem({
+    const root = treeloom.documentDomItem({ presetListener, remoteListener, beginRound })
+    treeloom.renderHtml(treeloom.createDomItem({
       nodeName: 'div',
       attributes: { className: 'final-scores' },
       children: [{ nodeName: 'p', attributes: { className: 'remote-final-score-message', innerHTML: 'Game over!' } }]
     }), root.body)
-    const target = jsonDom.getChildrenByClass('final-scores', root.body)[0]
+    const target = treeloom.getChildrenByClass('final-scores', root.body)[0]
     return { root, target }
   }
 

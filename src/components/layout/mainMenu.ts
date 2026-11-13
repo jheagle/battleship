@@ -1,5 +1,5 @@
-import jsonDom from 'json-dom'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import treeloom from 'treeloom'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 
 const listener = (listenerFunc: string) => [{ listenerFunc, listenerArgs: {}, listenerOptions: false }]
 
@@ -7,7 +7,7 @@ const listener = (listenerFunc: string) => [{ listenerFunc, listenerArgs: {}, li
  * The entry screen. It shows the game types (presets) first. Choosing one reveals the lobby, which is the form for the
  * game: how many humans and robots, the hint setting, and who goes first. Start in the lobby submits the form, as before.
  */
-const mainMenu = (): DomItem => jsonDom.createDomItem({
+const mainMenu = (): DomItem => treeloom.createDomItem({
   nodeName: 'div',
   attributes: {
     className: 'main-menu'

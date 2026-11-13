@@ -1,7 +1,7 @@
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Player } from '../types'
 
 /**
@@ -34,20 +34,20 @@ export const shade = (intensity: number): string => `rgba(255, 215, 0, ${0.15 + 
  * @param color
  */
 export const paint = (victim: Player, point: Point, color: string): void => {
-  jsonDom.updateElement(siFunciona.mergeObjectsMutable(matrixDom.getDomItemFromPoint(point, victim.board), { attributes: { style: { borderColor: color } } }))
+  treeloom.updateElement(siFunciona.mergeObjectsMutable(treeloomMatrix.getDomItemFromPoint(point, victim.board), { attributes: { style: { borderColor: color } } }))
 }
 
 /**
  * @param data
  */
 const resetTargets = (data: ResetTargetsData): ResetTargetsData => {
-  data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjectsMutable(l, { attributes: { style: { borderColor: '#333' } } })))
+  data.victim.board.children.map(l => treeloom.updateElement(siFunciona.mergeObjectsMutable(l, { attributes: { style: { borderColor: '#333' } } })))
   data.targets.forEach(t => paint(data.victim, t.point, '#333'))
   if (data.target) {
     paint(data.victim, data.target, 'red')
   }
   if (!data.target) {
-    data.victim.board.children.map(l => jsonDom.updateElement(siFunciona.mergeObjectsMutable(l, { attributes: { style: { borderColor: 'yellow' } } })))
+    data.victim.board.children.map(l => treeloom.updateElement(siFunciona.mergeObjectsMutable(l, { attributes: { style: { borderColor: 'yellow' } } })))
     data.targets.forEach(t => paint(data.victim, t.point, shade(t.intensity)))
   }
   return data

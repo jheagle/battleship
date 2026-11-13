@@ -1,4 +1,4 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import startMenu from '../../src/setup/startMenu'
 import beginRound from '../../src/setup/beginRound'
 import restart from '../../src/setup/restart'
@@ -11,7 +11,7 @@ import presetListener from '../../src/setup/presetListener'
 import remoteListener from '../../src/setup/remoteListener'
 import shipsListener from '../../src/attack/shipsListener'
 import waterTile from '../../src/components/pieces/waterTile'
-import jDomMatrix from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 
 /**
  * Let the game's timed queue (turn changes, board resizing, robot attacks) run. Needs jest.useFakeTimers().
@@ -29,7 +29,7 @@ export const settle = (ms = 5000) => jest.advanceTimersByTimeAsync(ms)
  * @returns {{doc: Object, players: Array}}
  */
 export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true, placing = false, hints = 'optional' } = {}) => {
-  const doc = startMenu(jsonDom.documentDomItem({
+  const doc = startMenu(treeloom.documentDomItem({
     beginRound,
     attackListener,
     hintListener,
@@ -43,13 +43,13 @@ export const startGame = ({ humans = 0, robots = 0, firstGoesFirst = true, placi
   }))
   // Choose the game type that matches the humans, as a player would, which reveals the lobby form
   const preset = humans === 1 ? 'preset-solo' : humans >= 2 ? 'preset-multi' : 'preset-robots'
-  jsonDom.getChildrenByClass(preset, doc.body)[0].element.click()
-  const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]
-  jsonDom.getChildrenByName('human-players', form)[0].element.value = String(humans)
-  jsonDom.getChildrenByName('robot-players', form)[0].element.value = String(robots)
-  jsonDom.getChildrenByName('first-go-first', form)[0].element.checked = firstGoesFirst
-  jsonDom.getChildrenByName('hint-setting', form)[0].element.value = hints
-  jsonDom.getChildrenFromAttribute('type', 'submit', form)[0].element.click()
+  treeloom.getChildrenByClass(preset, doc.body)[0].element.click()
+  const form = treeloom.getChildrenByClass('main-menu-form', doc.body)[0]
+  treeloom.getChildrenByName('human-players', form)[0].element.value = String(humans)
+  treeloom.getChildrenByName('robot-players', form)[0].element.value = String(robots)
+  treeloom.getChildrenByName('first-go-first', form)[0].element.checked = firstGoesFirst
+  treeloom.getChildrenByName('hint-setting', form)[0].element.value = hints
+  treeloom.getChildrenFromAttribute('type', 'submit', form)[0].element.click()
   if (!placing) {
     randomlyPlaceAllHumans()
   }
@@ -80,7 +80,7 @@ export const randomlyPlaceAllHumans = () => {
   }
 }
 
-export const getPlayers = doc => (jsonDom.getChildrenByClass('boards', doc.body)[0] || { children: [] }).children
+export const getPlayers = doc => (treeloom.getChildrenByClass('boards', doc.body)[0] || { children: [] }).children
 
 /** Every cell of a player's board, as an array of rows of cells. */
 export const rows = player => player.board.children[0].children.map(row => row.children)
@@ -99,7 +99,7 @@ export const click = async (cell, ms = 1000) => {
 }
 
 /** A bare 10 x 10 board of water tiles, with the point data filled in. */
-export const makeBoard = () => jDomMatrix.updateMatrixPoints(jDomMatrix.square({ x: waterTile() }, 10))
+export const makeBoard = () => treeloomMatrix.updateMatrixPoints(treeloomMatrix.square({ x: waterTile() }, 10))
 
 /** All the cells the players' boards have been hit on. */
 export const hitCells = player => cells(player).filter(cell => cell.isHit)

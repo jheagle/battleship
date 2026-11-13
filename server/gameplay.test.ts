@@ -2,14 +2,14 @@
  * @jest-environment node
  */
 import './installPseudoDom'
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
 import { startRoomGame, watchRoomGame, QUEUE_BROADCAST_DEBOUNCE_MS, TURN_TIMEOUT_MS } from './gameplay'
 import { PLACEMENT_TIMEOUT_MS, handleRemoteBoardClick, readyRemotePlayer, chooseOrderRandom } from '../src/setup/remotePlacement'
 import attackFleet from '../src/attack/attackFleet'
 import endGame from '../src/attack/endGame'
 import type { RoomGame } from './gameplay'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 
 // These tests run real socket.io servers and play real games (the slowest takes ~5.5s on its own); the default 5s
 // and the old per-test 15s limits ran out when several builds shared the machine. 45s leaves room for that.
@@ -23,7 +23,7 @@ const playersOf = (redactedBody: DomItem): any[] =>
  * up with ships is known rather than left to Randomise. */
 const FLEET: Array<[[number, number], [number, number]]> = [[[0, 0], [4, 0]], [[0, 1], [3, 1]], [[0, 2], [2, 2]], [[0, 3], [2, 3]], [[0, 4], [1, 4]]]
 
-const tileAt = (player: any, x: number, y: number): any => matrixDom.getDomItemFromPoint(matrixDom.point(x, y, 0), player.board)
+const tileAt = (player: any, x: number, y: number): any => treeloomMatrix.getDomItemFromPoint(treeloomMatrix.point(x, y, 0), player.board)
 const placeFullFleet = (player: any): void => FLEET.forEach(([from, to]) => {
   handleRemoteBoardClick(tileAt(player, ...from), player.board)
   handleRemoteBoardClick(tileAt(player, ...to), player.board)
@@ -43,8 +43,8 @@ const playToRealGame = async (game: RoomGame): Promise<void> => {
 
 /** How many of a player's own cells have been hit so far - (9, 9) is always water and always unhit for a
  * freshly-placed FLEET above, so it is a safe, known cell to attack directly in these tests. */
-const hitCount = (player: any): number => matrixDom.getAllPoints(player.board).filter((p: any) => p.z === 0)
-  .filter((p: any) => matrixDom.getDomItemFromPoint(p, player.board).isHit).length
+const hitCount = (player: any): number => treeloomMatrix.getAllPoints(player.board).filter((p: any) => p.z === 0)
+  .filter((p: any) => treeloomMatrix.getDomItemFromPoint(p, player.board).isHit).length
 
 describe('starting a room\'s game', () => {
   test('builds one player per connected socket, in join order', () => {
@@ -150,9 +150,9 @@ describe('robots filling empty remote seats', () => {
 
       const [alice, robot] = game.players
       const unhitCellOf = (player: any): any => {
-        const point = matrixDom.getAllPoints(player.board).filter((p: any) => p.z === 0)
-          .find((p: any) => !matrixDom.getDomItemFromPoint(p, player.board).isHit)
-        return matrixDom.getDomItemFromPoint(point, player.board)
+        const point = treeloomMatrix.getAllPoints(player.board).filter((p: any) => p.z === 0)
+          .find((p: any) => !treeloomMatrix.getDomItemFromPoint(p, player.board).isHit)
+        return treeloomMatrix.getDomItemFromPoint(point, player.board)
       }
 
       // Just enough rounds to prove the robot genuinely takes its own turns (computerAttack, driven by the
@@ -185,7 +185,7 @@ describe('watching a room\'s game for changes', () => {
 
     expect(pushes.size).toBe(2)
     // While actively placing, a viewer's own push includes only their own player at all - see
-    // redactGameState.ts's applyPlacingView. Resolution is by id now (json-dom's getItemById), not by
+    // redactGameState.ts's applyPlacingView. Resolution is by id now (treeloom's getItemById), not by
     // position, so there is no need for the two trees to stay the same shape any more.
     const aliceView = playersOf(pushes.get('alice-socket') as DomItem)
     expect(aliceView).toHaveLength(1)
@@ -200,7 +200,7 @@ describe('watching a room\'s game for changes', () => {
 
     const aliceView = playersOf(pushes.get('alice-socket') as DomItem)
     const alice = aliceView.find((p: any) => p.name === 'Alice')
-    expect(matrixDom.getAllPoints(alice.board).filter((p: { z: number }) => p.z === 0)).toHaveLength(100)
+    expect(treeloomMatrix.getAllPoints(alice.board).filter((p: { z: number }) => p.z === 0)).toHaveLength(100)
   })
 
   test('once everyone has placed and ordering begins, every player is visible again, for every viewer', () => {

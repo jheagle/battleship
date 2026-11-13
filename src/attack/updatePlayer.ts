@@ -1,4 +1,4 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import siFunciona from 'si-funciona'
 import getAttackLock from './attackLock'
 import queueTimeout from '../queue'
@@ -8,7 +8,7 @@ import { getSession } from '../setup/gameSession'
 import { getGameMode } from '../setup/gameOptions'
 import { clearHeatHint, showHeatHint, victimsOf } from './heatHint'
 import { clearValidTargets, showValidTargets } from './validTargets'
-import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
+import type { DomItem, DomItemRoot } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /** How long a human attacker's own lock stays on once their turn starts. This used to be 400ms to match a
@@ -55,7 +55,7 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
     queueTimeout(player, () => victimsOf(player).forEach(victim => player.attacker ? showHeatHint(victim) : clearHeatHint(victim)), 0)
   }
   if (player.attacker) {
-    const root = jsonDom.getTopParentItem(player as unknown as DomItem) as DomItemRoot
+    const root = treeloom.getTopParentItem(player as unknown as DomItem) as DomItemRoot
     if (!player.isRobot) {
       queueTimeout(player, () => { attackLock.isLocked = false }, ATTACKER_LOCK_MS)
       // Remote play only (see gameSession.ts) - starts/resets this player's own turn-timeout deadline. Fired
@@ -72,7 +72,7 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
     // Robots-only needs no recompute at all - see startNewGame.ts's own one-time setup, never "own" either way.
     const mode = getGameMode(root)
     if (mode === 'multi' || mode === 'solo') {
-      const players = jsonDom.getParentsByClass('boards', player as unknown as DomItem)[0].children as Player[]
+      const players = treeloom.getParentsByClass('boards', player as unknown as DomItem)[0].children as Player[]
       if (mode === 'solo') {
         applyLocalPlayerView(players, players.find(p => !p.isRobot) ?? null)
       } else if (!getSession(root).onAttackerChanged) {
@@ -86,8 +86,8 @@ const updatePlayer = (player: Player, hitShip?: boolean, sunkShip: number = 0): 
   // Every board keeps its size. The player whose turn it is is marked with a yellow outline on their panel. The players
   // they can attack glow in that player's colour, so the target is clear
   queueTimeout(player, () => {
-    jsonDom.updateElement(siFunciona.mergeObjectsMutable(player, { attributes: { style: { outline: player.attacker ? '3px solid yellow' : 'none' } } }) as DomItem)
-    victimsOf(player).forEach(victim => jsonDom.updateElement(siFunciona.mergeObjectsMutable(victim, { attributes: { style: { boxShadow: player.attacker ? `0 0 0 6px ${player.colour}` : 'none' } } }) as DomItem))
+    treeloom.updateElement(siFunciona.mergeObjectsMutable(player, { attributes: { style: { outline: player.attacker ? '3px solid yellow' : 'none' } } }) as DomItem)
+    victimsOf(player).forEach(victim => treeloom.updateElement(siFunciona.mergeObjectsMutable(victim, { attributes: { style: { boxShadow: player.attacker ? `0 0 0 6px ${player.colour}` : 'none' } } }) as DomItem))
   }, 0)
   queueTimeout(player, () => updatePlayerStats(player, player.attacker ? 'ATTACKER' : `${Math.round(player.status * 100) / 100}%`), 0)
   return player

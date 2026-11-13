@@ -1,7 +1,7 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import siFunciona from 'si-funciona'
 import { roleFor } from './playerView'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /**
@@ -19,7 +19,7 @@ import type { Player } from '../types'
 export const applyLocalPlayerView = (players: Player[], viewer: Player | null): void => {
   players.forEach(player => {
     const role = viewer === null ? 'summary' : roleFor(player, viewer)
-    jsonDom.updateElement(siFunciona.mergeObjectsMutable(player, { attributes: { className: `player role-${role}` } }) as DomItem)
+    treeloom.updateElement(siFunciona.mergeObjectsMutable(player, { attributes: { className: `player role-${role}` } }) as DomItem)
   })
 }
 

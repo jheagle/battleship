@@ -1,6 +1,6 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import shadeShips from '../cells/shadeShips'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../types'
 
 /**
@@ -16,10 +16,10 @@ const shipsListener = (e: Event, target: DomItem): void => {
     shadeShips(player, input.checked)
   }
   if (input.className.includes('own-ships')) {
-    set(jsonDom.getParentsByClass('player', target)[0] as unknown as Player)
+    set(treeloom.getParentsByClass('player', target)[0] as unknown as Player)
   } else if (input.className.includes('all-ships')) {
-    const root = jsonDom.getTopParentItem(target)
-    const boards = jsonDom.getChildrenByClass('boards', root.body)[0] as unknown as { children: Player[] }
+    const root = treeloom.getTopParentItem(target)
+    const boards = treeloom.getChildrenByClass('boards', root.body)[0] as unknown as { children: Player[] }
     boards.children.forEach(set)
   }
 }

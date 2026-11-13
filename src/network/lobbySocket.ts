@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client'
-import type { ForwardedEvent } from 'json-dom/dist/events/types'
+import type { ForwardedEvent } from 'treeloom/dist/events/types'
 import type { HintSetting } from '../setup/gameOptions'
 import type { RoomState } from '../../server/lobbyServer'
 

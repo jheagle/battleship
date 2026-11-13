@@ -1,8 +1,8 @@
-// Deep imports, not the full 'matrix-dom' barrel - this module is deliberately kept free of a real DOM dependency
-// (it runs in plain Node, not jsdom), and matrix-dom's own main.js pulls in json-dom, which touches `document`
+// Deep imports, not the full 'treeloom-matrix' barrel - this module is deliberately kept free of a real DOM dependency
+// (it runs in plain Node, not jsdom), and treeloom-matrix's own main.js pulls in treeloom, which touches `document`
 // eagerly at import time. getLinesOfLength and point are both pure, with no such dependency of their own.
-import getLinesOfLength from 'matrix-dom/dist/line/getLinesOfLength'
-import point from 'matrix-dom/dist/point/point'
+import getLinesOfLength from 'treeloom-matrix/dist/line/getLinesOfLength'
+import point from 'treeloom-matrix/dist/point/point'
 
 export interface Cell {
   x: number

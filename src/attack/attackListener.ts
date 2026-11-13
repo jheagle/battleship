@@ -1,8 +1,8 @@
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import attackFleet from './attackFleet'
 import { isPlacing, placeCell } from '../setup/placement'
 import { handleRemoteBoardClick, isRemoteSessionActive } from '../setup/remotePlacement'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Board, Player, Tile } from '../types'
 
 /**
@@ -15,9 +15,9 @@ import type { Board, Player, Tile } from '../types'
  */
 const attackListener = (e: Event, target: DomItem): Player[] => {
   const board = target as unknown as Board
-  const tile = matrixDom.getDomItemFromElement(e.target as Node, board) as Tile | false
+  const tile = treeloomMatrix.getDomItemFromElement(e.target as Node, board) as Tile | false
   // getDomItemFromElement resolves the real click target's position *within this board's own real DOM
-  // ancestry* (matrix-dom's own getPointFromElement - still position-based, unrelated to json-dom's own id
+  // ancestry* (treeloom-matrix's own getPointFromElement - still position-based, unrelated to treeloom's own id
   // work) - false when e.target does not sit where a tile of this specific board is expected. Every caller
   // downstream (attackFleet, placeCell, handleRemoteBoardClick) assumes a real Tile and would otherwise throw
   // on the bare boolean several calls deep (getSession/getTopParentItem reading .parentItem off it) - a

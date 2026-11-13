@@ -3,8 +3,8 @@
  */
 
 import { colours } from '../theme'
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import { useGameLifecycle, startGame, settle } from '../../tests/helpers/game'
 import { redactBoard, redactGameBody, redactGameState, redactPlayer } from './redactGameState'
 import remoteFinalScore from '../components/layout/remoteFinalScore'
@@ -20,8 +20,8 @@ describe('redacting the game state for a remote viewer', () => {
 
   const shipCells = player => player.shipFleet.flatMap(ship => ship.parts.map(part => ({ x: part.point.x, y: part.point.y })))
 
-  const hasShipAt = (board, x, y) => (matrixDom.getDomItemFromPoint(matrixDom.point(x, y, 0), board)).hasShip
-  const isHitAt = (board, x, y) => (matrixDom.getDomItemFromPoint(matrixDom.point(x, y, 0), board)).isHit
+  const hasShipAt = (board, x, y) => (treeloomMatrix.getDomItemFromPoint(treeloomMatrix.point(x, y, 0), board)).hasShip
+  const isHitAt = (board, x, y) => (treeloomMatrix.getDomItemFromPoint(treeloomMatrix.point(x, y, 0), board)).isHit
 
   test('a viewer sees their own unattacked ship positions', async () => {
     const [viewer] = await setUp()
@@ -38,13 +38,13 @@ describe('redacting the game state for a remote viewer', () => {
       expect(hasShipAt(redacted, x, y)).toBe(false)
     })
     // every cell is still accounted for: 100 cells, none dropped just because they are hidden
-    expect(matrixDom.getAllPoints(redacted).filter(p => p.z === 0)).toHaveLength(100)
+    expect(treeloomMatrix.getAllPoints(redacted).filter(p => p.z === 0)).toHaveLength(100)
   })
 
   test('a hit cell shows its ship on any board, even one the viewer does not own', async () => {
     const [, other] = await setUp()
     const part = other.shipFleet[0].parts[0]
-    matrixDom.getDomItemFromPoint(part.point, other.board).isHit = true
+    treeloomMatrix.getDomItemFromPoint(part.point, other.board).isHit = true
     const redacted = redactBoard(other.board, false)
     expect(isHitAt(redacted, part.point.x, part.point.y)).toBe(true)
     expect(hasShipAt(redacted, part.point.x, part.point.y)).toBe(true)
@@ -52,8 +52,8 @@ describe('redacting the game state for a remote viewer', () => {
 
   test('a miss stays a miss: isHit is true but hasShip is false, on any board', async () => {
     const [, other] = await setUp()
-    const miss = matrixDom.getAllPoints(other.board).filter(p => p.z === 0).find(p => !shipCells(other).some(s => s.x === p.x && s.y === p.y))
-    matrixDom.getDomItemFromPoint(miss, other.board).isHit = true
+    const miss = treeloomMatrix.getAllPoints(other.board).filter(p => p.z === 0).find(p => !shipCells(other).some(s => s.x === p.x && s.y === p.y))
+    treeloomMatrix.getDomItemFromPoint(miss, other.board).isHit = true
     const redacted = redactBoard(other.board, false)
     expect(isHitAt(redacted, miss.x, miss.y)).toBe(true)
     expect(hasShipAt(redacted, miss.x, miss.y)).toBe(false)
@@ -65,38 +65,38 @@ describe('redacting the game state for a remote viewer', () => {
     // hand (src/cells/setViewShip.ts) - set directly here, the same way the existing isHit-based tests above set
     // their own scenario directly rather than driving the whole placement UI just to reach one specific state.
     const part = other.shipFleet[0].parts[0]
-    const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
+    const realTile = treeloomMatrix.getDomItemFromPoint(part.point, other.board)
     realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: colours.ship }
 
     const redacted = redactBoard(other.board, false)
-    expect(matrixDom.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBeUndefined()
+    expect(treeloomMatrix.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBeUndefined()
   })
 
   test('an unhit ship\'s accessible name is redacted with its colour, so a screen reader never hears "ship" either', async () => {
     const [own, other] = await setUp()
     const part = other.shipFleet[0].parts[0]
-    const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
+    const realTile = treeloomMatrix.getDomItemFromPoint(part.point, other.board)
     realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: colours.ship }
     realTile.attributes['aria-label'] = `${String.fromCharCode(65 + part.point.x)}${part.point.y + 1}, ship`
 
-    const redacted = matrixDom.getDomItemFromPoint(part.point, redactBoard(other.board, false))
+    const redacted = treeloomMatrix.getDomItemFromPoint(part.point, redactBoard(other.board, false))
     expect(redacted.attributes['aria-label']).toBe(`${String.fromCharCode(65 + part.point.x)}${part.point.y + 1}`)
     // the owner still hears their own ship
     const ownPart = own.shipFleet[0].parts[0]
-    const ownTile = matrixDom.getDomItemFromPoint(ownPart.point, own.board)
+    const ownTile = treeloomMatrix.getDomItemFromPoint(ownPart.point, own.board)
     ownTile.attributes.style = { ...ownTile.attributes.style, backgroundColor: colours.ship }
     ownTile.attributes['aria-label'] = 'kept'
-    expect(matrixDom.getDomItemFromPoint(ownPart.point, redactBoard(own.board, true)).attributes['aria-label']).toBe('kept')
+    expect(treeloomMatrix.getDomItemFromPoint(ownPart.point, redactBoard(own.board, true)).attributes['aria-label']).toBe('kept')
   })
 
   test('a hit cell keeps its own colour untouched when redacted for someone else', async () => {
     const [, other] = await setUp()
     const part = other.shipFleet[0].parts[0]
-    const realTile = matrixDom.getDomItemFromPoint(part.point, other.board)
+    const realTile = treeloomMatrix.getDomItemFromPoint(part.point, other.board)
     realTile.attributes.style = { ...realTile.attributes.style, backgroundColor: colours.hit }
     realTile.isHit = true
     const redacted = redactBoard(other.board, false)
-    expect(matrixDom.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBe(colours.hit)
+    expect(treeloomMatrix.getDomItemFromPoint(part.point, redacted).attributes.style.backgroundColor).toBe(colours.hit)
   })
 
   test('redacting a board does not change the real board it was redacted from', async () => {
@@ -151,10 +151,10 @@ describe('redacting the game state for a remote viewer', () => {
     const [viewer, other] = players
 
     const ownStats = redactPlayer(viewer, viewer).playerStats
-    expect(jsonDom.getChildrenFromAttribute('type', 'checkbox', ownStats)).toHaveLength(1)
+    expect(treeloom.getChildrenFromAttribute('type', 'checkbox', ownStats)).toHaveLength(1)
 
     const otherStats = redactPlayer(other, viewer).playerStats
-    expect(jsonDom.getChildrenFromAttribute('type', 'checkbox', otherStats)).toHaveLength(0)
+    expect(treeloom.getChildrenFromAttribute('type', 'checkbox', otherStats)).toHaveLength(0)
     // Name and ship list are still there - only the control itself is gone, not the whole panel.
     expect(otherStats.children.some(child => child.attributes?.className === 'player-name')).toBe(true)
   })

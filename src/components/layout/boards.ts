@@ -1,12 +1,12 @@
-import jsonDom from 'json-dom'
-import type { DomItem } from 'json-dom/dist/domItem/types'
+import treeloom from 'treeloom'
+import type { DomItem } from 'treeloom/dist/domItem/types'
 import type { Player } from '../../types'
 
 /**
  * Wrapper div for player data / boards
  * @param players
  */
-const boards = (players: Player[] = []): DomItem => jsonDom.createDomItem({
+const boards = (players: Player[] = []): DomItem => treeloom.createDomItem({
   nodeName: 'div',
   attributes: {
     className: 'boards'

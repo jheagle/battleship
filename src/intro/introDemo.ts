@@ -1,10 +1,10 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import shadeShips from '../cells/shadeShips'
 import { getSession } from '../setup/gameSession'
 import { setGameMode } from '../setup/gameOptions'
 import { startNewGame } from '../setup/startNewGame'
-import type { DomItemRoot } from 'json-dom/dist/domItem/types'
-import type { ListenerFunction } from 'json-dom/dist/events/types'
+import type { DomItemRoot } from 'treeloom/dist/domItem/types'
+import type { ListenerFunction } from 'treeloom/dist/events/types'
 import type { Player } from '../types'
 
 /** How many robots play the demo game behind the menu. */
@@ -47,9 +47,9 @@ export const introLayer = (doc: Document): HTMLElement => {
  * @param layer
  */
 const demoGameRoot = (listeners: Record<string, ListenerFunction>, layer: HTMLElement): DomItemRoot => {
-  const head = jsonDom.createDomItem({ nodeName: 'head', attributes: {}, element: document.createElement('head'), children: [] })
-  const body = jsonDom.createDomItem({ nodeName: 'div', attributes: { className: 'intro-demo' }, element: layer, children: [] })
-  return jsonDom.documentDomItem(listeners, jsonDom.initRoot([head, body], listeners))
+  const head = treeloom.createDomItem({ nodeName: 'head', attributes: {}, element: document.createElement('head'), children: [] })
+  const body = treeloom.createDomItem({ nodeName: 'div', attributes: { className: 'intro-demo' }, element: layer, children: [] })
+  return treeloom.documentDomItem(listeners, treeloom.initRoot([head, body], listeners))
 }
 
 /**
@@ -59,7 +59,7 @@ const demoGameRoot = (listeners: Record<string, ListenerFunction>, layer: HTMLEl
 const playDemo = (root: DomItemRoot): void => {
   setGameMode(root, 'robots')
   startNewGame(root, 0, DEMO_ROBOTS, true, 'off')
-  const boards = jsonDom.getChildrenByClass('boards', root.body)[0]
+  const boards = treeloom.getChildrenByClass('boards', root.body)[0]
   ;((boards?.children ?? []) as Player[]).forEach(player => shadeShips(player, true))
 }
 

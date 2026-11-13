@@ -2,14 +2,14 @@
  * @jest-environment jsdom
  */
 
-import jDomMatrix from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import { useGameLifecycle, makeBoard } from '../../tests/helpers/game'
 import { isValidPlacement, placeShip } from './placeShip'
 
 useGameLifecycle()
 
 describe('placing a ship by hand', () => {
-  const at = (x, y) => jDomMatrix.point(x, y, 0)
+  const at = (x, y) => treeloomMatrix.point(x, y, 0)
   const carrier = { name: 'Mothership', size: 5 }
 
   test('a straight horizontal or vertical line of the right length is valid', () => {

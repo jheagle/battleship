@@ -12,12 +12,12 @@ import playAgain from './setup/playAgain'
 import returnToLobby from './setup/returnToLobby'
 import startMenu from './setup/startMenu'
 import gameRoot from './setup/gameRoot'
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { isNode } from 'browser-or-node'
 
 const cloakfall = (): void => {
   // Create new private reference to the document. In a browser the game renders into a <main> (see gameRoot), under a
-  // header with the page's h1; on Node (the server's own module use) it keeps json-dom's default document root.
+  // header with the page's h1; on Node (the server's own module use) it keeps treeloom's default document root.
   const listeners = {
     beginRound,
     attackListener,
@@ -32,7 +32,7 @@ const cloakfall = (): void => {
     playAgain,
     returnToLobby
   }
-  const documentItem = startMenu(isNode ? jsonDom.documentDomItem(listeners) : gameRoot(listeners))
+  const documentItem = startMenu(isNode ? treeloom.documentDomItem(listeners) : gameRoot(listeners))
 
   // Trigger game to start if running as a Node module. This used to check
   // `!(document instanceof HTMLDocument)`, but pseudo-dom's installGlobal (which must already have run - see below -
@@ -40,8 +40,8 @@ const cloakfall = (): void => {
   // that is the whole point: code should not be able to tell a real document from pseudo-dom's. isNode checks the
   // runtime itself instead, which still works regardless of how close pseudo-dom's document gets to a real one.
   if (isNode) {
-    const form = jsonDom.getChildrenByClass('main-menu-form', documentItem.body)[0]
-    const submitBtn = jsonDom.getChildrenFromAttribute('type', 'submit', form)
+    const form = treeloom.getChildrenByClass('main-menu-form', documentItem.body)[0]
+    const submitBtn = treeloom.getChildrenFromAttribute('type', 'submit', form)
     ;(submitBtn[0].element as HTMLElement).click()
   } else {
     // A shared join link (see remoteListener.ts's enterWaitingRoom) puts the room's own code here - jump
@@ -49,7 +49,7 @@ const cloakfall = (): void => {
     // type it in by hand.
     const roomCode = new URLSearchParams(window.location.search).get('room')
     if (roomCode) {
-      showRemoteEntry(jsonDom.getChildrenByClass('main-menu', documentItem.body)[0], roomCode.toUpperCase())
+      showRemoteEntry(treeloom.getChildrenByClass('main-menu', documentItem.body)[0], roomCode.toUpperCase())
     }
   }
 }

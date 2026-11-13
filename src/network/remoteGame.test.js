@@ -6,8 +6,8 @@
 // needs it.
 import { Server } from 'socket.io'
 import { createServer } from 'http'
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import { enterRemoteGame, leaveRemoteGame } from './remoteGame'
 import gameRoot from '../setup/gameRoot'
 import { connectLobbySocket, disconnectLobbySocket } from './lobbySocket'
@@ -41,7 +41,7 @@ const bodyWithClass = className => ({ children: [{ nodeName: 'div', attributes: 
 
 /** A fake push with one clickable button inside it, wired to the given listener name - used to prove which
  * listener a real click actually resolves to (not just that root.forwardEvents itself ends up correct):
- * json-dom decides forward-vs-real once, at render/bind time (activateListener calls retrieveListener there),
+ * treeloom decides forward-vs-real once, at render/bind time (activateListener calls retrieveListener there),
  * so toggling root.forwardEvents after rendering has no effect on anything already bound - the real bug this
  * covers, found by real testing after PR #124 merged. */
 const bodyWithButton = (className, listenerFunc) => ({
@@ -70,7 +70,7 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
   test('forwarding starts on, turns off on a final-scores push, and back on for whatever comes after', async () => {
     const socket = connectLobbySocket(baseUrl)
     await waitFor(() => socket.connected)
-    const root = jsonDom.documentDomItem({})
+    const root = treeloom.documentDomItem({})
 
     enterRemoteGame(root, bodyWithClass('boards'))
     expect(root.forwardEvents).toBeDefined()
@@ -84,7 +84,7 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
   })
 
   test('leaveRemoteGame always turns forwarding off and clears the rendered tree, regardless of game-over state', () => {
-    const root = jsonDom.documentDomItem({})
+    const root = treeloom.documentDomItem({})
     enterRemoteGame(root, bodyWithClass('boards'))
     expect(root.body.children).toHaveLength(1)
 
@@ -107,7 +107,7 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
     await waitFor(() => socket.connected)
     // Only the listeners main.ts actually registers - remotePlacementListener is deliberately missing, exactly
     // like the real app, since it only ever needs to run as a forwarder during an active game.
-    const root = jsonDom.documentDomItem({ attackListener: jest.fn() })
+    const root = treeloom.documentDomItem({ attackListener: jest.fn() })
     const staleBoardsAndFinalScores = {
       children: [
         {
@@ -132,7 +132,7 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
   })
 
   // The real bug this covers: root.forwardEvents only decides whether a button forwards or runs a real local
-  // listener once, at the moment renderInto actually binds it (json-dom's activateListener calls
+  // listener once, at the moment renderInto actually binds it (treeloom's activateListener calls
   // retrieveListener right then) - toggling the flag afterwards does nothing to anything already bound. A
   // final-scores push's own Play Again button was being rendered (and bound as a forwarder) before forwarding
   // was turned off, so clicking it silently forwarded to a no-op on the server instead of running locally.
@@ -140,7 +140,7 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
     const socket = connectLobbySocket(baseUrl)
     await waitFor(() => socket.connected)
     const localListener = jest.fn()
-    const root = jsonDom.documentDomItem({ localListener })
+    const root = treeloom.documentDomItem({ localListener })
 
     enterRemoteGame(root, bodyWithButton('final-scores', 'localListener'))
     document.querySelector('.the-button').click()
@@ -154,7 +154,7 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
     const socket = connectLobbySocket(baseUrl)
     await waitFor(() => socket.connected)
     const localListener = jest.fn()
-    const root = jsonDom.documentDomItem({ localListener })
+    const root = treeloom.documentDomItem({ localListener })
 
     enterRemoteGame(root, bodyWithButton('boards', 'localListener'))
     document.querySelector('.the-button').click()
@@ -167,7 +167,7 @@ describe('enterRemoteGame: forwarding toggles off once the game ends, and back o
     const socket = connectLobbySocket(baseUrl)
     await waitFor(() => socket.connected)
     const localListener = jest.fn()
-    const root = jsonDom.documentDomItem({ localListener })
+    const root = treeloom.documentDomItem({ localListener })
 
     enterRemoteGame(root, bodyWithClass('final-scores'))
     io.emit('gameUpdate', bodyWithButton('boards', 'localListener'))
@@ -183,10 +183,10 @@ describe('enterRemoteGame: the boards stay keyboard navigable across re-renders'
   // A board as the server sends it: built like buildPlayers builds one, then through json (forTransport), which drops
   // navigableGrid's function listeners but keeps the named attackListener
   const boardsBody = () => {
-    const board = matrixDom.navigableGrid(matrixDom.square({
+    const board = treeloomMatrix.navigableGrid(treeloomMatrix.square({
       matrix: { eventListeners: { click: [{ listenerFunc: 'attackListener', listenerArgs: {}, listenerOptions: false }] } }
     }, 3))
-    return { children: [{ nodeName: 'div', attributes: { className: 'boards' }, children: [JSON.parse(jsonDom.domItemToJson(board))] }] }
+    return { children: [{ nodeName: 'div', attributes: { className: 'boards' }, children: [JSON.parse(treeloom.domItemToJson(board))] }] }
   }
   const cellAt = (x, y) => document.querySelector('.boards [role="grid"]').children[0].children[y].children[x]
   const press = (element, key) => element.dispatchEvent(new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
@@ -194,7 +194,7 @@ describe('enterRemoteGame: the boards stay keyboard navigable across re-renders'
   test('arrow keys work on a board rendered from a push, and Enter is forwarded as a click', async () => {
     const socket = connectLobbySocket(baseUrl)
     await waitFor(() => socket.connected)
-    const root = jsonDom.documentDomItem({})
+    const root = treeloom.documentDomItem({})
     enterRemoteGame(root, boardsBody())
     cellAt(0, 0).focus()
     press(cellAt(0, 0), 'ArrowRight')
@@ -208,7 +208,7 @@ describe('enterRemoteGame: the boards stay keyboard navigable across re-renders'
   test('the next push re-renders everything, and focus goes back to the same cell', async () => {
     const socket = connectLobbySocket(baseUrl)
     await waitFor(() => socket.connected)
-    const root = jsonDom.documentDomItem({})
+    const root = treeloom.documentDomItem({})
     enterRemoteGame(root, boardsBody())
     cellAt(0, 0).focus()
     press(cellAt(0, 0), 'ArrowDown')

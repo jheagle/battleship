@@ -1,8 +1,8 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { leaveRemoteGame } from '../network/remoteGame'
 import startMenu from './startMenu'
 import { enterWaitingRoom, getLastRoomState } from './remoteListener'
-import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
+import type { DomItem, DomItemRoot } from 'treeloom/dist/domItem/types'
 
 /**
  * The final-score screen's Play Again button, for a remote game - any player can click it (there is nothing
@@ -25,9 +25,9 @@ const remotePlayAgainListener = (e: Event, target: DomItem): void => {
   if (!state) {
     return
   }
-  const root = jsonDom.getTopParentItem(target) as DomItemRoot
+  const root = treeloom.getTopParentItem(target) as DomItemRoot
   leaveRemoteGame(root)
-  const menu = jsonDom.getChildrenByClass('main-menu', startMenu(root).body)[0]
+  const menu = treeloom.getChildrenByClass('main-menu', startMenu(root).body)[0]
   enterWaitingRoom(menu, state)
 }
 

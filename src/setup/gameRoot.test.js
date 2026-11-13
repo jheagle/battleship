@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import gameRoot, { gameLayout } from './gameRoot'
 import startMenu from './startMenu'
 
@@ -34,7 +34,7 @@ describe('gameRoot', () => {
     expect(root.body.element).toBe(main)
     expect(root.body.children.length).toBeGreaterThan(0)
     expect(main.querySelector('.main-menu')).not.toBeNull()
-    expect(jsonDom.getChildrenByClass('main-menu', root.body)).toHaveLength(1)
+    expect(treeloom.getChildrenByClass('main-menu', root.body)).toHaveLength(1)
     // nothing the game renders is left outside the landmarks; the one extra layer is the robots' demo, hidden scenery
     expect([...document.body.children].map(child => child.tagName)).toEqual(['HEADER', 'DIV', 'MAIN'])
     const demo = document.body.children[1]

@@ -3,7 +3,7 @@
  */
 
 import { colours } from '../theme'
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import labelTile, { coordinateName, labelBoard, tileLabel } from './labelTile'
 import updatePlayerStats from '../attack/updatePlayerStats'
 import { useGameLifecycle, startGame, settle, twoHumans, victims, attacker, unhitShipCells, unhitWaterCells, cells } from '../../tests/helpers/game'
@@ -46,7 +46,7 @@ describe('the boards in a game', () => {
       expect(player.board.element.querySelectorAll('[role="gridcell"]').length).toBe(100)
       expect(player.board.element.querySelectorAll('[tabindex="0"]').length).toBe(1)
     })
-    const tile = matrixDom.getDomItemFromPoint(matrixDom.point(1, 3, 0), players[0].board)
+    const tile = treeloomMatrix.getDomItemFromPoint(treeloomMatrix.point(1, 3, 0), players[0].board)
     expect(tile.element.getAttribute('aria-label')).toBe('B4')
   })
 

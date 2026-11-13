@@ -1,6 +1,6 @@
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import labelTile from '../cells/labelTile'
-import matrixDom from 'matrix-dom'
+import treeloomMatrix from 'treeloom-matrix'
 import siFunciona from 'si-funciona'
 import { defaultShipSpecs } from './defaultFleet'
 import generateRandomFleet from './generateRandomFleet'
@@ -9,8 +9,8 @@ import { isValidPlacement, placeShip } from './placeShip'
 import { setStatsShown } from './placement'
 import remotePlacementPanel from '../components/layout/remotePlacementPanel'
 import remoteOrderingPanel from '../components/layout/remoteOrderingPanel'
-import type { DomItem, DomItemRoot } from 'json-dom/dist/domItem/types'
-import type { Point } from 'matrix-dom/dist/point/types'
+import type { DomItem, DomItemRoot } from 'treeloom/dist/domItem/types'
+import type { Point } from 'treeloom-matrix/dist/point/types'
 import type { Board, Player, ShipSpec, Tile } from '../types'
 
 /** How long players have to finish placing before any still-pending ships are placed at random for them. */
@@ -44,7 +44,7 @@ interface RemotePlacementState {
 
 const sessions = new WeakMap<DomItemRoot, RemotePlacementState>()
 
-const findSession = (item: DomItem): RemotePlacementState | null => sessions.get(jsonDom.getTopParentItem(item) as DomItemRoot) ?? null
+const findSession = (item: DomItem): RemotePlacementState | null => sessions.get(treeloom.getTopParentItem(item) as DomItemRoot) ?? null
 
 const activeSession = (item: DomItem): RemotePlacementState => {
   const found = findSession(item)
@@ -66,7 +66,7 @@ export const isRemoteSessionActive = (item: DomItem): boolean => findSession(ite
  * its shape. Safe to call even when no session is running (normal completion already deletes its own via
  * finishOrdering). */
 export const cancelRemotePlacement = (item: DomItem): void => {
-  const root = jsonDom.getTopParentItem(item) as DomItemRoot
+  const root = treeloom.getTopParentItem(item) as DomItemRoot
   const session = sessions.get(root)
   if (!session) {
     return
@@ -90,10 +90,10 @@ export const remotePlacementStage = (item: DomItem): RemoteStage | null => findS
 
 const update = (item: DomItem, attributes: object): void => {
   // labelTile only acts on tiles: a tile's accessible name follows its colour
-  jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem))
+  treeloom.updateElement(labelTile(siFunciona.mergeObjectsMutable(item, { attributes }) as DomItem))
 }
 
-const child = (item: DomItem, className: string): DomItem => jsonDom.getChildrenByClass(className, item)[0]
+const child = (item: DomItem, className: string): DomItem => treeloom.getChildrenByClass(className, item)[0]
 
 const panelOf = (player: Player): DomItem => child(player as unknown as DomItem, 'remote-placement-panel')
 
@@ -116,8 +116,8 @@ const renderPanel = (session: RemotePlacementState, player: Player): void => {
 /** Mark which cells a ship-in-progress could end on, same visual as local placement's own showStart. */
 const showStart = (player: Player, point: Point | null, size: number): void => {
   const board = player.board
-  matrixDom.getLayerPoints(board, 0).forEach(p => {
-    const tile = matrixDom.getDomItemFromPoint(p, board) as unknown as DomItem
+  treeloomMatrix.getLayerPoints(board, 0).forEach(p => {
+    const tile = treeloomMatrix.getDomItemFromPoint(p, board) as unknown as DomItem
     const isStart = Boolean(point && p.x === point.x && p.y === point.y)
     const isEnd = point !== null && !isStart && isValidPlacement(board, point, p, size)
     update(tile, {
@@ -157,7 +157,7 @@ const updateOrderingPanel = (session: RemotePlacementState, root: DomItemRoot): 
  * @param onTimerChange
  */
 export const startRemotePlacement = (players: Player[], body: DomItem, done: (order: Player[]) => void, onTimerChange: () => void = () => {}): void => {
-  const root = jsonDom.getTopParentItem(body) as DomItemRoot
+  const root = treeloom.getTopParentItem(body) as DomItemRoot
   const playerState = new Map(players.map(player => [player, player.isRobot
     ? { pending: [], start: null, ready: true }
     : { pending: [...defaultShipSpecs], start: null, ready: false }]))
@@ -183,10 +183,10 @@ export const startRemotePlacement = (players: Player[], body: DomItem, done: (or
   // resolves, mirroring local hot-seat's own placement.ts.
   setStatsShown(players, false)
   players.filter(player => !player.isRobot).forEach(player => {
-    jsonDom.renderHtml(jsonDom.createDomItem(remotePlacementPanel()), player as unknown as DomItem)
+    treeloom.renderHtml(treeloom.createDomItem(remotePlacementPanel()), player as unknown as DomItem)
     renderPanel(session, player)
   })
-  jsonDom.renderHtml(jsonDom.createDomItem(remoteOrderingPanel()), root.body)
+  treeloom.renderHtml(treeloom.createDomItem(remoteOrderingPanel()), root.body)
 }
 
 /**
@@ -197,7 +197,7 @@ export const startRemotePlacement = (players: Player[], body: DomItem, done: (or
  * @param board
  */
 const placeRemoteShip = (tile: Tile, board: Board): void => {
-  const player = jsonDom.getParentsByClass('player', tile)[0] as Player
+  const player = treeloom.getParentsByClass('player', tile)[0] as Player
   if (board !== player.board) {
     return
   }
@@ -254,7 +254,7 @@ const pickOrderPlayer = (board: Board): void => {
     return
   }
   session.order.push(player)
-  const root = jsonDom.getTopParentItem(board) as DomItemRoot
+  const root = treeloom.getTopParentItem(board) as DomItemRoot
   if (session.order.length < session.players.length) {
     updateOrderingPanel(session, root)
     return
@@ -308,7 +308,7 @@ export const readyRemotePlayer = (player: Player): void => {
   if (player.isRobot) {
     return
   }
-  const root = jsonDom.getTopParentItem(player as unknown as DomItem) as DomItemRoot
+  const root = treeloom.getTopParentItem(player as unknown as DomItem) as DomItemRoot
   const session = activeSession(player as unknown as DomItem)
   const state = session.playerState.get(player) as RemotePlayerState
   if (state.pending.length > 0) {
@@ -326,9 +326,9 @@ export const randomiseRemoteShips = (player: Player): void => {
   if (state.ready) {
     return
   }
-  matrixDom.getLayerPoints(player.board, 0).forEach(p => {
-    const tile = matrixDom.getDomItemFromPoint(p, player.board) as unknown as DomItem
-    jsonDom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem))
+  treeloomMatrix.getLayerPoints(player.board, 0).forEach(p => {
+    const tile = treeloomMatrix.getDomItemFromPoint(p, player.board) as unknown as DomItem
+    treeloom.updateElement(labelTile(siFunciona.mergeObjectsMutable(tile, { hasShip: false, attributes: { style: { backgroundColor: '' } } }) as DomItem))
   })
   player.shipFleet = generateRandomFleet(defaultShipSpecs, player.board, true)
   state.pending = []
@@ -344,7 +344,7 @@ export const beginOrderSet = (item: DomItem): void => {
   }
   session.stage = 'ordering'
   session.order = []
-  const root = jsonDom.getTopParentItem(item) as DomItemRoot
+  const root = treeloom.getTopParentItem(item) as DomItemRoot
   session.players.forEach(player => update(player as unknown as DomItem, { 'data-pickable': 'true' }))
   updateOrderingPanel(session, root)
 }
@@ -371,7 +371,7 @@ export const chooseOrderRandom = (item: DomItem): void => {
     return
   }
   session.stage = 'shuffling'
-  const root = jsonDom.getTopParentItem(item) as DomItemRoot
+  const root = treeloom.getTopParentItem(item) as DomItemRoot
   updateOrderingPanel(session, root)
   const shuffled = shuffle(session.players)
   const steps = 12

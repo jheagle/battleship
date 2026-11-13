@@ -1,5 +1,5 @@
-import jsonDom from 'json-dom'
-import matrixDom from 'matrix-dom'
+import treeloom from 'treeloom'
+import treeloomMatrix from 'treeloom-matrix'
 import getAttackLock from './attackLock'
 import setHit from '../cells/setHit'
 import updatePlayerStats from './updatePlayerStats'
@@ -12,8 +12,8 @@ import type { Player, Ship, Tile } from '../types'
  */
 const attackFleet = (target: Tile): Player[] => {
   const attackLock = getAttackLock(target)
-  let player = jsonDom.getParentsByClass('player', target)[0] as Player
-  const players = jsonDom.getParentsByClass('boards', target)[0].children as Player[]
+  let player = treeloom.getParentsByClass('player', target)[0] as Player
+  const players = treeloom.getParentsByClass('boards', target)[0].children as Player[]
   // Player cannot attack themselves (current attacker), if they have bad status, or a cell which was already hit
   if (player.status <= 0 || player.attacker || attackLock.isLocked || target.isHit) {
     return players
@@ -28,7 +28,7 @@ const attackFleet = (target: Tile): Player[] => {
     player.shipFleet.map((ship) => {
       // Get all healthy ships
       const healthy = ship.parts.filter((part) => {
-        if (matrixDom.areEqualPoints(part.point, target.point)) {
+        if (treeloomMatrix.areEqualPoints(part.point, target.point)) {
           hitShip = ship
         }
         return !part.isHit

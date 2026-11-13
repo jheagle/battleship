@@ -4,7 +4,7 @@
 
 import presetListener from './presetListener'
 import remoteListener from './remoteListener'
-import jsonDom from 'json-dom'
+import treeloom from 'treeloom'
 import { useGameLifecycle, startGame, getPlayers } from '../../tests/helpers/game'
 import beginRound from './beginRound'
 import startMenu from './startMenu'
@@ -33,12 +33,12 @@ describe('setup: choosing the players', () => {
   test.each([[101, 0], [0, 101], [-1, 2], [2, -1]])('%i humans and %i robots is refused and leaves the menu showing', (humans, robots) => {
     const { doc, players } = startGame({ humans, robots })
     expect(players).toHaveLength(0)
-    expect(jsonDom.getChildrenByClass('main-menu', doc.body)).toHaveLength(1)
+    expect(treeloom.getChildrenByClass('main-menu', doc.body)).toHaveLength(1)
   })
 
   test('starting the game removes the menu', () => {
     const { doc } = startGame({ humans: 2 })
-    expect(jsonDom.getChildrenByClass('main-menu', doc.body)).toHaveLength(0)
+    expect(treeloom.getChildrenByClass('main-menu', doc.body)).toHaveLength(0)
     expect(getPlayers(doc)).toHaveLength(2)
   })
 })
@@ -63,13 +63,13 @@ describe('setup: who goes first', () => {
 
 describe('setup: beginRound', () => {
   test('ignores a submit which is not aimed at the form itself (an event which only bubbled through)', () => {
-    const doc = startMenu(jsonDom.documentDomItem({ beginRound, presetListener, remoteListener }))
-    const form = jsonDom.getChildrenByClass('main-menu-form', doc.body)[0]
+    const doc = startMenu(treeloom.documentDomItem({ beginRound, presetListener, remoteListener }))
+    const form = treeloom.getChildrenByClass('main-menu-form', doc.body)[0]
     const preventDefault = jest.fn()
     expect(beginRound({ eventPhase: 3, type: 'submit', preventDefault }, form)).toBe(false)
     expect(beginRound({ eventPhase: 1, type: 'submit', preventDefault }, form)).toBe(false)
     expect(preventDefault).not.toHaveBeenCalled()
-    expect(jsonDom.getChildrenByClass('main-menu', doc.body)).toHaveLength(1)
+    expect(treeloom.getChildrenByClass('main-menu', doc.body)).toHaveLength(1)
     expect(getPlayers(doc)).toHaveLength(0)
   })
 })
