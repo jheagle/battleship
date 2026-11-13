@@ -23,6 +23,9 @@
     "index": "MAIN.md",
     "to": "../joshuaheagle.local/projects/cloakfall/docs"
   },
+  "lint": {
+    "include": ["scripts"]
+  },
   "readme": {
     "from": "dist/**/!(*.min).js"
   },
