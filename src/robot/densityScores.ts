@@ -1,6 +1,6 @@
-// Deep imports, not the full 'treeloom-matrix' barrel - this module is deliberately kept free of a real DOM dependency
-// (it runs in plain Node, not jsdom), and treeloom-matrix's own main.js pulls in treeloom, which touches `document`
-// eagerly at import time. getLinesOfLength and point are both pure, with no such dependency of their own.
+// Deep imports, not the full 'treeloom-matrix' barrel - this module is deliberately kept free of any DOM dependency
+// (it runs in plain Node, not jsdom). getLinesOfLength and point are both pure. (The barrel would also load in plain
+// Node now - treeloom builds its document lazily since treeloom#121 - but these two are all this module needs.)
 import getLinesOfLength from 'treeloom-matrix/dist/line/getLinesOfLength'
 import point from 'treeloom-matrix/dist/point/point'
 
