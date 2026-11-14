@@ -56,8 +56,8 @@ const finalScoreOnly = (redactedBody: RedactedBody): RedactedBody => ({
 })
 
 // The countdown is cosmetic only (the server's own timer is the one that actually fires - see
-// PLACEMENT_TIMEOUT_MS), so it is kept entirely outside treeloom's own tree: renderInto below wipes and rebuilds
-// root.body's children on every single update, which would reset a ticking display right as it ticks. Plain DOM
+// PLACEMENT_TIMEOUT_MS), so it is kept entirely outside treeloom's own tree: renderInto below rebuilds root.body's
+// children in full at the start and end of a game, which would reset a ticking display right as it ticks. Plain DOM
 // state module-wide is safe because the app only ever has one remote game active (its one real root) at a time -
 // see enterRemoteGame's own comment on reusing the app's existing root instead of a second one.
 let countdownElement: HTMLElement | null = null
@@ -148,6 +148,32 @@ const focusedCell = (root: DomItemRoot): { board: number, point: Point } | null 
 }
 
 /**
+ * Whether forwarding was on when each root's game was last rendered in full; only set while a remote game is shown.
+ * A push can be reconciled into what is rendered only when forwarding hasn't changed since: treeloom decides whether
+ * a listener forwards to the server or runs locally when it binds it, and reconcile keeps every unchanged listener
+ * bound as it was.
+ */
+const fullRenderForwarding = new WeakMap<DomItemRoot, boolean>()
+
+/** Item properties which are the tree itself, not the item's data (reconcile never copies these either). */
+const STRUCTURE = new Set(['element', 'parentItem', 'children', 'eventListeners', 'activeListeners'])
+
+/**
+ * Inflate a redacted body, with the boards' keyboard navigation (navigableGrid) put back: it is function listeners,
+ * which json drops. The Tab stop stays on the cell that had focus. Its listeners run locally even while events are
+ * forwarded (treeloom only forwards named listeners), and Enter / Space click the cell, which is forwarded like a
+ * mouse click.
+ * @param redactedBody
+ * @param focus
+ */
+const inflateBody = (redactedBody: object, focus: { board: number, point: Point } | null): { body: DomItem, boards: Board[] } => {
+  const body = treeloom.jsonToDomItem(JSON.stringify(redactedBody))
+  const boards = boardsIn(body)
+  boards.forEach((board, index) => treeloomMatrix.navigableGrid(board, focus?.board === index ? focus.point : undefined))
+  return { body, boards }
+}
+
+/**
  * Replace the root's own body content with a freshly-inflated redacted body's children, rendered directly as the
  * body's own children - not nested one level deeper under some other wrapper - so a path captured from this tree
  * (getItemPath) and one resolved against the server's own root (getItemByPath) agree: both are root -> body ->
@@ -155,16 +181,11 @@ const focusedCell = (root: DomItemRoot): { board: number, point: Point } | null 
  * @param root
  * @param redactedBody
  */
-const renderInto = (root: DomItemRoot, redactedBody: object): void => {
+const renderFresh = (root: DomItemRoot, redactedBody: object): void => {
   const focus = focusedCell(root)
   clearChildren(root.body)
-  const inflated = treeloom.jsonToDomItem(JSON.stringify(redactedBody))
-  // The boards' keyboard navigation (navigableGrid) is function listeners, which json drops: put it back, keeping
-  // the Tab stop on the cell that had focus. Its listeners run locally even while events are forwarded (treeloom only
-  // forwards named listeners), and Enter / Space click the cell, which is forwarded like a mouse click.
-  const boards = boardsIn(inflated)
-  boards.forEach((board, index) => treeloomMatrix.navigableGrid(board, focus?.board === index ? focus.point : undefined))
-  inflated.children.forEach((child: DomItem) => {
+  const { body, boards } = inflateBody(redactedBody, focus)
+  body.children.forEach((child: DomItem) => {
     // jsonToDomItem already set child.parentItem - to the throwaway top-level body it was inflated as part of,
     // not root.body. Left alone, renderHtml sees a non-null parentItem and assumes the item is already correctly
     // attached somewhere, skipping the fresh-tree setup (setParentItemReferences + insertChild) that binding any
@@ -172,9 +193,49 @@ const renderInto = (root: DomItemRoot, redactedBody: object): void => {
     child.parentItem = null
     treeloom.renderHtml(child, root.body)
   })
-  // Every update re-renders the whole tree, so keyboard focus would fall back to the page: return it to the same cell
+  // The whole tree was rendered again, so keyboard focus would fall back to the page: return it to the same cell
   const refocus = focus && boards[focus.board] ? treeloomMatrix.getDomItemFromPoint(focus.point, boards[focus.board]) : false
   ;(refocus ? refocus.element as HTMLElement | undefined : undefined)?.focus()
+  fullRenderForwarding.set(root, Boolean(root.forwardEvents))
+}
+
+/**
+ * Update what is rendered to match a push, changing only what differs (treeloom's reconcile): elements, focus and
+ * keyboard navigation stay where they are. The push's top level is a <body> while the game renders into the root's
+ * own body (a <main> in a browser, see gameRoot), so the push's children are reconciled into root.body and root.body
+ * keeps its own node name, attributes and data.
+ * @param root
+ * @param redactedBody
+ */
+const renderChanges = (root: DomItemRoot, redactedBody: object): void => {
+  const { body } = inflateBody(redactedBody, focusedCell(root))
+  const existing = root.body as unknown as Record<string, unknown>
+  const next = body as unknown as Record<string, unknown>
+  for (const key of Object.keys(next)) {
+    if (!STRUCTURE.has(key)) {
+      delete next[key]
+    }
+  }
+  for (const key of Object.keys(existing)) {
+    if (!STRUCTURE.has(key)) {
+      next[key] = existing[key]
+    }
+  }
+  treeloom.reconcile(root.body, body)
+}
+
+/**
+ * Show a push: reconciled into what is already rendered when it can be (same game, forwarding unchanged), otherwise
+ * rendered in full (the first push, and the switches between a game and its final scores).
+ * @param root
+ * @param redactedBody
+ */
+const renderInto = (root: DomItemRoot, redactedBody: object): void => {
+  if (fullRenderForwarding.get(root) === Boolean(root.forwardEvents)) {
+    renderChanges(root, redactedBody)
+  } else {
+    renderFresh(root, redactedBody)
+  }
 }
 
 /** Stop forwarding (and the countdown, which can't be running once the game has ended anyway) without touching
@@ -191,7 +252,7 @@ const stopForwarding = (root: DomItemRoot): void => {
  * one (a second documentDomItem() would claim the same real document.head/body the app's own root already has -
  * exactly the collision the server's own per-room roots had to avoid, see server/gameplay.ts). Every click/change
  * on the rendered tree is forwarded to the server instead of run locally (setForwardEvents) - the server's own
- * receiveForwardedEvent resolves and dispatches it, and the resulting gameUpdate re-renders this same tree fresh.
+ * receiveForwardedEvent resolves and dispatches it, and the resulting gameUpdate is reconciled into this same tree.
  * Leaving the lobby's own listeners (presetListener, remoteListener, ...) alone is safe because the lobby's own
  * markup is no longer in the tree by the time this runs - clearChildren above already removed it.
  *
@@ -211,7 +272,8 @@ export const enterRemoteGame = (root: DomItemRoot, firstUpdate: RedactedBody): v
   if (firstOver) {
     stopForwarding(root)
   }
-  renderInto(root, firstOver ? finalScoreOnly(firstUpdate) : firstUpdate)
+  // The lobby's own markup is still rendered: the first push always replaces it in full
+  renderFresh(root, firstOver ? finalScoreOnly(firstUpdate) : firstUpdate)
   setCountdownDeadline(deadlineOf(firstUpdate))
   onGameUpdate(redactedBody => {
     const over = isGameOver(redactedBody as RedactedBody)
@@ -229,4 +291,5 @@ export const enterRemoteGame = (root: DomItemRoot, firstUpdate: RedactedBody): v
 export const leaveRemoteGame = (root: DomItemRoot): void => {
   stopForwarding(root)
   clearChildren(root.body)
+  fullRenderForwarding.delete(root)
 }

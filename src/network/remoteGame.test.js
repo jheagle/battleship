@@ -205,7 +205,7 @@ describe('enterRemoteGame: the boards stay keyboard navigable across re-renders'
     leaveRemoteGame(root)
   })
 
-  test('the next push re-renders everything, and focus goes back to the same cell', async () => {
+  test('the next push is reconciled: the same elements stay, with focus and the Tab stop where they were', async () => {
     const socket = connectLobbySocket(baseUrl)
     await waitFor(() => socket.connected)
     const root = treeloom.documentDomItem({})
@@ -213,11 +213,65 @@ describe('enterRemoteGame: the boards stay keyboard navigable across re-renders'
     cellAt(0, 0).focus()
     press(cellAt(0, 0), 'ArrowDown')
     press(document.activeElement, 'ArrowRight')
-    const before = document.activeElement
+    const focused = document.activeElement
+    const grid = document.querySelector('.boards [role="grid"]')
+    let pushed = false
+    socket.once('gameUpdate', () => { pushed = true })
     io.emit('gameUpdate', boardsBody())
-    await waitFor(() => !document.body.contains(before))
-    expect(document.activeElement).toBe(cellAt(1, 1))
+    await waitFor(() => pushed)
+    expect(document.querySelector('.boards [role="grid"]')).toBe(grid)
+    expect(cellAt(1, 1)).toBe(focused)
+    expect(document.activeElement).toBe(focused)
     expect([...document.querySelectorAll('.boards [tabindex="0"]')]).toEqual([cellAt(1, 1)])
+    // Keyboard navigation still works on the kept board, and Enter still forwards
+    press(document.activeElement, 'ArrowRight')
+    expect(document.activeElement).toBe(cellAt(2, 1))
+    press(document.activeElement, 'Enter')
+    await waitFor(() => gameActionReceived)
+    leaveRemoteGame(root)
+  })
+
+  test('a push only changes what differs: a changed attribute is written, the other elements are untouched', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const root = treeloom.documentDomItem({})
+    enterRemoteGame(root, boardsBody())
+    const cells = [...document.querySelectorAll('.boards [role="gridcell"]')]
+    const next = boardsBody()
+    // Mark one cell, as a shot does
+    const target = next.children[0].children[0].children[0].children[1].children[2]
+    target.attributes = { ...target.attributes, className: `${target.attributes.className ?? ''} hit`.trim() }
+    const writes = []
+    const observer = new window.MutationObserver(records => writes.push(...records))
+    observer.observe(document.body, { subtree: true, childList: true, attributes: true })
+    let pushed = false
+    socket.once('gameUpdate', () => { pushed = true })
+    io.emit('gameUpdate', next)
+    await waitFor(() => pushed)
+    await new Promise(resolve => setTimeout(resolve, 0))
+    observer.disconnect()
+    expect([...document.querySelectorAll('.boards [role="gridcell"]')]).toEqual(cells)
+    expect(cellAt(2, 1).classList).toContain('hit')
+    expect(writes.filter(record => record.type === 'childList')).toEqual([])
+    expect(new Set(writes.map(record => record.target))).toEqual(new Set([cellAt(2, 1)]))
+    leaveRemoteGame(root)
+  })
+
+  test('the switch to final scores and back renders in full, so listeners bind in the right mode', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const root = treeloom.documentDomItem({})
+    enterRemoteGame(root, boardsBody())
+    const grid = document.querySelector('.boards [role="grid"]')
+    let pushes = 0
+    socket.on('gameUpdate', () => { pushes++ })
+    io.emit('gameUpdate', bodyWithClass('final-scores'))
+    await waitFor(() => pushes === 1)
+    expect(document.body.contains(grid)).toBe(false)
+    io.emit('gameUpdate', boardsBody())
+    await waitFor(() => pushes === 2)
+    expect(document.querySelector('.boards [role="grid"]')).not.toBe(grid)
+    expect(root.forwardEvents).toBeTruthy()
     leaveRemoteGame(root)
   })
 })
