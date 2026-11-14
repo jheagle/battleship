@@ -32,9 +32,11 @@ Online Multiplayer additionally needs the lobby server running:
 npm run serve:lobby
 ```
 
-This compiles and starts `server/lobbyServer.ts` on port 3002 (`src/network/lobbySocket.ts`'s own
-`DEFAULT_URL`). The page itself still needs to be served separately (same as local play) - this is
-just the socket.io server it talks to for room hosting/joining and the remote game itself.
+This compiles and starts `server/lobbyServer.ts` on port 3002. The page itself still needs to be served
+separately (same as local play) - this is just the socket.io server it talks to for room hosting/joining and the
+remote game itself. The page looks for it on port 3002 of the host it was loaded from (`lobbyUrl` in
+`src/network/lobbySocket.ts`), so another device on the same network can join: open the page from this machine's
+LAN address (e.g. `http://192.168.1.20:8080/`) on both, with ports 8080 and 3002 reachable from the network.
 
 ## Checking full games in a browser
 
