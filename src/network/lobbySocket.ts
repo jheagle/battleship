@@ -3,8 +3,20 @@ import type { ForwardedEvent } from 'treeloom/dist/events/types'
 import type { HintSetting } from '../setup/gameOptions'
 import type { RoomState } from '../../server/lobbyServer'
 
-/** No server is deployed yet - this only works against a locally-run lobby server (npm run dev:lobby). */
-const DEFAULT_URL = 'http://localhost:3002'
+/** The lobby server's port (server/lobbyServer.ts). */
+export const LOBBY_PORT = 3002
+
+/**
+ * The lobby server's URL: port 3002 on the host the page was loaded from, so a phone that opened the game from the
+ * laptop's LAN address (http://192.168.x.y:8080) reaches the laptop's lobby, not itself. Outside a page (Node, tests),
+ * or for a page opened from a file, it is localhost. No server is deployed yet: this only works against a lobby
+ * server run on the machine serving the page (npm run serve:lobby).
+ * @param location The page's location: the global one by default, null when there is none.
+ */
+export const lobbyUrl = (location: Pick<Location, 'protocol' | 'hostname'> | null = globalThis.location ?? null): string =>
+  location && /^https?:$/.test(location.protocol) && location.hostname
+    ? `${location.protocol}//${location.hostname}:${LOBBY_PORT}`
+    : `http://localhost:${LOBBY_PORT}`
 
 let socket: Socket | null = null
 
@@ -13,7 +25,7 @@ let socket: Socket | null = null
  * UI action, by calling this directly with that server's URL - the UI's own calls below then reuse that connection.
  * @param url
  */
-export const connectLobbySocket = (url: string = DEFAULT_URL): Socket => {
+export const connectLobbySocket = (url: string = lobbyUrl()): Socket => {
   if (!socket) {
     socket = io(url)
   }
