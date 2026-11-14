@@ -155,9 +155,6 @@ const focusedCell = (root: DomItemRoot): { board: number, point: Point } | null 
  */
 const fullRenderForwarding = new WeakMap<DomItemRoot, boolean>()
 
-/** Item properties which are the tree itself, not the item's data (reconcile never copies these either). */
-const STRUCTURE = new Set(['element', 'parentItem', 'children', 'eventListeners', 'activeListeners'])
-
 /**
  * Inflate a redacted body, with the boards' keyboard navigation (navigableGrid) put back: it is function listeners,
  * which json drops. The Tab stop stays on the cell that had focus. Its listeners run locally even while events are
@@ -202,8 +199,11 @@ const renderFresh = (root: DomItemRoot, redactedBody: object): void => {
 /**
  * Update what is rendered to match a push, changing only what differs (treeloom's reconcile): elements, focus and
  * keyboard navigation stay where they are. The push's top level is a <body> while the game renders into the root's
- * own body (a <main> in a browser, see gameRoot), so the push's children are reconciled into root.body and root.body
- * keeps its own node name, attributes and data.
+ * own body (a <main> in a browser, see gameRoot), so only the push's children are reconciled into root.body: the
+ * inflated top item takes everything else from root.body (its node name, attributes, data; the structure fields
+ * reconcile keeps from existing anyway), so root.body itself is unchanged.
+ * Should reconcile ever throw (it refuses a top-level node mismatch, which this rules out), the push is rendered in
+ * full instead, so the page never stays on a stale state.
  * @param root
  * @param redactedBody
  */
@@ -212,16 +212,21 @@ const renderChanges = (root: DomItemRoot, redactedBody: object): void => {
   const existing = root.body as unknown as Record<string, unknown>
   const next = body as unknown as Record<string, unknown>
   for (const key of Object.keys(next)) {
-    if (!STRUCTURE.has(key)) {
+    if (key !== 'children') {
       delete next[key]
     }
   }
   for (const key of Object.keys(existing)) {
-    if (!STRUCTURE.has(key)) {
+    if (key !== 'children') {
       next[key] = existing[key]
     }
   }
-  treeloom.reconcile(root.body, body)
+  try {
+    treeloom.reconcile(root.body, body)
+  } catch (error) {
+    console.warn('Cloakfall: reconciling a game update failed, rendering it in full instead', error)
+    renderFresh(root, redactedBody)
+  }
 }
 
 /**

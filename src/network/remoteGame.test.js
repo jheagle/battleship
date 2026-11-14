@@ -257,6 +257,71 @@ describe('enterRemoteGame: the boards stay keyboard navigable across re-renders'
     leaveRemoteGame(root)
   })
 
+  test('a push can add and remove children, and the rest stays', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const root = treeloom.documentDomItem({})
+    enterRemoteGame(root, boardsBody())
+    const grid = document.querySelector('.boards [role="grid"]')
+    const withPanel = boardsBody()
+    withPanel.children.push({ nodeName: 'div', attributes: { className: 'placement-panel' }, children: [{ nodeName: 'p', children: [{ nodeName: '#text', nodeValue: 'Place your fleet' }] }] })
+    let pushes = 0
+    socket.on('gameUpdate', () => { pushes++ })
+    io.emit('gameUpdate', withPanel)
+    await waitFor(() => pushes === 1)
+    expect(document.querySelector('.placement-panel').textContent).toBe('Place your fleet')
+    expect(document.querySelector('.boards [role="grid"]')).toBe(grid)
+    io.emit('gameUpdate', boardsBody())
+    await waitFor(() => pushes === 2)
+    expect(document.querySelector('.placement-panel')).toBeNull()
+    expect(document.querySelector('.boards [role="grid"]')).toBe(grid)
+    leaveRemoteGame(root)
+  })
+
+  test("in the game's own root, the <main> keeps its element, class and data across pushes", async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    document.body.innerHTML = ''
+    const root = gameRoot({})
+    const main = root.body.element
+    const before = { nodeName: root.body.nodeName, attributes: { ...root.body.attributes }, id: root.body.id }
+    enterRemoteGame(root, boardsBody())
+    let pushes = 0
+    socket.on('gameUpdate', () => { pushes++ })
+    io.emit('gameUpdate', boardsBody())
+    await waitFor(() => pushes === 1)
+    expect(root.body.element).toBe(main)
+    expect(document.querySelector('main')).toBe(main)
+    expect(main.classList).toContain('game')
+    expect({ nodeName: root.body.nodeName, attributes: { ...root.body.attributes }, id: root.body.id }).toEqual(before)
+    expect(main.querySelector('.boards [role="grid"]')).not.toBeNull()
+    leaveRemoteGame(root)
+  })
+
+  test('if reconciling a push throws, it is rendered in full instead (the page never stays stale)', async () => {
+    const socket = connectLobbySocket(baseUrl)
+    await waitFor(() => socket.connected)
+    const root = treeloom.documentDomItem({})
+    enterRemoteGame(root, boardsBody())
+    const grid = document.querySelector('.boards [role="grid"]')
+    const reconcile = jest.spyOn(treeloom, 'reconcile').mockImplementationOnce(() => { throw new Error('boom') })
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      let pushed = false
+      socket.once('gameUpdate', () => { pushed = true })
+      io.emit('gameUpdate', bodyWithClass('placement-panel'))
+      await waitFor(() => pushed)
+      expect(reconcile).toHaveBeenCalledTimes(1)
+      expect(document.body.contains(grid)).toBe(false)
+      expect(document.querySelector('.placement-panel')).not.toBeNull()
+      expect(warn).toHaveBeenCalled()
+    } finally {
+      reconcile.mockRestore()
+      warn.mockRestore()
+      leaveRemoteGame(root)
+    }
+  })
+
   test('the switch to final scores and back renders in full, so listeners bind in the right mode', async () => {
     const socket = connectLobbySocket(baseUrl)
     await waitFor(() => socket.connected)
